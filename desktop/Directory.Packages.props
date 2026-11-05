@@ -1,0 +1,20 @@
+<Project>
+  <!-- Quản lý phiên bản tập trung. Kiểm tra phiên bản mới nhất trước khi khởi tạo bằng lệnh: dotnet list package, tùy chọn outdated. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Avalonia" Version="11.3.0" />
+    <PackageVersion Include="Avalonia.Desktop" Version="11.3.0" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.0" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.0" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageVersion Include="Dapper" Version="2.1.66" />
+    <PackageVersion Include="ZstdSharp.Port" Version="0.8.5" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2" />
+  </ItemGroup>
+</Project>

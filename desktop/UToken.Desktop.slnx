@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/UToken.Core/UToken.Core.csproj" />
+    <Project Path="src/UToken.Collectors/UToken.Collectors.csproj" />
+    <Project Path="src/UToken.Storage/UToken.Storage.csproj" />
+    <Project Path="src/UToken.Sync/UToken.Sync.csproj" />
+    <Project Path="src/UToken.Desktop.App/UToken.Desktop.App.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/UToken.Core.Tests/UToken.Core.Tests.csproj" />
+    <Project Path="tests/UToken.Collectors.Tests/UToken.Collectors.Tests.csproj" />
+  </Folder>
+</Solution>

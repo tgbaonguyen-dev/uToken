@@ -1,0 +1,5 @@
+{
+  "ProjectId": "your-firebase-project-id",
+  "ApiKey": "your-web-api-key",
+  "OAuthClientId": "your-desktop-oauth-client-id.apps.googleusercontent.com"
+}

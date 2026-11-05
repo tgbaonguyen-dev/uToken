@@ -1,0 +1,5 @@
+{"type":"session_meta","payload":{"id":"s-001","model_provider":"openai","thread_source":"user","cwd":"/redacted"}}
+{"type":"turn_context","payload":{"turn_id":"t-1","model":"gpt-x","effort":"low"}}
+{"type":"token_usage_record","payload":{"turn_id":"t-1","response_id":"r-1","usage":{"input_tokens":30764,"cached_input_tokens":5504,"cache_write_input_tokens":0,"output_tokens":142,"reasoning_output_tokens":79,"total_tokens":30906}}}
+{"type":"event_msg","payload":{"type":"item_completed","turn_id":"t-1","item":{"type":"CommandExecution","exit_code":0,"status":"completed","parsed_cmd":[{"type":"unknown"}]}}}
+{"type":"event_msg","payload":{"type":"task_complete","turn_id":"t-1","duration_ms":4200}}

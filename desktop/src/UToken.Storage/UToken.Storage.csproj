@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <EmbeddedResource Include="Schema.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Dapper" />
+  </ItemGroup>
+</Project>

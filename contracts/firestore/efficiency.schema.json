@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "users/{uid}/efficiency/current",
+  "type": "object",
+  "required": [
+    "period_start",
+    "period_end",
+    "generated_at",
+    "process_metrics",
+    "setups",
+    "schema_version"
+  ],
+  "properties": {
+    "period_start": {
+      "type": "string"
+    },
+    "period_end": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "undetermined_tasks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "process_metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "metric",
+          "label"
+        ],
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "label": {
+            "enum": [
+              "good",
+              "review",
+              "no_data"
+            ]
+          }
+        }
+      }
+    },
+    "setups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "provider",
+          "model",
+          "task_group",
+          "n_tasks",
+          "verdict",
+          "cross_tool"
+        ],
+        "properties": {
+          "provider": {
+            "enum": [
+              "codex",
+              "claude_code",
+              "antigravity"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "effort": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "task_group": {
+            "enum": [
+              "small",
+              "medium",
+              "large"
+            ]
+          },
+          "n_tasks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "n_sessions": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sr": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sr_ci_low": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sr_ci_high": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sr_alt": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cpst_micro": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cost_p50_micro": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cost_p90_micro": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "weekly_sr": {
+            "type": "array",
+            "items": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          },
+          "redo_rate": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "mde": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "stability_flag": {
+            "type": "boolean"
+          },
+          "verdict": {
+            "enum": [
+              "better",
+              "cheaper_not_worse",
+              "tradeoff",
+              "worse",
+              "no_clear_difference",
+              "insufficient"
+            ]
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              null
+            ]
+          },
+          "compared_to": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cross_tool": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "schema_version": {
+      "const": 1
+    }
+  }
+}

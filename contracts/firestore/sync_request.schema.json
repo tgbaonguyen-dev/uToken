@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "users/{uid}/sync_requests/{id}",
+  "type": "object",
+  "required": [
+    "trigger",
+    "state",
+    "created_at"
+  ],
+  "properties": {
+    "trigger": {
+      "enum": [
+        "screen_open",
+        "manual_refresh"
+      ]
+    },
+    "state": {
+      "enum": [
+        "pending",
+        "running",
+        "done",
+        "failed"
+      ]
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "finished_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

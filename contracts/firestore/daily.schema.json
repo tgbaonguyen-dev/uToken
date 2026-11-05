@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "users/{uid}/daily/{YYYY-MM-DD}",
+  "type": "object",
+  "required": [
+    "date",
+    "totals",
+    "by_key",
+    "tasks_by_state",
+    "pricing_version",
+    "schema_version",
+    "updated_at"
+  ],
+  "properties": {
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "totals": {
+      "type": "object",
+      "required": [
+        "chats",
+        "requests",
+        "input",
+        "cached",
+        "cache_write",
+        "output"
+      ],
+      "properties": {
+        "chats": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requests": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error_requests": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cached": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_write": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "thinking": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cost_micro": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "side_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "side_cost_micro": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "context_growth_sum": {
+          "type": "number"
+        },
+        "context_growth_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duration_sum_ms": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "duration_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "by_key": {
+      "description": "Khóa = provider|model|project_key",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "chats",
+          "requests",
+          "input",
+          "cached",
+          "cache_write",
+          "output"
+        ],
+        "properties": {
+          "chats": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "requests": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "error_requests": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "input": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cached": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cache_write": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "output": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "thinking": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "cost_micro": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "side_tokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "side_cost_micro": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "context_growth_sum": {
+            "type": "number"
+          },
+          "context_growth_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "duration_sum_ms": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "duration_count": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "tasks_by_state": {
+      "type": "object",
+      "properties": {
+        "verified_success": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verified_failure": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "likely_success": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "likely_failure": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "undetermined": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "pricing_version": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 2
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
