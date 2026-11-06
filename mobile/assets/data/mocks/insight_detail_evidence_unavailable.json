@@ -1,0 +1,39 @@
+{
+  "screen_id": "M08",
+  "state_type": "evidence_unavailable",
+  "screen_title": "Insight detail",
+  "has_back_button": true,
+  "badge_text": "EVIDENCE UNAVAILABLE",
+  "specification_subtitle": "State specification · Evidence unavailable",
+  "card": {
+    "icon_type": "failed",
+    "title": "Supporting data isn’t available",
+    "description": "The source records for this recommendation were removed or are no longer accessible.",
+    "items": [
+      {
+        "id": "recommendation_preserved",
+        "title": "Recommendation is preserved",
+        "subtitle": "It cannot be independently verified",
+        "bullet_color": "#E0525B"
+      },
+      {
+        "id": "no_new_action",
+        "title": "No new action suggested",
+        "subtitle": "Re-analyze current usage instead",
+        "bullet_color": "#E0525B"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Avoid presenting estimated savings without evidence."
+  },
+  "action": {
+    "button_label": "Back to insights",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights"
+}
+

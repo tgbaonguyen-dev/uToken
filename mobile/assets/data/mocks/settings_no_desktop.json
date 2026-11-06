@@ -1,0 +1,39 @@
+{
+  "screen_id": "M09",
+  "state_type": "no_desktop",
+  "screen_title": "Settings",
+  "has_back_button": false,
+  "badge_text": "NOT CONNECTED",
+  "specification_subtitle": "State specification · Not connected",
+  "card": {
+    "icon_type": "offline",
+    "title": "No desktop companion connected",
+    "description": "Automatic usage tracking requires a paired desktop.",
+    "items": [
+      {
+        "id": "historical_data_remains",
+        "title": "Historical data remains",
+        "subtitle": "Existing usage is still available",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "new_usage_paused",
+        "title": "New usage paused",
+        "subtitle": "Connect a desktop to resume collection",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show the state in the settings summary row."
+  },
+  "action": {
+    "button_label": "Connect desktop",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Settings"
+}
+

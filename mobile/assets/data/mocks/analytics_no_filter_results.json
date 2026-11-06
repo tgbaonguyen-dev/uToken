@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M05",
+  "state_type": "no_filter_results",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "NO RESULTS",
+  "specification_subtitle": "State specification · No results",
+  "card": {
+    "icon_type": "empty",
+    "title": "No results match these filters",
+    "description": "Usage exists, but not for this source, model or project combination.",
+    "items": [
+      {
+        "id": "filters_active",
+        "title": "Filters are active",
+        "subtitle": "Original data is unchanged",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "clear_filters_recover",
+        "title": "Clear filters to recover",
+        "subtitle": "Keep the selected time range",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Differentiate filter-empty from no usage."
+  },
+  "action": {
+    "button_label": "Clear filters",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

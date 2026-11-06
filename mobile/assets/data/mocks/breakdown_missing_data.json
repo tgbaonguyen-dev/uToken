@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M06",
+  "state_type": "missing_data",
+  "screen_title": "Daily breakdown",
+  "has_back_button": true,
+  "badge_text": "PARTIAL DATA",
+  "specification_subtitle": "State specification · Partial data",
+  "card": {
+    "icon_type": "offline",
+    "title": "Part of this day is missing",
+    "description": "One source or time window did not sync completely.",
+    "items": [
+      {
+        "id": "available_activity_shown",
+        "title": "Available activity is shown",
+        "subtitle": "Missing intervals stay explicit",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "contributor_totals_may_differ",
+        "title": "Contributor totals may differ",
+        "subtitle": "Retry when desktop is online",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show the affected interval and source."
+  },
+  "action": {
+    "button_label": "View available data",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

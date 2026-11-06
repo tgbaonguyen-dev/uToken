@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M04",
+  "state_type": "stale_data",
+  "screen_title": "Tokens",
+  "has_back_button": false,
+  "badge_text": "DATA IS STALE",
+  "specification_subtitle": "State specification · Data is stale",
+  "card": {
+    "icon_type": "offline",
+    "title": "Usage hasn’t updated recently",
+    "description": "The dashboard is more than 24 hours behind the desktop activity.",
+    "items": [
+      {
+        "id": "last_sync",
+        "title": "Last successful sync · 26h ago",
+        "subtitle": "Displayed totals may be incomplete",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "manual_sync",
+        "title": "Manual sync recommended",
+        "subtitle": "Desktop must be online",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep stale data visible with an explicit timestamp."
+  },
+  "action": {
+    "button_label": "Sync now",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Tokens"
+}
+

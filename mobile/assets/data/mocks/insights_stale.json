@@ -1,0 +1,39 @@
+{
+  "screen_id": "M07",
+  "state_type": "insights_stale",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "badge_text": "INSIGHTS ARE STALE",
+  "specification_subtitle": "State specification · Insights are stale",
+  "card": {
+    "icon_type": "offline",
+    "title": "New usage isn’t reflected yet",
+    "description": "These recommendations were generated before the latest desktop sync.",
+    "items": [
+      {
+        "id": "last_analyzed",
+        "title": "Last analyzed · 2 days ago",
+        "subtitle": "Evidence may have changed",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "reanalysis_recommended",
+        "title": "Re-analysis recommended",
+        "subtitle": "Old insights remain readable",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show generated and last-sync timestamps together."
+  },
+  "action": {
+    "button_label": "Analyze latest usage",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights"
+}
+

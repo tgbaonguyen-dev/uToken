@@ -1,0 +1,39 @@
+{
+  "screen_id": "M07",
+  "state_type": "no_significant_issues",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "badge_text": "ALL CLEAR",
+  "specification_subtitle": "State specification · All clear",
+  "card": {
+    "icon_type": "success",
+    "title": "No significant issues found",
+    "description": "Recent usage is within its normal pattern and no reliable optimization stands out.",
+    "items": [
+      {
+        "id": "analysis_completed",
+        "title": "Analysis completed",
+        "subtitle": "Models and projects were compared",
+        "bullet_color": "#22A575"
+      },
+      {
+        "id": "keep_collecting_usage",
+        "title": "Keep collecting usage",
+        "subtitle": "New activity may reveal opportunities later",
+        "bullet_color": "#22A575"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "A positive empty state should still show analysis freshness."
+  },
+  "action": {
+    "button_label": "Review analytics",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights"
+}
+

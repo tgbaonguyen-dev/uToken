@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M02",
+    "state_type":  "code_expired",
+    "screen_title":  "Connect desktop",
+    "has_back_button":  true,
+    "badge_text":  "EXPIRED",
+    "specification_subtitle":  "State specification · Expired",
+    "card":  {
+                 "icon_type":  "offline",
+                 "title":  "Pairing code expired",
+                 "description":  "One-time codes are valid for 10 minutes.",
+                 "items":  [
+                               {
+                                   "id":  "old_code_disabled",
+                                   "title":  "Old code disabled",
+                                   "subtitle":  "It can no longer be reused",
+                                   "bullet_color":  "#C27A20"
+                               },
+                               {
+                                   "id":  "new_code_required",
+                                   "title":  "New code required",
+                                   "subtitle":  "Generate it from the desktop companion",
+                                   "bullet_color":  "#C27A20"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Show expiry before the user submits again."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Generate new code",
+                   "cancel_label":  "Generate new code",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

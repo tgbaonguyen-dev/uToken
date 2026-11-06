@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M12",
+    "screen_title":  "Privacy \u0026 data",
+    "has_back_button":  true,
+    "state_type":  "delete_partial",
+    "state_label":  "PARTIAL DELETION",
+    "state_context":  "State specification Â· Partial deletion",
+    "card_title":  "Some data couldnâ€™t be deleted",
+    "card_description":  "The deletion completed only for part of the selected scope.",
+    "icon_type":  "failed",
+    "bullet_points":  [
+                          {
+                              "title":  "Completed items are gone",
+                              "subtitle":  "They will not be restored automatically",
+                              "bullet_color":  "#E0525B"
+                          },
+                          {
+                              "title":  "Remaining items need attention",
+                              "subtitle":  "Retry or contact support with the job ID",
+                              "bullet_color":  "#E0525B"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Expose partial completion instead of generic failure.",
+    "action_text":  "Review remaining data",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Review remaining data",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

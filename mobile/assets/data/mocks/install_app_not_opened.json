@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M03",
+    "state_type":  "app_not_opened",
+    "screen_title":  "Install guide",
+    "has_back_button":  true,
+    "badge_text":  "NOT RUNNING",
+    "specification_subtitle":  "State specification · Not running",
+    "card":  {
+                 "icon_type":  "offline",
+                 "title":  "Open the desktop companion",
+                 "description":  "The app is installed but has not started a pairing session.",
+                 "items":  [
+                               {
+                                   "id":  "installation_detected",
+                                   "title":  "Installation detected",
+                                   "subtitle":  "No active companion process found",
+                                   "bullet_color":  "#C27A20"
+                               },
+                               {
+                                   "id":  "pairing_appear_after_launch",
+                                   "title":  "Pairing will appear after launch",
+                                   "subtitle":  "Keep the companion in the background",
+                                   "bullet_color":  "#C27A20"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Recheck desktop presence after the CTA."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "I opened it",
+                   "cancel_label":  "I opened it",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

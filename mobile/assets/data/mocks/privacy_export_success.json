@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M12",
+    "screen_title":  "Privacy \u0026 data",
+    "has_back_button":  true,
+    "state_type":  "export_success",
+    "state_label":  "EXPORT READY",
+    "state_context":  "State specification Â· Export ready",
+    "card_title":  "Your export is ready",
+    "card_description":  "Usage data was prepared successfully.",
+    "icon_type":  "success",
+    "bullet_points":  [
+                          {
+                              "title":  "12,842 usage records",
+                              "subtitle":  "CSV and JSON are available",
+                              "bullet_color":  "#22A575"
+                          },
+                          {
+                              "title":  "Generated just now",
+                              "subtitle":  "File download link expires for security",
+                              "bullet_color":  "#22A575"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Show scope, record count, and generation time.",
+    "action_text":  "Open export",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Open export",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

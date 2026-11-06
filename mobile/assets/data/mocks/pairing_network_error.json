@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M02",
+    "state_type":  "network_error",
+    "screen_title":  "Connect desktop",
+    "has_back_button":  true,
+    "badge_text":  "NETWORK ERROR",
+    "specification_subtitle":  "State specification · Network error",
+    "card":  {
+                 "icon_type":  "failed",
+                 "title":  "Pairing couldn’t finish",
+                 "description":  "The account is valid, but the pairing service could not be reached.",
+                 "items":  [
+                               {
+                                   "id":  "no_partial_connection",
+                                   "title":  "No partial connection",
+                                   "subtitle":  "The desktop token was not issued",
+                                   "bullet_color":  "#E0525B"
+                               },
+                               {
+                                   "id":  "safe_to_retry",
+                                   "title":  "Safe to retry",
+                                   "subtitle":  "Use the same code while it remains valid",
+                                   "bullet_color":  "#E0525B"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Differentiate network errors from invalid pairing codes."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Retry",
+                   "cancel_label":  "Retry",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

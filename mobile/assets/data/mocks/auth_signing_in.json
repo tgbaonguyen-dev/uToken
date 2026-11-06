@@ -1,0 +1,36 @@
+﻿{
+    "screen_id":  "M01",
+    "screen_title":  "Sign in",
+    "badge_text":  "SIGNING IN",
+    "specification_subtitle":  "State specification · Signing in",
+    "card":  {
+                 "icon_type":  "signing_in",
+                 "title":  "Signing you in",
+                 "description":  "We\u0027re verifying your Google account and restoring your μToken session.",
+                 "items":  [
+                               {
+                                   "id":  "secure_auth",
+                                   "title":  "Secure authentication",
+                                   "subtitle":  "Handled by Google and Firebase Auth",
+                                   "bullet_color":  "#6678E8"
+                               },
+                               {
+                                   "id":  "data_isolation",
+                                   "title":  "Your data stays isolated",
+                                   "subtitle":  "Usage loads only after the session is valid",
+                                   "bullet_color":  "#6678E8"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Keep this screen focused until authentication finishes."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Cancel",
+                   "cancel_label":  "Cancel",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

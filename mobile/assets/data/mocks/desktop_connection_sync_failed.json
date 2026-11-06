@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M10",
+    "screen_title":  "Desktop connection",
+    "has_back_button":  true,
+    "state_type":  "sync_failed",
+    "state_label":  "SYNC FAILED",
+    "state_context":  "State specification Â· Sync failed",
+    "card_title":  "Latest sync failed",
+    "card_description":  "The collector could read local usage but could not finish the upload.",
+    "icon_type":  "failed",
+    "bullet_points":  [
+                          {
+                              "title":  "Local queue retained",
+                              "subtitle":  "Events will not be lost",
+                              "bullet_color":  "#E0525B"
+                          },
+                          {
+                              "title":  "Retry available",
+                              "subtitle":  "Network or service issue detected",
+                              "bullet_color":  "#E0525B"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Separate collection success from upload failure.",
+    "action_text":  "Retry sync",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Retry sync",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

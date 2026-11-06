@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M10",
+    "screen_title":  "Desktop connection",
+    "has_back_button":  true,
+    "state_type":  "offline",
+    "state_label":  "OFFLINE",
+    "state_context":  "State specification Â· Offline",
+    "card_title":  "Desktop companion is offline",
+    "card_description":  "No new usage can be collected until the desktop app reconnects.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Last seen Â· 26m ago",
+                              "subtitle":  "Historical usage remains available",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "New events stay local",
+                              "subtitle":  "Open the desktop companion",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Show last seen and last successful sync separately.",
+    "action_text":  "Retry connection",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Retry connection",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M02",
+    "state_type":  "desktop_no_response",
+    "screen_title":  "Connect desktop",
+    "has_back_button":  true,
+    "badge_text":  "NO RESPONSE",
+    "specification_subtitle":  "State specification · No response",
+    "card":  {
+                 "icon_type":  "offline",
+                 "title":  "Desktop didn’t respond",
+                 "description":  "The companion may be closed, asleep or blocked by the network.",
+                 "items":  [
+                               {
+                                   "id":  "mobile_request_received",
+                                   "title":  "Mobile request received",
+                                   "subtitle":  "Desktop confirmation is still missing",
+                                   "bullet_color":  "#C27A20"
+                               },
+                               {
+                                   "id":  "local_data_unchanged",
+                                   "title":  "Local data remains unchanged",
+                                   "subtitle":  "Open the companion and retry",
+                                   "bullet_color":  "#C27A20"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Allow retry without generating a new code immediately."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Retry pairing",
+                   "cancel_label":  "Retry pairing",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

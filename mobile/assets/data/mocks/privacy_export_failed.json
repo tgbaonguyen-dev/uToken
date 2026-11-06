@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M12",
+    "screen_title":  "Privacy \u0026 data",
+    "has_back_button":  true,
+    "state_type":  "export_failed",
+    "state_label":  "EXPORT FAILED",
+    "state_context":  "State specification Â· Export failed",
+    "card_title":  "Couldnâ€™t prepare the export",
+    "card_description":  "The data job stopped before the files were created.",
+    "icon_type":  "failed",
+    "bullet_points":  [
+                          {
+                              "title":  "No incomplete file downloaded",
+                              "subtitle":  "Your cloud data is unchanged",
+                              "bullet_color":  "#E0525B"
+                          },
+                          {
+                              "title":  "Safe to retry",
+                              "subtitle":  "Another local copy may be requested",
+                              "bullet_color":  "#E0525B"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Retain the selected export format.",
+    "action_text":  "Retry export",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Retry export",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

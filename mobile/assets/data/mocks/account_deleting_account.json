@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M13",
+    "screen_title":  "Account",
+    "has_back_button":  true,
+    "state_type":  "deleting_account",
+    "state_label":  "DELETING ACCOUNT",
+    "state_context":  "State specification Â· Deleting account",
+    "card_title":  "Deleting your account",
+    "card_description":  "Revoking connected devices and removing account-owned cloud data.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Desktop access revoked",
+                              "subtitle":  "New syncs will be rejected",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "Deletion is permanent",
+                              "subtitle":  "Some backend cleanup may continue",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Block navigation until the backend confirms completion.",
+    "action_text":  "View account status",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View account status",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

@@ -1,0 +1,37 @@
+﻿{
+    "screen_id":  "M01",
+    "state_type":  "cancelled",
+    "screen_title":  "Sign in",
+    "badge_text":  "CANCELLED",
+    "specification_subtitle":  "State specification Â· Cancelled",
+    "card":  {
+                 "icon_type":  "cancelled",
+                 "title":  "Sign-in was cancelled",
+                 "description":  "No account changes were made. You can restart whenever you\u0027re ready.",
+                 "items":  [
+                               {
+                                   "id":  "nothing_connected",
+                                   "title":  "Nothing was connected",
+                                   "subtitle":  "Desktop and cloud data remain unchanged",
+                                   "bullet_color":  "#7B7F88"
+                               },
+                               {
+                                   "id":  "try_again_safely",
+                                   "title":  "Try again safely",
+                                   "subtitle":  "A new Google sign-in session will be created",
+                                   "bullet_color":  "#7B7F88"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Do not show this as a destructive error."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Try again",
+                   "cancel_label":  "Try again",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

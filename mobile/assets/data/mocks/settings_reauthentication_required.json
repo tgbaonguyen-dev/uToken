@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M09",
+    "screen_title":  "Settings",
+    "has_back_button":  false,
+    "state_type":  "reauthentication_required",
+    "state_label":  "REAUTHENTICATE",
+    "state_context":  "State specification Â· Reauthenticate",
+    "card_title":  "Account verification required",
+    "card_description":  "A sensitive account or data action needs a fresh Google sign-in.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Current session is read-only",
+                              "subtitle":  "Dashboard previews are available",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "Sensitive actions paused",
+                              "subtitle":  "Re-authenticate to continue",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Block only actions that require fresh authentication.",
+    "action_text":  "Open account",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Open account",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

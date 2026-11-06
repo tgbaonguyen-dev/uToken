@@ -1,0 +1,37 @@
+﻿{
+    "screen_id":  "M04",
+    "state_type":  "updating_with_data",
+    "screen_title":  "Tokens",
+    "has_back_button":  false,
+    "badge_text":  "REFRESHING",
+    "specification_subtitle":  "State specification · Refreshing",
+    "card":  {
+                 "icon_type":  "signing_in",
+                 "title":  "Updating latest usage",
+                 "description":  "The current dashboard remains visible while new desktop data is processed.",
+                 "items":  [
+                               {
+                                   "id":  "existing_totals_readable",
+                                   "title":  "Existing totals stay readable",
+                                   "subtitle":  "Never replace valid data with a blank screen",
+                                   "bullet_color":  "#6678E8"
+                               },
+                               {
+                                   "id":  "last_sync_visible",
+                                   "title":  "Last sync remains visible",
+                                   "subtitle":  "Fresh values replace it when complete",
+                                   "bullet_color":  "#6678E8"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Show progress without blocking exploration."
+                 },
+    "action":  {
+                   "button_label":  "View current data",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               },
+    "has_bottom_navigation":  true
+}

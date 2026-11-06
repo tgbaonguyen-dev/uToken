@@ -1,0 +1,39 @@
+{
+  "screen_id": "M07",
+  "state_type": "analyzing",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "badge_text": "ANALYZING",
+  "specification_subtitle": "State specification · Analyzing",
+  "card": {
+    "icon_type": "signing_in",
+    "title": "Analyzing recent usage",
+    "description": "The optimizer is reviewing aggregate token, cost, latency and error patterns.",
+    "items": [
+      {
+        "id": "privacy_safe_evidence",
+        "title": "Privacy-safe evidence",
+        "subtitle": "No prompts, responses or source code",
+        "bullet_color": "#6678E8"
+      },
+      {
+        "id": "minimum_history_required",
+        "title": "Minimum history required",
+        "subtitle": "Results appear after analysis completes",
+        "bullet_color": "#6678E8"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep existing insights visible during re-analysis."
+  },
+  "action": {
+    "button_label": "View current insights",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights"
+}
+

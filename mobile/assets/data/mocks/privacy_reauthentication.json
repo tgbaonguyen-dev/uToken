@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M12",
+    "screen_title":  "Privacy \u0026 data",
+    "has_back_button":  true,
+    "state_type":  "reauthentication",
+    "state_label":  "REAUTHENTICATE",
+    "state_context":  "State specification Â· Reauthenticate",
+    "card_title":  "Verify your account to continue",
+    "card_description":  "Exporting or deleting sensitive account data requires a fresh Google sign-in.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Current data is unchanged",
+                              "subtitle":  "No operation has started",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "Verification expires",
+                              "subtitle":  "Complete the action promptly after sign-in",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Return to the pending action after verification.",
+    "action_text":  "Verify with Google",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Verify with Google",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

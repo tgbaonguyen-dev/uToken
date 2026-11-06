@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M02",
+    "state_type":  "code_already_used",
+    "screen_title":  "Connect desktop",
+    "has_back_button":  true,
+    "badge_text":  "CODE USED",
+    "specification_subtitle":  "State specification · Code used",
+    "card":  {
+                 "icon_type":  "offline",
+                 "title":  "This code was already used",
+                 "description":  "A pairing code can connect only one authenticated session.",
+                 "items":  [
+                               {
+                                   "id":  "code_no_longer_active",
+                                   "title":  "Code is no longer active",
+                                   "subtitle":  "This prevents accidental desktop linking",
+                                   "bullet_color":  "#C27A20"
+                               },
+                               {
+                                   "id":  "create_another_code",
+                                   "title":  "Create another code",
+                                   "subtitle":  "Use the desktop companion to restart pairing",
+                                   "bullet_color":  "#C27A20"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Do not imply that a desktop was connected to this account."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Use a new code",
+                   "cancel_label":  "Use a new code",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

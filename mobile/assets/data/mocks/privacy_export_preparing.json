@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M12",
+    "screen_title":  "Privacy \u0026 data",
+    "has_back_button":  true,
+    "state_type":  "export_preparing",
+    "state_label":  "PREPARING EXPORT",
+    "state_context":  "State specification Â· Preparing export",
+    "card_title":  "Preparing your export",
+    "card_description":  "Collecting usage summaries into machine-readable files.",
+    "icon_type":  "signing_in",
+    "bullet_points":  [
+                          {
+                              "title":  "CSV and JSON requested",
+                              "subtitle":  "Prompts and response content are never stored",
+                              "bullet_color":  "#6678E8"
+                          },
+                          {
+                              "title":  "Keep the app open",
+                              "subtitle":  "Download becomes available when ready",
+                              "bullet_color":  "#6678E8"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Prevent duplicate export jobs.",
+    "action_text":  "Back to data settings",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Back to data settings",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

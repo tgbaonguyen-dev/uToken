@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M11",
+    "screen_title":  "Budget \u0026 alerts",
+    "has_back_button":  true,
+    "state_type":  "threshold_exceeded",
+    "state_label":  "ALERT TRIGGERED",
+    "state_context":  "State specification Â· Alert triggered",
+    "card_title":  "Budget alert threshold reached",
+    "card_description":  "Estimated monthly cost crossed a configured alert level.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "90% threshold reached",
+                              "subtitle":  "One notification created for this month",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "Budget is not exceeded yet",
+                              "subtitle":  "Tracking continues normally",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Deduplicate alerts per threshold and month.",
+    "action_text":  "View contributing usage",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View contributing usage",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

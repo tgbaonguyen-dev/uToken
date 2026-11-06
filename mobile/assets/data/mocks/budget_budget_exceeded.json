@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M11",
+    "screen_title":  "Budget \u0026 alerts",
+    "has_back_button":  true,
+    "state_type":  "budget_exceeded",
+    "state_label":  "BUDGET EXCEEDED",
+    "state_context":  "State specification Â· Budget exceeded",
+    "card_title":  "Estimated cost is over budget",
+    "card_description":  "Current usage has exceeded the monthly spending limit.",
+    "icon_type":  "failed",
+    "bullet_points":  [
+                          {
+                              "title":  "$63.20 of $50 estimated",
+                              "subtitle":  "This is not a provider invoice",
+                              "bullet_color":  "#E0525B"
+                          },
+                          {
+                              "title":  "Collection continues",
+                              "subtitle":  "Î¼Token does not block AI tools",
+                              "bullet_color":  "#E0525B"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Never imply that model access was restricted.",
+    "action_text":  "Review usage",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Review usage",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

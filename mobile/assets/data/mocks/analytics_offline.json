@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M05",
+  "state_type": "offline",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "OFFLINE",
+  "specification_subtitle": "State specification · Offline",
+  "card": {
+    "icon_type": "offline",
+    "title": "Analytics needs a connection",
+    "description": "This filtered view is not available from the local cache.",
+    "items": [
+      {
+        "id": "dashboard_may_still_work",
+        "title": "Dashboard may still work",
+        "subtitle": "Previously loaded summaries remain available",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "query_is_paused",
+        "title": "Query is paused",
+        "subtitle": "Reconnect to load this breakdown",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Distinguish cached overview from uncached analytics."
+  },
+  "action": {
+    "button_label": "Try again",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

@@ -1,0 +1,39 @@
+{
+  "screen_id": "M06",
+  "state_type": "today_incomplete",
+  "screen_title": "Daily breakdown",
+  "has_back_button": true,
+  "badge_text": "IN PROGRESS",
+  "specification_subtitle": "State specification · In progress",
+  "card": {
+    "icon_type": "signing_in",
+    "title": "Today is still in progress",
+    "description": "New usage can continue to arrive until the local day ends.",
+    "items": [
+      {
+        "id": "totals_provisional",
+        "title": "Totals are provisional",
+        "subtitle": "Time stamps follow the device timezone",
+        "bullet_color": "#6678E8"
+      },
+      {
+        "id": "sync_may_update",
+        "title": "Sync may update the chart",
+        "subtitle": "New bars appear after day close",
+        "bullet_color": "#6678E8"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Mark incomplete periods without hiding current data."
+  },
+  "action": {
+    "button_label": "View current totals",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

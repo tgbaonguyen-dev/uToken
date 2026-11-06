@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M02",
+    "state_type":  "existing_desktop",
+    "screen_title":  "Connect desktop",
+    "has_back_button":  true,
+    "badge_text":  "REPLACE DEVICE",
+    "specification_subtitle":  "State specification · Replace device",
+    "card":  {
+                 "icon_type":  "offline",
+                 "title":  "Another desktop is connected",
+                 "description":  "μToken supports one active desktop companion in the MVP.",
+                 "items":  [
+                               {
+                                   "id":  "current_device",
+                                   "title":  "Current device",
+                                   "subtitle":  "Corneliya\u0027s Mac · last seen 2 m ago",
+                                   "bullet_color":  "#C27A20"
+                               },
+                               {
+                                   "id":  "replacing_revokes_old",
+                                   "title":  "Replacing revokes the old session",
+                                   "subtitle":  "Historic usage will be kept",
+                                   "bullet_color":  "#C27A20"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Require explicit confirmation before replacement."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Review connection",
+                   "cancel_label":  "Review connection",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

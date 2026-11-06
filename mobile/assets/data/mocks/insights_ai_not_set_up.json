@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M07",
+    "screen_title":  "Insights",
+    "has_back_button":  false,
+    "state_type":  "ai_not_set_up",
+    "state_label":  "AI NOT SET UP",
+    "state_context":  "State specification Â· AI not set up",
+    "card_title":  "Choose an AI model",
+    "card_description":  "Suggestions are written by an LLM you pick. Add a provider and API key to start.",
+    "icon_type":  "empty",
+    "bullet_points":  [
+                          {
+                              "title":  "No provider configured",
+                              "subtitle":  "Settings \u003e AI suggestions",
+                              "bullet_color":  "#7B7F88"
+                          },
+                          {
+                              "title":  "Your usage is still tracked",
+                              "subtitle":  "Key stays on this phone",
+                              "bullet_color":  "#7B7F88"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Show this instead of the feed when no API key is saved. The button opens M15.",
+    "action_text":  "Set up AI suggestions",
+    "active_tab":  "Insights",
+    "action":  {
+                   "button_label":  "Set up AI suggestions",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

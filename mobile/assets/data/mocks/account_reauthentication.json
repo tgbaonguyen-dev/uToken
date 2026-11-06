@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M13",
+    "screen_title":  "Account",
+    "has_back_button":  true,
+    "state_type":  "reauthentication",
+    "state_label":  "REAUTHENTICATE",
+    "state_context":  "State specification Â· Reauthenticate",
+    "card_title":  "Confirm itâ€™s you",
+    "card_description":  "This account action requires a recent Google authentication.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Profile remains signed in",
+                              "subtitle":  "Normal analytics is still available",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "Sensitive action paused",
+                              "subtitle":  "Continues after verification",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Do not wipe the local account prematurely.",
+    "action_text":  "Verify account",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Verify account",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

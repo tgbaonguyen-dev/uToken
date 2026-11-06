@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M07",
+  "state_type": "insufficient_data",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "badge_text": "NOT ENOUGH DATA",
+  "specification_subtitle": "State specification · Not enough data",
+  "card": {
+    "icon_type": "empty",
+    "title": "More usage is needed",
+    "description": "Insights require at least 3 days or 10 daily model records.",
+    "items": [
+      {
+        "id": "current_history_too_short",
+        "title": "Current history is too short",
+        "subtitle": "No recommendations generated yet",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "tracking_is_active",
+        "title": "Tracking is active",
+        "subtitle": "Continue using supported AI tools",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Explain the threshold instead of showing an empty feed."
+  },
+  "action": {
+    "button_label": "View usage",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights"
+}
+

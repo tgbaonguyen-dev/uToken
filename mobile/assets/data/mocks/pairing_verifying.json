@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M02",
+    "state_type":  "verifying",
+    "screen_title":  "Connect desktop",
+    "has_back_button":  true,
+    "badge_text":  "VERIFYING",
+    "specification_subtitle":  "State specification Â· Verifying",
+    "card":  {
+                 "icon_type":  "signing_in",
+                 "title":  "Verifying this desktop",
+                 "description":  "Checking the one-time code and desktop identity.",
+                 "items":  [
+                               {
+                                   "id":  "pairing_code_received",
+                                   "title":  "Pairing code received",
+                                   "subtitle":  "Codes expire after 10 minutes",
+                                   "bullet_color":  "#6678E8"
+                               },
+                               {
+                                   "id":  "waiting_desktop",
+                                   "title":  "Waiting for desktop",
+                                   "subtitle":  "Keep the companion app open",
+                                   "bullet_color":  "#6678E8"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Disable duplicate code submits while verification is running."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Cancel pairing",
+                   "cancel_label":  "Cancel pairing",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M03",
+    "state_type":  "permission_denied",
+    "screen_title":  "Install guide",
+    "has_back_button":  true,
+    "badge_text":  "PERMISSION DENIED",
+    "specification_subtitle":  "State specification · Permission denied",
+    "card":  {
+                 "icon_type":  "failed",
+                 "title":  "Local usage access is blocked",
+                 "description":  "The companion needs permission to read Antigravity usage metadata.",
+                 "items":  [
+                               {
+                                   "id":  "no_prompt_content",
+                                   "title":  "No prompt content requested",
+                                   "subtitle":  "Only token usage metadata is processed",
+                                   "bullet_color":  "#E0525B"
+                               },
+                               {
+                                   "id":  "permission_can_change",
+                                   "title":  "Permission can be changed",
+                                   "subtitle":  "Open system settings and allow access",
+                                   "bullet_color":  "#E0525B"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Explain the exact permission and why it is needed."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Open permission guide",
+                   "cancel_label":  "Open permission guide",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

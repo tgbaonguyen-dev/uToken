@@ -1,0 +1,42 @@
+﻿{
+    "screen_id":  "M08",
+    "screen_title":  "Insight detail",
+    "has_back_button":  true,
+    "status":  "Active",
+    "status_color":  "#22A575",
+    "status_bg_color":  "#121519",
+    "insight_title":  "Large context is driving token growth",
+    "insight_meta":  "Gemini Â· Project Camellia Â· Last 30 days",
+    "impact_summary":  {
+                           "label":  "ESTIMATED IMPACT",
+                           "value":  "-18% input tokens",
+                           "cost":  "+ $0.40 / month",
+                           "confidence":  "Confidence: High",
+                           "comparison":  "Compared with prior 30 days"
+                       },
+    "evidence":  {
+                     "title":  "Evidence",
+                     "metrics":  [
+                                     {
+                                         "label":  "Average input per request",
+                                         "value":  "18.4k"
+                                     },
+                                     {
+                                         "label":  "Repeated context share",
+                                         "value":  "42%"
+                                     }
+                                 ]
+                 },
+    "recommendation":  {
+                           "title":  "Recommendation",
+                           "text":  "Move stable instructions earlier, reduce duplicated context, and keep reusable context cacheable.",
+                           "privacy_note":  "Based on aggregate metadata only â€” no prompts or source code."
+                       },
+    "action_text":  "Mark as reviewed",
+    "active_tab":  "Insights",
+    "action":  {
+                   "button_label":  "Mark as reviewed",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

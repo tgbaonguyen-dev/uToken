@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M10",
+    "screen_title":  "Desktop connection",
+    "has_back_button":  true,
+    "state_type":  "no_usage",
+    "state_label":  "NO USAGE YET",
+    "state_context":  "State specification Â· No usage yet",
+    "card_title":  "Connected, but no usage found",
+    "card_description":  "The collector is ready and the source is accessible.",
+    "icon_type":  "empty",
+    "bullet_points":  [
+                          {
+                              "title":  "Permission granted",
+                              "subtitle":  "No supported activity was logged or recorded",
+                              "bullet_color":  "#7B7F88"
+                          },
+                          {
+                              "title":  "Waiting for first session",
+                              "subtitle":  "Start using Antigravity on desktop",
+                              "bullet_color":  "#7B7F88"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Never show all metrics to zero before first activity.",
+    "action_text":  "View usage",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View usage",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

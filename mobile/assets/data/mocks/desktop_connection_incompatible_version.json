@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M10",
+    "screen_title":  "Desktop connection",
+    "has_back_button":  true,
+    "state_type":  "incompatible_version",
+    "state_label":  "UPDATE REQUIRED",
+    "state_context":  "State specification Â· Update required",
+    "card_title":  "Desktop app needs an update",
+    "card_description":  "This companion version is no longer compatible with the sync service.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Collection paused",
+                              "subtitle":  "Local usage is not deleted",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "Update required",
+                              "subtitle":  "Install the latest official version",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Keep the minimum supported version visible.",
+    "action_text":  "View install guide",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View install guide",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

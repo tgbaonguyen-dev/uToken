@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M04",
+  "state_type": "desktop_offline",
+  "screen_title": "Tokens",
+  "has_back_button": false,
+  "badge_text": "OFFLINE",
+  "specification_subtitle": "State specification · Offline",
+  "card": {
+    "icon_type": "offline",
+    "title": "Desktop is offline",
+    "description": "Showing the last successfully synced usage while the companion is unavailable.",
+    "items": [
+      {
+        "id": "last_sync",
+        "title": "Last sync · Today, 10:42",
+        "subtitle": "Historical details still available",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "new_activity_pending",
+        "title": "New activity is pending",
+        "subtitle": "Open the desktop companion to continue",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Preserve cached data and mark its freshness."
+  },
+  "action": {
+    "button_label": "View connection",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Tokens"
+}
+

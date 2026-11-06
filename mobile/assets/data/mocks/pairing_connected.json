@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M02",
+    "state_type":  "connected",
+    "screen_title":  "Connect desktop",
+    "has_back_button":  true,
+    "badge_text":  "CONNECTED",
+    "specification_subtitle":  "State specification Â· Connected",
+    "card":  {
+                 "icon_type":  "connected",
+                 "title":  "Desktop connected",
+                 "description":  "The desktop companion can now send aggregate usage metadata.",
+                 "items":  [
+                               {
+                                   "id":  "collector_authorized",
+                                   "title":  "Collector authorized",
+                                   "subtitle":  "Prompt and response content remain local",
+                                   "bullet_color":  "#22A575"
+                               },
+                               {
+                                   "id":  "initial_sync_pending",
+                                   "title":  "Initial sync pending",
+                                   "subtitle":  "Usage appears after the first claim",
+                                   "bullet_color":  "#22A575"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Move into the empty-data state before showing zero values."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Continue",
+                   "cancel_label":  "Continue",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

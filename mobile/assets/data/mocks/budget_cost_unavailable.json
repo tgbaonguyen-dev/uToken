@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M11",
+    "screen_title":  "Budget \u0026 alerts",
+    "has_back_button":  true,
+    "state_type":  "cost_unavailable",
+    "state_label":  "COST UNAVAILABLE",
+    "state_context":  "State specification Â· Cost unavailable",
+    "card_title":  "Budget status canâ€™t be calculated",
+    "card_description":  "One or more models are missing a valid pricing version.",
+    "icon_type":  "empty",
+    "bullet_points":  [
+                          {
+                              "title":  "Budget remains configured",
+                              "subtitle":  "Thresholds are not evaluated",
+                              "bullet_color":  "#7B7F88"
+                          },
+                          {
+                              "title":  "Token tracking continues",
+                              "subtitle":  "Resolve pricing to restore alerts",
+                              "bullet_color":  "#7B7F88"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Suspend cost alerts instead of treating cost as zero.",
+    "action_text":  "View model pricing",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View model pricing",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

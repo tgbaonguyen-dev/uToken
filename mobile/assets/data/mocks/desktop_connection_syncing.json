@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M10",
+    "screen_title":  "Desktop connection",
+    "has_back_button":  true,
+    "state_type":  "syncing",
+    "state_label":  "SYNCING",
+    "state_context":  "State specification Â· Syncing",
+    "card_title":  "Syncing from desktop",
+    "card_description":  "The companion is scanning local Antigravity usage and uploading aggregate changes.",
+    "icon_type":  "signing_in",
+    "bullet_points":  [
+                          {
+                              "title":  "Collector is online",
+                              "subtitle":  "Only changed aggregates are uploaded",
+                              "bullet_color":  "#6678E8"
+                          },
+                          {
+                              "title":  "Current data remains visible",
+                              "subtitle":  "Last successful sync is preserved",
+                              "bullet_color":  "#6678E8"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Prevent duplicate sync jobs.",
+    "action_text":  "View connection",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View connection",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

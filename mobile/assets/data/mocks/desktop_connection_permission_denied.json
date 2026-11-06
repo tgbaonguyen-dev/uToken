@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M10",
+    "screen_title":  "Desktop connection",
+    "has_back_button":  true,
+    "state_type":  "permission_denied",
+    "state_label":  "PERMISSION DENIED",
+    "state_context":  "State specification Â· Permission denied",
+    "card_title":  "Usage permission is blocked",
+    "card_description":  "The desktop companion cannot read local usage metadata.",
+    "icon_type":  "failed",
+    "bullet_points":  [
+                          {
+                              "title":  "Collector is connected",
+                              "subtitle":  "Cloud account remains linked",
+                              "bullet_color":  "#E0525B"
+                          },
+                          {
+                              "title":  "User action required",
+                              "subtitle":  "Grant access in desktop settings",
+                              "bullet_color":  "#E0525B"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "State the exact affected permission.",
+    "action_text":  "View permission help",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View permission help",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

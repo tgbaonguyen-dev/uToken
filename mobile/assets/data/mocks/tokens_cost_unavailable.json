@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M04",
+  "state_type": "cost_unavailable",
+  "screen_title": "Tokens",
+  "has_back_button": false,
+  "badge_text": "COST UNAVAILABLE",
+  "specification_subtitle": "State specification · Cost unavailable",
+  "card": {
+    "icon_type": "empty",
+    "title": "Cost can’t be estimated",
+    "description": "Token usage is available, but pricing is missing for one or more models.",
+    "items": [
+      {
+        "id": "token_totals_unaffected",
+        "title": "Token totals are unaffected",
+        "subtitle": "Usage counts remain accurate",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "pricing_catalog_missing",
+        "title": "Pricing catalog missing",
+        "subtitle": "Never substitute $0.00",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Separate token accuracy from cost availability."
+  },
+  "action": {
+    "button_label": "View model pricing",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Tokens"
+}
+

@@ -1,0 +1,38 @@
+﻿{
+    "screen_id":  "M03",
+    "state_type":  "unsupported_os",
+    "screen_title":  "Install guide",
+    "has_back_button":  true,
+    "badge_text":  "UNSUPPORTED OS",
+    "specification_subtitle":  "State specification · Unsupported",
+    "card":  {
+                 "icon_type":  "failed",
+                 "title":  "This system isn’t supported",
+                 "description":  "The desktop companion cannot run on this operating system version.",
+                 "items":  [
+                               {
+                                   "id":  "installation_blocked",
+                                   "title":  "Installation blocked",
+                                   "subtitle":  "No collector can be started here",
+                                   "bullet_color":  "#E0525B"
+                               },
+                               {
+                                   "id":  "check_supported_systems",
+                                   "title":  "Check supported systems",
+                                   "subtitle":  "Use a compatible desktop to continue",
+                                   "bullet_color":  "#E0525B"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "State the minimum supported OS clearly."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "View requirements",
+                   "cancel_label":  "View requirements",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

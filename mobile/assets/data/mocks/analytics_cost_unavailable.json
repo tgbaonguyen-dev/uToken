@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M05",
+  "state_type": "cost_unavailable",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "COST UNAVAILABLE",
+  "specification_subtitle": "State specification · Cost unavailable",
+  "card": {
+    "icon_type": "empty",
+    "title": "Cost analysis is unavailable",
+    "description": "Pricing could not be resolved for the current model selection.",
+    "items": [
+      {
+        "id": "token_analysis_remains_available",
+        "title": "Token analysis remains available",
+        "subtitle": "No records are discarded",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "missing_pricing_version",
+        "title": "Missing pricing version",
+        "subtitle": "Historical costs are never recalculated silently",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep the active filters when switching metrics."
+  },
+  "action": {
+    "button_label": "View token analytics",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

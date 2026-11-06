@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M06",
+  "state_type": "sync_delayed",
+  "screen_title": "Daily breakdown",
+  "has_back_button": true,
+  "badge_text": "SYNC DELAYED",
+  "specification_subtitle": "State specification · Sync delayed",
+  "card": {
+    "icon_type": "offline",
+    "title": "Latest activity is delayed",
+    "description": "The desktop companion has not completed the most recent sync.",
+    "items": [
+      {
+        "id": "last_sync",
+        "title": "Last sync · 42m ago",
+        "subtitle": "Today's usage may be incomplete",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "historical_events_safe",
+        "title": "Historical events are safe",
+        "subtitle": "Pending records remain on desktop",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show the last successful sync timestamp."
+  },
+  "action": {
+    "button_label": "View connection",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M05",
+  "state_type": "query_error",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "QUERY FAILED",
+  "specification_subtitle": "State specification · Query failed",
+  "card": {
+    "icon_type": "failed",
+    "title": "Couldn’t load this analysis",
+    "description": "The analytics query failed before results were returned.",
+    "items": [
+      {
+        "id": "no_partial_chart_shown",
+        "title": "No partial chart shown",
+        "subtitle": "No previous valid model data is preserved",
+        "bullet_color": "#E0525B"
+      },
+      {
+        "id": "safe_to_retry",
+        "title": "Safe to retry",
+        "subtitle": "Filters and date range remain selected",
+        "bullet_color": "#E0525B"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Expose a clear retry action."
+  },
+  "action": {
+    "button_label": "Retry analysis",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

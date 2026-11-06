@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M06",
+  "state_type": "no_usage",
+  "screen_title": "Daily breakdown",
+  "has_back_button": true,
+  "badge_text": "NO USAGE",
+  "specification_subtitle": "State specification · No usage",
+  "card": {
+    "icon_type": "empty",
+    "title": "No activity on this day",
+    "description": "No supported AI usage was recorded for the selected date.",
+    "items": [
+      {
+        "id": "daily_total_unknown",
+        "title": "Daily total is unknown",
+        "subtitle": "Do not display zero unless confirmed",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "choose_another_day",
+        "title": "Choose another day",
+        "subtitle": "Nearby days may contain activity",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep date navigation available."
+  },
+  "action": {
+    "button_label": "Choose another day",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

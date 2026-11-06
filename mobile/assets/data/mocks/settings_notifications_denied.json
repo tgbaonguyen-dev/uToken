@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M09",
+    "screen_title":  "Settings",
+    "has_back_button":  false,
+    "state_type":  "notifications_denied",
+    "state_label":  "NOTIFICATIONS OFF",
+    "state_context":  "State specification Â· Notifications off",
+    "card_title":  "Budget alerts are disabled",
+    "card_description":  "Î¼Token cannot display system notifications for budget thresholds.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Budgets still calculate",
+                              "subtitle":  "Alert history remains inside the app",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "OS permission required",
+                              "subtitle":  "Enable notifications in system settings",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Do not imply budget tracking is disabled.",
+    "action_text":  "Review budget alerts",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Review budget alerts",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

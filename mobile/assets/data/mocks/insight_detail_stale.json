@@ -1,0 +1,39 @@
+{
+  "screen_id": "M08",
+  "state_type": "insight_stale",
+  "screen_title": "Insight detail",
+  "has_back_button": true,
+  "badge_text": "STALE",
+  "specification_subtitle": "State specification · Stale",
+  "card": {
+    "icon_type": "offline",
+    "title": "This insight may be outdated",
+    "description": "Its evidence period ends before the most recent usage update.",
+    "items": [
+      {
+        "id": "original_finding_preserved",
+        "title": "Original finding preserved",
+        "subtitle": "You can still inspect the prior evidence",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "confidence_reduced",
+        "title": "Confidence reduced",
+        "subtitle": "Re-analysis may change the recommendation",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Never silently rewrite historical evidence."
+  },
+  "action": {
+    "button_label": "Back to insights",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights"
+}
+

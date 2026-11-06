@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M11",
+    "screen_title":  "Budget \u0026 alerts",
+    "has_back_button":  true,
+    "state_type":  "no_budget",
+    "state_label":  "NOT SET",
+    "state_context":  "State specification Â· Not set",
+    "card_title":  "Set a monthly budget",
+    "card_description":  "Choose a spending limit to track estimated AI cost against it.",
+    "icon_type":  "empty",
+    "bullet_points":  [
+                          {
+                              "title":  "Optional for tracking",
+                              "subtitle":  "Usage analysis works without a budget",
+                              "bullet_color":  "#7B7F88"
+                          },
+                          {
+                              "title":  "Alerts need a threshold",
+                              "subtitle":  "Notifications can be enabled afterward",
+                              "bullet_color":  "#7B7F88"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Do not show a zero-dollar budget as an active limit.",
+    "action_text":  "Set budget",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Set budget",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

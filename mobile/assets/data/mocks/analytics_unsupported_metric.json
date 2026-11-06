@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M05",
+  "state_type": "unsupported_metric",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "UNSUPPORTED",
+  "specification_subtitle": "State specification · Unsupported",
+  "card": {
+    "icon_type": "empty",
+    "title": "This metric isn’t supported",
+    "description": "The selected source does not provide latency, error or cache information.",
+    "items": [
+      {
+        "id": "source_limitation",
+        "title": "Source limitation",
+        "subtitle": "Not a value of zero",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "other_metrics_still_work",
+        "title": "Other metrics still work",
+        "subtitle": "Switch to tokens, requests or cost",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Explain unsupported source capability."
+  },
+  "action": {
+    "button_label": "Choose another metric",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

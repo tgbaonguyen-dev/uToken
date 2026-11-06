@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M15",
+    "screen_title":  "AI suggestions",
+    "has_back_button":  false,
+    "state_type":  "invalid_api_key",
+    "state_label":  "KEY REJECTED",
+    "state_context":  "State specification Â· Invalid API key",
+    "card_title":  "The provider rejected this key",
+    "card_description":  "Check the key or quota, then test the connection again.",
+    "icon_type":  "empty",
+    "bullet_points":  [
+                          {
+                              "title":  "Provider",
+                              "subtitle":  "OpenAI Â· gpt-4.5-mini",
+                              "bullet_color":  "#7B7F88"
+                          },
+                          {
+                              "title":  "Previous suggestions",
+                              "subtitle":  "Still present in Insights",
+                              "bullet_color":  "#7B7F88"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Keep old suggestions visible and show AI_PROVIDER_ERROR here after Test connection or scheduled run.",
+    "action_text":  "Edit API key",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Edit API key",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

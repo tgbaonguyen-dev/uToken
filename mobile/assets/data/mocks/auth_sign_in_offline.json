@@ -1,0 +1,37 @@
+﻿{
+    "screen_id":  "M01",
+    "state_type":  "offline",
+    "screen_title":  "Sign in",
+    "badge_text":  "OFFLINE",
+    "specification_subtitle":  "State specification · Offline",
+    "card":  {
+                 "icon_type":  "offline",
+                 "title":  "You’re offline",
+                 "description":  "μToken needs a network connection to verify your account.",
+                 "items":  [
+                               {
+                                   "id":  "auth_paused",
+                                   "title":  "Authentication paused",
+                                   "subtitle":  "No credentials are stored while offline",
+                                   "bullet_color":  "#C27A20"
+                               },
+                               {
+                                   "id":  "data_safe",
+                                   "title":  "Existing data is safe",
+                                   "subtitle":  "Continue when the connection returns",
+                                   "bullet_color":  "#C27A20"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Never replace network failure with a generic auth error."
+                 },
+    "has_bottom_navigation":  false,
+    "action":  {
+                   "button_label":  "Try again",
+                   "cancel_label":  "Try again",
+                   "background_color":  "#F4F4F5",
+                   "text_color":  "#111214"
+               }
+}

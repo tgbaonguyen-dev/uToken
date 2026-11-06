@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M11",
+    "screen_title":  "Budget \u0026 alerts",
+    "has_back_button":  true,
+    "state_type":  "notifications_off",
+    "state_label":  "NOTIFICATIONS OFF",
+    "state_context":  "State specification Â· Notifications off",
+    "card_title":  "System alerts are disabled",
+    "card_description":  "Budget thresholds still calculate, but push notifications cannot be delivered.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "In-app history remains",
+                              "subtitle":  "Alerts appear when the app is opened",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "OS permission required",
+                              "subtitle":  "Turn on notifications in system settings",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Separate notification delivery from threshold calculation.",
+    "action_text":  "Review alert settings",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "Review alert settings",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

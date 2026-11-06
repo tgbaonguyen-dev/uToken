@@ -1,0 +1,39 @@
+﻿{
+  "screen_id": "M05",
+  "state_type": "partial_data",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "PARTIAL DATA",
+  "specification_subtitle": "State specification · Partial data",
+  "card": {
+    "icon_type": "offline",
+    "title": "Analysis is incomplete",
+    "description": "Some days or sources are missing one or more metrics.",
+    "items": [
+      {
+        "id": "trend_uses_available",
+        "title": "Trend uses available records",
+        "subtitle": "Gaps remain visible in the chart",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "comparison_confidence_reduced",
+        "title": "Comparison confidence reduced",
+        "subtitle": "Contribution ranking may change after sync",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Never interpolate missing provider data silently."
+  },
+  "action": {
+    "button_label": "View available analysis",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics"
+}
+

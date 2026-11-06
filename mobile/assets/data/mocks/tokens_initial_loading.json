@@ -1,0 +1,37 @@
+﻿{
+    "screen_id":  "M04",
+    "state_type":  "initial_loading",
+    "screen_title":  "Tokens",
+    "has_back_button":  false,
+    "badge_text":  "LOADING",
+    "specification_subtitle":  "State specification · Loading",
+    "card":  {
+                 "icon_type":  "signing_in",
+                 "title":  "Loading your usage",
+                 "description":  "Fetching the latest daily summaries and pricing metadata.",
+                 "items":  [
+                               {
+                                   "id":  "account_verified",
+                                   "title":  "Account verified",
+                                   "subtitle":  "Usage is being prepared",
+                                   "bullet_color":  "#6678E8"
+                               },
+                               {
+                                   "id":  "no_zero_values",
+                                   "title":  "No zero values shown",
+                                   "subtitle":  "Unknown metrics remain unavailable",
+                                   "bullet_color":  "#6678E8"
+                               }
+                           ]
+             },
+    "behavior":  {
+                     "label":  "BEHAVIOR",
+                     "description":  "Use skeletons only for metrics that are actually loading."
+                 },
+    "action":  {
+                   "button_label":  "Back to overview",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               },
+    "has_bottom_navigation":  true
+}

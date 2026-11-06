@@ -1,0 +1,32 @@
+﻿{
+    "screen_id":  "M12",
+    "screen_title":  "Privacy \u0026 data",
+    "has_back_button":  true,
+    "state_type":  "deleting_usage",
+    "state_label":  "DELETING",
+    "state_context":  "State specification Â· Deleting",
+    "card_title":  "Deleting usage data",
+    "card_description":  "Removing cloud usage summaries while keeping the account active.",
+    "icon_type":  "offline",
+    "bullet_points":  [
+                          {
+                              "title":  "Desktop connection remains",
+                              "subtitle":  "New usage may arrive after delete",
+                              "bullet_color":  "#C27A20"
+                          },
+                          {
+                              "title":  "This canâ€™t be undone",
+                              "subtitle":  "The operation may take a moment",
+                              "bullet_color":  "#C27A20"
+                          }
+                      ],
+    "behavior_label":  "BEHAVIOR",
+    "behavior_text":  "Disable repeated destructive actions while running.",
+    "action_text":  "View data settings",
+    "active_tab":  "Settings",
+    "action":  {
+                   "button_label":  "View data settings",
+                   "background_color":  "#171717",
+                   "text_color":  "#9C9FAB"
+               }
+}

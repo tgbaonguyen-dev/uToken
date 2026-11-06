@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/analytics/presentation/analytics_screen.dart';
+import '../features/auth/presentation/signing_in_screen.dart';
 import '../features/efficiency/presentation/efficiency_screen.dart';
 import '../features/insights/presentation/insights_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -10,7 +11,12 @@ import '../features/tokens/presentation/tokens_screen.dart';
 final appRouter = GoRouter(
   initialLocation: '/tokens',
   routes: [
+    GoRoute(
+      path: '/auth/signing-in',
+      builder: (_, __) => const SigningInScreen(),
+    ),
     StatefulShellRoute.indexedStack(
+
       builder: (context, state, shell) => _Shell(shell: shell),
       branches: [
         StatefulShellBranch(routes: [GoRoute(path: '/tokens', builder: (_, __) => const TokensScreen())]),
