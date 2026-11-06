@@ -20,6 +20,7 @@ firebase/.firebaserc
 mobile/android/app/google-services.json
 mobile/lib/firebase_options.dart
 desktop/src/UToken.Desktop.App/firebase.desktop.json
+**/appsettings.Local.json
 *.jks
 *.keystore
 **/key.properties

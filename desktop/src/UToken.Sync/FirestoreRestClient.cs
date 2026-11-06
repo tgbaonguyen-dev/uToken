@@ -8,8 +8,8 @@ namespace UToken.Sync;
 /// </summary>
 public sealed class FirestoreRestClient(HttpClient http, FirebaseOptions options, Func<CancellationToken, Task<string>> getIdToken)
 {
-    private string DocumentsBase =>
-        $"https://firestore.googleapis.com/v1/projects/{options.ProjectId}/databases/(default)/documents";
+    // Emulator hay project thật do appsettings quyết định (Firebase:UseEmulator).
+    private string DocumentsBase => options.FirestoreBaseUrl;
 
     /// <summary>Ghi nhiều document trong một lần commit. <paramref name="commitBodyJson"/> theo định dạng Firestore REST "writes".</summary>
     public async Task CommitAsync(string commitBodyJson, CancellationToken ct)
