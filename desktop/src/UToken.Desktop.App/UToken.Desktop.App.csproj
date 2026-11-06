@@ -18,6 +18,7 @@
     <ProjectReference Include="../UToken.Sync/UToken.Sync.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="firebase.desktop.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('appsettings.Local.json')" />
   </ItemGroup>
 </Project>
