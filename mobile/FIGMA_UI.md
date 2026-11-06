@@ -30,3 +30,9 @@ The real app entrypoint requires team-provided Firebase configuration. Prototype
 M01, M02, M03, M04, M04B, M05, M05B, M05C, M06, M07, M09, M10, M11, M12, M13, M14, M15, O01, O02, O03.
 
 S01, S02, S03 and S04 are intentionally excluded.
+
+## UI preview interactions
+
+Presentation-layer interactions are configured in lib/core/mock/data/figma_demo_interactions.json, separate from the original read-only Figma exports. Tokens and Analytics period chips, dashboard drill-downs, suggestion cards, Settings entries, and primary bottom tabs respond to taps. Test these with flutter test test/figma_interaction_test.dart.
+
+Actions that need real backend access (Google authentication, sync, delete, export and API-key connectivity) show a preview-only notice instead of silently ignoring taps or claiming to have succeeded. Period selection indicates a selected option, but the sample metrics remain unchanged until actual data filtering is implemented.

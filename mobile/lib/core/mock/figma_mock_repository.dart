@@ -73,13 +73,23 @@ class FigmaMockRepository {
     return FigmaMockScreen.fromJson(Map<String, dynamic>.from(fallback));
   }
 
+  /// Interactions for the UI demo live separately from the Figma exports.
+  static Future<Map<String, dynamic>> demoInteractions() => _loadFile(
+        'lib/core/mock/data/figma_demo_interactions.json',
+      );
+
   static Future<List<FigmaMockHotspot>> hotspots(String screenId) async {
-    final data = await _loadFile(
+    final exported = await _loadFile(
       'lib/core/mock/data/figma_proto_hotspots.json',
     );
-    final items = data[screenId];
-    if (items is! List) return const [];
-    return items
+    final demo = await demoInteractions();
+    final original = exported[screenId];
+    final extra = (demo['areas'] as Map?)?[screenId];
+    final data = [
+      if (original is List) ...original,
+      if (extra is List) ...extra,
+    ];
+    return data
         .whereType<Map>()
         .map((row) => FigmaMockHotspot.fromJson(Map<String, dynamic>.from(row)))
         .toList(growable: false);

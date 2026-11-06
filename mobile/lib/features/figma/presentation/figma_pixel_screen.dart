@@ -45,6 +45,7 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
   void didUpdateWidget(covariant FigmaPixelScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.screenId != widget.screenId) {
+      _selectedHotspot = null;
       _hotspotsFuture = FigmaMockRepository.hotspots(widget.screenId);
       _loadScreenIfNeeded(_loadedBrightness ?? Brightness.light);
     }
@@ -73,10 +74,57 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
     return jsonDecode(raw) as Map<String, dynamic>;
   }
 
+  String? _selectedHotspot;
+
+  void _showNotice(String message) {
+    if (message.isEmpty || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _handleHotspot(String name) async {
-    final nav = await _navigation;
+    final demo = await FigmaMockRepository.demoInteractions();
     if (!mounted) return;
 
+    final allActions = demo['actions'];
+    final currentActions =
+        allActions is Map ? allActions[widget.screenId] : null;
+    final action = currentActions is Map ? currentActions[name] : null;
+    if (action is Map) {
+      final message = action['message']?.toString() ?? '';
+      switch (action['type']?.toString()) {
+        case 'route':
+          final target = action['target']?.toString();
+          final route = target == null ? null : figmaPathFor(target);
+          if (route != null) {
+            context.push(route);
+            return;
+          }
+        case 'select':
+          setState(() => _selectedHotspot = name);
+          _showNotice(message);
+          return;
+        case 'copy':
+          await Clipboard.setData(
+            ClipboardData(text: action['value']?.toString() ?? ''),
+          );
+          if (mounted) _showNotice(message);
+          return;
+        case 'notice':
+          _showNotice(message);
+          return;
+      }
+    }
+
+    final nav = await _navigation;
+    if (!mounted) return;
     if (name == 'Back' || name == 'Close' || name == 'Dismiss') {
       if (context.canPop()) {
         context.pop();
@@ -88,8 +136,7 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
     final screenTargets = targets[widget.screenId] as Map<String, dynamic>?;
     final target = screenTargets?[name]?.toString();
     if (target == null) {
-      // Deliberately leave writes/network actions to their owning feature.
-      // UI implementation does not fake a successful sync, export, or deletion.
+      _showNotice(demo['fallbackMessage']?.toString() ?? '');
       return;
     }
     if (target == '@pop') {
@@ -185,6 +232,28 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
                                         ),
                                       ),
                                     ),
+                                  for (final spot in spots)
+                                    if (_selectedHotspot == spot.name)
+                                      Positioned(
+                                        left: spot.x,
+                                        top: spot.y,
+                                        width: spot.width,
+                                        height: spot.height,
+                                        child: IgnorePointer(
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                 ],
                               );
                             },
