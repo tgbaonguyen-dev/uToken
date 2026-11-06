@@ -52,12 +52,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Đã chọn Week'), findsWidgets);
 
-    await tester.tapAt(const Offset(148, 824));
+    await tester.tap(find.byKey(const ValueKey('utoken-tab-1')));
     await tester.pump();
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 110)),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Analytics'), findsWidgets);
+    expect(router.routeInformationProvider.value.uri.path, '/analytics');
+    expect(find.text('Token mix, models, and cost.'), findsOneWidget);
   });
 }

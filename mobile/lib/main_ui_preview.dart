@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app/router.dart';
 
-/// Entry point for reviewing 20 Figma UI frames without Firebase credentials.
+/// Entry point for reviewing 24 Figma UI frames without Firebase credentials.
 /// Run: flutter run -t lib/main_ui_preview.dart
 void main() => runApp(const UTokenUiPreview());
 

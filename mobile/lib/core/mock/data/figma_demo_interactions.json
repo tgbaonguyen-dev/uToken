@@ -296,6 +296,10 @@
       "I’ve paired my device": {
         "type": "route",
         "target": "M04"
+      },
+      "I?ve paired my device": {
+        "type": "route",
+        "target": "S02"
       }
     },
     "M04": {
@@ -434,8 +438,9 @@
         "message": "UI Preview: tính năng đồng bộ nền cần Desktop Collector."
       },
       "Sync now": {
-        "type": "notice",
-        "message": "UI Preview: chưa kết nối bộ thu thập trên máy tính."
+        "type": "route",
+        "target": "S03",
+        "message": "?ang hi?n th? tr?ng th?i ??ng b? m?u, kh?ng c? ??ng b? th?c."
       }
     },
     "M11": {
@@ -452,8 +457,9 @@
         "message": "UI Preview: ngưỡng cảnh báo 100% sẽ được lưu sau khi kết nối dữ liệu."
       },
       "Save budget": {
-        "type": "notice",
-        "message": "Đây là giao diện mẫu; ngân sách chưa được ghi vào cơ sở dữ liệu."
+        "type": "route",
+        "target": "M09",
+        "message": "??y l? b?n xem th?; ng?n s?ch ch?a ???c l?u."
       }
     },
     "M12": {
@@ -508,8 +514,9 @@
         "message": "UI Preview: chưa lưu hoặc sử dụng API key thật."
       },
       "Test connection": {
-        "type": "notice",
-        "message": "UI Preview: chưa lưu API key và chưa kiểm tra kết nối nhà cung cấp."
+        "type": "route",
+        "target": "M09",
+        "message": "??y l? b?n xem th?; ch?a ki?m tra k?t n?i nh? cung c?p."
       }
     },
     "M03": {

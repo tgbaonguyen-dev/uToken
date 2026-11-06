@@ -29,6 +29,10 @@ class FigmaMockRepository {
     'M14': 9,
     'O03': 10,
     'M15': 10,
+    'S01': 11,
+    'S02': 11,
+    'S03': 12,
+    'S04': 12,
   };
 
   static Iterable<String> get screenIds => _fileIndex.keys;

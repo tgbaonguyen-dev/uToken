@@ -21,6 +21,10 @@ const Map<String, String> figmaRoutes = {
   'M14': '/model-pricing',
   'O03': '/cost-breakdown',
   'M15': '/ai-suggestions',
+  'S01': '/desktop-not-connected',
+  'S02': '/waiting-first-usage',
+  'S03': '/syncing-usage',
+  'S04': '/sync-failed',
 };
 
 String? figmaPathFor(String screenId) => figmaRoutes[screenId];

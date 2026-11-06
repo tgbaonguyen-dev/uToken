@@ -6,11 +6,12 @@
     },
     "M02": {
       "Back": "M01",
-      "Pair complete": "M04",
+      "Pair complete": "S02",
       "Open install guide": "M03"
     },
     "M03": {
       "Back": "M02",
+      "Download desktop app": "M02",
       "Already installed": "M02"
     },
     "M04": {
@@ -46,13 +47,16 @@
       "Open AI suggestions": "M15"
     },
     "M10": {
-      "Back": "M09"
+      "Back": "M09",
+      "Sync now": "S03"
     },
     "M11": {
-      "Back": "M09"
+      "Back": "M09",
+      "Save budget": "M09"
     },
     "M12": {
-      "Back": "M09"
+      "Back": "M09",
+      "Delete data": "M09"
     },
     "M13": {
       "Back": "M09",
@@ -60,11 +64,13 @@
       "Sign out": "M01"
     },
     "O01": {
-      "Back": "M13"
+      "Back": "M13",
+      "Download CSV": "M13",
+      "Download JSON": "M13"
     },
     "O02": {
       "Back": "M11",
-      "View usage": "M04",
+      "View usage": "M05",
       "Dismiss alert": "M11"
     },
     "M14": {
@@ -72,19 +78,35 @@
       "Back to settings": "M09"
     },
     "O03": {
-      "Close": "@pop",
       "Dismiss": "@pop",
-      "View model pricing": "M14"
+      "View model pricing": "M14",
+      "Close": "@pop"
     },
     "M15": {
-      "Back": "M09"
+      "Back": "M09",
+      "Test connection": "M09"
+    },
+    "S01": {
+      "Connect desktop": "M02"
+    },
+    "S02": {
+      "Refresh usage": "S03"
+    },
+    "S03": {},
+    "S04": {
+      "Retry sync": "S03",
+      "Desktop connection": "M10"
     }
   },
   "bottomBar": {
     "M04": true,
     "M05": true,
     "M07": true,
-    "M09": true
+    "M09": true,
+    "S01": true,
+    "S02": true,
+    "S03": true,
+    "S04": true
   },
   "tabs": [
     "M04",

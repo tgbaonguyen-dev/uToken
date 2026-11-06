@@ -85,6 +85,8 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
         content: Text(message),
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+            left: 16, right: 16, bottom: _hasBottomBar ? 88 : 16),
       ),
     );
   }
@@ -152,12 +154,69 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
     }
   }
 
+  Future<void> _openScreenGallery() async {
+    // FigmaMockRepository owns the complete 24-frame manifest.
+    // The sheet is synchronous; it never stalls while waiting for assets.
+    final ids = FigmaMockRepository.screenIds.toList(growable: false);
+    final origin = context;
+    await showModalBottomSheet<void>(
+      context: origin,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(sheetContext).height * 0.75,
+          child: Column(
+            children: [
+              const ListTile(
+                title: Text('All 24 Figma screens'),
+                subtitle:
+                    Text('UI Preview: hold a screen title to open this index'),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      for (final id in ids)
+                        ListTile(
+                          title: Text(id),
+                          subtitle: Text(figmaPathFor(id) ?? ''),
+                          trailing: const Icon(Icons.chevron_right),
+                          selected: id == widget.screenId,
+                          onTap: () {
+                            final path = figmaPathFor(id);
+                            Navigator.of(sheetContext).pop();
+                            if (path != null && mounted) origin.go(path);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _onBottomTap(int tabIndex) {
     const tabScreenIds = ['M04', 'M05', 'M07', 'M09'];
     if (tabIndex < 0 || tabIndex >= tabScreenIds.length) return;
     final route = figmaPathFor(tabScreenIds[tabIndex]);
     if (route != null) context.go(route);
   }
+
+  bool get _hasBottomBar => const [
+        'M04',
+        'M05',
+        'M07',
+        'M09',
+        'S01',
+        'S02',
+        'S03',
+        'S04',
+      ].contains(widget.screenId);
 
   @override
   Widget build(BuildContext context) {
@@ -176,8 +235,9 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
                 return Center(
                   child: Text(
                     snapshot.error.toString(),
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 );
               }
@@ -194,101 +254,129 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
                 math.min(width / screen.width, height / screen.height);
             final scaledWidth = screen.width * scale;
             final scaledHeight = screen.height * scale;
+
             return Center(
               child: SizedBox(
                 width: scaledWidth,
                 height: scaledHeight,
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: SizedBox(
-                    width: screen.width,
-                    height: screen.height,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        widget.screenId == 'M01' ? 24 : 28,
-                      ),
-                      child: Stack(
-                        clipBehavior: Clip.hardEdge,
-                        children: [
-                          ...screen.layers.map(_paintLayer),
-                          FutureBuilder<List<FigmaMockHotspot>>(
-                            future: _hotspotsFuture,
-                            builder: (context, snapshot) {
-                              final spots = snapshot.data;
-                              if (spots == null) return const SizedBox.shrink();
-                              return Stack(
-                                children: [
-                                  for (final spot in spots)
-                                    Positioned(
-                                      left: spot.x,
-                                      top: spot.y,
-                                      width: spot.width,
-                                      height: spot.height,
-                                      child: GestureDetector(
-                                        behavior: HitTestBehavior.opaque,
-                                        onTap: () => _handleHotspot(spot.name),
-                                        child: const ColoredBox(
-                                          color: Colors.transparent,
-                                        ),
-                                      ),
-                                    ),
-                                  for (final spot in spots)
-                                    if (_selectedHotspot == spot.name)
-                                      Positioned(
-                                        left: spot.x,
-                                        top: spot.y,
-                                        width: spot.width,
-                                        height: spot.height,
-                                        child: IgnorePointer(
-                                          child: DecoratedBox(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              border: Border.all(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                                width: 2,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                ],
-                              );
-                            },
-                          ),
-                          if (const ['M04', 'M05', 'M07', 'M09']
-                              .contains(widget.screenId))
-                            Positioned(
-                              left: 0,
-                              top: 776,
-                              width: 390,
-                              height: 68,
-                              child: Row(
-                                children: [
-                                  for (var i = 0; i < 4; i++)
-                                    Expanded(
-                                      child: GestureDetector(
-                                        behavior: HitTestBehavior.opaque,
-                                        onTap: () => _onBottomTap(i),
-                                        child: const ColoredBox(
-                                          color: Colors.transparent,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                        ],
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned.fill(
+                      child: FittedBox(
+                        fit: BoxFit.fill,
+                        child: SizedBox(
+                          width: screen.width,
+                          height: screen.height,
+                          child: _buildFigmaCanvas(context, screen),
+                        ),
                       ),
                     ),
-                  ),
+                    // Preview-only index: accessible without changing the
+                    // original Figma appearance (hold any screen title).
+                    Positioned(
+                      left: 78 * scale,
+                      top: 38 * scale,
+                      width: 234 * scale,
+                      height: 62 * scale,
+                      child: GestureDetector(
+                        key: const ValueKey('figma-screen-gallery-trigger'),
+                        behavior: HitTestBehavior.translucent,
+                        onLongPress: _openScreenGallery,
+                        child: const SizedBox.expand(),
+                      ),
+                    ),
+                    // Keep the hit targets OUTSIDE the scaled Figma canvas.
+                    // This makes tabs reliably hittable on emulators/devices
+                    // with non-reference physical dimensions.
+                    if (_hasBottomBar)
+                      Positioned(
+                        left: 0,
+                        bottom: 0,
+                        width: scaledWidth,
+                        height: 68 * scale,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var i = 0; i < 4; i++)
+                              Expanded(
+                                child: GestureDetector(
+                                  key: ValueKey('utoken-tab-$i'),
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => _onBottomTap(i),
+                                  child: const ColoredBox(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
               ),
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildFigmaCanvas(
+    BuildContext context,
+    FigmaMockScreen screen,
+  ) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(
+        widget.screenId == 'M01' ? 24 : 28,
+      ),
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          ...screen.layers.map(_paintLayer),
+          FutureBuilder<List<FigmaMockHotspot>>(
+            future: _hotspotsFuture,
+            builder: (context, snapshot) {
+              final spots = snapshot.data;
+              if (spots == null) return const SizedBox.shrink();
+              return Stack(
+                children: [
+                  for (final spot in spots)
+                    Positioned(
+                      left: spot.x,
+                      top: spot.y,
+                      width: spot.width,
+                      height: spot.height,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _handleHotspot(spot.name),
+                        child: const ColoredBox(color: Colors.transparent),
+                      ),
+                    ),
+                  for (final spot in spots)
+                    if (_selectedHotspot == spot.name)
+                      Positioned(
+                        left: spot.x,
+                        top: spot.y,
+                        width: spot.width,
+                        height: spot.height,
+                        child: IgnorePointer(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }

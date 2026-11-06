@@ -6,8 +6,7 @@ import 'package:utoken_mobile/features/figma/presentation/figma_pixel_screen.dar
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets(
-      'all M/O Figma screens paint their mock text without Flutter errors',
+  testWidgets('all 24 M/O/S Figma screens paint mock text without errors',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));

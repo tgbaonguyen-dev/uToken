@@ -7,8 +7,8 @@ import 'package:utoken_mobile/features/figma/presentation/figma_pixel_screen.dar
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('20 non-state Figma frames are available in Light and Dark', () async {
-    expect(figmaRoutes.length, 20);
+  test('all 24 Figma frames are available in Light and Dark', () async {
+    expect(figmaRoutes.length, 24);
     for (final id in figmaRoutes.keys) {
       for (final brightness in [Brightness.light, Brightness.dark]) {
         final frame = await FigmaMockRepository.screen(id, brightness);
@@ -18,7 +18,7 @@ void main() {
       }
     }
     for (final stateId in ['S01', 'S02', 'S03', 'S04']) {
-      expect(figmaRoutes.containsKey(stateId), isFalse);
+      expect(figmaRoutes.containsKey(stateId), isTrue);
     }
   });
 

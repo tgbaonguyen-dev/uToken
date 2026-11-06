@@ -7,10 +7,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('each primary Figma layer has a valid local asset reference', () async {
-    expect(FigmaMockRepository.screenIds.length, 20);
+    expect(FigmaMockRepository.screenIds.length, 24);
     expect(figmaRoutes.keys.toSet(), FigmaMockRepository.screenIds.toSet());
     for (final id in FigmaMockRepository.screenIds) {
-      expect(id.startsWith('S'), isFalse);
       for (final brightness in [Brightness.light, Brightness.dark]) {
         final screen = await FigmaMockRepository.screen(id, brightness);
         expect(screen.nodeId, isNotEmpty, reason: id);
