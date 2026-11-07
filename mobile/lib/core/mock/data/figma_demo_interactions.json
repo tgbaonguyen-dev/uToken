@@ -1,0 +1,539 @@
+{
+  "description": "UI-only interaction targets, entirely separate from the original exported Figma layers and proto hotspots.",
+  "fallbackMessage": "Nút này chưa có chức năng backend trong bản UI Preview. Bạn vẫn có thể xem các màn hình qua thanh điều hướng.",
+  "areas": {
+    "M02": [
+      {
+        "n": "Copy code",
+        "x": 24,
+        "y": 314,
+        "w": 342,
+        "h": 62
+      },
+      {
+        "n": "I’ve paired my device",
+        "x": 24,
+        "y": 712,
+        "w": 342,
+        "h": 50
+      }
+    ],
+    "M04": [
+      {
+        "n": "Refresh",
+        "x": 326,
+        "y": 42,
+        "w": 52,
+        "h": 52
+      },
+      {
+        "n": "Day",
+        "x": 20,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Week",
+        "x": 106,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Month",
+        "x": 193,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Total",
+        "x": 280,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Open sources",
+        "x": 20,
+        "y": 446,
+        "w": 350,
+        "h": 82
+      },
+      {
+        "n": "Open usage trend",
+        "x": 20,
+        "y": 552,
+        "w": 350,
+        "h": 198
+      }
+    ],
+    "M05": [
+      {
+        "n": "Day",
+        "x": 20,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Week",
+        "x": 98,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Month",
+        "x": 178,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Total",
+        "x": 262,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Open model list",
+        "x": 20,
+        "y": 366,
+        "w": 350,
+        "h": 200
+      }
+    ],
+    "M05C": [
+      {
+        "n": "Small",
+        "x": 26,
+        "y": 136,
+        "w": 70,
+        "h": 48
+      },
+      {
+        "n": "Medium",
+        "x": 90,
+        "y": 136,
+        "w": 70,
+        "h": 48
+      },
+      {
+        "n": "Large",
+        "x": 166,
+        "y": 136,
+        "w": 70,
+        "h": 48
+      }
+    ],
+    "M06": [
+      {
+        "n": "Daily",
+        "x": 20,
+        "y": 165,
+        "w": 130,
+        "h": 52
+      },
+      {
+        "n": "Project",
+        "x": 148,
+        "y": 165,
+        "w": 130,
+        "h": 52
+      }
+    ],
+    "M07": [
+      {
+        "n": "Trim repeated context",
+        "x": 20,
+        "y": 284,
+        "w": 350,
+        "h": 89
+      },
+      {
+        "n": "Enable prompt caching",
+        "x": 20,
+        "y": 378,
+        "w": 350,
+        "h": 84
+      }
+    ],
+    "M09": [
+      {
+        "n": "Language",
+        "x": 20,
+        "y": 294,
+        "w": 350,
+        "h": 49
+      },
+      {
+        "n": "Token numbers",
+        "x": 20,
+        "y": 445,
+        "w": 350,
+        "h": 46
+      },
+      {
+        "n": "Sync interval",
+        "x": 20,
+        "y": 548,
+        "w": 350,
+        "h": 45
+      }
+    ],
+    "M10": [
+      {
+        "n": "Disconnect this computer",
+        "x": 20,
+        "y": 712,
+        "w": 350,
+        "h": 52
+      },
+      {
+        "n": "Background sync",
+        "x": 20,
+        "y": 481,
+        "w": 350,
+        "h": 55
+      }
+    ],
+    "M11": [
+      {
+        "n": "Edit monthly limit",
+        "x": 20,
+        "y": 540,
+        "w": 350,
+        "h": 61
+      },
+      {
+        "n": "90% alert",
+        "x": 20,
+        "y": 411,
+        "w": 350,
+        "h": 56
+      },
+      {
+        "n": "100% alert",
+        "x": 20,
+        "y": 467,
+        "w": 350,
+        "h": 56
+      }
+    ],
+    "M12": [
+      {
+        "n": "Diagnostics",
+        "x": 20,
+        "y": 578,
+        "w": 350,
+        "h": 60
+      }
+    ],
+    "M13": [
+      {
+        "n": "Connected devices",
+        "x": 20,
+        "y": 402,
+        "w": 350,
+        "h": 63
+      },
+      {
+        "n": "Google account",
+        "x": 20,
+        "y": 505,
+        "w": 350,
+        "h": 59
+      }
+    ],
+    "M15": [
+      {
+        "n": "OpenAI",
+        "x": 20,
+        "y": 197,
+        "w": 350,
+        "h": 59
+      },
+      {
+        "n": "Anthropic",
+        "x": 20,
+        "y": 253,
+        "w": 350,
+        "h": 60
+      },
+      {
+        "n": "Google Gemini",
+        "x": 20,
+        "y": 310,
+        "w": 350,
+        "h": 59
+      },
+      {
+        "n": "Edit model",
+        "x": 20,
+        "y": 408,
+        "w": 350,
+        "h": 55
+      },
+      {
+        "n": "Edit API key",
+        "x": 20,
+        "y": 464,
+        "w": 350,
+        "h": 60
+      }
+    ]
+  },
+  "actions": {
+    "M02": {
+      "Copy code": {
+        "type": "copy",
+        "value": "8K4 — M2P",
+        "message": "Đã sao chép mã ghép nối mẫu. Mã này chỉ dùng để xem giao diện."
+      },
+      "I’ve paired my device": {
+        "type": "route",
+        "target": "M04"
+      },
+      "I?ve paired my device": {
+        "type": "route",
+        "target": "S02"
+      }
+    },
+    "M04": {
+      "Refresh": {
+        "type": "notice",
+        "message": "UI Preview: chưa kết nối Desktop Collector nên không có dữ liệu mới để đồng bộ."
+      },
+      "Day": {
+        "type": "select",
+        "group": "period",
+        "value": "Day",
+        "message": "Đã chọn Day. Bộ lọc dữ liệu thực tế chưa kết nối; số liệu hiển thị vẫn là mẫu Figma."
+      },
+      "Week": {
+        "type": "select",
+        "group": "period",
+        "value": "Week",
+        "message": "Đã chọn Week. Bộ lọc dữ liệu thực tế chưa kết nối; số liệu hiển thị vẫn là mẫu Figma."
+      },
+      "Month": {
+        "type": "select",
+        "group": "period",
+        "value": "Month",
+        "message": "Đã chọn Month. Bộ lọc dữ liệu thực tế chưa kết nối; số liệu hiển thị vẫn là mẫu Figma."
+      },
+      "Total": {
+        "type": "select",
+        "group": "period",
+        "value": "Total",
+        "message": "Đã chọn Total. Bộ lọc dữ liệu thực tế chưa kết nối; số liệu hiển thị vẫn là mẫu Figma."
+      },
+      "Open sources": {
+        "type": "route",
+        "target": "M04B"
+      },
+      "Open usage trend": {
+        "type": "route",
+        "target": "M06"
+      }
+    },
+    "M05": {
+      "Day": {
+        "type": "select",
+        "group": "period",
+        "value": "Day",
+        "message": "Đã chọn Day. Biểu đồ trong UI Preview vẫn dùng số liệu mẫu."
+      },
+      "Week": {
+        "type": "select",
+        "group": "period",
+        "value": "Week",
+        "message": "Đã chọn Week. Biểu đồ trong UI Preview vẫn dùng số liệu mẫu."
+      },
+      "Month": {
+        "type": "select",
+        "group": "period",
+        "value": "Month",
+        "message": "Đã chọn Month. Biểu đồ trong UI Preview vẫn dùng số liệu mẫu."
+      },
+      "Total": {
+        "type": "select",
+        "group": "period",
+        "value": "Total",
+        "message": "Đã chọn Total. Biểu đồ trong UI Preview vẫn dùng số liệu mẫu."
+      },
+      "Open model list": {
+        "type": "route",
+        "target": "M05C"
+      }
+    },
+    "M05C": {
+      "Small": {
+        "type": "select",
+        "group": "size",
+        "value": "Small",
+        "message": "Đã chọn nhóm tác vụ Small. Dữ liệu so sánh vẫn là bản mẫu Figma."
+      },
+      "Medium": {
+        "type": "select",
+        "group": "size",
+        "value": "Medium",
+        "message": "Đã chọn nhóm tác vụ Medium. Dữ liệu so sánh vẫn là bản mẫu Figma."
+      },
+      "Large": {
+        "type": "select",
+        "group": "size",
+        "value": "Large",
+        "message": "Đã chọn nhóm tác vụ Large. Dữ liệu so sánh vẫn là bản mẫu Figma."
+      }
+    },
+    "M06": {
+      "Daily": {
+        "type": "select",
+        "group": "group",
+        "value": "Daily",
+        "message": "Đang xem dữ liệu Daily mẫu từ Figma."
+      },
+      "Project": {
+        "type": "select",
+        "group": "group",
+        "value": "Project",
+        "message": "UI Preview: chưa có dữ liệu dự án thực từ Desktop Collector."
+      }
+    },
+    "M07": {
+      "Trim repeated context": {
+        "type": "notice",
+        "message": "Gợi ý mẫu: rút gọn ngữ cảnh trùng lặp. Chưa thể áp dụng tự động trong UI Preview."
+      },
+      "Enable prompt caching": {
+        "type": "notice",
+        "message": "Gợi ý mẫu: kiểm tra khả năng dùng prompt caching trong phiên dài. Chưa có kết nối dữ liệu thực."
+      }
+    },
+    "M09": {
+      "Language": {
+        "type": "notice",
+        "message": "Ngôn ngữ trong bản UI Preview đang theo thiết kế Figma; tùy chọn sẽ có khi nối phần Settings."
+      },
+      "Token numbers": {
+        "type": "notice",
+        "message": "Bản UI Preview đang hiển thị số liệu mẫu dạng Compact."
+      },
+      "Sync interval": {
+        "type": "notice",
+        "message": "Chu kỳ đồng bộ chỉ được cấu hình khi kết nối Desktop Collector."
+      }
+    },
+    "M10": {
+      "Disconnect this computer": {
+        "type": "notice",
+        "message": "UI Preview: chưa kết nối thiết bị thật nên không có máy tính để ngắt kết nối."
+      },
+      "Background sync": {
+        "type": "notice",
+        "message": "UI Preview: tính năng đồng bộ nền cần Desktop Collector."
+      },
+      "Sync now": {
+        "type": "route",
+        "target": "S03",
+        "message": "?ang hi?n th? tr?ng th?i ??ng b? m?u, kh?ng c? ??ng b? th?c."
+      }
+    },
+    "M11": {
+      "Edit monthly limit": {
+        "type": "notice",
+        "message": "UI Preview: chỉnh ngân sách sẽ được bật sau khi tích hợp lưu trữ cấu hình."
+      },
+      "90% alert": {
+        "type": "notice",
+        "message": "UI Preview: ngưỡng cảnh báo 90% sẽ được lưu sau khi kết nối dữ liệu."
+      },
+      "100% alert": {
+        "type": "notice",
+        "message": "UI Preview: ngưỡng cảnh báo 100% sẽ được lưu sau khi kết nối dữ liệu."
+      },
+      "Save budget": {
+        "type": "route",
+        "target": "M09",
+        "message": "??y l? b?n xem th?; ng?n s?ch ch?a ???c l?u."
+      }
+    },
+    "M12": {
+      "Diagnostics": {
+        "type": "notice",
+        "message": "UI Preview: chẩn đoán chỉ thay đổi sau khi tích hợp phần Privacy."
+      },
+      "Delete data": {
+        "type": "notice",
+        "message": "UI Preview: chưa có dữ liệu thực để xóa."
+      }
+    },
+    "M13": {
+      "Connected devices": {
+        "type": "route",
+        "target": "M10"
+      },
+      "Google account": {
+        "type": "notice",
+        "message": "UI Preview: chưa có đăng nhập Google thật để quản lý."
+      },
+      "Delete account": {
+        "type": "notice",
+        "message": "UI Preview: chưa có tài khoản thật để xóa."
+      }
+    },
+    "M15": {
+      "OpenAI": {
+        "type": "select",
+        "group": "provider",
+        "value": "OpenAI",
+        "message": "Đã chọn nhà cung cấp OpenAI (chỉ là bản UI Preview)."
+      },
+      "Anthropic": {
+        "type": "select",
+        "group": "provider",
+        "value": "Anthropic",
+        "message": "Đã chọn nhà cung cấp Anthropic (chỉ là bản UI Preview)."
+      },
+      "Google Gemini": {
+        "type": "select",
+        "group": "provider",
+        "value": "Google Gemini",
+        "message": "Đã chọn nhà cung cấp Google Gemini (chỉ là bản UI Preview)."
+      },
+      "Edit model": {
+        "type": "notice",
+        "message": "UI Preview: chọn model thật sẽ có khi tính năng AI Suggestions được tích hợp."
+      },
+      "Edit API key": {
+        "type": "notice",
+        "message": "UI Preview: chưa lưu hoặc sử dụng API key thật."
+      },
+      "Test connection": {
+        "type": "route",
+        "target": "M09",
+        "message": "??y l? b?n xem th?; ch?a ki?m tra k?t n?i nh? cung c?p."
+      }
+    },
+    "M03": {
+      "Download desktop app": {
+        "type": "notice",
+        "message": "UI Preview: cần bản cài Desktop Companion do nhóm cung cấp."
+      }
+    },
+    "O01": {
+      "Download CSV": {
+        "type": "notice",
+        "message": "UI Preview: chức năng xuất CSV chưa được kết nối. Không có file nào được tạo."
+      },
+      "Download JSON": {
+        "type": "notice",
+        "message": "UI Preview: chức năng xuất JSON chưa được kết nối. Không có file nào được tạo."
+      }
+    }
+  }
+}

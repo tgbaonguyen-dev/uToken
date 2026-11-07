@@ -6,7 +6,8 @@ import 'app/router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Android đọc cấu hình từ android/app/google-services.json (không commit).
+  // Real app entry point: Firebase remains initialized here.
+  // Use main_ui_preview.dart to review the layout without credentials.
   await Firebase.initializeApp();
   runApp(const ProviderScope(child: UTokenApp()));
 }
@@ -18,13 +19,18 @@ class UTokenApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'μToken',
-      theme: ThemeData(colorSchemeSeed: const Color(0xFF2A55C9), useMaterial3: true),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'BeVietnamPro',
+        brightness: Brightness.light,
+        useMaterial3: true,
+      ),
       darkTheme: ThemeData(
-        colorSchemeSeed: const Color(0xFF2A55C9),
+        fontFamily: 'BeVietnamPro',
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
       routerConfig: appRouter,
     );
   }

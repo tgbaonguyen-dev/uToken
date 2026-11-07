@@ -1,57 +1,34 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/analytics/presentation/analytics_screen.dart';
+import '../features/figma/presentation/figma_pixel_screen.dart';
+import 'figma_routes.dart';
 import '../features/auth/presentation/signing_in_screen.dart';
-import '../features/efficiency/presentation/efficiency_screen.dart';
-import '../features/insights/presentation/insights_screen.dart';
-import '../features/settings/presentation/settings_screen.dart';
-import '../features/tokens/presentation/tokens_screen.dart';
+import '../features/insights/presentation/insight_detail_screen.dart';
 
+/// UI-only routes for Figma's M/O frames; S-state frames are excluded.
 final appRouter = GoRouter(
-  initialLocation: '/tokens',
+  initialLocation: '/welcome',
   routes: [
     GoRoute(
       path: '/auth/signing-in',
       builder: (_, __) => const SigningInScreen(),
     ),
-    StatefulShellRoute.indexedStack(
-
-      builder: (context, state, shell) => _Shell(shell: shell),
-      branches: [
-        StatefulShellBranch(routes: [GoRoute(path: '/tokens', builder: (_, __) => const TokensScreen())]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: '/analytics',
-            builder: (_, __) => const AnalyticsScreen(),
-            routes: [GoRoute(path: 'efficiency', builder: (_, __) => const EfficiencyScreen())],
-          ),
-        ]),
-        StatefulShellBranch(routes: [GoRoute(path: '/insights', builder: (_, __) => const InsightsScreen())]),
-        StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen())]),
-      ],
+    GoRoute(
+      path: '/insight-detail',
+      builder: (_, __) => const InsightDetailScreen(),
     ),
+    GoRoute(
+      path: '/analytics/efficiency',
+      redirect: (_, __) => '/efficiency',
+    ),
+    GoRoute(
+      path: '/',
+      redirect: (context, state) => '/welcome',
+    ),
+    for (final entry in figmaRoutes.entries)
+      GoRoute(
+        path: entry.value,
+        builder: (context, state) => FigmaPixelScreen(screenId: entry.key),
+      ),
   ],
 );
-
-class _Shell extends StatelessWidget {
-  const _Shell({required this.shell});
-  final StatefulNavigationShell shell;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: shell.goBranch,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.data_usage), label: 'Tokens'),
-          NavigationDestination(icon: Icon(Icons.insights), label: 'Analytics'),
-          NavigationDestination(icon: Icon(Icons.lightbulb_outline), label: 'Insights'),
-          NavigationDestination(icon: Icon(Icons.settings_outlined), label: 'Settings'),
-        ],
-      ),
-    );
-  }
-}
