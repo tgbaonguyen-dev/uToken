@@ -1,4 +1,7 @@
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using UToken.Core.Aggregation;
 using UToken.Core.Efficiency;
@@ -74,6 +77,43 @@ public sealed class CloudSyncTests : IDisposable
     }
 
     [Fact]
+    public async Task Windows_session_is_dpapi_encrypted_and_can_be_restored()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        await NewSync().SignInAsync();
+        string text = File.ReadAllText(SessionFile);
+        Assert.DoesNotContain("refresh-1", text);
+        Assert.DoesNotContain("ana@example.com", text);
+        using var envelope = JsonDocument.Parse(text);
+        Assert.Equal("windows-dpapi-v1", envelope.RootElement.GetProperty("Protection").GetString());
+        byte[] clear = ProtectedData.Unprotect(Convert.FromBase64String(envelope.RootElement.GetProperty("Data").GetString()!), null, DataProtectionScope.CurrentUser);
+        try { Assert.Contains("refresh-1", Encoding.UTF8.GetString(clear)); }
+        finally { CryptographicOperations.ZeroMemory(clear); }
+        Assert.Equal("uid-1", (await NewSync().RestoreAsync())!.Uid);
+    }
+
+    [Fact]
+    public async Task Windows_legacy_session_is_migrated_before_restore()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        File.WriteAllText(SessionFile, """{"Uid":"uid-1","Email":"ana@example.com","DisplayName":"Ana","RefreshToken":"refresh-1","ProjectId":"utoken-test","Emulator":true}""");
+        var sync = NewSync();
+        Assert.Equal("uid-1", (await sync.RestoreAsync())!.Uid);
+        Assert.DoesNotContain("refresh-1", File.ReadAllText(SessionFile));
+        await sync.UploadAsync([], Efficiency());
+        Assert.Equal(1, _server.Refreshes);
+    }
+
+    [Theory]
+    [InlineData("not-base64")]
+    [InlineData("AQIDBA==")]
+    public async Task Corrupt_protected_session_requires_sign_in(string data)
+    {
+        File.WriteAllText(SessionFile, JsonSerializer.Serialize(new { Protection = "windows-dpapi-v1", Data = data, RefreshToken = "do-not-fall-back" }));
+        Assert.Null(await NewSync().RestoreAsync());
+    }
+
+    [Fact]
     public async Task Expiring_token_is_refreshed_before_upload()
     {
         var sync = NewSync();
@@ -102,9 +142,42 @@ public sealed class CloudSyncTests : IDisposable
         await sync.SignInAsync();
         _server.CommitStatus = HttpStatusCode.Unauthorized;
         await Assert.ThrowsAsync<CloudAuthException>(() => sync.UploadAsync([], Efficiency()));
+        Assert.Null(sync.Account);
+        Assert.Null(await NewSync().RestoreAsync());
+        await sync.SignInAsync();
         _server.CommitStatus = HttpStatusCode.ServiceUnavailable;
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() => sync.UploadAsync([], Efficiency()));
         Assert.Equal(HttpStatusCode.ServiceUnavailable, ex.StatusCode);
+        Assert.NotNull(sync.Account);
+    }
+
+    [Fact]
+    public async Task Sign_out_of_a_locked_session_cannot_restore_the_old_account()
+    {
+        var sync = NewSync();
+        await sync.SignInAsync();
+        using (var locked = new FileStream(SessionFile, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            await sync.SignOutAsync();
+            Assert.Null(sync.Account);
+            Assert.Null(await NewSync().RestoreAsync());
+        }
+        var reopened = NewSync();
+        Assert.Null(await reopened.RestoreAsync());
+        Assert.False(File.Exists(SessionFile));
+        await reopened.SignInAsync();
+        Assert.NotNull(await NewSync().RestoreAsync());
+    }
+
+    [Fact]
+    public async Task Sign_out_reports_failure_if_neither_session_nor_sign_out_marker_can_be_written()
+    {
+        var sync = NewSync();
+        await sync.SignInAsync();
+        Directory.CreateDirectory(SessionFile + ".signed-out");
+        using var locked = new FileStream(SessionFile, FileMode.Open, FileAccess.Read, FileShare.None);
+        await Assert.ThrowsAsync<IOException>(() => sync.SignOutAsync());
+        Assert.Null(sync.Account);
     }
 
     [Fact] // Phiên của project/emulator khác cấu hình hiện tại thì bỏ

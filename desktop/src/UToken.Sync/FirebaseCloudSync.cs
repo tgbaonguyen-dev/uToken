@@ -1,4 +1,5 @@
 using System.Text;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using UToken.Core.Aggregation;
@@ -30,7 +31,7 @@ public interface ICloudSync
 /// <summary>
 /// ICloudSync qua REST với Firebase ID token của người dùng (ADR-0003), nên Security Rules luôn được áp dụng.
 /// Refresh token lưu trong <paramref name="sessionFile"/> (chỉ chủ tài khoản máy đọc được trên Linux/macOS).
-/// Chưa mã hóa bằng DPAPI/libsecret (đã cắt khỏi MVP).
+/// Windows sessions use DPAPI CurrentUser; legacy JSON sessions are migrated on restore.
 /// </summary>
 public sealed class FirebaseCloudSync : ICloudSync
 {
@@ -58,50 +59,84 @@ public sealed class FirebaseCloudSync : ICloudSync
 
     public CloudAccount? Account => _session is { } s ? new(s.Uid, s.Email, s.DisplayName, _options.ProjectId, _options.UseEmulator) : null;
 
-    public Task<CloudAccount?> RestoreAsync(CancellationToken ct = default)
+    public async Task<CloudAccount?> RestoreAsync(CancellationToken ct = default)
     {
-        _session = LoadSession();
-        return Task.FromResult(Account);
+        await _tokenLock.WaitAsync(ct);
+        try { _session = LoadSession(); return Account; }
+        finally { _tokenLock.Release(); }
     }
 
     public async Task<CloudAccount> SignInAsync(CancellationToken ct = default)
     {
-        var googleIdToken = await _google.GetGoogleIdTokenAsync(ct);
-        _session = await _auth.SignInWithGoogleIdTokenAsync(googleIdToken, ct);
-        SaveSession(_session);
-        return Account!;
+        await _tokenLock.WaitAsync(ct);
+        try
+        {
+            var googleIdToken = await _google.GetGoogleIdTokenAsync(ct);
+            var session = await _auth.SignInWithGoogleIdTokenAsync(googleIdToken, ct);
+            SaveSession(session);
+            _session = session;
+            return Account!;
+        }
+        finally { _tokenLock.Release(); }
     }
 
-    public Task SignOutAsync(CancellationToken ct = default)
+    public async Task SignOutAsync(CancellationToken ct = default)
+    {
+        await _tokenLock.WaitAsync(ct);
+        try { ClearSession(); }
+        finally { _tokenLock.Release(); }
+    }
+
+    private string SignOutMarker => _sessionFile + ".signed-out";
+
+    private void ClearSession()
     {
         _session = null;
-        try { if (File.Exists(_sessionFile)) File.Delete(_sessionFile); }
-        catch (IOException) { }
-        return Task.CompletedTask;
+        try { File.Delete(_sessionFile); }
+        catch (DirectoryNotFoundException) { }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // A locked token file must never restore an account after a successful sign-out.
+            try { File.WriteAllText(SignOutMarker, "signed-out"); }
+            catch (Exception markerError) when (markerError is IOException or UnauthorizedAccessException)
+            {
+                throw new IOException("Could not persist sign-out. Close applications using the session file and retry.", markerError);
+            }
+        }
     }
 
     public async Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default)
     {
-        if (_session is not { } session) throw new CloudAuthException("Not signed in.");
-        string uid = session.Uid;
-
-        var writes = new List<JsonObject>();
-        foreach (var d in daily)
-            writes.Add(Update($"users/{uid}/daily/{d.Date}", FirestoreValues.Fields(d)));
-        writes.Add(Update($"users/{uid}/efficiency/current", FirestoreValues.Fields(efficiency)));
-        // Chỉ cập nhật đúng một trường ở users/{uid}, không ghi đè dữ liệu mobile đặt ở đó.
-        var profile = Update($"users/{uid}", new JsonObject { ["last_sync_at"] = FirestoreValues.Value(_clock.GetUtcNow()) });
-        profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at") };
-        writes.Add(profile);
-
-        long bytes = 0;
-        foreach (var chunk in writes.Chunk(MaxWritesPerCommit))
+        await _tokenLock.WaitAsync(ct);
+        try
         {
-            var body = new JsonObject { ["writes"] = new JsonArray(chunk.Select(w => (JsonNode)w).ToArray()) }.ToJsonString();
-            bytes += Encoding.UTF8.GetByteCount(body);
-            await _firestore.CommitAsync(body, ct);
+            if (_session is not { } session) throw new CloudAuthException("Not signed in.");
+            string uid = session.Uid;
+
+            var writes = new List<JsonObject>();
+            foreach (var d in daily)
+                writes.Add(Update($"users/{uid}/daily/{d.Date}", FirestoreValues.Fields(d)));
+            writes.Add(Update($"users/{uid}/efficiency/current", FirestoreValues.Fields(efficiency)));
+            // Chỉ cập nhật đúng một trường ở users/{uid}, không ghi đè dữ liệu mobile đặt ở đó.
+            var profile = Update($"users/{uid}", new JsonObject { ["last_sync_at"] = FirestoreValues.Value(_clock.GetUtcNow()) });
+            profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at") };
+            writes.Add(profile);
+
+            long bytes = 0;
+            foreach (var chunk in writes.Chunk(MaxWritesPerCommit))
+            {
+                var body = new JsonObject { ["writes"] = new JsonArray(chunk.Select(w => (JsonNode)w).ToArray()) }.ToJsonString();
+                bytes += Encoding.UTF8.GetByteCount(body);
+                await _firestore.CommitAsync(body, ct);
+            }
+            return bytes;
         }
-        return bytes;
+        catch (CloudAuthException)
+        {
+            ClearSession();
+            throw;
+        }
+        finally { _tokenLock.Release(); }
     }
 
     private JsonObject Update(string path, JsonObject fields) => new()
@@ -112,24 +147,12 @@ public sealed class FirebaseCloudSync : ICloudSync
     /// <summary>ID token còn hạn; còn dưới 5 phút thì làm mới trước.</summary>
     private async Task<string> GetIdTokenAsync(CancellationToken ct)
     {
-        await _tokenLock.WaitAsync(ct);
-        try
-        {
-            if (_session is not { } s) throw new CloudAuthException("Not signed in.");
-            if (s.ExpiresAt - _clock.GetUtcNow() > TimeSpan.FromMinutes(5)) return s.IdToken;
-            try
-            {
-                _session = await _auth.RefreshAsync(s, ct);
-                SaveSession(_session);
-                return _session.IdToken;
-            }
-            catch (CloudAuthException)
-            {
-                await SignOutAsync(ct); // refresh token đã bị thu hồi → phải đăng nhập lại
-                throw;
-            }
-        }
-        finally { _tokenLock.Release(); }
+        if (_session is not { } s) throw new CloudAuthException("Not signed in.");
+        if (s.ExpiresAt - _clock.GetUtcNow() > TimeSpan.FromMinutes(5)) return s.IdToken;
+        var refreshed = await _auth.RefreshAsync(s, ct);
+        SaveSession(refreshed);
+        _session = refreshed;
+        return refreshed.IdToken;
     }
 
     // ───────────── Lưu phiên trên máy ─────────────
@@ -139,24 +162,61 @@ public sealed class FirebaseCloudSync : ICloudSync
     private void SaveSession(FirebaseSession s)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(_sessionFile))!);
-        var tmp = _sessionFile + ".tmp";
-        File.WriteAllText(tmp, JsonSerializer.Serialize(new StoredSession(s.Uid, s.Email, s.DisplayName, s.RefreshToken, _options.ProjectId, _options.UseEmulator)));
-        if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(tmp, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        File.Move(tmp, _sessionFile, overwrite: true);
+        var tmp = _sessionFile + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        byte[] payload = JsonSerializer.SerializeToUtf8Bytes(new StoredSession(s.Uid, s.Email, s.DisplayName, s.RefreshToken, _options.ProjectId, _options.UseEmulator));
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                var encrypted = ProtectedData.Protect(payload, null, DataProtectionScope.CurrentUser);
+                File.WriteAllText(tmp, JsonSerializer.Serialize(new { Protection = "windows-dpapi-v1", Data = Convert.ToBase64String(encrypted) }));
+            }
+            else
+            {
+                File.WriteAllBytes(tmp, payload);
+                File.SetUnixFileMode(tmp, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
+            File.Move(tmp, _sessionFile, overwrite: true);
+            File.Delete(SignOutMarker);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(payload);
+            if (File.Exists(tmp)) File.Delete(tmp);
+        }
     }
 
     private FirebaseSession? LoadSession()
     {
         try
         {
+            if (File.Exists(SignOutMarker))
+            {
+                try { File.Delete(_sessionFile); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+                return null;
+            }
             if (!File.Exists(_sessionFile)) return null;
-            var stored = JsonSerializer.Deserialize<StoredSession>(File.ReadAllText(_sessionFile));
+            using var document = JsonDocument.Parse(File.ReadAllBytes(_sessionFile));
+            bool protectedSession = document.RootElement.TryGetProperty("Protection", out var protection);
+            StoredSession? stored;
+            if (protectedSession)
+            {
+                if (!OperatingSystem.IsWindows() || protection.GetString() != "windows-dpapi-v1") return null;
+                byte[] payload = ProtectedData.Unprotect(Convert.FromBase64String(document.RootElement.GetProperty("Data").GetString()!), null, DataProtectionScope.CurrentUser);
+                try { stored = JsonSerializer.Deserialize<StoredSession>(payload); }
+                finally { CryptographicOperations.ZeroMemory(payload); }
+            }
+            else stored = document.RootElement.Deserialize<StoredSession>();
             // Phiên của project khác hoặc của emulator/thật khác cấu hình hiện tại thì bỏ.
             if (stored is null || stored.ProjectId != _options.ProjectId || stored.Emulator != _options.UseEmulator) return null;
             // ID token chưa có: để hết hạn ngay, lần gọi đầu sẽ làm mới bằng refresh token.
-            return new FirebaseSession(stored.Uid, stored.Email, stored.DisplayName, "", stored.RefreshToken, DateTimeOffset.MinValue);
+            if (string.IsNullOrWhiteSpace(stored.Uid) || string.IsNullOrWhiteSpace(stored.RefreshToken)) return null;
+            var session = new FirebaseSession(stored.Uid, stored.Email, stored.DisplayName, "", stored.RefreshToken, DateTimeOffset.MinValue);
+            if (OperatingSystem.IsWindows() && !protectedSession) SaveSession(session);
+            return session;
         }
-        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException or CryptographicException or FormatException or KeyNotFoundException or InvalidOperationException or ArgumentException)
         {
             return null;
         }

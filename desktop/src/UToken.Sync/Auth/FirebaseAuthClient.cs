@@ -8,7 +8,10 @@ namespace UToken.Sync.Auth;
 public sealed record FirebaseSession(string Uid, string Email, string? DisplayName, string IdToken, string RefreshToken, DateTimeOffset ExpiresAt);
 
 /// <summary>Phiên đăng nhập không còn hợp lệ (refresh token bị thu hồi, tài khoản bị khóa, 401): cần đăng nhập lại.</summary>
-public sealed class CloudAuthException(string message, Exception? inner = null) : Exception(message, inner);
+public sealed class CloudAuthException(string message, Exception? inner = null, string? errorCode = null) : Exception(message, inner)
+{
+    public string? ErrorCode { get; } = errorCode;
+}
 
 /// <summary>Identity Toolkit REST: đổi Google ID token lấy Firebase ID token và làm mới token (ADR-0003).</summary>
 public sealed class FirebaseAuthClient(HttpClient http, FirebaseOptions options, TimeProvider? clock = null)
@@ -60,7 +63,7 @@ public sealed class FirebaseAuthClient(HttpClient http, FirebaseOptions options,
             // 400 với TOKEN_EXPIRED, INVALID_REFRESH_TOKEN, USER_DISABLED… nghĩa là phải đăng nhập lại.
             string code = TryErrorCode(body) ?? res.StatusCode.ToString();
             if (res.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-                throw new CloudAuthException($"Firebase sign-in rejected: {code}");
+                throw new CloudAuthException("Firebase rejected the authentication request.", errorCode: code.Split(' ', ':')[0]);
             throw new HttpRequestException($"Firebase auth request failed: {code}", null, res.StatusCode);
         }
         using var doc = JsonDocument.Parse(body);

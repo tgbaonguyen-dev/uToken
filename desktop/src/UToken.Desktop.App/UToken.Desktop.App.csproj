@@ -23,9 +23,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('appsettings.Local.json')" />
-    <None Update="firebase.desktop.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Remove="appsettings.Local.json" />
+    <None Include="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="UiContent/*.json" CopyToOutputDirectory="PreserveNewest" />
     <AvaloniaResource Include="Assets/**" />
   </ItemGroup>
+  <Target Name="CreateLocalSettings" BeforeTargets="PrepareForBuild"
+          Condition="!Exists('$(MSBuildProjectDirectory)/appsettings.Local.json')">
+    <Copy SourceFiles="$(MSBuildProjectDirectory)/appsettings.Local.example.json"
+          DestinationFiles="$(MSBuildProjectDirectory)/appsettings.Local.json" />
+    <Message Importance="high" Text="Created appsettings.Local.json from the example. Fill in your team's Firebase/Google OAuth settings to enable sign-in." />
+  </Target>
 </Project>

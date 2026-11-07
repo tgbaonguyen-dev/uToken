@@ -201,10 +201,45 @@ public sealed partial class RealDesktopApi
         {
             return new("expired", "Sign-in timed out. Start again and finish signing in within 3 minutes.");
         }
-        catch (Exception ex) when (ex is CloudAuthException or InvalidOperationException or HttpRequestException or InvalidDataException or System.Net.HttpListenerException)
+        catch (GoogleSignInException ex)
         {
-            _localSettings?.Record("Sign-in failed: " + ex.GetType().Name);
-            return new("rejected", "Google sign-in did not complete. Check your connection and try again.");
+            _localSettings?.Record("Sign-in failed: Google authorization/token exchange");
+            return new("rejected", ex.Message);
+        }
+        catch (CloudAuthException ex)
+        {
+            _localSettings?.Record("Sign-in failed: Firebase authentication rejected");
+            return new("rejected", ex.ErrorCode switch
+            {
+                "OPERATION_NOT_ALLOWED" => "Google sign-in is disabled in Firebase. Enable the Google provider in Firebase Authentication.",
+                "INVALID_API_KEY" or "API_KEY_INVALID" => "Firebase API key is invalid. Check Firebase:ApiKey and the selected project.",
+                "PROJECT_NOT_FOUND" or "CONFIGURATION_NOT_FOUND" => "Firebase authentication configuration was not found. Check the project and enable Authentication.",
+                "INVALID_IDP_RESPONSE" or "INVALID_CREDENTIAL" or "INVALID_ID_TOKEN" => "Firebase rejected the Google credential. Check that the Desktop OAuth client belongs to the Firebase project, then sign in again.",
+                "USER_DISABLED" => "This Firebase account is disabled. Contact the project administrator.",
+                "TOO_MANY_ATTEMPTS_TRY_LATER" => "Firebase temporarily blocked sign-in after too many attempts. Try again later.",
+                _ => "Firebase rejected the Google credential. Check the Google provider, OAuth client and Firebase project configuration."
+            });
+        }
+        catch (HttpRequestException ex)
+        {
+            _localSettings?.Record("Sign-in failed: Firebase connection/HTTP " + (int?)ex.StatusCode);
+            return new("rejected", ex.StatusCode is null
+                ? "Cannot reach Firebase Authentication. Check your connection. If UseEmulator is true, start the Auth Emulator and check its host/port."
+                : $"Firebase Authentication request failed (HTTP {(int)ex.StatusCode}). Check API key restrictions or try again later.");
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+        {
+            return new("expired", "Firebase sign-in timed out. Check your connection and try again.");
+        }
+        catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException or System.Security.Cryptography.CryptographicException)
+        {
+            _localSettings?.Record("Sign-in failed: local session storage");
+            return new("rejected", "Could not securely save the sign-in session. Check local folder permissions and your Windows user profile, then try again.");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or InvalidDataException or System.Text.Json.JsonException or System.Net.HttpListenerException)
+        {
+            _localSettings?.Record("Sign-in failed: invalid configuration, response or local callback");
+            return new("rejected", "Sign-in configuration, server response or local browser callback is invalid. Check the Desktop OAuth settings and try again.");
         }
     }
 }

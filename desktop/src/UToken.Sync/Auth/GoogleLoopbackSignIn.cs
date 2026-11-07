@@ -8,6 +8,8 @@ using System.Text.Json;
 namespace UToken.Sync.Auth;
 
 /// <summary>Lấy Google ID token của người dùng. Tách interface để test không cần trình duyệt.</summary>
+public sealed class GoogleSignInException(string message, Exception? inner = null) : Exception(message, inner);
+
 public interface IGoogleSignIn
 {
     Task<string> GetGoogleIdTokenAsync(CancellationToken ct);
@@ -63,24 +65,43 @@ public sealed class GoogleLoopbackSignIn(HttpClient http, FirebaseOptions option
         var query = context.Request.QueryString;
         bool ok = query["state"] == state && query["code"] is { Length: > 0 } && query["error"] is null;
         await RespondAsync(context, ok
-            ? "Signed in to uToken. You can close this tab and return to the app."
+            ? "Google authorization received. Return to uToken to check whether sign-in completed. You can close this tab."
             : "Sign-in was cancelled or failed. Return to uToken and try again.");
-        if (!ok) throw new InvalidOperationException(query["error"] is { } e ? $"Google sign-in error: {e}" : "Google sign-in failed.");
+        if (!ok) throw new GoogleSignInException(query["error"] == "access_denied"
+            ? "Google sign-in was cancelled or access was denied. Try again and approve access."
+            : "The Google callback could not be verified. Start sign-in again from uToken.");
 
-        using var res = await http.PostAsync(TokenEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
+        try
         {
-            ["code"] = query["code"]!,
-            ["client_id"] = options.OAuthClientId,
-            ["client_secret"] = options.OAuthClientSecret,
-            ["redirect_uri"] = redirect,
-            ["grant_type"] = "authorization_code",
-            ["code_verifier"] = verifier,
-        }), ct);
-        if (!res.IsSuccessStatusCode)
-            throw new HttpRequestException($"Google token exchange failed ({(int)res.StatusCode}).", null, res.StatusCode);
-        using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct));
-        return doc.RootElement.TryGetProperty("id_token", out var idToken) && idToken.GetString() is { Length: > 0 } t
-            ? t : throw new InvalidDataException("Google không trả về id_token.");
+            using var res = await http.PostAsync(TokenEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["code"] = query["code"]!,
+                ["client_id"] = options.OAuthClientId,
+                ["client_secret"] = options.OAuthClientSecret,
+                ["redirect_uri"] = redirect,
+                ["grant_type"] = "authorization_code",
+                ["code_verifier"] = verifier,
+            }), ct);
+            if (!res.IsSuccessStatusCode)
+                throw new GoogleSignInException(res.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized
+                    ? "Google could not exchange the sign-in code. Check the Desktop OAuth client ID/secret and start sign-in again."
+                    : "Google token exchange is temporarily unavailable. Try again later.");
+            using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct));
+            return doc.RootElement.TryGetProperty("id_token", out var idToken) && idToken.GetString() is { Length: > 0 } t
+                ? t : throw new InvalidDataException("Google không trả về id_token.");
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new GoogleSignInException("Cannot reach Google's token service. Check your connection and try again.", ex);
+        }
+        catch (OperationCanceledException ex) when (!ct.IsCancellationRequested)
+        {
+            throw new GoogleSignInException("Google token exchange timed out. Check your connection and try again.", ex);
+        }
+        catch (Exception ex) when (ex is JsonException or InvalidDataException)
+        {
+            throw new GoogleSignInException("Google returned an invalid sign-in response. Start sign-in again.", ex);
+        }
     }
 
     private static async Task RespondAsync(HttpListenerContext context, string message)

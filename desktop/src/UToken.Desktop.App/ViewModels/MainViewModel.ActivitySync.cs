@@ -110,8 +110,16 @@ public partial class MainViewModel
     [RelayCommand]
     private Task DisconnectAsync() => RunAsync(async () =>
     {
-        Sync = await api.DisconnectAsync(); ConfirmDisconnect = false; PairingState = "waiting";
-        SyncMessage = "Signed out. Local usage collection continues; sign in again to resume cloud sync."; SyncMessageColor = "#9096A1";
+        try
+        {
+            Sync = await api.DisconnectAsync(); ConfirmDisconnect = false; PairingState = "waiting";
+            SyncMessage = "Signed out. Local usage collection continues; sign in again to resume cloud sync."; SyncMessageColor = "#9096A1";
+        }
+        catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+        {
+            Error = "Could not remove the saved sign-in session. Close applications using the session file, then retry Sign out before restarting the app.";
+            SyncMessage = "Sign-out could not be saved."; SyncMessageColor = "#F26039";
+        }
     });
     private async Task LoadPairingPageCoreAsync()
     {

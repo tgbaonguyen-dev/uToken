@@ -75,12 +75,12 @@ public sealed class RealHome : IDisposable
     }
 
     /// <summary>API dữ liệu thật trên thư mục này. <paramref name="cloud"/> = false: chưa cấu hình đăng nhập Google.</summary>
-    public RealDesktopApi Api(bool cloud = true)
+    public RealDesktopApi Api(bool cloud = true, ICloudSync? cloudSync = null)
     {
         var store = new SqliteStore(DatabasePath);
         var engine = new UsageEngine(store, [new CodexCollector(), new ClaudeCodeCollector()], Home, Utc7, clock: Clock);
         var locations = RealDesktopApi.DefaultLocations(Path.Combine(Home, ".codex"), Path.Combine(Home, ".claude"), Home, ["codex", "claude_code"]);
-        return new RealDesktopApi(engine, store, locations, DatabasePath, Settings, clock: Clock, cloud: cloud ? Cloud : null)
+        return new RealDesktopApi(engine, store, locations, DatabasePath, Settings, clock: Clock, cloud: cloudSync ?? (cloud ? Cloud : null))
         {
             Startup = new StartupRegistration(AutostartDirectory, "/opt/utoken/UToken.Desktop.App"),
             PriceHttpClient = new HttpClient(new OfflineHandler()), // test không gọi mạng
@@ -113,12 +113,14 @@ public sealed class FakeCloud : ICloudSync
     public CloudAccount? Account { get; private set; }
     public Failure NextUpload { get; set; }
     public bool SignInFails { get; set; }
+    public Exception? SignInError { get; set; }
     public List<(IReadOnlyList<DailyDoc> Daily, EfficiencyDoc Efficiency)> Uploads { get; } = [];
 
     public Task<CloudAccount?> RestoreAsync(CancellationToken ct = default) => Task.FromResult(Account);
 
     public Task<CloudAccount> SignInAsync(CancellationToken ct = default)
     {
+        if (SignInError is not null) throw SignInError;
         if (SignInFails) throw new CloudAuthException("cancelled");
         Account = new CloudAccount("uid-1", "ana@example.com", "Ana", "utoken-78191", Emulator: true);
         return Task.FromResult(Account);

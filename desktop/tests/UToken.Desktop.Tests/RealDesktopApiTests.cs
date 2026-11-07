@@ -136,6 +136,39 @@ public sealed class RealDesktopApiTests : IDisposable
         Assert.Contains("not configured", (await unconfigured.GetPairingInfoAsync()).SignInHint);
     }
 
+    [Theory]
+    [InlineData("OPERATION_NOT_ALLOWED", "disabled")]
+    [InlineData("INVALID_API_KEY", "API key")]
+    [InlineData("CONFIGURATION_NOT_FOUND", "configuration")]
+    [InlineData("INVALID_IDP_RESPONSE", "OAuth client")]
+    [InlineData("USER_DISABLED", "disabled")]
+    [InlineData("UNKNOWN_SERVER_DETAIL_secret-token", "Firebase rejected")]
+    public async Task Sign_in_reports_safe_firebase_configuration_errors(string code, string expected)
+    {
+        using var api = _home.Api();
+        _home.Cloud.SignInError = new UToken.Sync.Auth.CloudAuthException("raw-secret-response", errorCode: code);
+        var result = await api.SignInAsync();
+        Assert.Equal("rejected", result.State);
+        Assert.Contains(expected, result.Message);
+        Assert.DoesNotContain("secret", result.Message);
+    }
+
+    [Fact]
+    public async Task Sign_in_distinguishes_google_network_and_session_storage_errors()
+    {
+        using var api = _home.Api();
+        _home.Cloud.SignInError = new UToken.Sync.Auth.GoogleSignInException("Google sign-in was cancelled. Try again.");
+        Assert.Contains("cancelled", (await api.SignInAsync()).Message);
+        _home.Cloud.SignInError = new HttpRequestException("private-endpoint-and-key");
+        var network = await api.SignInAsync();
+        Assert.Contains("Auth Emulator", network.Message);
+        Assert.DoesNotContain("private", network.Message);
+        _home.Cloud.SignInError = new System.Security.Cryptography.CryptographicException("private-token");
+        Assert.Contains("securely save", (await api.SignInAsync()).Message);
+        _home.Cloud.SignInError = new TaskCanceledException("private-response");
+        Assert.Equal("expired", (await api.SignInAsync()).State);
+    }
+
     [Fact]
     public async Task Clear_local_data_removes_usage_and_does_not_reread_old_logs()
     {
