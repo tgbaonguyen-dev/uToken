@@ -32,7 +32,7 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     public string PageTitle => Page switch
     {
         "first-run" => FirstRun?.Title ?? "Set up automatic tracking", "overview" => IsOverviewState ? OverviewPreview!.Scenario.Title : "Collector", "sources" => IsSourcesStatePreview ? SectionScenario!.Title : IsScanningSources ? "Scanning local usage" : IsSourceNotFound ? NotFoundScenario?.Title ?? "No supported source found" : "Sources", "activity" => "Activity",
-        "settings" => "Settings", "sync" => IsSyncStatePreview ? ActiveSyncScenario!.Title : "Sync", "pairing" => ActivePairingScenario?.Title ?? (HasDevice ? "Device information" : "Pair mobile device"), _ => SelectedSource?.Name ?? "Source",
+        "settings" => "Settings", "pricing" => "Model pricing", "sync" => IsSyncStatePreview ? ActiveSyncScenario!.Title : "Sync", "pairing" => ActivePairingScenario?.Title ?? (HasDevice ? "Google account" : "Sign in with Google"), _ => SelectedSource?.Name ?? "Source",
     };
     public string Subtitle => Page switch
     {
@@ -41,14 +41,15 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
         "sources" => IsSourcesStatePreview ? SectionScenario!.Subtitle : IsScanningSources ? "Checking supported provider sources on this device." : IsSourceNotFound ? NotFoundScenario?.Description ?? "Install or use a supported AI tool, then rescan." : IsPermissionRequired ? "Collector access and provider availability." : "Providers detected on this computer and their collection health.",
         "activity" => "A live, searchable stream of collected usage events.",
         "settings" => "Collector behavior, privacy, retention, and maintenance.",
-        "sync" => IsSyncStatePreview ? ActiveSyncScenario!.Subtitle : "Mobile connection, encrypted transfer, and synchronization history.",
-        "pairing" => ActivePairingScenario?.Subtitle ?? (HasDevice ? "Connected mobile device, privacy, and supported sources." : "Enter the one-time code shown in the mobile app."),
+        "pricing" => "Current models.dev API rates used for estimated costs.",
+        "sync" => IsSyncStatePreview ? ActiveSyncScenario!.Subtitle : "Google account, encrypted upload to Firebase, and synchronization history.",
+        "pairing" => ActivePairingScenario?.Subtitle ?? (HasDevice ? "Signed-in account, privacy, and supported sources." : "Use the same Google account as uToken mobile."),
         _ => "Provider usage, models, and collector health.",
     };
     partial void OnErrorChanged(string? value) => OnPropertyChanged(nameof(HasError));
     partial void OnPageChanged(string value)
     {
-        foreach (var name in new[] { nameof(IsOverview), nameof(IsSources), nameof(IsDetail), nameof(IsSourceSection), nameof(PageTitle), nameof(Subtitle), nameof(IsActivityPage), nameof(IsSyncPage), nameof(IsPairingPage), nameof(IsOverviewSection), nameof(IsSyncSection), nameof(IsSettingsPage), nameof(IsFirstRunPage), nameof(CanNavigate), nameof(CanSkipSetup), nameof(IsOverviewDashboard), nameof(IsOverviewState), nameof(DisplayedCollector), nameof(IsPermissionRequired), nameof(IsSourcesNormal), nameof(IsSourceNotFound), nameof(IsSourcesStatePreview), nameof(IsSyncStatePreview), nameof(IsSectionStatePreview), nameof(IsSyncNormal), nameof(ActiveSyncScenario), nameof(IsSyncDetailState), nameof(IsSyncFailure), nameof(IsSyncProgress), nameof(SyncStateDetails), nameof(ActivePairingScenario), nameof(IsPairingStateVisible), nameof(IsPairingFormVisible), nameof(IsPairingVerifying) }) OnPropertyChanged(name);
+        foreach (var name in new[] { nameof(IsOverview), nameof(IsSources), nameof(IsDetail), nameof(IsSourceSection), nameof(PageTitle), nameof(Subtitle), nameof(IsActivityPage), nameof(IsPricingPage), nameof(IsSyncPage), nameof(IsPairingPage), nameof(IsOverviewSection), nameof(IsSyncSection), nameof(IsSettingsPage), nameof(IsFirstRunPage), nameof(CanNavigate), nameof(CanSkipSetup), nameof(IsOverviewDashboard), nameof(IsOverviewState), nameof(DisplayedCollector), nameof(IsPermissionRequired), nameof(IsSourcesNormal), nameof(IsSourceNotFound), nameof(IsSourcesStatePreview), nameof(IsSyncStatePreview), nameof(IsSectionStatePreview), nameof(IsSyncNormal), nameof(ActiveSyncScenario), nameof(IsSyncDetailState), nameof(IsSyncFailure), nameof(IsSyncProgress), nameof(SyncStateDetails), nameof(ActivePairingScenario), nameof(IsPairingStateVisible), nameof(IsPairingFormVisible), nameof(IsPairingVerifying), nameof(OverviewStateId) }) OnPropertyChanged(name);
         NotifyVisualStatus();
         SkipSetupCommand.NotifyCanExecuteChanged();
     }
@@ -58,7 +59,7 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
         IsBusy = true; Error = null;
         try { await action(); }
         catch (Exception ex) when (ex is System.IO.IOException or System.IO.InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException)
-        { Error = IsSettingsPage ? "Could not read or save settings. Check folder permissions. For invalid settings JSON, Restore defaults resets your preferences." : "Could not load demo data. Please try again."; }
+        { Error = IsSettingsPage ? "Could not read or save settings. Check folder permissions. For invalid settings JSON, Restore defaults resets your preferences." : "Could not read local usage data. Check Settings → Open diagnostics."; }
         finally { IsBusy = false; }
     }
     [RelayCommand]
@@ -72,9 +73,10 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
         await LoadOverviewScenariosCoreAsync();
         SyncStateConfig = await api.GetSyncStateConfigAsync();
         ApplySourcePermission(await api.GetSourcePermissionAsync());
+        Sync = await api.GetSyncAsync();
+        ApplySettings(await api.GetSettingsAsync());
         if (showSetupOnStart && !_startupLoaded)
         {
-            ApplySettings(await api.GetSettingsAsync());
             if (!await api.IsSetupCompleteAsync())
             {
                 FirstRun = await api.GetFirstRunAsync();
@@ -84,6 +86,7 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
         }
         if (IsSettingsPage) ApplySettings(await api.GetSettingsAsync());
         if (IsActivityPage) await LoadActivityCoreAsync();
+        if (IsPricingPage) Pricing = await api.GetPricingAsync(CancellationToken.None);
         if (IsSyncPage) Sync = await api.GetSyncAsync();
         if (IsPairingPage) await LoadPairingPageCoreAsync();
         if (IsDetail && SelectedSource is not null)

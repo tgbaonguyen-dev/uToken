@@ -9,6 +9,6 @@ public record SourcePermissionConfig(string Headline, string Description, string
 public record SourcePermissionData(SourcePermissionConfig Config, PermissionScenario Scenario, SourcesData Sources);
 public record PermissionProvider(string Name, string Logo, bool MissingAccess)
 {
-    public string Status => MissingAccess ? "Permission missing" : "Collecting (mock)";
+    public string Status => MissingAccess ? "Permission missing" : "Collecting";
     public string Color => MissingAccess ? "#FFAD38" : "#2EC790";
 }

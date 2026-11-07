@@ -10,6 +10,6 @@
  <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="32,14,*,Auto"><svg:Svg Path="{Binding Logo}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}"/><TextBlock Text="{Binding Label}" Foreground="{Binding Color}" FontSize="11"/></StackPanel></Grid></Border>
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl></Border></StackPanel>
  <WrapPanel IsEnabled="{Binding !IsBusy}"><Button Classes="primary" Content="Configure sources" Command="{Binding ConfigureSourcesCommand}" MinWidth="170" Margin="0,0,12,8"/><Button Content="Rescan sources" Command="{Binding RescanSourcesCommand}" Margin="0,0,12,8"/><Button Content="Open settings" Command="{Binding ShowSettingsCommand}" Margin="0,0,0,8"/></WrapPanel>
- <TextBlock Text="Previously collected usage remains available. Discovery is simulated; provider files and system settings are not accessed." Classes="muted" FontSize="11" TextWrapping="Wrap"/>
+ <TextBlock Text="Previously collected usage remains available. uToken only checks the log folders listed above; system settings are never changed." Classes="muted" FontSize="11" TextWrapping="Wrap"/>
  </StackPanel></Border>
 </UserControl>

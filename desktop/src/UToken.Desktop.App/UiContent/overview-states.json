@@ -22,13 +22,13 @@
     "id": "offline",
     "name": "D09 - Collector Offline",
     "title": "Overview",
-    "subtitle": "Collector status and the last locally recorded usage.",
+    "subtitle": "No enabled source is being collected.",
     "status": "COLLECTOR STOPPED",
     "headline": "Collector is offline",
-    "description": "No new usage has been recorded. Existing data is safe on this computer.",
+    "description": "Enable a source in appsettings.json or install Codex / Claude Code, then restart collection.",
     "accent": "#F04D57",
     "code": "09",
-    "primaryLabel": "Restart collector",
+    "primaryLabel": "Rescan sources",
     "primaryAction": "restart",
     "secondaryLabel": "View diagnostics",
     "secondaryAction": "diagnostics",
@@ -42,17 +42,17 @@
       },
       {
         "label": "Log access",
-        "value": "Available (mock)",
+        "value": "—",
         "color": "#2EC790"
       },
       {
         "label": "Local database",
-        "value": "Sample data retained",
+        "value": "—",
         "color": "#2EC790"
       },
       {
         "label": "Mobile sync",
-        "value": "Paused (preview)",
+        "value": "—",
         "color": "#F04D57"
       }
     ],
@@ -77,7 +77,7 @@
     "details": [
       {
         "label": "Collector",
-        "value": "Healthy (mock)",
+        "value": "—",
         "color": "#2EC790"
       }
     ],
@@ -97,7 +97,7 @@
       {
         "number": "3",
         "title": "Return to uToken",
-        "description": "Usage appears after collection (demo)",
+        "description": "Usage appears within seconds after the tool writes its log",
         "action": ""
       }
     ]
@@ -164,19 +164,19 @@
       {
         "number": "1",
         "title": "Use a supported AI tool",
-        "description": "Start a Gemini, Codex or Claude session (demo).",
+        "description": "Start a Codex or Claude Code session on this computer.",
         "action": ""
       },
       {
         "number": "2",
         "title": "Check the expected log path",
-        "description": "The collector needs an available usage-log folder. This UI does not access provider files.",
+        "description": "The collector reads usage metadata from the provider log folder on this computer.",
         "action": ""
       },
       {
         "number": "3",
         "title": "Return and rescan",
-        "description": "Rescan sources uses the chosen mock discovery result.",
+        "description": "Open Sources and press Rescan sources.",
         "action": ""
       }
     ]
@@ -200,7 +200,7 @@
     "details": [
       {
         "label": "Last scan",
-        "value": "Just now (mock)",
+        "value": "—",
         "color": "#9096A1"
       },
       {
@@ -214,14 +214,14 @@
   {
     "id": "revoked",
     "name": "D23 - Session Revoked",
-    "title": "Connection revoked",
-    "subtitle": "This collector was disconnected from mobile. Pair it again to resume sync.",
+    "title": "Session expired",
+    "subtitle": "Your Google session expired or was revoked.",
     "status": "Revoked",
-    "headline": "Connection revoked",
-    "description": "This collector was disconnected from mobile. Pair it again to resume sync.",
+    "headline": "Sign in again",
+    "description": "Uploads are paused. Local usage is still collected and will upload after you sign in.",
     "accent": "#F04D57",
     "code": "11",
-    "primaryLabel": "Pair again",
+    "primaryLabel": "Sign in again",
     "primaryAction": "pair",
     "secondaryLabel": "Open settings",
     "secondaryAction": "settings",
@@ -248,7 +248,7 @@
     "subtitle": "This version is no longer compatible with secure sync. Update before continuing.",
     "status": "Update required",
     "headline": "Collector update required",
-    "description": "This version is no longer compatible with secure sync. Update before continuing.",
+    "description": "Some log lines use a format this collector does not recognize. Existing data is kept; update uToken to read them.",
     "accent": "#F26039",
     "code": "12",
     "primaryLabel": "View settings",
@@ -259,12 +259,12 @@
     "emptyUsage": false,
     "details": [
       {
-        "label": "Installed (sample)",
+        "label": "Installed",
         "value": "1.0.3",
         "color": "#9096A1"
       },
       {
-        "label": "Minimum (sample)",
+        "label": "Minimum",
         "value": "1.2.0",
         "color": "#9096A1"
       }
@@ -275,10 +275,10 @@
     "id": "network",
     "name": "D25 - Network Error",
     "title": "Unable to reach sync service",
-    "subtitle": "Check your internet connection, then retry. Local usage remains safe.",
+    "subtitle": "uToken cannot reach Firebase.",
     "status": "Offline",
     "headline": "Unable to reach sync service",
-    "description": "Check your internet connection, then retry. Local usage remains safe.",
+    "description": "Summaries stay queued on this computer and upload automatically when the connection returns.",
     "accent": "#F04D57",
     "code": "13",
     "primaryLabel": "Retry sync",
@@ -290,12 +290,12 @@
     "details": [
       {
         "label": "Last successful sync",
-        "value": "18 min ago (sample)",
+        "value": "—",
         "color": "#F04D57"
       },
       {
         "label": "Pending records",
-        "value": "284 (sample)",
+        "value": "—",
         "color": "#F04D57"
       }
     ],

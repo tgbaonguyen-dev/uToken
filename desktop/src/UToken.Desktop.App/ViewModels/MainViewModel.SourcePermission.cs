@@ -3,12 +3,13 @@ using CommunityToolkit.Mvvm.Input;
 using UToken.Desktop.App.Models;
 namespace UToken.Desktop.App.ViewModels;
 
+/// <summary>D10: nguồn có thư mục log nhưng app không đọc được (kiểm tra thật bằng cách đọc thư mục).</summary>
 public partial class MainViewModel
 {
     public event Action<string>? PermissionInstructionsRequested;
-    [ObservableProperty, NotifyPropertyChangedFor(nameof(SourcePreviewOptions))] private SourcePermissionData? _sourcePermission;
-    public PermissionScenario[] SourcePreviewOptions => [.. SourcePermission?.Config.Scenarios ?? [], .. OverviewScenarios.Where(s => s.Id is "scanning" or "up-to-date").Select(s => new PermissionScenario(s.Id, s.Name, false, "granted"))];
-    [ObservableProperty] private PermissionScenario? _selectedPermissionScenario;
+    /// <summary>Yêu cầu mở thư mục trong trình quản lý file của hệ điều hành.</summary>
+    public event Action<string>? OpenFolderRequested;
+    [ObservableProperty] private SourcePermissionData? _sourcePermission;
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasPermissionRetryFailure)),
         NotifyPropertyChangedFor(nameof(PermissionAccent)), NotifyPropertyChangedFor(nameof(PermissionBadgeLabel))]
     private string? _permissionRetryFailure;
@@ -16,7 +17,6 @@ public partial class MainViewModel
     public string PermissionAccent => HasPermissionRetryFailure ? "#F04D57" : "#FFAD38";
     public string PermissionBadgeLabel => HasPermissionRetryFailure ? "RETRY FAILED" : "ACTION REQUIRED";
     [RelayCommand] private void DismissPermissionRetryFailure() => PermissionRetryFailure = null;
-    private bool _restoringPermissionSelection;
     public bool HasPermissionIssue => SourceList?.Sources.Any(s => s.CollectorState != "not_found" && (!s.Health.HasLogAccess || s.CollectorState == "permission_required")) == true;
     public bool IsPermissionRequired => IsSources && HasPermissionIssue && !IsScanningSources && !IsSourcesStatePreview;
     public bool IsSourcesNormal => IsSources && !HasPermissionIssue && !HasNoSupportedSources && !IsScanningSources && !IsSourcesStatePreview;
@@ -28,58 +28,33 @@ public partial class MainViewModel
     {
         SourcePermission = data;
         SourceList = data.Sources;
-        _restoringPermissionSelection = true;
-        SelectedPermissionScenario = data.Config.Scenarios.FirstOrDefault(s => s.Id == data.Scenario.Id);
-        _restoringPermissionSelection = false;
     }
-    partial void OnSelectedPermissionScenarioChanged(PermissionScenario? value)
-    {
-        if (!_restoringPermissionSelection && value is not null && IsSources && !IsBusy)
-            _ = ChangePermissionScenarioCommand.ExecuteAsync(null);
-    }
-    [RelayCommand] private async Task ChangePermissionScenarioAsync()
-    {
-        if (!CanNavigate || !IsSources) return;
-        if (SelectedPermissionScenario?.Id == "scanning")
-        {
-            await RescanSourcesCommand.ExecuteAsync(null);
-            ApplySourcePermission(SourcePermission!);
-            return;
-        }
-        if (SelectedPermissionScenario?.Id == "up-to-date")
-        {
-            SectionScenario = OverviewScenarios.Single(s => s.Id == "up-to-date");
-            return;
-        }
-        SectionScenario = null;
-        await RunAsync(async () =>
-        {
-            ApplySourcePermission(await api.SetSourcePermissionScenarioAsync(SelectedPermissionScenario?.Id ?? "normal"));
-            Notice = "State preview - no system permissions or usage data are changed.";
-        });
-        if (HasError && SourcePermission is not null)
-        {
-            _restoringPermissionSelection = true;
-            SelectedPermissionScenario = SourcePermission.Config.Scenarios.FirstOrDefault(s => s.Id == SourcePermission.Scenario.Id);
-            _restoringPermissionSelection = false;
-        }
-    }
+
     [RelayCommand] private Task RetrySourcePermissionAsync() => NavigateAsync(async () =>
     {
         if (PermissionSource is not { } source) return;
         ApplySourcePermission(await api.RetrySourcePermissionAsync(source.Id));
-        if (HasPermissionIssue)
-            PermissionRetryFailure = $"Access to {source.Name} is still denied. Review the permissions and try again.";
-        Notice = HasPermissionIssue ? "Access is still denied. Review the instructions and try again."
-            : "Access restored. Existing usage history is retained.";
+        Overview = await api.GetOverviewAsync();
+        PermissionRetryFailure = HasPermissionIssue ? $"uToken still cannot read {source.Path}. Check the folder permissions and try again." : null;
+        Notice = HasPermissionIssue ? "Access is still denied." : $"Access to {source.Name} restored. Usage collection resumed.";
     });
+
+    /// <summary>"system": mở thư mục log của nguồn bị chặn; còn lại: hiện hướng dẫn kèm đường dẫn thật.</summary>
     [RelayCommand] private void ShowPermissionInstructions(string mode)
     {
         if (IsBusy || !CanNavigate || SourcePermission is null) return;
-        var introduction = mode == "system"
-            ? "System Settings simulation: no operating-system settings are opened or changed."
-            : "Permission instructions";
+        var source = PermissionSource ?? SourceList?.Sources.FirstOrDefault();
+        if (mode == "system" && source is not null)
+        {
+            OpenFolderRequested?.Invoke(Path.GetDirectoryName(api.GetSourceFolder(source.Id)) ?? api.GetSourceFolder(source.Id));
+            return;
+        }
         var steps = string.Join("\n\n", SourcePermission.Config.Instructions.Select(s => $"{s.Number}. {s.Title}\n{s.Description}"));
-        PermissionInstructionsRequested?.Invoke($"{introduction}\n\nAffected source: {PermissionSource?.Name ?? "All supported sources"}\nLog path (sample): {PermissionSource?.Path ?? string.Join("; ", SourceList?.Sources.Select(s => s.Path) ?? [])}\n\n{steps}");
+        var folder = source is null ? string.Join("\n", SourceList?.Sources.Select(s => api.GetSourceFolder(s.Id)) ?? []) : api.GetSourceFolder(source.Id);
+        PermissionInstructionsRequested?.Invoke(
+            $"Affected source: {source?.Name ?? "All supported sources"}\nLog folder: {folder}\n\n{steps}\n\n" +
+            (OperatingSystem.IsWindows()
+                ? "Windows: right-click the folder → Properties → Security, and allow Read for your account."
+                : $"Linux/macOS: run  chmod -R u+rX \"{folder}\"  then press Retry access."));
     }
 }

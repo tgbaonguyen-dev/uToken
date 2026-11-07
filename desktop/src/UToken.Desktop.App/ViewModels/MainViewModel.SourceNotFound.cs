@@ -6,7 +6,7 @@ public partial class MainViewModel
 {
     public event Action<string>? SourceSetupGuideRequested;
     public bool HasNoSupportedSources => SourceList is not null &&
-        (SourceList.Sources.Length == 0 || SourceList.Sources.All(s => s.CollectorState == "not_found"));
+        (SourceList.Sources.Length == 0 || SourceList.Sources.All(s => s.CollectorState is "not_found" or "paused"));
     public bool IsSourceNotFound => IsSources && HasNoSupportedSources && !IsScanningSources && !IsSourcesStatePreview;
     public OverviewScenario? NotFoundScenario => OverviewScenarios.FirstOrDefault(s => s.Id == "not-found");
     public SourceScanItem[] DiscoveryProviders => SupportedSources.Select(s =>

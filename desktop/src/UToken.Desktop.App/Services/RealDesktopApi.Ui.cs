@@ -6,7 +6,7 @@ using UToken.Desktop.App.Models;
 
 namespace UToken.Desktop.App.Services;
 
-/// <summary>Cài đặt, chẩn đoán, first-run và các kịch bản xem trước trạng thái giao diện.</summary>
+/// <summary>Cài đặt, chẩn đoán, first-run và nội dung các màn trạng thái giao diện.</summary>
 public sealed partial class RealDesktopApi
 {
     private SettingsData? _settings;
@@ -45,8 +45,17 @@ public sealed partial class RealDesktopApi
 
     // ───────────────────────── Settings ─────────────────────────
 
+    /// <summary>Đăng ký khởi động cùng hệ điều hành; null thì "Launch at startup" chỉ được lưu, không áp dụng (dùng trong test).</summary>
+    public StartupRegistration? Startup { get; init; }
+
     private SettingsData WithLocalMetadata(SettingsData data) => data with
     {
+        // Phản ánh trạng thái thật trên máy; chưa có server phát hành nên không có tự cập nhật.
+        Values = data.Values with
+        {
+            LaunchAtStartup = Startup is { IsSupported: true } st ? st.IsEnabled() : data.Values.LaunchAtStartup,
+            AutomaticUpdates = false,
+        },
         DataPath = Path.GetDirectoryName(Path.GetFullPath(_databasePath)) ?? _databasePath,
         AppVersion = BuildVersion,
         Diagnostics = "Collector reads local logs of enabled sources. Only token counts and metadata are stored.",
@@ -67,14 +76,18 @@ public sealed partial class RealDesktopApi
         var settings = await GetSettingsAsync(ct);
         if (!settings.RetentionOptions.Contains(values.RetentionDays))
             throw new InvalidDataException("Unsupported retention period.");
+        values = values with { AutomaticUpdates = false };
+        Startup?.Apply(values.LaunchAtStartup);
         if (_localSettings is not null) await _localSettings.SaveAsync(values, ct);
+        _localSettings?.Record($"Settings saved: startup={values.LaunchAtStartup}, background={values.BackgroundCollection}, notifications={values.UsageNotifications}, retention={values.RetentionDays}d");
         return _settings = settings with { Values = values };
     }
 
     public async Task<SettingsData> ResetSettingsAsync(CancellationToken ct = default)
     {
         var defaults = await ReadContentAsync<SettingsData>("settings.json", ct);
-        if (_localSettings is not null) await _localSettings.SaveAsync(defaults.Values, ct);
+        Startup?.Apply(defaults.Values.LaunchAtStartup);
+        if (_localSettings is not null) await _localSettings.SaveAsync(defaults.Values with { AutomaticUpdates = false }, ct);
         return _settings = WithLocalMetadata(defaults);
     }
 
@@ -122,83 +135,31 @@ public sealed partial class RealDesktopApi
         return report.ToString();
     }
 
-    // ───────────────────────── Xem trước trạng thái Overview ─────────────────────────
+    // ───────────────────────── Nội dung các màn trạng thái ─────────────────────────
 
     public Task<OverviewScenario[]> GetOverviewScenariosAsync(CancellationToken ct = default) =>
         ReadContentAsync<OverviewScenario[]>("overview-states.json", ct);
 
-    public async Task<OverviewPreview> GetOverviewPreviewAsync(string id, CancellationToken ct = default)
-    {
-        var scenario = (await GetOverviewScenariosAsync(ct)).FirstOrDefault(s => s.Id == id)
-            ?? throw new InvalidDataException("Unknown overview scenario.");
-        var data = await GetOverviewAsync(ct);
-        if (scenario.EmptyUsage) data = data with { TotalTokens = 0, EstimatedCost = 0, Cached = 0, Activity = [] };
-        data = data with { Collector = data.Collector with { State = scenario.CollectorState } };
-        return new(scenario, data);
-    }
-
-    // ───────────────────────── Quyền đọc log ─────────────────────────
-    // Trạng thái thật lấy từ việc thử đọc thư mục. Các kịch bản trong source-permission.json chỉ là
-    // xem trước giao diện: chúng phủ lên kết quả thật cho tới lần quét lại tiếp theo.
-
-    private string _permissionScenarioId = "normal";
-    private readonly Dictionary<string, bool> _previewLogAccess = [];
-    private bool? _previewDiscovery;
-
-    private void ClearPreview()
-    {
-        _permissionScenarioId = "normal";
-        _previewLogAccess.Clear();
-        _previewDiscovery = null;
-    }
-
-    private SourcesData ApplyPreview(SourcesData data) => data with
-    {
-        Sources = data.Sources.Select(s =>
-        {
-            if (_previewDiscovery == false) s = s with { CollectorState = "not_found" };
-            if (_previewLogAccess.TryGetValue(s.Id, out var allowed))
-                s = s with
-                {
-                    Health = s.Health with { HasLogAccess = allowed },
-                    CollectorState = allowed ? s.CollectorState : "permission_required",
-                };
-            return s;
-        }).ToArray(),
-    };
+    // ───────────────────────── Quyền đọc thư mục log ─────────────────────────
 
     public async Task<SourcePermissionData> GetSourcePermissionAsync(CancellationToken ct = default)
     {
         var config = await ReadContentAsync<SourcePermissionConfig>("source-permission.json", ct);
         var sources = await GetSourcesAsync(ct);
-        // Có nguồn thật sự bị chặn quyền → chỉ hướng dẫn tới nguồn đó.
         var blocked = sources.Sources.FirstOrDefault(s => s.CollectorState == "permission_required");
         if (blocked is not null) config = config with { SourceId = blocked.Id };
-        var scenario = config.Scenarios.FirstOrDefault(s => s.Id == _permissionScenarioId)
-            ?? config.Scenarios.First(s => s.Id == "normal");
+        // Trạng thái thật: có nguồn không đọc được thư mục thì "permission-required", ngược lại "normal".
+        var scenario = config.Scenarios.FirstOrDefault(s => s.Id == (blocked is null ? "normal" : "permission-required"))
+            ?? config.Scenarios.First();
         return new(config, scenario, sources);
     }
 
-    public async Task<SourcePermissionData> SetSourcePermissionScenarioAsync(string id, CancellationToken ct = default)
-    {
-        var config = await ReadContentAsync<SourcePermissionConfig>("source-permission.json", ct);
-        var scenario = config.Scenarios.FirstOrDefault(s => s.Id == id)
-            ?? throw new InvalidDataException("Unknown permission scenario.");
-        ClearPreview();
-        _permissionScenarioId = id;
-        if (scenario.MissingAccess) _previewLogAccess[config.SourceId] = false;
-        if (scenario.SourcesNotFound) _previewDiscovery = false;
-        return new(config, scenario, await GetSourcesAsync(ct));
-    }
-
+    /// <summary>Kiểm tra lại quyền đọc thư mục; đọc được thì quét luôn nguồn đó.</summary>
     public async Task<SourcePermissionData> RetrySourcePermissionAsync(string sourceId, CancellationToken ct = default)
     {
-        var current = await GetSourcePermissionAsync(ct);
-        if (!current.Sources.Sources.Any(s => s.Id == sourceId))
-            throw new InvalidDataException("Unknown permission source.");
-        // Kịch bản xem trước "vẫn bị từ chối" giữ nguyên; còn lại kiểm tra lại thư mục thật.
-        if (current.Scenario.RetryResult != "denied") ClearPreview();
-        var refreshed = await GetSourcePermissionAsync(ct);
-        return refreshed with { Scenario = current.Scenario.RetryResult == "denied" ? current.Scenario : refreshed.Scenario };
+        var location = _locations.FirstOrDefault(l => l.Id == sourceId) ?? throw new InvalidDataException("Unknown permission source.");
+        if (CheckFolder(location) == FolderState.Running)
+            await WithStoreAsync(() => _engine.Scan([location.Provider], ct), ct);
+        return await GetSourcePermissionAsync(ct);
     }
 }

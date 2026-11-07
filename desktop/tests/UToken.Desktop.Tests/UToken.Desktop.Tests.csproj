@@ -6,7 +6,6 @@
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Avalonia.Headless.XUnit" />
     <ProjectReference Include="../../src/UToken.Desktop.App/UToken.Desktop.App.csproj" />
-    <None Include="MockData/*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../../contracts/fixtures/**/*" LinkBase="fixtures" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

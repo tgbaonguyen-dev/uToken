@@ -4,6 +4,10 @@ using UToken.Desktop.App.Models;
 
 namespace UToken.Desktop.App.ViewModels;
 
+/// <summary>
+/// Màn trạng thái của Sources và Sync, bật theo kết quả thật:
+/// D22 "up-to-date" sau khi quét lại không có event mới; D12/D13/D23/D25 theo kết quả Sync now.
+/// </summary>
 public partial class MainViewModel
 {
     [ObservableProperty, NotifyPropertyChangedFor(nameof(IsSourcesStatePreview)),
@@ -14,28 +18,14 @@ public partial class MainViewModel
         NotifyPropertyChangedFor(nameof(ActiveSyncScenario)), NotifyPropertyChangedFor(nameof(IsSyncDetailState)),
         NotifyPropertyChangedFor(nameof(IsSyncFailure)), NotifyPropertyChangedFor(nameof(IsSyncProgress)), NotifyPropertyChangedFor(nameof(SyncStateDetails))]
     private OverviewScenario? _sectionScenario;
-    [ObservableProperty] private OverviewScenario? _selectedSyncScenario;
-    public OverviewScenario[] SyncPreviewOptions => [.. OverviewScenarios.Where(s => s.Id == "normal"), .. SyncStateConfig?.Scenarios ?? [], .. OverviewScenarios.Where(s => s.Id is "revoked" or "network")];
+    /// <summary>Nội dung các màn trạng thái Sync (tra theo id, không hiển thị như bộ chọn).</summary>
+    public OverviewScenario[] SyncPreviewOptions => [.. SyncStateConfig?.Scenarios ?? [], .. OverviewScenarios.Where(s => s.Id is "revoked" or "network")];
     public bool IsSourcesStatePreview => IsSources && SectionScenario?.Id == "up-to-date";
     public bool IsSyncStatePreview => IsSyncPage && ActiveSyncScenario is not null;
     public bool IsSectionStatePreview => IsSourcesStatePreview || (IsSyncStatePreview && !IsSyncDetailState);
     public bool IsSyncNormal => IsSyncPage && !IsSyncStatePreview;
-    private bool _restoringSyncSelection;
 
-    partial void OnSelectedSyncScenarioChanged(OverviewScenario? value)
-    {
-        if (_restoringSyncSelection || IsBusy || !IsSyncPage || value is null) return;
-        if (!SyncPreviewOptions.Any(s => s.Id == value.Id)) return;
-        SectionScenario = value.Id == "normal" ? null : value;
-    }
-
-    private void ResetSectionPreview()
-    {
-        SectionScenario = null;
-        _restoringSyncSelection = true;
-        SelectedSyncScenario = SyncPreviewOptions.FirstOrDefault(s => s.Id == "normal");
-        _restoringSyncSelection = false;
-    }
+    private void ResetSectionPreview() => SectionScenario = null;
 
     [RelayCommand] private async Task SectionStateActionAsync(string action)
     {
@@ -44,26 +34,23 @@ public partial class MainViewModel
         if (IsSourcesStatePreview)
         {
             ResetSectionPreview();
-            ApplySourcePermission(SourcePermission!);
             if (action == "normal") ShowOverviewCommand.Execute(null);
             return;
         }
         if (!IsSyncStatePreview) return;
-        if (action == "sync") { ResetSectionPreview(); return; }
-        if (action == "pair")
+        switch (action)
         {
-            await NavigateAsync(async () =>
-            {
-                Sync = await api.DisconnectAsync();
-                await LoadPairingPageCoreAsync();
+            case "sync":
                 ResetSectionPreview();
-                Page = "pairing";
-            });
-        }
-        else if (action == "retry")
-        {
-            ResetSectionPreview();
-            await SyncNowCommand.ExecuteAsync(null);
+                break;
+            case "pair":
+                ResetSectionPreview();
+                await ShowPairingCommand.ExecuteAsync(null);
+                break;
+            case "retry":
+                ResetSectionPreview();
+                await SyncNowCommand.ExecuteAsync(null);
+                break;
         }
     }
 }

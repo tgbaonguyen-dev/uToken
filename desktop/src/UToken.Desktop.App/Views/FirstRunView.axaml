@@ -13,6 +13,7 @@
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  </StackPanel></Border>
  <WrapPanel><Button Classes="primary" Content="{Binding SetupAction}" Command="{Binding ContinueSetupCommand}" MinWidth="270" Margin="0,0,16,12"/><TextBlock Text="Takes about 2 minutes" Classes="muted" FontSize="10" VerticalAlignment="Center" Margin="0,0,16,12"/><Button Content="Skip setup" IsVisible="{Binding CanSkipSetup}" Command="{Binding SkipSetupCommand}" Margin="0,0,0,12"/></WrapPanel>
- <TextBlock Text="Usage is read from local logs on this computer. Google sign-in for cloud sync is coming with the sync module." Classes="muted" FontSize="11" TextWrapping="Wrap"/>
+ <TextBlock Text="{Binding SetupMessage}" IsVisible="{Binding HasSetupMessage}" Foreground="{Binding SetupMessageColor}" TextWrapping="Wrap"/>
+ <TextBlock Text="Usage is read from local logs on this computer. Only daily summaries are uploaded after you sign in; prompts and code never leave this computer." Classes="muted" FontSize="11" TextWrapping="Wrap"/>
  </StackPanel>
 </UserControl>

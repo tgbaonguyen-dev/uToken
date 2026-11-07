@@ -1,24 +1,24 @@
 {
   "title": "Set up automatic tracking",
-  "subtitle": "Three steps to connect your AI usage securely.",
+  "subtitle": "Three steps to start tracking AI token usage on this computer.",
   "steps": [
     {
       "number": "01",
       "title": "Sign in with Google",
-      "description": "Use the same account as uToken mobile",
-      "action": "Continue"
+      "description": "Use the same account as uToken mobile. Opens your browser.",
+      "action": "Sign in with Google"
     },
     {
       "number": "02",
-      "title": "Allow local log access",
-      "description": "Usage metadata only - prompts stay private",
+      "title": "Check local log access",
+      "description": "Finds Codex and Claude Code logs and reads token counts only",
       "action": "Check log folders"
     },
     {
       "number": "03",
-      "title": "Pair your phone",
-      "description": "Enter the one-time code from mobile",
-      "action": "Open pairing"
+      "title": "Open uToken on your phone",
+      "description": "Sign in with the same Google account to see your dashboard",
+      "action": "Finish setup"
     }
   ]
 }

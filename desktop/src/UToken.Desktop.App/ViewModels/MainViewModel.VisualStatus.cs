@@ -14,7 +14,7 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(SidebarStatusColor));
         OnPropertyChanged(nameof(SidebarStatusCaption));
     }
-    partial void OnOverviewChanged(Models.OverviewData? value) => NotifyVisualStatus();
+    partial void OnOverviewChanged(Models.OverviewData? value) { RefreshOverviewState(); NotifyVisualStatus(); }
     partial void OnOverviewPreviewChanged(Models.OverviewPreview? value) => NotifyVisualStatus();
     partial void OnSectionScenarioChanged(Models.OverviewScenario? value) => NotifyVisualStatus();
     partial void OnSourceListChanged(Models.SourcesData? value) => NotifyVisualStatus();

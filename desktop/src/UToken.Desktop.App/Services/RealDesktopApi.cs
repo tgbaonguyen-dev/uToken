@@ -7,6 +7,7 @@ using UToken.Core.Pricing;
 using UToken.Desktop.App.Models;
 using UToken.Engine;
 using UToken.Storage;
+using UToken.Sync;
 
 namespace UToken.Desktop.App.Services;
 
@@ -21,6 +22,7 @@ public sealed record SourceLocation(Provider Provider, string Id, string Name, s
 public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
 {
     private readonly UsageEngine _engine;
+    private readonly ICloudSync? _cloud;
     private readonly SqliteStore _store;
     private readonly IReadOnlyList<SourceLocation> _locations;
     private readonly LocalSettingsStore? _localSettings;
@@ -38,9 +40,10 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
     };
 
     public RealDesktopApi(UsageEngine engine, SqliteStore store, IReadOnlyList<SourceLocation> locations, string databasePath,
-        LocalSettingsStore? localSettings = null, string? contentDirectory = null, TimeProvider? clock = null)
+        LocalSettingsStore? localSettings = null, string? contentDirectory = null, TimeProvider? clock = null, ICloudSync? cloud = null)
     {
         _engine = engine;
+        _cloud = cloud;
         _store = store;
         _locations = locations;
         _databasePath = databasePath;
@@ -229,11 +232,11 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
     }
 
     public async Task<SourcesData> GetSourcesAsync(CancellationToken ct = default) =>
-        ApplyPreview(await WithStoreAsync(() => BuildSources("30 days"), ct));
+        await WithStoreAsync(() => BuildSources("30 days"), ct);
 
     public async Task<SourceData> GetSourceAsync(string id, string period = "30 days", CancellationToken ct = default)
     {
-        var data = ApplyPreview(await WithStoreAsync(() => BuildSources(period), ct));
+        var data = await WithStoreAsync(() => BuildSources(period), ct);
         return data.Sources.FirstOrDefault(s => s.Id == id) ?? throw new InvalidDataException($"Source not found: {id}");
     }
 
@@ -270,7 +273,9 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
         }, ct);
 
         var settings = await GetSettingsAsync(ct);
-        string state = sources.Sources.Any(s => s.CollectorState == "running") ? "running" : "stopped";
+        // Log có dòng không đọc được (định dạng lạ) → collector cần cập nhật (SOURCE_FORMAT_UNSUPPORTED, màn D24).
+        string state = _lastScan is { MalformedLines: > 0 } ? "error"
+            : sources.Sources.Any(s => s.CollectorState == "running") ? "running" : "stopped";
         HealthData[] health =
         [
             new("Prompt content", "Not collected", "#2EC790"),
@@ -282,7 +287,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
             sources.Sources.Sum(s => s.Tokens),
             sources.Sources.Sum(s => s.EstimatedCost),
             sources.Sources.Sum(s => s.CachedTokens),
-            new CollectorData(state, _lastAnalysisAt, Now),
+            new CollectorData(state, _lastUploadAt, Now), // "Synced …" = lần upload thành công gần nhất
             recent,
             health);
     }
@@ -357,7 +362,8 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
     public async Task<SourcesData> RescanSourcesAsync(CancellationToken ct = default, IProgress<SourceScanProgress>? progress = null)
     {
         var config = await ReadContentAsync<SourceScanConfig>("source-scan.json", ct);
-        ClearPreview();
+        var retention = (await GetSettingsAsync(ct)).Values.RetentionDays;
+        int newEvents = 0, malformed = 0;
         var items = _locations.Select(l => new SourceScanItem(l.Name, $"/Assets/{l.Id}.svg", "waiting")).ToArray();
         progress?.Report(new(config, 0, items.Length, items.Length == 0 ? "None" : items[0].Name, items.ToArray()));
 
@@ -373,7 +379,8 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
             {
                 var report = await WithStoreAsync(() => _engine.Scan([l.Provider], ct), ct);
                 _localSettings?.Record($"Rescan {l.Id}: {report.FilesRead} files read, {report.NewEvents} new events, {report.Errors.Count} errors");
-                _lastScan = report;
+                newEvents += report.NewEvents;
+                malformed += report.MalformedLines;
             }
             if (config.StepDelayMs > 0) await Task.Delay(config.StepDelayMs, ct);
 
@@ -388,12 +395,31 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
             };
             progress?.Report(new(config, i + 1, items.Length, l.Name, items.ToArray()));
         }
+        await WithStoreAsync(() => _store.PruneBefore(Now.AddDays(-retention)), ct);
+        _lastScan = new ScanReport(_locations.Count, 0, newEvents, 0, malformed, [], []);
         _lastScanAt = Now;
-        return await GetSourcesAsync(ct);
+        return (await GetSourcesAsync(ct)) with { NewEvents = newEvents };
+    }
+
+    public string GetSourceFolder(string sourceId) =>
+        _locations.FirstOrDefault(l => l.Id == sourceId)?.Directory ?? throw new InvalidDataException($"Unknown source: {sourceId}");
+
+    public async Task<long> ClearLocalDataAsync(CancellationToken ct = default)
+    {
+        var removed = await WithStoreAsync(() =>
+        {
+            var n = _store.Counts().Events;
+            _store.ClearUsage();
+            return n;
+        }, ct);
+        _history.Clear();
+        _localSettings?.Record($"Local data cleared: {removed} events");
+        return removed;
     }
 
     public void Dispose()
     {
+        _priceUpdateGate.Dispose();
         _gate.Dispose();
         _store.Dispose();
     }

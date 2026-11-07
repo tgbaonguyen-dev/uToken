@@ -14,66 +14,27 @@ namespace UToken.Desktop.Tests;
 public class LocalFeaturesTests : IDisposable
 {
     private readonly string _directory = Path.Combine(AppContext.BaseDirectory, "local-features-" + Guid.NewGuid().ToString("N"));
+    private readonly RealHome _home = new();
     private DesktopUiStateStore Store() => new(new LocalSettingsStore(_directory));
-
-    [AvaloniaFact]
-    public async Task Pairing_timer_expires_without_submit_and_restart_gets_a_new_countdown()
-    {
-        var clock = new Clock();
-        var api = new MockDesktopApi(timeProvider: clock);
-        var vm = new MainViewModel(api, timeProvider: clock);
-        var window = new MainWindow { DataContext = vm };
-        window.Show();
-        try
-        {
-            while (vm.IsBusy) await Task.Delay(20);
-            await vm.ShowSyncCommand.ExecuteAsync(null);
-            await vm.DisconnectCommand.ExecuteAsync(null);
-            await vm.ShowPairingCommand.ExecuteAsync(null);
-            Assert.Equal("Code expires in 10:00", vm.PairingCountdownLabel);
-            clock.Now = clock.Now.AddMinutes(2).AddSeconds(3);
-            vm.UpdatePairingCountdown();
-            Assert.Equal("Code expires in 07:57", vm.PairingCountdownLabel);
-            clock.Now = clock.Now.AddMinutes(8);
-            var deadline = DateTime.UtcNow.AddSeconds(4);
-            while (vm.PairingState != "expired" && DateTime.UtcNow < deadline) await Task.Delay(40);
-            Assert.Equal("expired", vm.ActivePairingScenario!.Id);
-            Assert.Equal(TimeSpan.Zero, vm.PairingRemaining);
-            Assert.Equal("expired", (await api.PairDeviceAsync("482913")).State);
-            await vm.PairingStateActionCommand.ExecuteAsync("restart");
-            Assert.True(vm.IsPairingFormVisible);
-            Assert.Equal("Code expires in 10:00", vm.PairingCountdownLabel);
-            vm.SelectedPairingScenario = vm.PairingScenarios.Single(s => s.Id == "waiting");
-            clock.Now = clock.Now.AddHours(1);
-            vm.UpdatePairingCountdown();
-            Assert.Equal("waiting", vm.ActivePairingScenario!.Id);
-            Assert.True(vm.IsPairingPreview);
-            vm.SelectedPairingScenario = vm.PairingScenarios.Single(s => s.Id == "normal");
-            vm.UpdatePairingCountdown();
-            Assert.Equal("expired", vm.ActivePairingScenario!.Id);
-            DesktopDemoTests.Render(window, "local-pairing-expired");
-        }
-        finally { window.Close(); }
-    }
 
     [AvaloniaFact]
     public async Task Activity_and_source_filters_survive_a_new_viewmodel_and_stale_models_fall_back()
     {
         var store = Store();
-        var vm = new MainViewModel(new MockDesktopApi(), uiStateStore: store);
+        var vm = new MainViewModel(_home.Api(), uiStateStore: store);
         await vm.LoadCommand.ExecuteAsync(null);
-        vm.ActivityProvider = "Codex"; vm.ActivityModel = "gpt-5.3-codex";
-        vm.ActivityPeriod = "Last 7 days"; vm.ActivitySearch = "codex"; vm.SelectedPeriod = "Week";
+        vm.ActivityProvider = "Codex"; vm.ActivityModel = "gpt-5.6-sol";
+        vm.ActivityPeriod = "Last 7 days"; vm.ActivitySearch = "r-"; vm.SelectedPeriod = "Week";
         await vm.ShowActivityCommand.ExecuteAsync(null);
         Assert.NotEmpty(vm.ActivityPage!.Events);
-        var restored = new MainViewModel(new MockDesktopApi(), uiStateStore: Store());
+        var restored = new MainViewModel(_home.Api(), uiStateStore: Store());
         await restored.LoadCommand.ExecuteAsync(null);
         await restored.ShowActivityCommand.ExecuteAsync(null);
         Assert.Equal(vm.CurrentActivityQuery, restored.CurrentActivityQuery);
         Assert.Equal("Week", restored.SelectedPeriod);
         Assert.All(restored.ActivityPage!.Events, e => Assert.Equal("Codex", e.Provider));
         Store().SaveFilters(new("Removed provider", "Removed model", "All time"), "Total");
-        var stale = new MainViewModel(new MockDesktopApi(), uiStateStore: Store());
+        var stale = new MainViewModel(_home.Api(), uiStateStore: Store());
         await stale.LoadCommand.ExecuteAsync(null);
         await stale.ShowActivityCommand.ExecuteAsync(null);
         Assert.Equal("All sources", stale.ActivityProvider);
@@ -92,7 +53,7 @@ public class LocalFeaturesTests : IDisposable
         try
         {
             window.Width = 1100; window.Height = 700;
-            DesktopDemoTests.Render(window, "local-window-placement");
+            TestApp.Render(window, "local-window-placement");
             controller.Save();
             var normal = Store().State.Window;
             Assert.True(normal.Width >= 1020 && normal.Height >= 650);
@@ -147,7 +108,7 @@ public class LocalFeaturesTests : IDisposable
             await actions.CopyReportAsync();
             Assert.Equal(report, await window.Clipboard!.GetTextAsync());
             Assert.Equal("Report copied.", actions.FindControl<TextBlock>("ReportActionStatus")!.Text);
-            DesktopDemoTests.Render(window, "local-diagnostics-copy-save");
+            TestApp.Render(window, "local-diagnostics-copy-save");
             using var stream = new MemoryStream();
             await stream.WriteAsync(Encoding.UTF8.GetBytes(new string('x', 1000)));
             await ReportActions.WriteReportAsync(stream, report);
@@ -158,13 +119,9 @@ public class LocalFeaturesTests : IDisposable
 
     public void Dispose()
     {
+        _home.Dispose();
         if (!Directory.Exists(_directory)) return;
         foreach (var file in Directory.EnumerateFiles(_directory)) File.Delete(file);
         Directory.Delete(_directory);
-    }
-    private sealed class Clock : TimeProvider
-    {
-        public DateTimeOffset Now = DateTimeOffset.Parse("2026-11-07T10:00:00+07:00");
-        public override DateTimeOffset GetUtcNow() => Now;
     }
 }

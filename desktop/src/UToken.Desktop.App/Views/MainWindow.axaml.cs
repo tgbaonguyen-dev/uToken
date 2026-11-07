@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
+using Avalonia.Platform.Storage;
 
 namespace UToken.Desktop.App.Views;
 
@@ -22,11 +24,25 @@ public partial class MainWindow : Window
         dialog.Closed += (_, _) => _diagnostics = null;
         _ = dialog.ShowDialog(this);
     }
+    private WindowNotificationManager? _notifications;
+    private void ShowNotification(string title, string message, bool isError)
+    {
+        _notifications ??= new WindowNotificationManager(this) { Position = NotificationPosition.BottomRight, MaxItems = 3 };
+        _notifications.Show(new Notification(title, message, isError ? NotificationType.Warning : NotificationType.Success, TimeSpan.FromSeconds(8)));
+    }
+    private async void OpenFolder(string path)
+    {
+        try
+        {
+            var ok = Directory.Exists(path) && await Launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(path));
+            if (!ok) ShowNotification("Cannot open folder", path, true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        { ShowNotification("Cannot open folder", path, true); }
+    }
     public MainWindow()
     {
         InitializeComponent();
-        var pairingTimer = new Avalonia.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        pairingTimer.Tick += (_, _) => _viewModel?.UpdatePairingCountdown();
         DataContextChanged += (_, _) =>
         {
             if (_viewModel is not null)
@@ -34,6 +50,8 @@ public partial class MainWindow : Window
                 _viewModel.OverviewDiagnosticsRequested -= ShowOverviewDiagnostics;
                 _viewModel.PermissionInstructionsRequested -= ShowPermissionInstructions;
                 _viewModel.SourceSetupGuideRequested -= ShowSourceSetupGuide;
+                _viewModel.NotificationRequested -= ShowNotification;
+                _viewModel.OpenFolderRequested -= OpenFolder;
             }
             _viewModel = DataContext as ViewModels.MainViewModel;
             if (_viewModel is not null)
@@ -41,13 +59,16 @@ public partial class MainWindow : Window
                 _viewModel.OverviewDiagnosticsRequested += ShowOverviewDiagnostics;
                 _viewModel.PermissionInstructionsRequested += ShowPermissionInstructions;
                 _viewModel.SourceSetupGuideRequested += ShowSourceSetupGuide;
+                _viewModel.NotificationRequested += ShowNotification;
+                _viewModel.OpenFolderRequested += OpenFolder;
             }
         };
         Closed += (_, _) =>
         {
-            pairingTimer.Stop();
             if (_viewModel is not null)
             {
+                _viewModel.NotificationRequested -= ShowNotification;
+                _viewModel.OpenFolderRequested -= OpenFolder;
                 _viewModel.OverviewDiagnosticsRequested -= ShowOverviewDiagnostics;
                 _viewModel.PermissionInstructionsRequested -= ShowPermissionInstructions;
                 _viewModel.SourceSetupGuideRequested -= ShowSourceSetupGuide;
@@ -55,8 +76,6 @@ public partial class MainWindow : Window
         };
         Opened += async (_, _) =>
         {
-            pairingTimer.Start();
-            _viewModel?.UpdatePairingCountdown();
             if (_opened) return;
             _opened = true;
             if (DataContext is ViewModels.MainViewModel vm) await vm.LoadCommand.ExecuteAsync(null);

@@ -82,7 +82,8 @@ public sealed record SourceData(string Id, string Name, string Status, string Co
         new("Last successful read", DisplayFormat.Relative(Health.LastReadAt, ReferenceTime), "#F3F4F7"),
         new("Prompt content", Health.CollectsPrompt ? "Collected" : "Not collected", Health.CollectsPrompt ? "#F26039" : "#2EC790")];
 }
-public sealed record SourcesData(DateTimeOffset ReferenceTime, SourceData[] Sources, CoverageData[] Coverage);
+/// <param name="NewEvents">Số event mới đọc được ở lần quét vừa chạy (null khi chỉ đọc lại số liệu).</param>
+public sealed record SourcesData(DateTimeOffset ReferenceTime, SourceData[] Sources, CoverageData[] Coverage, int? NewEvents = null);
 public sealed record SupportedSourceData(string Id, string Name, string Availability)
 {
     public string Color => Id switch { "gemini" => "#F26039", "codex" => "#4089EF", "claude" => "#E64C9D", _ => "#9096A1" };

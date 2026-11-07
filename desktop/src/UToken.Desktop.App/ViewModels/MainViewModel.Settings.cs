@@ -23,6 +23,7 @@ public partial class MainViewModel
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasDiagnosticsReport))] private string? _diagnosticsReport;
     public bool HasDiagnosticsReport => DiagnosticsReport is not null;
     public bool IsSettingsPage => Page == "settings";
+    public string CloudSyncLabel => Sync?.Device is { } account ? $"Signed in · {account.Name}" : "Not signed in";
 
     private void ApplySettings(SettingsData data)
     {
@@ -44,24 +45,24 @@ public partial class MainViewModel
     {
         ApplySettings(await api.SaveSettingsAsync(new(LaunchAtStartup, BackgroundCollection,
             AutomaticUpdates, UsageNotifications, RetentionDays)));
-        SettingsMessage = Settings!.IsPersistent ? "Settings saved on this computer. Collector behavior is still simulated." : "Settings saved for this test session.";
+        SettingsMessage = "Settings saved." + (LaunchAtStartup ? " uToken starts when you sign in to this computer." : "")
+            + (BackgroundCollection ? " Usage is collected and synced in the background." : "");
     });
     [RelayCommand] private Task ResetSettingsAsync() => RunAsync(async () =>
     {
         ApplySettings(await api.ResetSettingsAsync());
         SettingsMessage = "Default settings restored.";
     });
-    [RelayCommand] private void SettingsAction(string action)
+    /// <summary>"clear": xóa thật toàn bộ usage trên máy (log cũ không bị đọc lại; dữ liệu trên cloud giữ nguyên).</summary>
+    [RelayCommand] private Task SettingsActionAsync(string action) => RunAsync(async () =>
     {
-        if (IsBusy || Settings is null) return;
-        SettingsMessage = action switch
-        {
-            "updates" => Settings.UpdateMessage,
-            "clear" => "Clearing local data is not available yet. Records are retained.",
-            _ => null,
-        };
+        if (Settings is null || action != "clear") return;
+        var removed = await api.ClearLocalDataAsync();
         ConfirmClearData = false;
-    }
+        Overview = await api.GetOverviewAsync();
+        ApplySourcePermission(await api.GetSourcePermissionAsync());
+        SettingsMessage = $"Cleared {removed:N0} usage events from this computer. New usage will be collected from now on.";
+    });
     [RelayCommand] private Task OpenDiagnosticsAsync() => RunAsync(async () =>
         DiagnosticsReport = await api.GetDiagnosticsAsync());
     [RelayCommand] private void CloseDiagnostics() => DiagnosticsReport = null;

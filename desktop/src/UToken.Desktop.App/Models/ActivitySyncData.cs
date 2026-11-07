@@ -44,9 +44,9 @@ public sealed record SyncData(MobileDevice? Device, string EncryptionTitle, stri
     HealthData[] Privacy, SyncHistoryData[] History, SyncScenario NextSync, DateTimeOffset ReferenceTime);
 public sealed record SyncResult(string State, string Message, SyncData Data);
 public sealed record PairingConfig(string ValidCode, string ExpiredCode, int ExpiryMinutes,
-    string DemoHint, string RejectedMessage, string ExpiredMessage, string SuccessMessage,
+    string SignInHint, string RejectedMessage, string ExpiredMessage, string SuccessMessage,
     string[] SecurityItems, MobileDevice Device);
-public sealed record PairingData(DateTimeOffset ExpiresAt, int ExpiryMinutes, string DemoHint, string[] SecurityItems);
+public sealed record PairingData(DateTimeOffset ExpiresAt, int ExpiryMinutes, string SignInHint, string[] SecurityItems);
 public sealed record PairingResult(string State, string Message, SyncData? Data = null);
 
 public sealed record SyncQueueItem(string Id, string Name, int Events, long Bytes)

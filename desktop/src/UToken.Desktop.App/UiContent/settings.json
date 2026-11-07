@@ -1,8 +1,8 @@
 {
   "values": {
-    "launchAtStartup": true,
+    "launchAtStartup": false,
     "backgroundCollection": true,
-    "automaticUpdates": true,
+    "automaticUpdates": false,
     "usageNotifications": false,
     "retentionDays": 30
   },
@@ -11,8 +11,8 @@
     30,
     90
   ],
-  "dataPath": "~/.local/share/utoken (sample)",
-  "appVersion": "Demo 0.1",
-  "updateMessage": "Automatic updates are not available in this build.",
-  "diagnostics": "Mock collector is running. JSON fixtures loaded. No provider logs or prompt content are accessed."
+  "dataPath": "",
+  "appVersion": "",
+  "updateMessage": "",
+  "diagnostics": ""
 }

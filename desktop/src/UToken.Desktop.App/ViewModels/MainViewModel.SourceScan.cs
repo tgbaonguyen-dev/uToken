@@ -38,8 +38,13 @@ public partial class MainViewModel
             var overview = await api.GetOverviewAsync(cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
             ApplySourcePermission(permission with { Sources = sources }); Overview = overview;
-            Notice = $"Scan complete - {sources.Sources.Length} sources checked."
+            Notice = $"Scan complete - {sources.Sources.Length} sources checked, {sources.NewEvents ?? 0} new events."
                 + (HasNoSupportedSources ? " No supported source found." : HasPermissionIssue ? " Some sources still require permission." : "");
+            // D22: quét xong, nguồn bình thường nhưng không có usage mới.
+            if (sources.NewEvents == 0 && !HasNoSupportedSources && !HasPermissionIssue)
+                SectionScenario = OverviewScenarios.FirstOrDefault(s => s.Id == "up-to-date") is { } upToDate
+                    ? WithLiveDetails(upToDate)
+                    : null;
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {

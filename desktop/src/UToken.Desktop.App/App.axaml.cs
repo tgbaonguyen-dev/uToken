@@ -20,7 +20,8 @@ public partial class App : Application
         {
             var store = new LocalSettingsStore(LocalSettingsStore.DefaultDirectory);
             var uiState = new DesktopUiStateStore(store);
-            var api = CreateApi(store);
+            var settings = AppSettings.Load();
+            var api = CreateApi(store, settings);
             desktop.Exit += (_, _) => api.Dispose();
             _ = api.UpdatePricesAsync(); // chạy nền; lỗi mạng chỉ ghi log, giá cũ vẫn dùng
             var vm = new MainViewModel(api, showSetupOnStart: true, uiStateStore: uiState);
@@ -29,6 +30,16 @@ public partial class App : Application
             window.Closing += (_, _) => vm.SaveUiPreferences();
             desktop.Exit += (_, _) => { vm.SaveUiPreferences(); placementController.Save(); };
             desktop.MainWindow = window;
+            // Mở bởi autostart (--background): bắt đầu ở dạng thu nhỏ.
+            if (Environment.GetCommandLineArgs().Contains("--background")) window.WindowState = WindowState.Minimized;
+            // Thu thập nền: quét log và đẩy lên cloud theo chu kỳ Sync:IntervalMinutes khi Background collection bật.
+            var backgroundTimer = new Avalonia.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(Math.Clamp(settings.Sync.IntervalMinutes, 1, 24 * 60)),
+            };
+            backgroundTimer.Tick += async (_, _) => await vm.BackgroundSyncAsync();
+            backgroundTimer.Start();
+            desktop.Exit += (_, _) => backgroundTimer.Stop();
             TrayIcon? tray = null;
             // Only hide windows on platforms where the app installs a native tray.
             if (OperatingSystem.IsWindows())
@@ -57,15 +68,31 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    /// <summary>Dựng API dữ liệu thật: appsettings → SQLite trong thư mục dữ liệu của app → UsageEngine.</summary>
-    private static RealDesktopApi CreateApi(LocalSettingsStore store)
+    /// <summary>
+    /// Dựng API dữ liệu thật: appsettings → SQLite trong thư mục dữ liệu của app → UsageEngine;
+    /// FirebaseCloudSync khi đã cấu hình OAuth client (appsettings.Local.json), nếu không thì chỉ dùng trên máy.
+    /// </summary>
+    private static RealDesktopApi CreateApi(LocalSettingsStore store, AppSettings settings)
     {
-        var settings = AppSettings.Load();
         var codexHome = AppSettings.ExpandHome(settings.Collectors.CodexHome);
         var claudeHome = AppSettings.ExpandHome(settings.Collectors.ClaudeHome);
         var (engine, sqlite) = EngineFactory.Create(settings.DatabasePath, settings.Collectors.Enabled, codexHome, claudeHome);
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var locations = RealDesktopApi.DefaultLocations(codexHome, claudeHome, home, settings.Collectors.Enabled);
-        return new RealDesktopApi(engine, sqlite, locations, settings.DatabasePath, store);
+
+        Sync.ICloudSync? cloud = null;
+        var problems = settings.Firebase.Validate();
+        if (problems.Count == 0)
+        {
+            var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("uToken-desktop");
+            cloud = new Sync.FirebaseCloudSync(http, settings.Firebase, Path.Combine(AppSettings.DataDirectory, "auth.json"));
+        }
+        else foreach (var p in problems) store.Record("Cloud sync disabled: " + p);
+
+        return new RealDesktopApi(engine, sqlite, locations, settings.DatabasePath, store, cloud: cloud)
+        {
+            Startup = new StartupRegistration(),
+        };
     }
 }

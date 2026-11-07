@@ -1,6 +1,0 @@
-{
-  "heading": "Scanning local usage",
-  "description": "Checking supported provider sources and calculating token summaries on this device.",
-  "privacyNote": "UI demo: source checks use JSON responses. No provider logs or prompt content are accessed.",
-  "stepDelayMs": 900
-}

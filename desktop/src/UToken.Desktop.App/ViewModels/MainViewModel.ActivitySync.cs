@@ -5,11 +5,6 @@ using UToken.Desktop.App.Models;
 
 namespace UToken.Desktop.App.ViewModels;
 
-public sealed partial class PairingDigit : ObservableObject
-{
-    [ObservableProperty] private string _text = "";
-}
-
 public partial class MainViewModel
 {
     [ObservableProperty, NotifyPropertyChangedFor(nameof(IsActivityListEmpty))] private ActivityPageData? _activityPage;
@@ -23,17 +18,16 @@ public partial class MainViewModel
     [ObservableProperty] private bool _confirmDisconnect;
     [ObservableProperty] private bool _isSyncing;
     partial void OnIsSyncingChanged(bool value) => NotifySyncState();
-    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); }
+    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); OnPropertyChanged(nameof(CloudSyncLabel)); }
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasSyncMessage))] private string _syncMessage = "";
     [ObservableProperty] private string _syncMessageColor = "#2EC790";
     [ObservableProperty] private PairingData? _pairing;
     [ObservableProperty, NotifyPropertyChangedFor(nameof(PairingMessageColor)), NotifyPropertyChangedFor(nameof(IsPaired)), NotifyPropertyChangedFor(nameof(CanEnterPairing))] private string _pairingState = "waiting";
-    partial void OnPairingStateChanged(string value) => SyncPairingSelection();
+    partial void OnPairingStateChanged(string value) => NotifyPairingState();
     [ObservableProperty] private string _pairingMessage = "";
     public ObservableCollection<string> ActivityProviders { get; } = ["All sources"];
     public ObservableCollection<string> ActivityModels { get; } = ["All models"];
     public ObservableCollection<string> ActivityPeriods { get; } = ["Last 24h"];
-    public PairingDigit[] PairingDigits { get; } = Enumerable.Range(0, 6).Select(_ => new PairingDigit()).ToArray();
     public bool IsActivityPage => Page == "activity";
     public bool IsSyncPage => Page == "sync";
     public bool IsPairingPage => Page == "pairing";
@@ -46,7 +40,7 @@ public partial class MainViewModel
     public bool IsSyncHistoryEmpty => Sync?.History.Length == 0;
     public bool HasSyncMessage => !string.IsNullOrEmpty(SyncMessage);
     public bool IsPaired => HasDevice;
-    public string PairingActionLabel => HasDevice ? "Device information" : "Pair new device";
+    public string PairingActionLabel => HasDevice ? "Google account" : "Sign in with Google";
     public bool CanEnterPairing => !IsPaired;
     public string PairingMessageColor => IsPaired ? "#2EC790" : "#F26039";
 
@@ -95,63 +89,58 @@ public partial class MainViewModel
     [RelayCommand]
     private Task SyncNowAsync() => RunAsync(async () =>
     {
-        IsSyncing = true; SyncMessage = "Analyzing local usage...";
+        IsSyncing = true; SyncMessage = HasDevice ? "Analyzing local usage and uploading summaries..." : "Analyzing local usage...";
         try
         {
             var result = await api.SyncNowAsync();
-            Sync = result.Data; SyncMessage = result.Message;
-            SetSyncResultState(result.State);
-            if (result.State == "success" && Overview is not null)
-                Overview = Overview with { Collector = Overview.Collector with { LastSyncAt = Sync.Device?.LastSyncAt, ReferenceTime = Sync.ReferenceTime } };
-            SyncMessageColor = result.State is "success" or "no_new_usage" ? "#2EC790" : "#F26039";
+            ApplySyncResult(result);
+            Overview = await api.GetOverviewAsync();
         }
         catch { SetSyncResultState("failed"); SyncMessage = "Sync did not complete. Please try again."; SyncMessageColor = "#F26039"; throw; }
         finally { IsSyncing = false; }
     });
+    private void ApplySyncResult(SyncResult result)
+    {
+        Sync = result.Data; SyncMessage = result.Message;
+        SetSyncResultState(result.State);
+        SyncMessageColor = result.State is "success" or "no_new_usage" ? "#2EC790" : "#F26039";
+    }
     [RelayCommand] private void RequestDisconnect() { if (!IsBusy) ConfirmDisconnect = true; }
     [RelayCommand] private void CancelDisconnect() => ConfirmDisconnect = false;
     [RelayCommand]
     private Task DisconnectAsync() => RunAsync(async () =>
     {
-        Sync = await api.DisconnectAsync(); ConfirmDisconnect = false;
-        SyncMessage = "Device disconnected. Sign in again to resume sync."; SyncMessageColor = "#9096A1";
+        Sync = await api.DisconnectAsync(); ConfirmDisconnect = false; PairingState = "waiting";
+        SyncMessage = "Signed out. Local usage collection continues; sign in again to resume cloud sync."; SyncMessageColor = "#9096A1";
     });
-    private async Task StartPairingCoreAsync()
-    {
-        Pairing = await api.StartPairingAsync();
-        foreach (var digit in PairingDigits) digit.Text = "";
-        ResetPairingPreview();
-        PairingState = "waiting"; PairingMessage = "";
-    }
     private async Task LoadPairingPageCoreAsync()
     {
         PairingScenarios = await api.GetPairingScenariosAsync();
-        ResetPairingPreview();
         SupportedSources = await api.GetSupportedSourcesAsync();
+        Pairing = await api.GetPairingInfoAsync();
         Sync = await api.GetSyncAsync();
-        if (HasDevice)
-        {
-            Pairing = await api.GetPairingInfoAsync();
-            PairingState = "connected";
-            PairingMessage = "Your mobile device is paired. Review its connection details below.";
-        }
-        else await StartPairingCoreAsync();
+        PairingState = HasDevice ? "connected" : "waiting";
+        PairingMessage = HasDevice ? $"Signed in as {Sync.Device!.Name}." : "";
     }
     [RelayCommand]
     private Task ShowPairingAsync() => NavigateAsync(async () => { Page = "pairing"; await LoadPairingPageCoreAsync(); });
     [RelayCommand]
-    private Task RestartPairingAsync() => RunAsync(async () => { if (!HasDevice) await StartPairingCoreAsync(); });
+    private Task RestartPairingAsync() => RunAsync(async () => { if (!HasDevice) await LoadPairingPageCoreAsync(); });
+    /// <summary>Mở trình duyệt đăng nhập Google; chờ tối đa 3 phút.</summary>
     [RelayCommand]
-    private Task PairDeviceAsync() => RunAsync(async () =>
+    private Task SignInAsync() => RunAsync(SignInCoreAsync);
+    private async Task<bool> SignInCoreAsync()
     {
-        if (HasDevice) return;
-        PairingState = "verifying"; PairingMessage = "Verifying code...";
+        if (HasDevice) return true;
+        PairingState = "verifying"; PairingMessage = "Finish signing in with Google in your browser...";
         try
         {
-            var result = await api.PairDeviceAsync(string.Concat(PairingDigits.Select(d => d.Text)));
-            PairingState = result.State; PairingMessage = result.Message;
-            if (result.Data is not null) { Sync = result.Data; SyncMessage = ""; }
+            var result = await api.SignInAsync();
+            PairingState = result.State == "unavailable" ? "waiting" : result.State;
+            PairingMessage = result.Message;
+            if (result.Data is not null) { Sync = result.Data; SyncMessage = ""; SectionScenario = null; }
+            return result.State == "success";
         }
-        catch { PairingState = "error"; PairingMessage = "Pairing did not complete. Please try again."; throw; }
-    });
+        catch { PairingState = "rejected"; PairingMessage = "Sign-in did not complete. Please try again."; throw; }
+    }
 }

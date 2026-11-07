@@ -22,7 +22,7 @@ public sealed class DesktopWindowController
             e.CloseReason is WindowCloseReason.ApplicationShutdown or WindowCloseReason.OSShutdown or WindowCloseReason.OwnerWindowClosing)
             return;
         e.Cancel = true;
-        _viewModel.Notice = "Window hidden to tray. Use Open to return or Quit to exit. Usage data is simulated.";
+        _viewModel.Notice = "Window hidden to tray. Usage is still collected and synced in the background. Use Open to return or Quit to exit.";
         _window.Hide();
     }
 

@@ -232,6 +232,35 @@ public sealed class SqliteStore : IDisposable
         return true;
     }
 
+    /// <summary>
+    /// Xóa toàn bộ số liệu usage trên máy (Settings → Clear local data). Giữ vị trí đã đọc của file log
+    /// để log cũ không bị đọc lại ngay; chỉ usage phát sinh sau thời điểm này được thu thập tiếp. Giữ bảng giá.
+    /// </summary>
+    public void ClearUsage()
+    {
+        using var tx = _db.BeginTransaction();
+        foreach (var t in new[] { "usage_events", "turns", "task_outcomes", "daily_local", "sync_queue", "projects" })
+            _db.Execute($"DELETE FROM {t}", transaction: tx);
+        tx.Commit();
+        _db.Execute("VACUUM");
+    }
+
+    /// <summary>Retention: xóa event, turn, task và bản nháp daily cũ hơn <paramref name="cutoffUtc"/>. Trả về số event đã xóa.</summary>
+    public int PruneBefore(DateTimeOffset cutoffUtc)
+    {
+        var cutoff = Ts(cutoffUtc);
+        using var tx = _db.BeginTransaction();
+        int n = _db.Execute("DELETE FROM usage_events WHERE occurred_at < @cutoff", new { cutoff }, tx);
+        _db.Execute("DELETE FROM turns WHERE started_at < @cutoff", new { cutoff }, tx);
+        _db.Execute("DELETE FROM task_outcomes WHERE started_at < @cutoff", new { cutoff }, tx);
+        _db.Execute("DELETE FROM daily_local WHERE date < @day", new { day = cutoffUtc.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) }, tx);
+        tx.Commit();
+        return n;
+    }
+
+    /// <summary>Đánh dấu mọi bản daily cần đẩy lại (ví dụ sau khi đăng nhập tài khoản khác).</summary>
+    public void MarkAllDailyDirty() => _db.Execute("UPDATE daily_local SET dirty = 1");
+
     public IReadOnlyList<(string Date, string Json)> GetDirtyDaily() =>
         _db.Query<(string, string)>("SELECT date, json FROM daily_local WHERE dirty = 1 ORDER BY date").ToList();
 
