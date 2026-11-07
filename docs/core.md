@@ -87,7 +87,7 @@ Các trường thêm so với schema ban đầu (đã ghi vào `contracts/firest
 | 1 | Task = các turn liên tiếp cách nhau ≤ 2 phút trong cùng phiên chính. Có turn gộp vào thì coi là "hỏi lại trong 2 phút", nên task chỉ còn verified hoặc likely_failure | `TaskBuilder` |
 | 2 | Nhóm việc theo số lần gọi model: Small ≤ 10, Medium ≤ 40, Large > 40 | `TaskBuilderOptions` |
 | 3 | Danh sách lệnh test/build: pytest, npm/pnpm/yarn test\|build, flutter test, dotnet test\|build, cargo, go test, make… Lệnh chỉ được đọc trong bộ nhớ, không lưu | `TestCommandDetector` |
-| 4 | Bảng giá để cứng `static-2026-11-06`; `codex-auto-review` tạm tính bằng giá gpt-5; cache write Claude tính theo mức 5 phút | `StaticPriceBook` |
+| 4 | Giá lấy từ models.dev (xem mục 6). Model không có trên models.dev dùng bảng dự phòng `static-2026-11-06`; `codex-auto-review` tạm tính bằng giá gpt-5. Cache write Claude tính theo mức 5 phút | `TieredPriceBook`, `StaticPriceBook` |
 | 5 | Mỗi setup được so với setup có nhiều task nhất trong cùng công cụ và nhóm việc; setup đứng đầu so với setup thứ hai | `EfficiencyCalculator.Setups` |
 | 6 | Nhãn chỉ chuyển "review" khi vượt ngưỡng Review của SRS (cache < 50%, context > 5×, thinking 7 ngày > 2× trung vị ngày, lỗi lệnh > 10% hoặc ≥ 3 lỗi liên tiếp, retry > 10%, token/turn > +50%, P90/P50 > 3, chi phí ngầm > 30%) | `ProcessMetrics` |
 | 7 | Sai số SR tính theo cụm phiên. Khi SR = 0% hoặc 100% thì dùng sai số Agresti–Coull. Khoảng tin cậy CPST dùng bootstrap theo phiên, 1.000 lần, seed cố định | `Stats` |
@@ -102,3 +102,15 @@ Các trường thêm so với schema ban đầu (đã ghi vào `contracts/firest
 - **Đổi phiên bản schema SQLite:** xóa toàn bộ bảng rồi quét lại từ log, vì dữ liệu đều suy ra được từ log.
 - **Hiệu năng:** đã chạy trên log thật (290 file, khoảng 68 MB) mất 1,7 giây lần đầu và 0,3 giây các lần sau. Chưa thử với file 500 MB.
 - **Claude Code CLI:** đã kiểm tra trên log Claude Code (VS Code và SDK) của máy nhóm trưởng.
+
+## 6. Giá model (models.dev)
+
+- Nguồn giá: `https://models.dev/api.json` (hãng anthropic, openai, google). Tải lúc mở app và khi bấm "Sync now", tối đa khoảng 1 lần/ngày (`UsageEngine.UpdatePricesAsync`, `RealDesktopApi.UpdatePricesAsync`). Đây chỉ là một request GET, không gửi dữ liệu người dùng. Lỗi mạng chỉ ghi log và dùng giá đã lưu.
+- Lưu trong SQLite, bảng `pricing` và `pricing_tier`. Mỗi lần tải là một `pricing_version = models.dev@<thời điểm>`, và chỉ model đổi giá mới được ghi thêm. Hai bảng này không bị xóa khi nâng schema.
+- Cách tra giá cho một event (`TieredPriceBook.PriceFor`):
+  1. Đoán hãng và chuẩn hóa tên model: bỏ `vendor/`, `[1m]` và hậu tố ngày.
+  2. Chọn phiên bản giá có hiệu lực tại thời điểm event; event xảy ra trước lần tải đầu tiên thì dùng bản cũ nhất.
+  3. Chọn bậc giá theo context = input đã chuẩn hóa của event. Ví dụ gpt-5.6-sol: 4/20 USD, và 8/30 USD khi context > 272K token.
+  4. Model không có trên models.dev thì dùng `StaticPriceBook`; không có ở đâu thì `cost_micro = null` ("thiếu giá").
+- `daily.pricing_version` và `efficiency.pricing_version` ghi phiên bản models.dev mới nhất; chưa tải lần nào thì ghi phiên bản của bảng dự phòng.
+- Màn Diagnostics trên desktop liệt kê các model đang dùng giá dự phòng. Lệnh `--scan --update-prices` ép tải lại giá ngay.

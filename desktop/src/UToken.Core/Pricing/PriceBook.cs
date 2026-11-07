@@ -5,11 +5,16 @@ namespace UToken.Core.Pricing;
 public interface IPriceBook
 {
     string Version { get; }
+
+    /// <summary>Giá cơ bản hiện hành của model (không xét thời điểm hay bậc context).</summary>
     Price? Find(Provider provider, string model);
+
+    /// <summary>Giá áp cho một event cụ thể: có thể phụ thuộc thời điểm và kích thước context.</summary>
+    Price? PriceFor(UsageEvent e) => Find(e.Provider, e.Model);
 }
 
 /// <summary>
-/// Bảng giá để cứng trong app (schema pricing/ đã cắt khỏi MVP, xem docs/core.md).
+/// Bảng giá để cứng, dùng làm dự phòng khi models.dev chưa tải được hoặc không có model (xem TieredPriceBook).
 /// Giá USD trên 1 triệu token, ƯỚC TÍNH theo giá API công bố; nhóm cập nhật khi giá đổi và tăng Version.
 /// Khớp model theo tiền tố dài nhất, nên "claude-opus-5-5" dùng giá của "claude-opus".
 /// </summary>
@@ -54,5 +59,5 @@ public static class PriceBookExtensions
 {
     /// <summary>Chi phí micro-USD của một event; null khi model chưa có giá ("thiếu giá").</summary>
     public static long? CostMicro(this IPriceBook book, UsageEvent e) =>
-        book.Find(e.Provider, e.Model) is { } p ? CostCalculator.CostMicroUsd(e, p) : null;
+        book.PriceFor(e) is { } p ? CostCalculator.CostMicroUsd(e, p) : null;
 }

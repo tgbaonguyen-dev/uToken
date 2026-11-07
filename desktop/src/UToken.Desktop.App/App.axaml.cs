@@ -22,6 +22,7 @@ public partial class App : Application
             var uiState = new DesktopUiStateStore(store);
             var api = CreateApi(store);
             desktop.Exit += (_, _) => api.Dispose();
+            _ = api.UpdatePricesAsync(); // chạy nền; lỗi mạng chỉ ghi log, giá cũ vẫn dùng
             var vm = new MainViewModel(api, showSetupOnStart: true, uiStateStore: uiState);
             var window = new MainWindow { DataContext = vm };
             var placementController = new WindowPlacementController(window, uiState);

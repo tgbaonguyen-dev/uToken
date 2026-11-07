@@ -39,7 +39,36 @@ public sealed class UsageEngine(
 {
     private readonly IReadOnlyList<ILogCollector> _collectors = collectors.ToList();
     public TimeZoneInfo TimeZone { get; } = timeZone ?? TimeZoneInfo.Local;
-    public IPriceBook Prices { get; } = prices ?? StaticPriceBook.Default;
+    /// <summary>Bảng giá đang dùng. Mặc định: giá models.dev đã lưu trong SQLite, thiếu thì dùng bảng để cứng.</summary>
+    public IPriceBook Prices { get; private set; } = prices ?? new TieredPriceBook(store.LoadAllPrices(), StaticPriceBook.Default);
+
+    /// <summary>Đọc lại bảng giá từ SQLite (sau khi tải giá mới).</summary>
+    public void RefreshPrices() => Prices = new TieredPriceBook(store.LoadAllPrices(), StaticPriceBook.Default);
+
+    /// <summary>
+    /// Tải bảng giá models.dev nếu lần tải gần nhất đã cũ hơn <paramref name="maxAge"/> (mặc định 20 giờ), lưu vào SQLite
+    /// rồi dùng ngay. Trả về số model có giá thay đổi; null nếu bỏ qua vì giá còn mới.
+    /// Chỉ gửi một request GET tới models.dev, không gửi dữ liệu người dùng. Lỗi mạng thì ném ra; giá cũ vẫn dùng được.
+    /// </summary>
+    public async Task<int?> UpdatePricesAsync(HttpClient http, TimeSpan? maxAge = null, CancellationToken ct = default)
+    {
+        if (PricesAreFresh(maxAge)) return null;
+        return ApplyPriceCatalog(await ModelsDevCatalog.FetchAsync(http, ct));
+    }
+
+    /// <summary>Giá models.dev đã tải trong khoảng <paramref name="maxAge"/> (mặc định 20 giờ) chưa.</summary>
+    public bool PricesAreFresh(TimeSpan? maxAge = null) =>
+        Prices is TieredPriceBook { LastFetchedAt: { } last } && Now - last < (maxAge ?? TimeSpan.FromHours(20));
+
+    /// <summary>Lưu bảng giá đã tải (phần ghi SQLite, tách khỏi phần gọi mạng) rồi dùng ngay. Trả về số model đổi giá.</summary>
+    public int ApplyPriceCatalog(IReadOnlyList<ModelPrice> catalog)
+    {
+        if (catalog.Count == 0) throw new InvalidDataException("models.dev trả về bảng giá rỗng");
+        var now = Now;
+        int changed = store.SavePrices(catalog, PricingSync.VersionFor(now), now);
+        RefreshPrices();
+        return changed;
+    }
     private readonly TimeProvider _clock = clock ?? TimeProvider.System;
     private readonly TaskBuilderOptions _taskOptions = taskOptions ?? new TaskBuilderOptions();
 

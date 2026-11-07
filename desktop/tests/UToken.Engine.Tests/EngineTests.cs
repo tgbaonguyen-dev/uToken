@@ -98,6 +98,35 @@ public sealed class EngineTests : IDisposable
         }
     }
 
+    [Fact] // Giá models.dev lưu trong SQLite được dùng cho daily và còn nguyên khi mở lại app
+    public void Catalog_prices_drive_daily_cost_and_persist()
+    {
+        var (engine, store) = NewEngine();
+        using (store)
+        {
+            engine.Run();
+            var before = engine.BuildDaily(new DateOnly(2026, 11, 5));
+            Assert.False(engine.PricesAreFresh());
+
+            // Claude rẻ đi một nửa so với bảng để cứng.
+            var catalog = new[]
+            {
+                new Core.Pricing.ModelPrice("anthropic", "claude-opus-5-5",
+                    new Core.Pricing.PriceSchedule(new Core.Pricing.Price(2.5m, 0.25m, 3.125m, 12.5m), [])),
+            };
+            Assert.Equal(1, engine.ApplyPriceCatalog(catalog));
+            Assert.True(engine.PricesAreFresh());
+            var after = engine.BuildDaily(new DateOnly(2026, 11, 5));
+            Assert.StartsWith("models.dev@", after.PricingVersion);
+            var claudeKey = after.ByKey.Keys.Single(k => k.StartsWith("claude_code|claude-opus-5-5|"));
+            Assert.InRange(after.ByKey[claudeKey].CostMicro!.Value, before.ByKey[claudeKey].CostMicro!.Value / 2 - 1, before.ByKey[claudeKey].CostMicro!.Value / 2 + 1);
+            // Haiku (phiên phụ) không có trong catalog giả → vẫn tính bằng giá dự phòng.
+            Assert.NotNull(after.ByKey.Single(k => k.Key.Contains("claude-haiku")).Value.CostMicro);
+        }
+        var (engine2, store2) = NewEngine();
+        using (store2) Assert.StartsWith("models.dev@", engine2.Prices.Version);
+    }
+
     [Fact] // Hợp đồng với mobile: JSON phải khớp contracts/firestore/*.schema.json
     public void Output_matches_firestore_contracts()
     {

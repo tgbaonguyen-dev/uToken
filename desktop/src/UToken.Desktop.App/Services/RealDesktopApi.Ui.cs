@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using UToken.Core.Pricing;
 using UToken.Desktop.App.Models;
 
 namespace UToken.Desktop.App.Services;
@@ -87,7 +88,11 @@ public sealed partial class RealDesktopApi
             .AppendLine($"Database: {_databasePath}")
             .AppendLine($"Pricing: {Prices.Version} (estimated API prices)");
 
-        var (counts, lastEvent) = await WithStoreAsync(() => (_store.Counts(), _store.GetLastEventAt()), ct);
+        var (counts, lastEvent, unpriced) = await WithStoreAsync(() => (_store.Counts(), _store.GetLastEventAt(), ModelsWithoutCatalogPrice()), ct);
+        if (Prices is TieredPriceBook book)
+            report.AppendLine($"Price catalog: {book.ModelCount} models from models.dev" +
+                              (book.LastFetchedAt is { } f ? $", fetched {f:u}" : ", not fetched yet (using built-in prices)"));
+        foreach (var m in unpriced) report.AppendLine($"  not on models.dev: {m}");
         report.AppendLine($"Stored: {counts.Events:N0} usage events, {counts.Turns:N0} turns, {counts.Files:N0} log files tracked")
               .AppendLine($"Last event: {(lastEvent is { } le ? le.ToString("u") : "none")}");
 

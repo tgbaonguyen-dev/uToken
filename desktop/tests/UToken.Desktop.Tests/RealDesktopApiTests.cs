@@ -31,14 +31,14 @@ public sealed class RealDesktopApiTests : IDisposable
         File.Copy(Path.Combine(AppContext.BaseDirectory, "fixtures", fixture), dest);
     }
 
-    private RealDesktopApi NewApi()
+    private RealDesktopApi NewApi(HttpClient? http = null)
     {
         var db = Path.Combine(_home.FullName, "utoken.db");
         var store = new SqliteStore(db);
         var engine = new UsageEngine(store, [new CodexCollector(), new ClaudeCodeCollector()], _home.FullName, Utc7, clock: _clock);
         var locations = RealDesktopApi.DefaultLocations(
             Path.Combine(_home.FullName, ".codex"), Path.Combine(_home.FullName, ".claude"), _home.FullName, ["codex", "claude_code", "antigravity"]);
-        return new RealDesktopApi(engine, store, locations, db, clock: _clock);
+        return new RealDesktopApi(engine, store, locations, db, clock: _clock) { PriceHttpClient = http };
     }
 
     [Fact]
@@ -152,6 +152,33 @@ public sealed class RealDesktopApiTests : IDisposable
         Assert.DoesNotContain("Mock", report);
     }
 
+    [Fact]
+    public async Task Prices_are_updated_from_models_dev_once_per_day()
+    {
+        int calls = 0;
+        var handler = new StubHandler(() =>
+        {
+            calls++;
+            return """{"anthropic":{"models":{"claude-opus-5-5":{"cost":{"input":4,"output":20,"cache_read":0.2,"cache_write":5}}}}}""";
+        });
+        using var api = NewApi(new HttpClient(handler));
+        await api.GetSourcesAsync(); // quét log trước
+        Assert.True(await api.UpdatePricesAsync());
+        Assert.False(await api.UpdatePricesAsync()); // còn mới → không gọi lại
+        Assert.Equal(1, calls);
+        var report = await api.GetDiagnosticsAsync();
+        Assert.Contains("Price catalog: 1 models from models.dev", report);
+        Assert.Contains("codex-auto-review (fallback price)", report);
+    }
+
+    [Fact]
+    public async Task Price_update_failure_keeps_working()
+    {
+        using var api = NewApi(new HttpClient(new StubHandler(() => throw new HttpRequestException("offline"))));
+        Assert.False(await api.UpdatePricesAsync());
+        Assert.True((await api.GetSourcesAsync()).Sources.Single(s => s.Id == "codex").EstimatedCost > 0);
+    }
+
     [AvaloniaFact]
     public async Task Main_view_model_loads_with_real_api()
     {
@@ -167,6 +194,12 @@ public sealed class RealDesktopApiTests : IDisposable
     {
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
         _home.Delete(true);
+    }
+
+    private sealed class StubHandler(Func<string> body) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(body()) });
     }
 
     private sealed class FixedClock(DateTimeOffset now) : TimeProvider

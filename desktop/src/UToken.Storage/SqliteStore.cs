@@ -333,6 +333,58 @@ public sealed class SqliteStore : IDisposable
         return null;
     }
 
+    /// <summary>Toàn bộ các phiên bản giá đã lưu, kèm bậc context, để dựng <see cref="TieredPriceBook"/> trong bộ nhớ.</summary>
+    public IReadOnlyList<PriceEntry> LoadAllPrices()
+    {
+        var rows = _db.Query<PriceRowWithKey>("""
+            SELECT pricing_version AS PricingVersion, provider AS Vendor, model AS Model, effective_from AS EffectiveFrom,
+                   input_per_mtok AS Input, cached_input_per_mtok AS Cached, cache_write_per_mtok AS CacheWrite, output_per_mtok AS Output
+            FROM pricing
+            """).ToList();
+        var tiers = _db.Query<PriceTierRowWithKey>("""
+            SELECT pricing_version AS PricingVersion, provider AS Vendor, model AS Model, context_above AS ContextAbove,
+                   input_per_mtok AS Input, cached_input_per_mtok AS Cached, cache_write_per_mtok AS CacheWrite, output_per_mtok AS Output
+            FROM pricing_tier
+            """).ToLookup(t => (t.PricingVersion, t.Vendor, t.Model));
+        return rows.Select(r => new PriceEntry(
+            r.Vendor, r.Model,
+            DateTimeOffset.Parse(r.EffectiveFrom, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+            r.PricingVersion,
+            new PriceSchedule(r.ToPrice(), tiers[(r.PricingVersion, r.Vendor, r.Model)].Select(t => t.ToTier()).ToArray())))
+            .ToList();
+    }
+
+    private sealed class PriceRowWithKey
+    {
+        public string PricingVersion { get; set; } = "";
+        public string Vendor { get; set; } = "";
+        public string Model { get; set; } = "";
+        public string EffectiveFrom { get; set; } = "";
+        public string Input { get; set; } = "";
+        public string Cached { get; set; } = "";
+        public string? CacheWrite { get; set; }
+        public string Output { get; set; } = "";
+
+        public Price ToPrice() => new PriceRow { Input = Input, Cached = Cached, CacheWrite = CacheWrite, Output = Output }.ToPrice();
+    }
+
+    private sealed class PriceTierRowWithKey
+    {
+        public string PricingVersion { get; set; } = "";
+        public string Vendor { get; set; } = "";
+        public string Model { get; set; } = "";
+        public long ContextAbove { get; set; }
+        public string Input { get; set; } = "";
+        public string Cached { get; set; } = "";
+        public string? CacheWrite { get; set; }
+        public string Output { get; set; } = "";
+
+        public PriceTier ToTier() => new PriceTierRow
+        {
+            ContextAbove = ContextAbove, Input = Input, Cached = Cached, CacheWrite = CacheWrite, Output = Output,
+        }.ToTier();
+    }
+
     private static string Str(decimal d) => d.ToString(CultureInfo.InvariantCulture);
 
     private IReadOnlyList<PriceTier> LoadTiers(

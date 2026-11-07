@@ -4,7 +4,7 @@ namespace UToken.Desktop.App;
 
 /// <summary>
 /// Chạy core không cần giao diện:
-///   dotnet run --project src/UToken.Desktop.App -- --scan [--db đường-dẫn.db] [--out thư-mục]
+///   dotnet run --project src/UToken.Desktop.App -- --scan [--db đường-dẫn.db] [--out thư-mục] [--update-prices]
 /// In tóm tắt và JSON của daily hôm nay + efficiency/current. Có --out thì ghi thêm file JSON vào thư mục đó.
 /// </summary>
 internal static class CliScan
@@ -22,6 +22,20 @@ internal static class CliScan
             AppSettings.ExpandHome(settings.Collectors.ClaudeHome));
         using (store)
         {
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("uToken-desktop");
+                var maxAge = args.Contains("--update-prices") ? TimeSpan.Zero : (TimeSpan?)null;
+                var changed = engine.UpdatePricesAsync(http, maxAge).GetAwaiter().GetResult();
+                Console.WriteLine(changed is null ? "Giá: còn mới, không tải lại" : $"Giá: đã tải models.dev, {changed} model đổi giá");
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or InvalidDataException)
+            {
+                Console.WriteLine($"Giá: không tải được models.dev ({ex.GetType().Name}), dùng giá đã lưu");
+            }
+            Console.WriteLine($"Bảng giá: {engine.Prices.Version}");
+
             var started = DateTime.UtcNow;
             var snap = engine.Run();
             var s = snap.Scan;

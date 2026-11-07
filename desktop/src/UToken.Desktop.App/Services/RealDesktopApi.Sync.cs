@@ -77,6 +77,7 @@ public sealed partial class RealDesktopApi
 
     public async Task<SyncResult> SyncNowAsync(CancellationToken ct = default)
     {
+        await UpdatePricesAsync(ct); // chỉ tải khi giá đã cũ hơn ~1 ngày
         var snapshot = await WithStoreAsync(() => _engine.Run(ct), ct);
         LastSnapshot = snapshot;
         _lastScan = snapshot.Scan;
