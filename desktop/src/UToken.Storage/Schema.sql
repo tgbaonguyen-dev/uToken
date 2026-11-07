@@ -110,3 +110,28 @@ CREATE TABLE IF NOT EXISTS sync_queue (
   next_retry_at  TEXT,
   created_at     TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS pricing (
+  pricing_version         TEXT NOT NULL,
+  provider                TEXT NOT NULL,
+  model                   TEXT NOT NULL,
+  input_per_mtok          TEXT NOT NULL,
+  cached_input_per_mtok   TEXT NOT NULL,
+  cache_write_per_mtok    TEXT,
+  cache_write_1h_per_mtok TEXT,
+  output_per_mtok         TEXT NOT NULL,
+  effective_from          TEXT NOT NULL,
+  PRIMARY KEY (pricing_version, provider, model)
+);
+
+CREATE TABLE IF NOT EXISTS pricing_tier (
+  pricing_version       TEXT NOT NULL,
+  provider              TEXT NOT NULL,
+  model                 TEXT NOT NULL,
+  context_above         INTEGER NOT NULL,
+  input_per_mtok        TEXT NOT NULL,
+  cached_input_per_mtok TEXT NOT NULL,
+  cache_write_per_mtok  TEXT,
+  output_per_mtok       TEXT NOT NULL,
+  PRIMARY KEY (pricing_version, provider, model, context_above)
+);
