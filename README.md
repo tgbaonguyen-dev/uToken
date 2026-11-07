@@ -43,10 +43,10 @@ utoken/
 | Phần | Yêu cầu | Lệnh |
 |---|---|---|
 | Desktop | .NET SDK 10 | `cd desktop && dotnet restore && dotnet test` rồi `dotnet run --project src/UToken.Desktop.App` |
-| Mobile | Flutter stable, Android SDK | `cd mobile && flutter create --platforms=android . && flutter pub get && flutter test` |
+| Mobile | Flutter 3.29.3+, JDK 17, Android SDK | `cd mobile && flutter pub get && flutter test` |
 | Firebase | Node 20+, Firebase CLI | `cd firebase && npm ci && npm test` (chạy emulator) |
 
-File cấu hình Firebase thật (`google-services.json`, `firebase.desktop.json`) **không commit**. Xem `docs/setup.md`.
+File cấu hình Firebase thật (`google-services.json`, `appsettings.Local.json`) **không commit**. Xem `docs/setup.md` và `docs/auth.md`.
 
 ## Làm việc nhóm
 

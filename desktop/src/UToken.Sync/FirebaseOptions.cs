@@ -24,6 +24,22 @@ public sealed class FirebaseOptions
         ? $"http://{AuthEmulatorHost}/identitytoolkit.googleapis.com/v1"
         : "https://identitytoolkit.googleapis.com/v1";
 
+    public string SecureTokenBaseUrl => UseEmulator
+        ? $"http://{AuthEmulatorHost}/securetoken.googleapis.com/v1"
+        : "https://securetoken.googleapis.com/v1";
+
+    // Separate credentials for each project and emulator/production environment.
+    public string SessionKey => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+        System.Text.Encoding.UTF8.GetBytes($"{ProjectId}|{(UseEmulator ? AuthEmulatorHost : "production")}")));
+
+    public IReadOnlyList<string> ValidateGoogleSignIn()
+    {
+        var errors = Validate().ToList();
+        if (IsPlaceholder(OAuthClientId)) errors.Add("Firebase:OAuthClientId chưa điền");
+        if (IsPlaceholder(OAuthClientSecret)) errors.Add("Firebase:OAuthClientSecret chưa điền");
+        return errors.Distinct().ToArray();
+    }
+
     /// <summary>Thiếu giá trị bắt buộc thì trả danh sách lỗi để báo người dùng.</summary>
     public IReadOnlyList<string> Validate()
     {

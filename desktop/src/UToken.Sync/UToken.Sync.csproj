@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
     <ProjectReference Include="../UToken.Storage/UToken.Storage.csproj" />
   </ItemGroup>

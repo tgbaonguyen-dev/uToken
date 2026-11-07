@@ -13,6 +13,20 @@
       <Button Content="Settings" />
     </StackPanel>
     <StackPanel Margin="24" Spacing="12">
+      <Border Padding="20" BorderThickness="1" BorderBrush="Gray" CornerRadius="8">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Tài khoản Google" FontSize="22" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Account}" IsVisible="{Binding IsSignedIn}" />
+          <TextBlock Text="{Binding AuthMessage}" TextWrapping="Wrap" />
+          <ProgressBar IsIndeterminate="True" IsVisible="{Binding AuthBusy}" Height="4" />
+          <StackPanel Orientation="Horizontal" Spacing="12" IsEnabled="{Binding !AuthBusy}">
+            <Button Content="Continue with Google" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" />
+            <Button Content="Thử khôi phục phiên" Command="{Binding RestoreSessionCommand}" IsVisible="{Binding !IsSignedIn}" />
+            <Button Content="Đăng xuất" Command="{Binding SignOutCommand}" IsVisible="{Binding IsSignedIn}" />
+          </StackPanel>
+          <Button Content="Hủy đăng nhập" Command="{Binding SignInCancelCommand}" IsVisible="{Binding SignInCommand.IsRunning}" />
+        </StackPanel>
+      </Border>
       <TextBlock Text="{Binding Status}" />
       <TextBlock Text="{Binding TotalTokens, StringFormat='Tổng token: {0:N0}'}" FontSize="28" />
       <TextBlock Text="{Binding LastSync}" />

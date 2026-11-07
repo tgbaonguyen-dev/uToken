@@ -15,6 +15,7 @@
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="ZstdSharp.Port" Version="0.8.5" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
     <!-- Vá bảo mật cho gói kéo theo. Xóa khi gói cha đã tự dùng bản mới. -->
     <!-- GHSA-xrw6-gwf8-vvr9: Tmds.DBus.Protocol nhỏ hơn 0.21.3 (đi kèm Avalonia trên Linux) -->
     <PackageVersion Include="Tmds.DBus.Protocol" Version="0.21.3" />

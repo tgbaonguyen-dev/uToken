@@ -1,11 +1,14 @@
 # Mobile (Flutter, Android)
 
-Thư mục `android/` chưa có trong mẫu. Lần đầu chạy:
+Thư mục `android/` đã được tạo cho package `com.utoken.mobile`, Android 9+.
+Đăng ký package và SHA-1/SHA-256 trong Firebase, bật Google provider rồi đặt
+`google-services.json` vào `android/app/` (không commit). Xem [thiết lập auth](../docs/auth.md).
 
 ```bash
-flutter create --platforms=android --org com.yourteam --project-name utoken_mobile .
 flutter pub get
-flutterfire configure   # sinh lib/firebase_options.dart (đã gitignore)
+flutter analyze
+flutter test
+flutter run
 ```
 
 ## Cấu trúc (feature-first)
@@ -31,3 +34,8 @@ lib/
 
 Mỗi feature chia `data/` (đọc Firestore), `domain/` (model, logic thuần), `presentation/` (màn hình, widget).
 State management: Riverpod. Mobile **không tự tính** P50/P90 hay khoảng tin cậy — chỉ hiển thị `efficiency/current` do desktop tính.
+
+`authRepositoryProvider` cung cấp Google Sign-In/Firebase Auth; `authControllerProvider`
+theo dõi phiên. Router chặn màn hình riêng tư khi chưa đăng nhập hoặc hết phiên.
+Các data repository mới nên đọc `userDocumentProvider` để scope vào UID hiện tại.
+Firebase SDK giữ phiên; ứng dụng không tự ghi ID/refresh token vào preferences hay Firestore.
