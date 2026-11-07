@@ -15,11 +15,11 @@ public partial class MainViewModel
     public bool IsSyncDetailState => ActiveSyncScenario?.Id is "sync-failed" or "not-paired" or "syncing";
     public bool IsSyncFailure => ActiveSyncScenario?.Id == "sync-failed";
     public bool IsSyncProgress => ActiveSyncScenario?.Id == "syncing";
-    public string SyncQueuedLabel => $"{SyncStateConfig?.Queue.Sum(q => q.Events) ?? 0} events queued (mock)";
+    public string SyncQueuedLabel => $"{SyncStateConfig?.Queue.Sum(q => q.Events) ?? 0} events queued";
     public HealthData[] SyncStateDetails => IsSyncFailure
         ? [new("Device", Sync?.Device?.Name ?? "No mobile device", "#F3F4F7"),
            new("Last successful sync", Sync?.Device?.LastSync ?? "Not synchronized yet", "#9096A1"),
-           new("Encryption", Sync?.EncryptionTitle ?? "Demo only", "#2EC790"),
+           new("Encryption", Sync?.EncryptionTitle ?? "Not configured", "#2EC790"),
            new("Collector", DisplayedCollector?.Label ?? "Unknown", DisplayedCollector?.Color ?? "#9096A1")]
         : ActiveSyncScenario?.Details ?? [];
 

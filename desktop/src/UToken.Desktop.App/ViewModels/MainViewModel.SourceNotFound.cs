@@ -18,6 +18,6 @@ public partial class MainViewModel
         if (IsBusy || !CanNavigate || NotFoundScenario is null) return;
         var guide = string.Join("\n\n", NotFoundScenario.Guide.Select(s => $"{s.Number}. {s.Title}\n{s.Description}"));
         var paths = string.Join("\n", SourceList?.Sources.Select(s => $"{s.Name}: {s.Path}") ?? []);
-        SourceSetupGuideRequested?.Invoke($"Supported source setup (UI demo)\n\n{guide}\n\nExpected paths (sample):\n{paths}\n\nNo provider files or system settings are accessed.");
+        SourceSetupGuideRequested?.Invoke($"Supported source setup\n\n{guide}\n\nExpected paths:\n{paths}\n\nNo provider files or system settings are accessed.");
     }
 }

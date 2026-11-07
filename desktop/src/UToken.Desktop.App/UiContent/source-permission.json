@@ -1,0 +1,61 @@
+{
+  "headline": "Log access needs attention",
+  "description": "The collector cannot read the selected provider's local usage logs.",
+  "sourceId": "gemini",
+  "instructions": [
+    {
+      "number": "1",
+      "title": "Review folder permissions",
+      "description": "Open the permission settings for the provider log folder.",
+      "action": ""
+    },
+    {
+      "number": "2",
+      "title": "Allow read access for uToken",
+      "description": "Usage metadata only; prompt and response content stay private.",
+      "action": ""
+    },
+    {
+      "number": "3",
+      "title": "Return and retry",
+      "description": "Retry checks whether the log folder can be read again; no OS permissions are changed.",
+      "action": ""
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "normal",
+      "name": "Normal",
+      "missingAccess": false,
+      "retryResult": "granted"
+    },
+    {
+      "id": "permission-required",
+      "name": "D10 - Retry succeeds",
+      "missingAccess": true,
+      "retryResult": "granted"
+    },
+    {
+      "id": "permission-denied",
+      "name": "D10 - Still denied",
+      "missingAccess": true,
+      "retryResult": "denied"
+    },
+    {
+      "id": "source-not-found",
+      "name": "D21 - Still not found",
+      "missingAccess": false,
+      "retryResult": "granted",
+      "sourcesNotFound": true,
+      "restoreSourcesOnScan": false
+    },
+    {
+      "id": "source-found-on-scan",
+      "name": "D21 - Found after rescan",
+      "missingAccess": false,
+      "retryResult": "granted",
+      "sourcesNotFound": true,
+      "restoreSourcesOnScan": true
+    }
+  ]
+}

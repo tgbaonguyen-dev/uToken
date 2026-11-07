@@ -12,7 +12,7 @@ namespace UToken.Collectors.ClaudeCode;
 /// <param name="claudeHome">Thư mục ~/.claude; null thì lấy theo thư mục home truyền vào DiscoverFiles.</param>
 public sealed class ClaudeCodeCollector(string? claudeHome = null) : ILogCollector
 {
-    public const string Version = "claude-2";
+    public const string Version = "claude-3";
     public string ParserVersion => Version;
     public Provider Provider => Provider.ClaudeCode;
 
@@ -104,6 +104,8 @@ public sealed class ClaudeCodeCollector(string? claudeHome = null) : ILogCollect
             if (!msg.TryGetProperty("usage", out var u) || u.ValueKind != JsonValueKind.Object) return;
             if (Json.Str(msg, "id") is not { } id) { MalformedLines++; return; }
             if (!_seen.Add(id)) return; // dòng trùng của cùng một phản hồi
+            // "<synthetic>" là tin nhắn Claude Code tự tạo (báo lỗi, ngắt lượt), không phải lần gọi model.
+            if (Json.Str(msg, "model") == "<synthetic>") return;
 
             long input = Json.Long(u, "input_tokens");
             long read = Json.Long(u, "cache_read_input_tokens");

@@ -10,9 +10,9 @@ public partial class MainWindow : Window
     private void ShowOverviewDiagnostics(string report) =>
         ShowReport(report, "Collector diagnostics", "Application environment and recent log entries");
     private void ShowPermissionInstructions(string report) =>
-        ShowReport(report, "Restore log access", "UI demo - no system permissions are changed.");
+        ShowReport(report, "Restore log access", "uToken never changes system permissions.");
     private void ShowSourceSetupGuide(string report) =>
-        ShowReport(report, "Configure sources", "UI demo - supported tools and expected log paths.");
+        ShowReport(report, "Configure sources", "Supported tools and expected log paths.");
     private void ShowReport(string report, string heading, string subtitle)
     {
         if (!IsVisible) return;

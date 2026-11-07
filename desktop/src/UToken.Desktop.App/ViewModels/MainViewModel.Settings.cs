@@ -57,7 +57,7 @@ public partial class MainViewModel
         SettingsMessage = action switch
         {
             "updates" => Settings.UpdateMessage,
-            "clear" => "Demo clear completed (simulation). Sample records are retained.",
+            "clear" => "Clearing local data is not available yet. Records are retained.",
             _ => null,
         };
         ConfirmClearData = false;

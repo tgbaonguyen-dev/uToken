@@ -25,7 +25,7 @@
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('appsettings.Local.json')" />
     <None Update="firebase.desktop.example.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="MockData/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="UiContent/*.json" CopyToOutputDirectory="PreserveNewest" />
     <AvaloniaResource Include="Assets/**" />
   </ItemGroup>
 </Project>

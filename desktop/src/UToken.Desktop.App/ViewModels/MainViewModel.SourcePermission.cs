@@ -55,7 +55,7 @@ public partial class MainViewModel
         await RunAsync(async () =>
         {
             ApplySourcePermission(await api.SetSourcePermissionScenarioAsync(SelectedPermissionScenario?.Id ?? "normal"));
-            Notice = "Sources demo - no system permissions or sample usage are changed.";
+            Notice = "State preview - no system permissions or usage data are changed.";
         });
         if (HasError && SourcePermission is not null)
         {
@@ -70,15 +70,15 @@ public partial class MainViewModel
         ApplySourcePermission(await api.RetrySourcePermissionAsync(source.Id));
         if (HasPermissionIssue)
             PermissionRetryFailure = $"Access to {source.Name} is still denied. Review the permissions and try again.";
-        Notice = HasPermissionIssue ? "Demo check: access is still denied. Review the instructions and try again."
-            : "Demo access restored. Existing usage history is retained.";
+        Notice = HasPermissionIssue ? "Access is still denied. Review the instructions and try again."
+            : "Access restored. Existing usage history is retained.";
     });
     [RelayCommand] private void ShowPermissionInstructions(string mode)
     {
         if (IsBusy || !CanNavigate || SourcePermission is null) return;
         var introduction = mode == "system"
             ? "System Settings simulation: no operating-system settings are opened or changed."
-            : "Permission instructions (UI demo)";
+            : "Permission instructions";
         var steps = string.Join("\n\n", SourcePermission.Config.Instructions.Select(s => $"{s.Number}. {s.Title}\n{s.Description}"));
         PermissionInstructionsRequested?.Invoke($"{introduction}\n\nAffected source: {PermissionSource?.Name ?? "All supported sources"}\nLog path (sample): {PermissionSource?.Path ?? string.Join("; ", SourceList?.Sources.Select(s => s.Path) ?? [])}\n\n{steps}");
     }

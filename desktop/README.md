@@ -16,7 +16,20 @@ dotnet test
 dotnet run --project src/UToken.Desktop.App
 ```
 
-## Desktop UI demo (D02, D05, D06, D04, D07, D03)
+## Real data (default)
+
+The app now runs on real local data. `App.axaml.cs` builds `RealDesktopApi` (`Services/RealDesktopApi*.cs`):
+
+- Usage numbers come from `UsageEngine`: Codex and Claude Code logs are read incrementally into SQLite at `%LOCALAPPDATA%/uToken/utoken.db` (Linux: `~/.local/share/uToken/utoken.db`). See `../docs/core.md` for formulas.
+- Enabled sources and log folders come from `appsettings.json` (`Collectors.Enabled`, `CodexHome`, `ClaudeHome`). Gemini/Antigravity shows *Paused* unless enabled; its local logs have no token data yet (OQ-10).
+- Sources check the real log folder: missing → *Not found*, unreadable → *Permission required*. Rescan scans each provider and reports progress.
+- Activity lists real usage events (newest 1,000 per query); Export writes them to CSV.
+- **Sync now** runs a full local analysis (scan, daily summaries, efficiency report) and keeps summaries queued. Cloud upload is not wired yet: when the sync module is ready, set `RealDesktopApi.Uploader`; until then Sync reports *Not paired* and history rows say *Local only*. Pairing codes are not used (desktop and mobile will sign in with the same Google account).
+- Static UI copy (setup steps, preview-state scenarios, permission instructions) lives in `src/UToken.Desktop.App/UiContent/*.json`. The *Preview state* selectors only preview screen states; they never change stored usage.
+
+The mock implementation (`MockDesktopApi`) and its JSON fixtures moved to `tests/UToken.Desktop.Tests/Mock` and `tests/UToken.Desktop.Tests/MockData`. They are used only by UI tests; the sections below describe that mock behaviour.
+
+## Desktop UI with mock data (tests only; D02, D05, D06, D04, D07, D03)
 
 - Overview displays the dashboard. Sources opens the provider list; select a card to open its detail, then use Back to sources.
 - Rescan sources simulates a scan and reloads JSON. Settings remains disabled until its screen is implemented.

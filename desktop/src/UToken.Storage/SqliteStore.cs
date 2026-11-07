@@ -166,6 +166,20 @@ public sealed class SqliteStore : IDisposable
             (long)r.is_side != 0, (string?)r.project_key)).ToList();
     }
 
+    /// <summary>Lần đọc log thành công gần nhất của một nguồn (null nếu chưa đọc).</summary>
+    public DateTimeOffset? GetLastReadAt(Provider provider) =>
+        _db.ExecuteScalar<string?>("SELECT MAX(last_ok_at) FROM source_files WHERE provider = @p", new { p = provider.ToWire() })
+            is string s ? ParseTs(s) : null;
+
+    /// <summary>Thời điểm event mới nhất của một nguồn, hoặc của mọi nguồn khi <paramref name="provider"/> null.</summary>
+    public DateTimeOffset? GetLastEventAt(Provider? provider = null) =>
+        _db.ExecuteScalar<string?>(
+            provider is null ? "SELECT MAX(occurred_at) FROM usage_events" : "SELECT MAX(occurred_at) FROM usage_events WHERE provider = @p",
+            new { p = provider?.ToWire() }) is string s ? ParseTs(s) : null;
+
+    public DateTimeOffset? GetFirstEventAt() =>
+        _db.ExecuteScalar<string?>("SELECT MIN(occurred_at) FROM usage_events") is string s ? ParseTs(s) : null;
+
     public IReadOnlyDictionary<string, string> GetProjects() =>
         _db.Query<(string, string)>("SELECT project_key, display_name FROM projects").ToDictionary(r => r.Item1, r => r.Item2);
 

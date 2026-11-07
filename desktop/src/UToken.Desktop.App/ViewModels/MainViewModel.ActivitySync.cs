@@ -95,7 +95,7 @@ public partial class MainViewModel
     [RelayCommand]
     private Task SyncNowAsync() => RunAsync(async () =>
     {
-        IsSyncing = true; SyncMessage = "Synchronizing demo usage metadata...";
+        IsSyncing = true; SyncMessage = "Analyzing local usage...";
         try
         {
             var result = await api.SyncNowAsync();
@@ -114,7 +114,7 @@ public partial class MainViewModel
     private Task DisconnectAsync() => RunAsync(async () =>
     {
         Sync = await api.DisconnectAsync(); ConfirmDisconnect = false;
-        SyncMessage = "Demo device disconnected. Pair a device to resume sync."; SyncMessageColor = "#9096A1";
+        SyncMessage = "Device disconnected. Sign in again to resume sync."; SyncMessageColor = "#9096A1";
     });
     private async Task StartPairingCoreAsync()
     {

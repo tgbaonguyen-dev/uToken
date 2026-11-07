@@ -44,6 +44,7 @@ public sealed class UsageEngine(
     private readonly TaskBuilderOptions _taskOptions = taskOptions ?? new TaskBuilderOptions();
 
     public DateTimeOffset Now => _clock.GetUtcNow();
+    public IReadOnlyList<ILogCollector> Collectors => _collectors;
     public DateOnly Today => DailyAggregator.LocalDate(Now, TimeZone);
 
     public static readonly JsonSerializerOptions JsonOptions = new()
@@ -57,7 +58,10 @@ public sealed class UsageEngine(
     // ───────────────────────── Quét log ─────────────────────────
 
     /// <summary>Đọc phần mới của mọi file log trong allowlist. Đọc lại bao nhiêu lần cũng không cộng trùng.</summary>
-    public ScanReport Scan(CancellationToken ct = default)
+    public ScanReport Scan(CancellationToken ct = default) => Scan(null, ct);
+
+    /// <summary>Như <see cref="Scan(CancellationToken)"/> nhưng chỉ quét các nguồn trong <paramref name="only"/> (null = mọi nguồn).</summary>
+    public ScanReport Scan(IReadOnlyCollection<Provider>? only, CancellationToken ct = default)
     {
         int read = 0, unchanged = 0, newEvents = 0, turns = 0, malformed = 0;
         var dates = new HashSet<DateOnly>();
@@ -65,6 +69,7 @@ public sealed class UsageEngine(
 
         foreach (var collector in _collectors)
         {
+            if (only is not null && !only.Contains(collector.Provider)) continue;
             IEnumerable<string> files;
             try { files = collector.DiscoverFiles(homeDirectory).ToList(); }
             catch (Exception ex) { errors.Add($"{collector.Provider.ToWire()}: {ex.GetType().Name}"); continue; }

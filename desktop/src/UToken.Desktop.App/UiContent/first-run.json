@@ -1,0 +1,24 @@
+{
+  "title": "Set up automatic tracking",
+  "subtitle": "Three steps to connect your AI usage securely.",
+  "steps": [
+    {
+      "number": "01",
+      "title": "Sign in with Google",
+      "description": "Use the same account as uToken mobile",
+      "action": "Continue"
+    },
+    {
+      "number": "02",
+      "title": "Allow local log access",
+      "description": "Usage metadata only - prompts stay private",
+      "action": "Check log folders"
+    },
+    {
+      "number": "03",
+      "title": "Pair your phone",
+      "description": "Enter the one-time code from mobile",
+      "action": "Open pairing"
+    }
+  ]
+}

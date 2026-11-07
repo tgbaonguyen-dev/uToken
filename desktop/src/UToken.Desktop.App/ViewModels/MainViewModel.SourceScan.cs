@@ -38,12 +38,12 @@ public partial class MainViewModel
             var overview = await api.GetOverviewAsync(cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
             ApplySourcePermission(permission with { Sources = sources }); Overview = overview;
-            Notice = $"Demo scan complete - {sources.Sources.Length} sources checked."
+            Notice = $"Scan complete - {sources.Sources.Length} sources checked."
                 + (HasNoSupportedSources ? " No supported source found." : HasPermissionIssue ? " Some sources still require permission." : "");
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
-            Notice = "Demo scan canceled. Previous source results and usage history are retained.";
+            Notice = "Scan canceled. Previous source results and usage history are retained.";
         }
         finally
         {

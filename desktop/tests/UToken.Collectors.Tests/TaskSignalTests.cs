@@ -108,6 +108,14 @@ public class TaskSignalTests
     }
 
     [Fact]
+    public void Claude_synthetic_messages_are_not_model_calls()
+    {
+        var p = new ClaudeCodeCollector.Parser();
+        p.Feed("""{"type":"assistant","sessionId":"c-1","timestamp":"2026-11-05T10:00:00Z","isApiErrorMessage":true,"message":{"id":"syn-1","model":"<synthetic>","usage":{"input_tokens":0,"output_tokens":0}}}""");
+        Assert.Empty(p.Events);
+    }
+
+    [Fact]
     public void Malformed_line_is_counted_not_thrown()
     {
         var p = new ClaudeCodeCollector.Parser();

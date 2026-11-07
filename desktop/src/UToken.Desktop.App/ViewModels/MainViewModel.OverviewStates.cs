@@ -58,7 +58,7 @@ public partial class MainViewModel
         {
             var preview = await api.GetOverviewPreviewAsync(SelectedOverviewScenario?.Id ?? "normal");
             OverviewPreview = preview;
-            Notice = "Demo state preview - usage fixtures are unchanged.";
+            Notice = "State preview - usage data is unchanged.";
         });
         RestoreOverviewSelection(OverviewPreview?.Scenario.Id ?? "normal");
     }
@@ -71,11 +71,11 @@ public partial class MainViewModel
             case "normal":
                 OverviewPreview = await api.GetOverviewPreviewAsync("normal");
                 RestoreOverviewSelection("normal");
-                Notice = action == "restart" ? "Demo collector restarted. Sample history retained."
-                    : action == "retry" ? "Demo retry completed. No network request was made." : "Normal overview restored.";
+                Notice = action == "restart" ? "Preview: collector restarted. Usage history retained."
+                    : action == "retry" ? "Preview: retry completed. No network request was made." : "Normal overview restored.";
                 break;
             case "check":
-                Notice = "Demo collector check complete. No usage recorded; no provider logs were read.";
+                Notice = "Preview: collector check complete. Usage data is unchanged.";
                 break;
             case "sources":
                 Page = "sources";

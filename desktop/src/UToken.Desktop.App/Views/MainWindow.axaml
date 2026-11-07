@@ -2,7 +2,7 @@
  xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
  xmlns:views="using:UToken.Desktop.App.Views"
  x:Class="UToken.Desktop.App.Views.MainWindow" x:CompileBindings="False"
- Title="&#x03BC;Token &#x2014; Desktop Companion &#x00B7; Demo" Width="1180" Height="760" MinWidth="1020" MinHeight="650">
+ Title="&#x03BC;Token &#x2014; Desktop Companion" Width="1180" Height="760" MinWidth="1020" MinHeight="650">
  <Grid ColumnDefinitions="220,*">
   <Border Background="#121315" Padding="16,28,16,20">
    <Grid RowDefinitions="Auto,*,Auto">
@@ -44,14 +44,14 @@
    </Grid>
    <Grid Grid.Row="1" Margin="0,14,0,10" ColumnDefinitions="*,Auto">
     <TextBlock Text="{Binding Notice}" Classes="muted" FontSize="10"/>
-    <TextBlock Grid.Column="1" Text="Loading mock data..." IsVisible="{Binding IsBusy}" Foreground="{StaticResource SuccessBrush}" FontSize="11"/>
+    <TextBlock Grid.Column="1" Text="Loading..." IsVisible="{Binding IsBusy}" Foreground="{StaticResource SuccessBrush}" FontSize="11"/>
    </Grid>
    <Border Grid.Row="2" IsVisible="{Binding HasError}" BorderBrush="#F26039" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
     <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Error}" TextWrapping="Wrap" VerticalAlignment="Center"/><Button Grid.Column="1" Content="Try again" Command="{Binding LoadCommand}" IsEnabled="{Binding !IsBusy}"/></Grid>
    </Border>
    <ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
     <StackPanel>
-     <StackPanel IsVisible="{Binding IsOverview}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="OverviewScenarioSelector" ItemsSource="{Binding OverviewPreviewOptions}" SelectedItem="{Binding SelectedOverviewScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Overview demo state"/></StackPanel>
+     <StackPanel IsVisible="{Binding IsOverview}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Preview state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="OverviewScenarioSelector" ItemsSource="{Binding OverviewPreviewOptions}" SelectedItem="{Binding SelectedOverviewScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Overview demo state"/></StackPanel>
      <views:OverviewStateView IsVisible="{Binding IsOverviewState}"/>
      <!-- D02: Collector Dashboard -->
      <StackPanel IsVisible="{Binding IsOverviewDashboard}" Spacing="28">
@@ -84,7 +84,7 @@
        </StackPanel>
       </Grid>
      </StackPanel>
-     <StackPanel IsVisible="{Binding IsSources}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="PermissionScenarioSelector" ItemsSource="{Binding SourcePreviewOptions}" SelectedItem="{Binding SelectedPermissionScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Sources demo state"/></StackPanel>
+     <StackPanel IsVisible="{Binding IsSources}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Preview state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="PermissionScenarioSelector" ItemsSource="{Binding SourcePreviewOptions}" SelectedItem="{Binding SelectedPermissionScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Sources demo state"/></StackPanel>
      <views:SourceNotFoundView IsVisible="{Binding IsSourceNotFound}"/>
      <views:SourceScanView IsVisible="{Binding IsScanningSources}"/>
      <views:SourcePermissionView IsVisible="{Binding IsPermissionRequired}"/>
@@ -102,7 +102,7 @@
         </StackPanel>
        </Button>
       </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-      <TextBlock Text="No sources found. Update MockData/sources.json and rescan." IsVisible="{Binding IsSourceListEmpty}" Classes="muted"/>
+      <TextBlock Text="No supported sources found. Install Codex or Claude Code, then rescan." IsVisible="{Binding IsSourceListEmpty}" Classes="muted"/>
       <Grid ColumnDefinitions="1.9*,24,*">
        <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="Collection coverage" Classes="heading"/><TextBlock Text="What the collector reads from each provider." Classes="muted" FontSize="11"/>
         <ItemsControl ItemsSource="{Binding SourceList.Coverage}"><ItemsControl.ItemTemplate><DataTemplate><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="18,150,*,48"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Left"/><TextBlock Grid.Column="1" Text="{Binding Label}" FontSize="11"/><TextBlock Grid.Column="2" Text="{Binding Description}" Classes="muted" FontSize="10" TextWrapping="Wrap"/><TextBlock Grid.Column="3" Text="{Binding Count}" Foreground="{Binding Color}" TextAlignment="Right" FontSize="11"/></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
@@ -110,7 +110,7 @@
        <Border Grid.Column="2" Classes="card"><StackPanel Spacing="22"><TextBlock Text="Collector paths" Classes="heading"/>
         <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemTemplate><DataTemplate><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="40,*"><svg:Svg Path="{Binding Logo}" Width="32" Height="32"/><StackPanel Grid.Column="1" Margin="8,0" Spacing="8"><TextBlock Text="{Binding Name}" FontSize="11"/><TextBlock Text="{Binding Path}" Classes="muted" FontSize="10" TextWrapping="Wrap" ToolTip.Tip="{Binding Path}"/></StackPanel></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
         <Button Content="Manage permissions" Command="{Binding ShowPermissionInstructionsCommand}" CommandParameter="guide" IsEnabled="{Binding !IsBusy}"/>
-        <TextBlock Text="Demo mode. Source folders are not accessed." TextWrapping="Wrap" Classes="muted" FontSize="11"/>
+        <TextBlock Text="Only token counts and metadata are read from these folders." TextWrapping="Wrap" Classes="muted" FontSize="11"/>
        </StackPanel></Border>
       </Grid>
      </StackPanel>
@@ -137,13 +137,13 @@
       </StackPanel></Border>
      </StackPanel>
      <views:ActivityView IsVisible="{Binding IsActivityPage}"/>
-     <StackPanel IsVisible="{Binding IsSyncPage}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="SyncScenarioSelector" ItemsSource="{Binding SyncPreviewOptions}" SelectedItem="{Binding SelectedSyncScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Sync demo state"/></StackPanel>
+     <StackPanel IsVisible="{Binding IsSyncPage}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Preview state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="SyncScenarioSelector" ItemsSource="{Binding SyncPreviewOptions}" SelectedItem="{Binding SelectedSyncScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Sync demo state"/></StackPanel>
      <views:SectionStateView IsVisible="{Binding IsSectionStatePreview}"/>
      <views:SyncStateView IsVisible="{Binding IsSyncDetailState}"/>
      <views:SyncView IsVisible="{Binding IsSyncNormal}"/>
      <views:FirstRunView IsVisible="{Binding IsFirstRunPage}"/>
      <views:SettingsView IsVisible="{Binding IsSettingsPage}"/>
-     <StackPanel IsVisible="{Binding IsPairingPage}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="PairingScenarioSelector" ItemsSource="{Binding PairingScenarios}" SelectedItem="{Binding SelectedPairingScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Pairing demo state"/></StackPanel>
+     <StackPanel IsVisible="{Binding IsPairingPage}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Preview state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="PairingScenarioSelector" ItemsSource="{Binding PairingScenarios}" SelectedItem="{Binding SelectedPairingScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Pairing demo state"/></StackPanel>
      <views:PairingStateView IsVisible="{Binding IsPairingStateVisible}"/>
      <views:PairingView IsVisible="{Binding IsPairingFormVisible}"/>
     </StackPanel>

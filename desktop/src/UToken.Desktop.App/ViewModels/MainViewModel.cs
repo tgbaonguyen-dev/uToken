@@ -12,7 +12,7 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     [ObservableProperty] private string _page = "overview";
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _error;
-    [ObservableProperty] private string _notice = "Demo mode · Sample data";
+    [ObservableProperty] private string _notice = "Local data · usage metadata only";
     [ObservableProperty] private string _selectedPeriod = "30 days";
     private bool _startupLoaded;
     private string _loadedPeriod = "30 days";
