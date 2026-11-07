@@ -111,3 +111,15 @@ CREATE TABLE IF NOT EXISTS pricing (
   effective_from          TEXT NOT NULL,
   PRIMARY KEY (pricing_version, provider, model)
 );
+
+CREATE TABLE IF NOT EXISTS pricing_tier (
+  pricing_version       TEXT NOT NULL,
+  provider              TEXT NOT NULL,
+  model                 TEXT NOT NULL,
+  context_above         INTEGER NOT NULL,
+  input_per_mtok        TEXT NOT NULL,
+  cached_input_per_mtok TEXT NOT NULL,
+  cache_write_per_mtok  TEXT,
+  output_per_mtok       TEXT NOT NULL,
+  PRIMARY KEY (pricing_version, provider, model, context_above)
+);
