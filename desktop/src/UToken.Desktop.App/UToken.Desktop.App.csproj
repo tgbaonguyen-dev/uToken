@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Svg.Skia" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
@@ -19,5 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="firebase.desktop.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="MockData/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+    <AvaloniaResource Include="Assets/**" />
   </ItemGroup>
 </Project>

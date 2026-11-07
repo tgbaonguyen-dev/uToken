@@ -1,0 +1,17 @@
+[
+  {
+    "id": "gemini",
+    "name": "Gemini",
+    "availability": "Available (mock)"
+  },
+  {
+    "id": "codex",
+    "name": "Codex",
+    "availability": "Available (mock)"
+  },
+  {
+    "id": "claude",
+    "name": "Claude",
+    "availability": "Available (mock)"
+  }
+]

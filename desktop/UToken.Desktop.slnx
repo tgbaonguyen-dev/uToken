@@ -9,5 +9,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/UToken.Core.Tests/UToken.Core.Tests.csproj" />
     <Project Path="tests/UToken.Collectors.Tests/UToken.Collectors.Tests.csproj" />
+    <Project Path="tests/UToken.Desktop.Tests/UToken.Desktop.Tests.csproj" />
   </Folder>
 </Solution>

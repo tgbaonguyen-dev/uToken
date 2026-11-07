@@ -1,0 +1,722 @@
+{
+  "gemini": {
+    "1 day": {
+      "tokens": 142000,
+      "share": 62.4,
+      "estimatedCost": 0.82,
+      "dailyCost": 0.82,
+      "cacheRate": 19.6,
+      "cacheChange": 1.2,
+      "cacheChangePeriod": "today",
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 108000,
+          "share": 76.1
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 28000,
+          "share": 19.7
+        },
+        {
+          "name": "gemini-2.0-flash",
+          "tokens": 6000,
+          "share": 4.2
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-11-06T00:00:00+07:00",
+          "tokens": 9930,
+          "cached": 126
+        },
+        {
+          "timestamp": "2026-11-06T01:21:49.090909+07:00",
+          "tokens": 12289,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T02:43:38.181818+07:00",
+          "tokens": 14647,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T04:05:27.272727+07:00",
+          "tokens": 17005,
+          "cached": 210
+        },
+        {
+          "timestamp": "2026-11-06T05:27:16.363636+07:00",
+          "tokens": 6082,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T06:49:05.454545+07:00",
+          "tokens": 8441,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T08:10:54.545455+07:00",
+          "tokens": 10799,
+          "cached": 133
+        },
+        {
+          "timestamp": "2026-11-06T09:32:43.636364+07:00",
+          "tokens": 13157,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T10:54:32.727273+07:00",
+          "tokens": 15516,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T12:16:21.818182+07:00",
+          "tokens": 17874,
+          "cached": 225
+        },
+        {
+          "timestamp": "2026-11-06T13:38:10.909091+07:00",
+          "tokens": 6951,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 9309,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-11-06T00:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "hour"
+    },
+    "Week": {
+      "tokens": 994000,
+      "share": 62.4,
+      "estimatedCost": 5.74,
+      "dailyCost": 0.82,
+      "cacheRate": 22.4,
+      "cacheChange": 2.6,
+      "cacheChangePeriod": "this week",
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 756000,
+          "share": 76.1
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 196000,
+          "share": 19.7
+        },
+        {
+          "name": "gemini-2.0-flash",
+          "tokens": 42000,
+          "share": 4.2
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-10-30T15:00:00+07:00",
+          "tokens": 124640,
+          "cached": 1306
+        },
+        {
+          "timestamp": "2026-10-31T19:00:00+07:00",
+          "tokens": 154241,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-01T23:00:00+07:00",
+          "tokens": 183843,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-03T03:00:00+07:00",
+          "tokens": 213445,
+          "cached": 2177
+        },
+        {
+          "timestamp": "2026-11-04T07:00:00+07:00",
+          "tokens": 76342,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-05T11:00:00+07:00",
+          "tokens": 105944,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 135545,
+          "cached": 1378
+        }
+      ],
+      "periodStart": "2026-10-30T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "day"
+    },
+    "Total": {
+      "tokens": 10224000,
+      "share": 62.4,
+      "estimatedCost": 59.04,
+      "dailyCost": 0.82,
+      "cacheRate": 20.1,
+      "cacheChange": 3.1,
+      "cacheChangePeriod": "overall",
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 7780000,
+          "share": 76.1
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 2020000,
+          "share": 19.7
+        },
+        {
+          "name": "gemini-2.0-flash",
+          "tokens": 432000,
+          "share": 4.2
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-08-26T15:00:00+07:00",
+          "tokens": 714965,
+          "cached": 9090
+        },
+        {
+          "timestamp": "2026-09-02T04:05:27.272727+07:00",
+          "tokens": 884769,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-08T17:10:54.545455+07:00",
+          "tokens": 1054573,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-15T06:16:21.818182+07:00",
+          "tokens": 1224378,
+          "cached": 15151
+        },
+        {
+          "timestamp": "2026-09-21T19:21:49.090909+07:00",
+          "tokens": 437916,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-28T08:27:16.363636+07:00",
+          "tokens": 607720,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-04T21:32:43.636364+07:00",
+          "tokens": 777524,
+          "cached": 9595
+        },
+        {
+          "timestamp": "2026-10-11T10:38:10.909091+07:00",
+          "tokens": 947329,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-17T23:43:38.181818+07:00",
+          "tokens": 1117133,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-24T12:49:05.454545+07:00",
+          "tokens": 1286937,
+          "cached": 16161
+        },
+        {
+          "timestamp": "2026-10-31T01:54:32.727273+07:00",
+          "tokens": 500476,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 670280,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-08-26T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "week"
+    }
+  },
+  "codex": {
+    "1 day": {
+      "tokens": 65666,
+      "share": 28.8,
+      "estimatedCost": 0.44,
+      "dailyCost": 0.44,
+      "cacheRate": 19.6,
+      "cacheChange": 1.2,
+      "cacheChangePeriod": "today",
+      "models": [
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 51300,
+          "share": 78.2
+        },
+        {
+          "name": "gpt-5.5-mini",
+          "tokens": 14300,
+          "share": 21.8
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-11-06T00:00:00+07:00",
+          "tokens": 4522,
+          "cached": 55
+        },
+        {
+          "timestamp": "2026-11-06T01:21:49.090909+07:00",
+          "tokens": 5699,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T02:43:38.181818+07:00",
+          "tokens": 6876,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T04:05:27.272727+07:00",
+          "tokens": 8053,
+          "cached": 100
+        },
+        {
+          "timestamp": "2026-11-06T05:27:16.363636+07:00",
+          "tokens": 2602,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T06:49:05.454545+07:00",
+          "tokens": 3779,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T08:10:54.545455+07:00",
+          "tokens": 4956,
+          "cached": 62
+        },
+        {
+          "timestamp": "2026-11-06T09:32:43.636364+07:00",
+          "tokens": 6133,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T10:54:32.727273+07:00",
+          "tokens": 7310,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T12:16:21.818182+07:00",
+          "tokens": 8487,
+          "cached": 104
+        },
+        {
+          "timestamp": "2026-11-06T13:38:10.909091+07:00",
+          "tokens": 3036,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 4213,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-11-06T00:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "hour"
+    },
+    "Week": {
+      "tokens": 459666,
+      "share": 28.8,
+      "estimatedCost": 3.08,
+      "dailyCost": 0.44,
+      "cacheRate": 22.4,
+      "cacheChange": 2.6,
+      "cacheChangePeriod": "this week",
+      "models": [
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 359300,
+          "share": 78.2
+        },
+        {
+          "name": "gpt-5.5-mini",
+          "tokens": 100300,
+          "share": 21.8
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-10-30T15:00:00+07:00",
+          "tokens": 56971,
+          "cached": 571
+        },
+        {
+          "timestamp": "2026-10-31T19:00:00+07:00",
+          "tokens": 71798,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-01T23:00:00+07:00",
+          "tokens": 86626,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-03T03:00:00+07:00",
+          "tokens": 101454,
+          "cached": 1035
+        },
+        {
+          "timestamp": "2026-11-04T07:00:00+07:00",
+          "tokens": 32778,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-05T11:00:00+07:00",
+          "tokens": 47606,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 62433,
+          "cached": 642
+        }
+      ],
+      "periodStart": "2026-10-30T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "day"
+    },
+    "Total": {
+      "tokens": 4728000,
+      "share": 28.8,
+      "estimatedCost": 31.68,
+      "dailyCost": 0.44,
+      "cacheRate": 20.1,
+      "cacheChange": 3.1,
+      "cacheChangePeriod": "overall",
+      "models": [
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 3700000,
+          "share": 78.2
+        },
+        {
+          "name": "gpt-5.5-mini",
+          "tokens": 1030000,
+          "share": 21.8
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-08-26T15:00:00+07:00",
+          "tokens": 325608,
+          "cached": 3978
+        },
+        {
+          "timestamp": "2026-09-02T04:05:27.272727+07:00",
+          "tokens": 410355,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-08T17:10:54.545455+07:00",
+          "tokens": 495102,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-15T06:16:21.818182+07:00",
+          "tokens": 579849,
+          "cached": 7210
+        },
+        {
+          "timestamp": "2026-09-21T19:21:49.090909+07:00",
+          "tokens": 187336,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-28T08:27:16.363636+07:00",
+          "tokens": 272083,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-04T21:32:43.636364+07:00",
+          "tokens": 356830,
+          "cached": 4475
+        },
+        {
+          "timestamp": "2026-10-11T10:38:10.909091+07:00",
+          "tokens": 441577,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-17T23:43:38.181818+07:00",
+          "tokens": 526324,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-24T12:49:05.454545+07:00",
+          "tokens": 611072,
+          "cached": 7459
+        },
+        {
+          "timestamp": "2026-10-31T01:54:32.727273+07:00",
+          "tokens": 218558,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 303306,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-08-26T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "week"
+    }
+  },
+  "claude": {
+    "1 day": {
+      "tokens": 20000,
+      "share": 8.8,
+      "estimatedCost": 0.15,
+      "dailyCost": 0.15,
+      "cacheRate": 19.6,
+      "cacheChange": 1.2,
+      "cacheChangePeriod": "today",
+      "models": [
+        {
+          "name": "claude-sonnet",
+          "tokens": 16000,
+          "share": 80
+        },
+        {
+          "name": "claude-haiku",
+          "tokens": 4000,
+          "share": 20
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-11-06T00:00:00+07:00",
+          "tokens": 1399,
+          "cached": 18
+        },
+        {
+          "timestamp": "2026-11-06T01:21:49.090909+07:00",
+          "tokens": 1731,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T02:43:38.181818+07:00",
+          "tokens": 2063,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T04:05:27.272727+07:00",
+          "tokens": 2395,
+          "cached": 30
+        },
+        {
+          "timestamp": "2026-11-06T05:27:16.363636+07:00",
+          "tokens": 857,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T06:49:05.454545+07:00",
+          "tokens": 1189,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T08:10:54.545455+07:00",
+          "tokens": 1521,
+          "cached": 19
+        },
+        {
+          "timestamp": "2026-11-06T09:32:43.636364+07:00",
+          "tokens": 1853,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T10:54:32.727273+07:00",
+          "tokens": 2185,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T12:16:21.818182+07:00",
+          "tokens": 2517,
+          "cached": 31
+        },
+        {
+          "timestamp": "2026-11-06T13:38:10.909091+07:00",
+          "tokens": 979,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 1311,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-11-06T00:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "hour"
+    },
+    "Week": {
+      "tokens": 140000,
+      "share": 8.8,
+      "estimatedCost": 1.02,
+      "dailyCost": 0.15,
+      "cacheRate": 22.4,
+      "cacheChange": 2.6,
+      "cacheChangePeriod": "this week",
+      "models": [
+        {
+          "name": "claude-sonnet",
+          "tokens": 112000,
+          "share": 80
+        },
+        {
+          "name": "claude-haiku",
+          "tokens": 28000,
+          "share": 20
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-10-30T15:00:00+07:00",
+          "tokens": 17555,
+          "cached": 184
+        },
+        {
+          "timestamp": "2026-10-31T19:00:00+07:00",
+          "tokens": 21724,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-01T23:00:00+07:00",
+          "tokens": 25893,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-03T03:00:00+07:00",
+          "tokens": 30063,
+          "cached": 307
+        },
+        {
+          "timestamp": "2026-11-04T07:00:00+07:00",
+          "tokens": 10752,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-05T11:00:00+07:00",
+          "tokens": 14922,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 19091,
+          "cached": 194
+        }
+      ],
+      "periodStart": "2026-10-30T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "day"
+    },
+    "Total": {
+      "tokens": 1440000,
+      "share": 8.8,
+      "estimatedCost": 10.51,
+      "dailyCost": 0.15,
+      "cacheRate": 20.1,
+      "cacheChange": 3.1,
+      "cacheChangePeriod": "overall",
+      "models": [
+        {
+          "name": "claude-sonnet",
+          "tokens": 1150000,
+          "share": 80
+        },
+        {
+          "name": "claude-haiku",
+          "tokens": 288000,
+          "share": 20
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-08-26T15:00:00+07:00",
+          "tokens": 100699,
+          "cached": 1280
+        },
+        {
+          "timestamp": "2026-09-02T04:05:27.272727+07:00",
+          "tokens": 124615,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-08T17:10:54.545455+07:00",
+          "tokens": 148531,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-15T06:16:21.818182+07:00",
+          "tokens": 172448,
+          "cached": 2134
+        },
+        {
+          "timestamp": "2026-09-21T19:21:49.090909+07:00",
+          "tokens": 61678,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-09-28T08:27:16.363636+07:00",
+          "tokens": 85594,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-04T21:32:43.636364+07:00",
+          "tokens": 109510,
+          "cached": 1352
+        },
+        {
+          "timestamp": "2026-10-11T10:38:10.909091+07:00",
+          "tokens": 133427,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-17T23:43:38.181818+07:00",
+          "tokens": 157343,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-24T12:49:05.454545+07:00",
+          "tokens": 181259,
+          "cached": 2276
+        },
+        {
+          "timestamp": "2026-10-31T01:54:32.727273+07:00",
+          "tokens": 70490,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 94406,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-08-26T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "week"
+    }
+  }
+}

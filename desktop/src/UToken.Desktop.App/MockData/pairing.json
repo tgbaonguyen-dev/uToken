@@ -1,0 +1,24 @@
+{
+  "validCode": "482913",
+  "expiredCode": "000000",
+  "expiryMinutes": 10,
+  "demoHint": "Demo: 482913 pairs a phone; 000000 shows an expired code. Other codes are rejected.",
+  "rejectedMessage": "Code not recognized. Check the six digits and try again.",
+  "expiredMessage": "This code has expired. Start a new pairing session and enter a fresh code.",
+  "successMessage": "Demo phone paired successfully. Open Sync to view the connection.",
+  "securityItems": [
+    "Usage metadata",
+    "No prompt content",
+    "Encrypted sync",
+    "Revoke anytime"
+  ],
+  "device": {
+    "name": "Demo phone",
+    "platform": "Android",
+    "version": "uToken 1.0.0",
+    "initial": "D",
+    "isOnline": true,
+    "lastSyncAt": null,
+    "transferredBytes": 0
+  }
+}
