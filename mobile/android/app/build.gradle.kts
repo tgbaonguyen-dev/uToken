@@ -9,7 +9,7 @@ plugins {
 android {
     namespace = "com.utoken.mobile"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973" // Required by Firebase and Google Sign-In Android plugins.
 
     compileOptions {
         // Required by the existing flutter_local_notifications dependency.

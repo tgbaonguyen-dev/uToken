@@ -123,9 +123,13 @@ Không đưa đường dẫn JDK/SDK riêng của máy hoặc credential vào Gi
 Lượt build APK đầu tiên bị chặn bởi ổ C hết dung lượng khi Gradle tạo instrumented
 Kotlin compiler JAR trong cache. Lượt kiểm tra tiếp theo đã có dung lượng trống;
 cấu hình Android cũng bật core library desugaring cho thư viện thông báo có sẵn
-trong pubspec. Vẫn cần thêm google-services.json hợp lệ, hoàn tất Android SDK
+trong pubspec và dùng NDK 27.0.12077973 theo yêu cầu của các plugin Firebase/Google.
+Vẫn cần thêm google-services.json hợp lệ, hoàn tất Android SDK
 licenses nếu build yêu cầu và chạy Google Login trên thiết bị thật trước khi
 nghiệm thu. Các bước này không được coi là đã pass chỉ dựa vào unit/widget test.
+Kiểm tra Gradle `:app:processDebugGoogleServices --offline` đã chạy qua cấu hình
+dự án và dừng đúng tại lỗi thiếu google-services.json; APK và Google Login thật
+chưa được nghiệm thu.
 
 ## Tài liệu API
 
