@@ -1,0 +1,489 @@
+{
+  "referenceTime": "2026-11-06T15:00:00+07:00",
+  "sources": [
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "status": "Connected",
+      "color": "#F26039",
+      "path": "~/.gemini/antigravity",
+      "lastEventAt": "2026-11-06T14:58:00+07:00",
+      "collectorState": "running",
+      "health": {
+        "hasLogAccess": true,
+        "parserState": "healthy",
+        "lastReadAt": "2026-11-06T14:58:00+07:00",
+        "collectsPrompt": false
+      },
+      "tokens": 4260000,
+      "share": 62.4,
+      "estimatedCost": 24.6,
+      "dailyCost": 0.82,
+      "cacheRate": 21.8,
+      "cacheChange": 4.2,
+      "cacheChangePeriod": "this month",
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 3240000,
+          "share": 76.1
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 840000,
+          "share": 19.7
+        },
+        {
+          "name": "gemini-2.0-flash",
+          "tokens": 180000,
+          "share": 4.2
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-10-07T15:00:00+07:00",
+          "tokens": 80497,
+          "cached": 3472
+        },
+        {
+          "timestamp": "2026-10-09T01:17:08.571429+07:00",
+          "tokens": 74142,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-10T11:34:17.142857+07:00",
+          "tokens": 110154,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-11T21:51:25.714286+07:00",
+          "tokens": 93207,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-13T08:08:34.285714+07:00",
+          "tokens": 141930,
+          "cached": 3472
+        },
+        {
+          "timestamp": "2026-10-14T18:25:42.857143+07:00",
+          "tokens": 129219,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-16T04:42:51.428571+07:00",
+          "tokens": 177941,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-17T15:00:00+07:00",
+          "tokens": 146166,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-19T01:17:08.571429+07:00",
+          "tokens": 190652,
+          "cached": 3472
+        },
+        {
+          "timestamp": "2026-10-20T11:34:17.142857+07:00",
+          "tokens": 160995,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-21T21:51:25.714286+07:00",
+          "tokens": 218190,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-23T08:08:34.285714+07:00",
+          "tokens": 182178,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-24T18:25:42.857143+07:00",
+          "tokens": 233019,
+          "cached": 3472
+        },
+        {
+          "timestamp": "2026-10-26T04:42:51.428571+07:00",
+          "tokens": 207598,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-27T15:00:00+07:00",
+          "tokens": 249965,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-29T01:17:08.571429+07:00",
+          "tokens": 222427,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-30T11:34:17.142857+07:00",
+          "tokens": 269030,
+          "cached": 3472
+        },
+        {
+          "timestamp": "2026-10-31T21:51:25.714286+07:00",
+          "tokens": 237255,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-02T08:08:34.285714+07:00",
+          "tokens": 290214,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-03T18:25:42.857143+07:00",
+          "tokens": 262675,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-05T04:42:51.428571+07:00",
+          "tokens": 305042,
+          "cached": 3472
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 277504,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-10-07T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "day"
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "status": "Connected",
+      "color": "#4089EF",
+      "path": "~/.codex/sessions",
+      "lastEventAt": "2026-11-06T14:56:00+07:00",
+      "collectorState": "running",
+      "health": {
+        "hasLogAccess": true,
+        "parserState": "healthy",
+        "lastReadAt": "2026-11-06T14:56:00+07:00",
+        "collectsPrompt": false
+      },
+      "tokens": 1970000,
+      "share": 28.8,
+      "estimatedCost": 13.2,
+      "dailyCost": 0.44,
+      "cacheRate": 34.6,
+      "cacheChange": 2.1,
+      "cacheChangePeriod": "this month",
+      "models": [
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 1540000,
+          "share": 78.2
+        },
+        {
+          "name": "gpt-5.5-mini",
+          "tokens": 430000,
+          "share": 21.8
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-10-07T15:00:00+07:00",
+          "tokens": 37225,
+          "cached": 1606
+        },
+        {
+          "timestamp": "2026-10-09T01:17:08.571429+07:00",
+          "tokens": 34287,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-10T11:34:17.142857+07:00",
+          "tokens": 50940,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-11T21:51:25.714286+07:00",
+          "tokens": 43103,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-13T08:08:34.285714+07:00",
+          "tokens": 65634,
+          "cached": 1606
+        },
+        {
+          "timestamp": "2026-10-14T18:25:42.857143+07:00",
+          "tokens": 59756,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-16T04:42:51.428571+07:00",
+          "tokens": 82287,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-17T15:00:00+07:00",
+          "tokens": 67593,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-19T01:17:08.571429+07:00",
+          "tokens": 88165,
+          "cached": 1606
+        },
+        {
+          "timestamp": "2026-10-20T11:34:17.142857+07:00",
+          "tokens": 74451,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-21T21:51:25.714286+07:00",
+          "tokens": 100900,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-23T08:08:34.285714+07:00",
+          "tokens": 84247,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-24T18:25:42.857143+07:00",
+          "tokens": 107757,
+          "cached": 1606
+        },
+        {
+          "timestamp": "2026-10-26T04:42:51.428571+07:00",
+          "tokens": 96002,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-27T15:00:00+07:00",
+          "tokens": 115594,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-29T01:17:08.571429+07:00",
+          "tokens": 102859,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-30T11:34:17.142857+07:00",
+          "tokens": 124411,
+          "cached": 1605
+        },
+        {
+          "timestamp": "2026-10-31T21:51:25.714286+07:00",
+          "tokens": 109717,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-02T08:08:34.285714+07:00",
+          "tokens": 134207,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-03T18:25:42.857143+07:00",
+          "tokens": 121472,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-05T04:42:51.428571+07:00",
+          "tokens": 141064,
+          "cached": 1605
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 128329,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-10-07T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "day"
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "status": "Connected",
+      "color": "#E64C9D",
+      "path": "~/.claude/projects",
+      "lastEventAt": "2026-11-06T14:52:00+07:00",
+      "collectorState": "running",
+      "health": {
+        "hasLogAccess": true,
+        "parserState": "healthy",
+        "lastReadAt": "2026-11-06T14:52:00+07:00",
+        "collectsPrompt": false
+      },
+      "tokens": 600000,
+      "share": 8.8,
+      "estimatedCost": 4.38,
+      "dailyCost": 0.15,
+      "cacheRate": 18.2,
+      "cacheChange": 1.4,
+      "cacheChangePeriod": "this month",
+      "models": [
+        {
+          "name": "claude-sonnet",
+          "tokens": 480000,
+          "share": 80
+        },
+        {
+          "name": "claude-haiku",
+          "tokens": 120000,
+          "share": 20
+        }
+      ],
+      "trend": [
+        {
+          "timestamp": "2026-10-07T15:00:00+07:00",
+          "tokens": 11338,
+          "cached": 489
+        },
+        {
+          "timestamp": "2026-10-09T01:17:08.571429+07:00",
+          "tokens": 10443,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-10T11:34:17.142857+07:00",
+          "tokens": 15515,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-11T21:51:25.714286+07:00",
+          "tokens": 13128,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-13T08:08:34.285714+07:00",
+          "tokens": 19990,
+          "cached": 489
+        },
+        {
+          "timestamp": "2026-10-14T18:25:42.857143+07:00",
+          "tokens": 18200,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-16T04:42:51.428571+07:00",
+          "tokens": 25062,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-17T15:00:00+07:00",
+          "tokens": 20587,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-19T01:17:08.571429+07:00",
+          "tokens": 26852,
+          "cached": 489
+        },
+        {
+          "timestamp": "2026-10-20T11:34:17.142857+07:00",
+          "tokens": 22675,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-21T21:51:25.714286+07:00",
+          "tokens": 30731,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-23T08:08:34.285714+07:00",
+          "tokens": 25659,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-24T18:25:42.857143+07:00",
+          "tokens": 32819,
+          "cached": 489
+        },
+        {
+          "timestamp": "2026-10-26T04:42:51.428571+07:00",
+          "tokens": 29239,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-27T15:00:00+07:00",
+          "tokens": 35206,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-29T01:17:08.571429+07:00",
+          "tokens": 31328,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-10-30T11:34:17.142857+07:00",
+          "tokens": 37892,
+          "cached": 489
+        },
+        {
+          "timestamp": "2026-10-31T21:51:25.714286+07:00",
+          "tokens": 33416,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-02T08:08:34.285714+07:00",
+          "tokens": 40875,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-03T18:25:42.857143+07:00",
+          "tokens": 36996,
+          "cached": 0
+        },
+        {
+          "timestamp": "2026-11-05T04:42:51.428571+07:00",
+          "tokens": 42964,
+          "cached": 489
+        },
+        {
+          "timestamp": "2026-11-06T15:00:00+07:00",
+          "tokens": 39085,
+          "cached": 0
+        }
+      ],
+      "periodStart": "2026-10-07T15:00:00+07:00",
+      "periodEnd": "2026-11-06T15:00:00+07:00",
+      "granularity": "day"
+    }
+  ],
+  "coverage": [
+    {
+      "label": "Token usage",
+      "description": "Input, output, cached",
+      "available": 3,
+      "total": 3
+    },
+    {
+      "label": "Model identity",
+      "description": "Provider and model",
+      "available": 3,
+      "total": 3
+    },
+    {
+      "label": "Timing",
+      "description": "Timestamp; latency for Codex",
+      "available": 3,
+      "total": 3
+    },
+    {
+      "label": "Prompt content",
+      "description": "Never collected",
+      "available": 0,
+      "total": 3
+    },
+    {
+      "label": "AI responses",
+      "description": "Never collected",
+      "available": 0,
+      "total": 3
+    }
+  ]
+}

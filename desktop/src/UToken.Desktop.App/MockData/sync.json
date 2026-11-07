@@ -1,0 +1,69 @@
+{
+  "device": {
+    "name": "Demo phone",
+    "platform": "Android",
+    "version": "uToken 1.0.0",
+    "initial": "D",
+    "isOnline": true,
+    "lastSyncAt": "2026-11-06T15:00:00+07:00",
+    "transferredBytes": 18400000
+  },
+  "encryptionTitle": "Encryption enabled (demo)",
+  "encryptionDescription": "TLS in transit, encrypted at rest by Firebase. Sample status only.",
+  "privacy": [
+    {
+      "label": "Usage metadata",
+      "value": "Yes",
+      "color": "#2EC790"
+    },
+    {
+      "label": "Prompt content",
+      "value": "No",
+      "color": "#2EC790"
+    }
+  ],
+  "history": [
+    {
+      "device": "Demo phone",
+      "events": 128,
+      "result": "Success",
+      "occurredAt": "2026-11-06T14:44:00+07:00",
+      "bytes": 1800000
+    },
+    {
+      "device": "Demo phone",
+      "events": 84,
+      "result": "Success",
+      "occurredAt": "2026-11-06T14:29:00+07:00",
+      "bytes": 1100000
+    },
+    {
+      "device": "Demo phone",
+      "events": 57,
+      "result": "Success",
+      "occurredAt": "2026-11-06T14:14:00+07:00",
+      "bytes": 800000
+    },
+    {
+      "device": "Demo phone",
+      "events": 109,
+      "result": "Success",
+      "occurredAt": "2026-11-06T13:59:00+07:00",
+      "bytes": 1500000
+    },
+    {
+      "device": "Demo phone",
+      "events": 76,
+      "result": "Success",
+      "occurredAt": "2026-11-06T13:44:00+07:00",
+      "bytes": 1000000
+    }
+  ],
+  "nextSync": {
+    "state": "success",
+    "message": "Demo sync complete. Usage metadata is up to date.",
+    "events": 42,
+    "bytes": 600000
+  },
+  "referenceTime": "2026-11-06T15:00:00+07:00"
+}
