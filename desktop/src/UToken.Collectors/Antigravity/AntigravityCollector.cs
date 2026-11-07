@@ -9,6 +9,7 @@ namespace UToken.Collectors.Antigravity;
 public sealed class AntigravityCollector : ILogCollector
 {
     public Provider Provider => Provider.Antigravity;
+    public string ParserVersion => "antigravity-0";
 
     public IEnumerable<string> DiscoverFiles(string home)
     {
@@ -20,6 +21,5 @@ public sealed class AntigravityCollector : ILogCollector
         }
     }
 
-    public (IReadOnlyList<UsageEvent> Events, SourceFileState NewState) ReadNew(SourceFileState state) =>
-        (Array.Empty<UsageEvent>(), state); // TODO(OQ-10)
+    public CollectResult ReadNew(SourceFileState state) => CollectResult.Empty(state); // TODO(OQ-10)
 }

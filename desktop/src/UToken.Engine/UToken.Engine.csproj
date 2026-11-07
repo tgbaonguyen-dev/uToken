@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
+    <ProjectReference Include="../UToken.Collectors/UToken.Collectors.csproj" />
+    <ProjectReference Include="../UToken.Storage/UToken.Storage.csproj" />
+  </ItemGroup>
+</Project>
