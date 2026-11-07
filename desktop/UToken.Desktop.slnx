@@ -13,5 +13,6 @@
     <Project Path="tests/UToken.Engine.Tests/UToken.Engine.Tests.csproj" />
     <Project Path="tests/UToken.Desktop.Tests/UToken.Desktop.Tests.csproj" />
     <Project Path="tests/UToken.Storage.Tests/UToken.Storage.Tests.csproj" />
+    <Project Path="tests/UToken.Sync.Tests/UToken.Sync.Tests.csproj" />
   </Folder>
 </Solution>

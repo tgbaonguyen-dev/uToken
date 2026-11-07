@@ -31,15 +31,15 @@ public sealed class TieredPriceBook(IEnumerable<PriceEntry> entries, IPriceBook 
 
     /// <summary>Phiên bản models.dev mới nhất; chưa tải lần nào thì dùng phiên bản của bảng dự phòng.</summary>
     public string Version => _byModel.Count == 0
-        ? fallback.Version
+        ? Fallback.Version
         : _byModel.Values.SelectMany(v => v).MaxBy(e => e.EffectiveFrom)!.PricingVersion;
 
     public Price? Find(Provider provider, string model) =>
-        Versions(provider, model) is { } v ? v[^1].Schedule.Base : fallback.Find(provider, model);
+        Versions(provider, model) is { } v ? v[^1].Schedule.Base : Fallback.Find(provider, model);
 
     public Price? PriceFor(UsageEvent e)
     {
-        if (Versions(e.Provider, e.Model) is not { } versions) return fallback.PriceFor(e);
+        if (Versions(e.Provider, e.Model) is not { } versions) return Fallback.PriceFor(e);
         // Bản mới nhất có hiệu lực ≤ thời điểm event; event cũ hơn mọi bản thì dùng bản cũ nhất.
         var entry = versions[0];
         foreach (var v in versions)
