@@ -101,9 +101,10 @@ public sealed class FirebaseAuthService(HttpClient http, FirebaseOptions options
         await _gate.WaitAsync(ct);
         try
         {
-            // Do not report successful sign-out until the persisted credential has been removed.
-            await store.ClearAsync(ct);
+            // Stop local access immediately, including when OS vault cleanup fails.
+            // The exception still prevents the UI from reporting successful cleanup.
             ResetSession();
+            await store.ClearAsync(ct);
         }
         finally { _gate.Release(); }
     }
@@ -127,7 +128,7 @@ public sealed class FirebaseAuthService(HttpClient http, FirebaseOptions options
         if (response.IsSuccessStatusCode) return json;
         using (json)
         {
-            var code = json.RootElement.TryGetProperty("error", out var error) && error.ValueKind == JsonValueKind.Object
+            var code = json.RootElement.ValueKind == JsonValueKind.Object && json.RootElement.TryGetProperty("error", out var error) && error.ValueKind == JsonValueKind.Object
                 ? Optional(error, "message") : null;
             code = code?.Split([' ', ':'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
             var invalid = code is "TOKEN_EXPIRED" or "INVALID_REFRESH_TOKEN" or "USER_DISABLED" or "USER_NOT_FOUND" or "INVALID_IDP_RESPONSE" or "INVALID_ID_TOKEN";
@@ -137,9 +138,9 @@ public sealed class FirebaseAuthService(HttpClient http, FirebaseOptions options
         }
     }
 
-    private static string Required(JsonElement root, string name) => Optional(root, name) is { Length: > 0 } value
+    private static string Required(JsonElement root, string name) => Optional(root, name) is { } value && !string.IsNullOrWhiteSpace(value)
         ? value : throw new AuthException("AUTH_RESPONSE", "Phản hồi đăng nhập thiếu thông tin cần thiết.");
-    private static string? Optional(JsonElement root, string name) => root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+    private static string? Optional(JsonElement root, string name) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
     private static int Lifetime(JsonElement root, string name) => int.TryParse(Required(root, name), out var seconds) && seconds > 0
         ? seconds : throw new AuthException("AUTH_RESPONSE", "Thời hạn phiên đăng nhập không hợp lệ.");
 }

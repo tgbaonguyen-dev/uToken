@@ -23,6 +23,7 @@
             <Button Content="Continue with Google" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" />
             <Button Content="Thử khôi phục phiên" Command="{Binding RestoreSessionCommand}" IsVisible="{Binding !IsSignedIn}" />
             <Button Content="Đăng xuất" Command="{Binding SignOutCommand}" IsVisible="{Binding IsSignedIn}" />
+            <Button Content="Thử đăng xuất lại" Command="{Binding SignOutCommand}" IsVisible="{Binding RetrySignOut}" />
           </StackPanel>
           <Button Content="Hủy đăng nhập" Command="{Binding SignInCancelCommand}" IsVisible="{Binding SignInCommand.IsRunning}" />
         </StackPanel>

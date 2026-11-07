@@ -10,3 +10,8 @@
 Không cần secret để chạy CI (test dùng emulator và fixtures). Chỉ thêm secret khi làm workflow release.
 
 Kiểm tra auth: `dotnet test desktop/UToken.Desktop.slnx`; trong `mobile/` chạy `flutter pub get`, `flutter analyze`, `flutter test`. Test auth dùng HTTP/repository giả lập và callback loopback thật, không cần tài khoản Google hay credential thật.
+
+Kiểm tra tích hợp Auth/Firestore cần Node 24.12+, Java 21 và Firebase Emulator.
+Xem [auth-verification.md](auth-verification.md) để bật 3 integration test và chạy
+rules tests tuần tự. Không đặt biến `UTOKEN_TEST_AUTH_HOST` thì integration test
+được đánh dấu skip; unit test vẫn chạy.

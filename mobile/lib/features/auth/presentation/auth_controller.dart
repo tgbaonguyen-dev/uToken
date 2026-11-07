@@ -32,6 +32,7 @@ class AuthController extends StateNotifier<AuthState> {
   final AuthRepository _repository;
   late final StreamSubscription<AuthUser?> _subscription;
   bool _operating = false;
+  bool _validating = false;
   bool _expired = false;
   int _revision = 0;
 
@@ -63,6 +64,7 @@ class AuthController extends StateNotifier<AuthState> {
             message: user == null ? 'Bạn đã hủy đăng nhập Google.' : null);
       }
     } on AuthFailure catch (error) {
+      _expired = error.isSessionExpired;
       if (mounted) {
         state = AuthState(
             sessionExpired: error.isSessionExpired, message: error.message);
@@ -78,7 +80,8 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> validateSession() async {
-    if (!state.signedIn || _operating) return;
+    if (!state.signedIn || _operating || _validating) return;
+    _validating = true;
     final revision = _revision;
     try {
       await _repository.getIdToken(forceRefresh: true);
@@ -86,9 +89,18 @@ class AuthController extends StateNotifier<AuthState> {
       if (!mounted || revision != _revision) return;
       if (error.isSessionExpired) {
         _expired = true;
+        _operating = true;
+        // Lock private routes before waiting for SDK/plugin cleanup. Prevent a
+        // new sign-in from racing with cleanup and being signed out by it.
+        state = const AuthState(
+            sessionExpired: true,
+            busy: true,
+            message: 'Session expired. Vui lòng đăng nhập lại.');
         try {
           await _repository.signOut();
-        } catch (_) {/* Keep local routes locked. */}
+        } catch (_) {/* Keep local routes locked. */} finally {
+          _operating = false;
+        }
         if (!mounted || revision != _revision) return;
         if (mounted) {
           state = const AuthState(
@@ -106,6 +118,8 @@ class AuthController extends StateNotifier<AuthState> {
             message:
                 'Không kiểm tra được phiên. Kiểm tra kết nối mạng và thử lại.');
       }
+    } finally {
+      _validating = false;
     }
   }
 

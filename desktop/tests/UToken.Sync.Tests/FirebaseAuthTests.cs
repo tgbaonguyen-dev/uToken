@@ -131,6 +131,32 @@ public sealed class FirebaseAuthTests
         Assert.NotNull(store.Saved);
     }
 
+    [Theory]
+    [InlineData("null")]
+    [InlineData("[]")]
+    [InlineData("{\"localId\":123}")]
+    [InlineData("not-json")]
+    public async Task MalformedSuccessfulResponseIsARecoverableAuthError(string response)
+    {
+        using var http = new HttpClient(new Handler(_ => Task.FromResult(Json(response))));
+        var auth = new FirebaseAuthService(http, Options, new Google(), new MemoryStore());
+        Assert.Equal("AUTH_RESPONSE", (await Assert.ThrowsAsync<AuthException>(() => auth.SignInWithGoogleAsync())).Code);
+        Assert.Null(auth.CurrentUser);
+    }
+
+    [Fact]
+    public async Task FailedVaultDeletionStillLocksTheInMemorySession()
+    {
+        var store = new MemoryStore();
+        using var http = new HttpClient(new Handler(_ => Task.FromResult(Json(SignInResponse))));
+        var auth = new FirebaseAuthService(http, Options, new Google(), store);
+        await auth.SignInWithGoogleAsync();
+        store.FailClear = true;
+        await Assert.ThrowsAsync<IOException>(() => auth.SignOutAsync());
+        Assert.Null(auth.CurrentUser);
+        await Assert.ThrowsAsync<AuthException>(() => auth.GetIdTokenAsync());
+    }
+
     [Fact]
     public void SessionStorageIsSeparatedByProjectAndEnvironment()
     {
@@ -156,8 +182,9 @@ public sealed class FirebaseAuthTests
     private sealed class MemoryStore : IRefreshTokenStore
     {
         public StoredSession? Saved;
+        public bool FailClear;
         public Task<StoredSession?> LoadAsync(CancellationToken ct) => Task.FromResult(Saved);
         public Task SaveAsync(StoredSession session, CancellationToken ct) { Saved = session; return Task.CompletedTask; }
-        public Task ClearAsync(CancellationToken ct) { Saved = null; return Task.CompletedTask; }
+        public Task ClearAsync(CancellationToken ct) { if (FailClear) throw new IOException("unavailable"); Saved = null; return Task.CompletedTask; }
     }
 }

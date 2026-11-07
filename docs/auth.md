@@ -1,5 +1,7 @@
 # Google Login — FR-AUTH-001
 
+Kết quả rà soát, lỗi đã sửa và lệnh chạy nghiệm thu: [auth-verification.md](auth-verification.md).
+
 ## Hiện trạng và phạm vi
 
 Nhánh `feat/oauth-setup` tách từ `origin/dev` tại `b8529b2`. Ở commit đó, mobile

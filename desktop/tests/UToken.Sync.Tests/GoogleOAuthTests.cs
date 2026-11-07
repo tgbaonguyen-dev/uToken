@@ -82,6 +82,75 @@ public sealed class GoogleOAuthTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.GetIdTokenAsync(cts.Token));
     }
 
+    [Theory]
+    [InlineData("not-json", HttpStatusCode.OK, "AUTH_RESPONSE")]
+    [InlineData("[]", HttpStatusCode.OK, "AUTH_RESPONSE")]
+    [InlineData("{\"id_token\":123}", HttpStatusCode.OK, "AUTH_RESPONSE")]
+    [InlineData("{\"id_token\":\"\"}", HttpStatusCode.OK, "AUTH_RESPONSE")]
+    [InlineData("{}", HttpStatusCode.OK, "AUTH_RESPONSE")]
+    [InlineData("unavailable", HttpStatusCode.ServiceUnavailable, "AUTH_NETWORK")]
+    [InlineData("rate limit", HttpStatusCode.TooManyRequests, "AUTH_NETWORK")]
+    [InlineData("{\"error\":\"invalid_grant\"}", HttpStatusCode.BadRequest, "AUTH_INVALID")]
+    public async Task TokenEndpointFailuresAreRecoverableAndNeverExposeTheResponse(string body, HttpStatusCode status, string expected)
+    {
+        var error = await CallbackFailureAsync("code=valid-code", body, status);
+        Assert.Equal(expected, error.Code);
+        Assert.DoesNotContain(body, error.Message);
+    }
+
+    [Fact]
+    public async Task ProviderServerErrorIsNotReportedAsUserCancellation()
+    {
+        var error = await CallbackFailureAsync("error=server_error", "must not be requested", HttpStatusCode.OK);
+        Assert.Equal("AUTH_FAILED", error.Code);
+    }
+
+    [Theory]
+    [InlineData("?state=$STATE&state=$STATE&code=ignored")]
+    [InlineData("?state=$STATE&code=first&code=second")]
+    [InlineData("?state=wrong&error=access_denied")]
+    [InlineData("favicon.ico")]
+    public async Task MalformedCallbacksDoNotCompleteTheLogin(string invalidCallback)
+    {
+        Task? browserTask = null;
+        using var http = new HttpClient(new FirebaseAuthTests.Handler(_ => Task.FromResult(FirebaseAuthTests.Json("""{"id_token":"google-token"}"""))));
+        var client = new GoogleOAuthClient(http, Options(), uri =>
+        {
+            var query = Query(uri);
+            browserTask = Task.Run(async () =>
+            {
+                using var browser = new HttpClient();
+                using var wrong = await browser.GetAsync(query["redirect_uri"] + invalidCallback.Replace("$STATE", query["state"]));
+                Assert.Equal(HttpStatusCode.BadRequest, wrong.StatusCode);
+                using var right = await browser.GetAsync(query["redirect_uri"] + "?state=" + query["state"] + "&code=valid-code");
+                Assert.Equal(HttpStatusCode.OK, right.StatusCode);
+            });
+        });
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        Assert.Equal("google-token", await client.GetIdTokenAsync(timeout.Token));
+        await browserTask!;
+    }
+
+    private static async Task<AuthException> CallbackFailureAsync(string callback, string body, HttpStatusCode status)
+    {
+        Task? browserTask = null;
+        using var http = new HttpClient(new FirebaseAuthTests.Handler(_ => Task.FromResult(FirebaseAuthTests.Json(body, status))));
+        var client = new GoogleOAuthClient(http, Options(), uri =>
+        {
+            var query = Query(uri);
+            browserTask = Task.Run(async () =>
+            {
+                using var browser = new HttpClient();
+                using var response = await browser.GetAsync(query["redirect_uri"] + "?state=" + query["state"] + "&" + callback);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            });
+        });
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var error = await Assert.ThrowsAsync<AuthException>(() => client.GetIdTokenAsync(timeout.Token));
+        await browserTask!;
+        return error;
+    }
+
     [Fact]
     public async Task WindowsVaultRoundTripsWithoutPlaintextAndClearsCredential()
     {
@@ -95,6 +164,44 @@ public sealed class GoogleOAuthTests
             Assert.Equal("private-refresh-value", (await store.LoadAsync(default))!.RefreshToken);
             await store.ClearAsync(default);
             Assert.Null(await store.LoadAsync(default));
+        }
+        finally { await store.ClearAsync(default); if (Directory.Exists(dir)) Directory.Delete(dir); }
+    }
+
+    [Fact]
+    public async Task WindowsVaultConcurrentWritersNeverShareATemporaryFile()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var dir = Path.Combine(Path.GetTempPath(), "utoken-auth-test-" + Guid.NewGuid());
+        var first = new SecureRefreshTokenStore(dir, "test");
+        var second = new SecureRefreshTokenStore(dir, "test");
+        try
+        {
+            await Task.WhenAll(
+                first.SaveAsync(new StoredSession { Uid = "a", RefreshToken = new string('a', 100000) }, default),
+                second.SaveAsync(new StoredSession { Uid = "b", RefreshToken = new string('b', 100000) }, default));
+            var saved = (await first.LoadAsync(default))!;
+            Assert.Equal(new string(saved.Uid[0], 100000), saved.RefreshToken);
+            Assert.Single(Directory.GetFiles(dir));
+        }
+        finally { await first.ClearAsync(default); if (Directory.Exists(dir)) Directory.Delete(dir); }
+    }
+
+    [Fact]
+    public async Task WindowsVaultCancelledSavePreservesThePreviousCredential()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var dir = Path.Combine(Path.GetTempPath(), "utoken-auth-test-" + Guid.NewGuid());
+        var store = new SecureRefreshTokenStore(dir, "test");
+        try
+        {
+            await store.SaveAsync(new StoredSession { Uid = "a", RefreshToken = "previous" }, default);
+            using var cancelled = new CancellationTokenSource();
+            cancelled.Cancel();
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => store.SaveAsync(
+                new StoredSession { Uid = "b", RefreshToken = "replacement" }, cancelled.Token));
+            Assert.Equal("previous", (await store.LoadAsync(default))!.RefreshToken);
+            Assert.Single(Directory.GetFiles(dir));
         }
         finally { await store.ClearAsync(default); if (Directory.Exists(dir)) Directory.Delete(dir); }
     }

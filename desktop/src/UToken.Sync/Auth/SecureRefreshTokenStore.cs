@@ -41,7 +41,7 @@ public sealed class SecureRefreshTokenStore(string dataDirectory, string session
         {
             Directory.CreateDirectory(dataDirectory);
             var bytes = ProtectedData.Protect(Encoding.UTF8.GetBytes(json), Entropy, DataProtectionScope.CurrentUser);
-            var temporary = TokenPath + ".tmp";
+            var temporary = TokenPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
                 await File.WriteAllBytesAsync(temporary, bytes, ct);

@@ -19,6 +19,9 @@ class FakeAuthRepository implements AuthRepository {
   AuthFailure? failure;
   AuthFailure? tokenFailure;
   Completer<AuthUser?>? pending;
+  Completer<void>? pendingSignOut;
+  Completer<String>? pendingToken;
+  bool signOutFails = false;
   int signInCalls = 0;
   int signOutCalls = 0;
 
@@ -39,6 +42,7 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<String> getIdToken({bool forceRefresh = false}) async {
+    if (pendingToken != null) return pendingToken!.future;
     if (tokenFailure != null) throw tokenFailure!;
     return 'firebase-id';
   }
@@ -46,6 +50,8 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     signOutCalls++;
+    if (pendingSignOut != null) await pendingSignOut!.future;
+    if (signOutFails) throw StateError('vault unavailable');
     events.add(null);
   }
 }
@@ -185,5 +191,65 @@ void main() {
     expect(find.text('a@example.test'), findsNothing);
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle();
+  });
+
+  test('expired session locks routes before a slow sign-out completes',
+      () async {
+    final repository = FakeAuthRepository(initialUser: user)
+      ..pendingSignOut = Completer<void>()
+      ..tokenFailure = const AuthFailure('AUTH_INVALID', 'Expired');
+    final controller = AuthController(repository);
+    addTearDown(() {
+      controller.dispose();
+      repository.events.close();
+    });
+    await settleEvents();
+    expect(repository.signOutCalls, 1);
+    expect(controller.state.signedIn, isFalse);
+    expect(controller.state.sessionExpired, isTrue);
+    expect(controller.state.busy, isTrue);
+    await controller.signIn();
+    expect(repository.signInCalls, 0);
+    repository.pendingSignOut!.complete();
+    await settleEvents();
+    expect(controller.state.busy, isFalse);
+  });
+
+  test('late validation cannot clear a newly signed-in account', () async {
+    final repository = FakeAuthRepository(initialUser: user)
+      ..pendingToken = Completer<String>();
+    final controller = AuthController(repository);
+    addTearDown(() {
+      controller.dispose();
+      repository.events.close();
+    });
+    await settleEvents();
+    await controller.signOut();
+    await settleEvents();
+    const nextUser = AuthUser(uid: 'uid-b');
+    repository.result = nextUser;
+    await controller.signIn();
+    repository.pendingToken!
+        .completeError(const AuthFailure('AUTH_INVALID', 'Expired'));
+    await settleEvents();
+    expect(controller.state.user?.uid, 'uid-b');
+    expect(repository.signOutCalls, 1);
+  });
+
+  test('failed expiration cleanup keeps routes locked despite stale SDK events',
+      () async {
+    final repository = FakeAuthRepository(initialUser: user)
+      ..signOutFails = true
+      ..tokenFailure = const AuthFailure('AUTH_INVALID', 'Expired');
+    final controller = AuthController(repository);
+    addTearDown(() {
+      controller.dispose();
+      repository.events.close();
+    });
+    await settleEvents();
+    repository.events.add(user);
+    await settleEvents();
+    expect(controller.state.signedIn, isFalse);
+    expect(controller.state.sessionExpired, isTrue);
   });
 }

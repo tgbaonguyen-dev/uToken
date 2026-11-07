@@ -16,6 +16,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _authMessage = "Đăng nhập cùng tài khoản Google trên desktop và điện thoại.";
     [ObservableProperty] private bool _isSignedIn;
     [ObservableProperty] private bool _authBusy;
+    [ObservableProperty] private bool _retrySignOut;
 
     public MainViewModel(IAuthService auth)
     {
@@ -37,11 +38,17 @@ public partial class MainViewModel : ObservableObject
     private Task SignInAsync(CancellationToken ct) => RunAuthAsync(() => _auth.SignInWithGoogleAsync(ct));
 
     [RelayCommand]
-    private Task SignOutAsync(CancellationToken ct) => RunAuthAsync(() => _auth.SignOutAsync(ct));
-
-    private async Task RunAuthAsync(Func<Task> action)
+    private async Task SignOutAsync(CancellationToken ct)
     {
         if (AuthBusy) return;
+        RetrySignOut = !await RunAuthAsync(() => _auth.SignOutAsync(ct));
+        if (RetrySignOut && !IsSignedIn)
+            AuthMessage = "Phiên đã khóa trên ứng dụng nhưng chưa xóa được phiên đã lưu. Hãy thử đăng xuất lại.";
+    }
+
+    private async Task<bool> RunAuthAsync(Func<Task> action)
+    {
+        if (AuthBusy) return false;
         AuthBusy = true;
         AuthMessage = "Đang xử lý đăng nhập…";
         try
@@ -49,6 +56,7 @@ public partial class MainViewModel : ObservableObject
             await action();
             UpdateAccount();
             AuthMessage = IsSignedIn ? "Đăng nhập thành công. Bạn có thể tiếp tục ghép nối." : "Đăng nhập cùng tài khoản Google trên desktop và điện thoại.";
+            return true;
         }
         catch (AuthException ex) { AuthMessage = ex.Message; }
         catch (OperationCanceledException) { AuthMessage = "Đã hủy hoặc hết thời gian đăng nhập. Vui lòng thử lại."; }
@@ -56,6 +64,7 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
         { AuthMessage = "Không truy cập được kho lưu phiên. Kiểm tra quyền ghi và thử lại."; }
         finally { UpdateAccount(); AuthBusy = false; }
+        return false;
     }
 
     [RelayCommand]

@@ -76,7 +76,9 @@ public sealed class GoogleOAuthClient(HttpClient http, FirebaseOptions options,
                 await stream.WriteAsync(bytes, ct);
             }
             catch (IOException) { /* Browser may close before reading the response. */ }
-            if (denied) throw new AuthException("AUTH_CANCELLED", "Bạn đã hủy đăng nhập Google.");
+            if (denied) throw query["error"] == "access_denied"
+                ? new AuthException("AUTH_CANCELLED", "Bạn đã hủy đăng nhập Google.")
+                : new AuthException("AUTH_FAILED", "Google không hoàn tất đăng nhập. Vui lòng thử lại.");
         }
 
         using var content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -89,14 +91,25 @@ public sealed class GoogleOAuthClient(HttpClient http, FirebaseOptions options,
             ["grant_type"] = "authorization_code",
         });
         using var response = await http.PostAsync("https://oauth2.googleapis.com/token", content, ct);
+        if ((int)response.StatusCode >= 500 || response.StatusCode == HttpStatusCode.TooManyRequests)
+            throw new AuthException("AUTH_NETWORK", "Google tạm thời không khả dụng. Vui lòng thử lại.");
         if (!response.IsSuccessStatusCode)
             throw new AuthException("AUTH_INVALID", "Google từ chối phiên đăng nhập. Vui lòng thử lại.");
-        using var json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(ct), cancellationToken: ct);
-        if (!json.RootElement.TryGetProperty("id_token", out var token) || string.IsNullOrWhiteSpace(token.GetString()))
-            throw new AuthException("AUTH_INVALID", "Google không trả về ID token hợp lệ.");
-        // Firebase verifies the Google signature, issuer, audience and expiry during signInWithIdp.
-        return token.GetString()!;
+        JsonDocument json;
+        try { json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(ct), cancellationToken: ct); }
+        catch (JsonException) { throw InvalidResponse(); }
+        using (json)
+        {
+            if (json.RootElement.ValueKind != JsonValueKind.Object ||
+                !json.RootElement.TryGetProperty("id_token", out var token) ||
+                token.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(token.GetString()))
+                throw InvalidResponse();
+            // Firebase verifies the Google signature, issuer, audience and expiry during signInWithIdp.
+            return token.GetString()!;
+        }
     }
+
+    private static AuthException InvalidResponse() => new("AUTH_RESPONSE", "Google trả về dữ liệu đăng nhập không hợp lệ. Vui lòng thử lại.");
 
     public static Uri BuildAuthorizationUri(string clientId, string redirect, string verifier, string state)
     {
