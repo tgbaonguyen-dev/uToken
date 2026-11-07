@@ -120,11 +120,12 @@ giữ API NumberFormat đang dùng. Gradle wrapper 8.10.2
 cần JDK tương thích (khuyến nghị 17); Android Studio trên máy hiện dùng JDK 25.
 Không đưa đường dẫn JDK/SDK riêng của máy hoặc credential vào Git.
 
-Build APK trên máy hiện tại bị chặn bởi ổ C hết dung lượng khi Gradle tạo
-instrumented Kotlin compiler JAR trong cache. Cần giải phóng dung lượng/chuyển
-cache sang ổ còn trống, hoàn tất Android SDK licenses và thêm google-services.json
-trước khi nghiệm thu APK/Google Login trên thiết bị thật. Các bước này không được
-coi là đã pass chỉ dựa vào unit/widget test.
+Lượt build APK đầu tiên bị chặn bởi ổ C hết dung lượng khi Gradle tạo instrumented
+Kotlin compiler JAR trong cache. Lượt kiểm tra tiếp theo đã có dung lượng trống;
+cấu hình Android cũng bật core library desugaring cho thư viện thông báo có sẵn
+trong pubspec. Vẫn cần thêm google-services.json hợp lệ, hoàn tất Android SDK
+licenses nếu build yêu cầu và chạy Google Login trên thiết bị thật trước khi
+nghiệm thu. Các bước này không được coi là đã pass chỉ dựa vào unit/widget test.
 
 ## Tài liệu API
 
@@ -133,3 +134,4 @@ coi là đã pass chỉ dựa vào unit/widget test.
 - [Firebase Auth với Google trên Flutter](https://firebase.google.com/docs/auth/flutter/federated-auth)
 - [Google Sign-In 6.3.0](https://pub.dev/packages/google_sign_in/versions/6.3.0)
 - [Google Services Gradle plugin](https://developers.google.com/android/guides/google-services-plugin)
+- [Cấu hình Android của flutter_local_notifications 18.0.1](https://pub.dev/packages/flutter_local_notifications/versions/18.0.1)
