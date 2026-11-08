@@ -1,0 +1,44 @@
+{
+  "defaults": {
+    "language": "System",
+    "numberFormat": "Compact",
+    "syncInterval": "15 minutes",
+    "monthlyLimit": 50.0,
+    "alert90": true,
+    "alert100": true,
+    "backgroundSync": true,
+    "diagnostics": true,
+    "connected": true,
+    "lastSync": "2m ago",
+    "desktopName": "Demo Windows PC",
+    "accountName": "Camellya",
+    "accountEmail": "camellya@example.com",
+    "appVersion": "1.0.0",
+    "budgetMonth": "November",
+    "budgetDaysLeft": 9,
+    "aiProvider": "OpenAI",
+    "aiModel": "gpt-5.5-mini",
+    "thresholdReachedLabel": "Reached 27 Oct",
+    "thresholdBaselineLimit": 50,
+    "aiKeyPresent": true,
+    "aiConnection": "Connected",
+    "aiCheckedAt": "Demo result: today 02:00"
+  },
+  "options": {
+    "language": [
+      "System",
+      "English",
+      "Vietnamese"
+    ],
+    "numberFormat": [
+      "Compact",
+      "Full"
+    ],
+    "syncInterval": [
+      "5 minutes",
+      "15 minutes",
+      "30 minutes",
+      "Manual"
+    ]
+  }
+}

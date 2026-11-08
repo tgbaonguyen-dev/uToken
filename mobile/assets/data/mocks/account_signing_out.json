@@ -1,0 +1,61 @@
+{
+  "screen_id": "M13",
+  "screen_title": "Account",
+  "has_back_button": true,
+  "state_type": "signing_out",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Return to welcome",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Make sign-out and account deletion clearly different."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Cloud data is retained",
+        "subtitle": "You can sign in again later"
+      },
+      {
+        "title": "Desktop remains linked",
+        "subtitle": "Revoke it separately if needed"
+      }
+    ],
+    "title": "Signing out of this phone",
+    "description": "Ending the mobile session without deleting cloud usage.",
+    "icon_type": "signing_in"
+  },
+  "badge_text": "SIGNING OUT",
+  "specification_subtitle": "State specification · Signing out",
+  "figma_layout": {
+    "node": "94:5119",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/5a53e.svg",
+    "illustration_rect": {
+      "x": 141.552,
+      "y": 22.023916,
+      "w": 69.472,
+      "h": 42.881784
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/21f2c.svg",
+      "assets/figma/reviewed/f1f72.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

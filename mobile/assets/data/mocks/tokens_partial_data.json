@@ -1,0 +1,65 @@
+{
+  "screen_id": "M04",
+  "state_type": "partial_data",
+  "screen_title": "Tokens",
+  "has_back_button": false,
+  "badge_text": "PARTIAL DATA",
+  "specification_subtitle": "State specification · Partial data",
+  "card": {
+    "icon_type": "offline",
+    "title": "Some metrics are missing",
+    "description": "Token totals are available, but one or more sources did not provide complete metadata.",
+    "items": [
+      {
+        "id": "available_metrics_visible",
+        "title": "Available metrics remain visible",
+        "subtitle": "Missing values are labelled, not shown as zero",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "analysis_limited",
+        "title": "Analysis is limited",
+        "subtitle": "Insights explain which evidence is incomplete",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Name the affected provider, project or time range."
+  },
+  "action": {
+    "button_label": "View available data",
+    "background_color": "#171717",
+    "text_color": "#9c9fa8"
+  },
+  "has_bottom_navigation": true,
+  "figma_layout": {
+    "node": "94:514",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/4100e.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

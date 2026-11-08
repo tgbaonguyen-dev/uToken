@@ -1,0 +1,265 @@
+{
+  "accountStateDialogs": {
+    "reauthentication": {
+      "title": "Verify account (demo)",
+      "body": "Preview a recent-verification step, then return to the sample Account screen. No Google sign-in runs; the sample account remains signed in.",
+      "confirmLabel": "Simulate verified"
+    },
+    "deleting_account": {
+      "title": "Account deletion status (demo)",
+      "body": "Deletion is in progress in this scenario. No real account or device session was changed.",
+      "jobId": "demo-account-delete-001",
+      "items": [
+        "Device access: revoked (scenario)",
+        "Cloud account data: cleanup pending (scenario)"
+      ]
+    },
+    "delete_failed": {
+      "title": "Retry account deletion (demo)",
+      "body": "Preview another cleanup attempt. No account, session or usage records will be removed.",
+      "confirmLabel": "Preview retry"
+    },
+    "delete_partial": {
+      "title": "Account cleanup (demo)",
+      "body": "These are sample remaining resources. No real cleanup ran.",
+      "jobId": "demo-account-delete-001",
+      "items": [
+        "Usage summaries: needs cleanup (scenario)",
+        "Device session records: requires review (scenario)"
+      ]
+    }
+  },
+  "privacyVerification": {
+    "title": "Verify with Google (demo)",
+    "body": "Preview verification for a pending export. No Google sign-in or export is performed.",
+    "confirmLabel": "Simulate verified"
+  },
+  "privacyPartialDeletion": {
+    "title": "Remaining data (demo)",
+    "body": "This is a preview of an incomplete deletion. No records were removed.",
+    "jobId": "demo-delete-001",
+    "items": [
+      "Daily usage summaries: pending retry",
+      "Model usage summaries: needs review"
+    ],
+    "confirmLabel": "Preview retry"
+  },
+  "desktopPermissionHelp": {
+    "title": "Permission help (demo)",
+    "body": "The desktop collector needs read access to local usage metadata. This preview does not change permissions.",
+    "steps": [
+      "Open the desktop companion.",
+      "Review its source access settings.",
+      "Retry collection on the desktop, then return here."
+    ]
+  },
+  "export": {
+    "label": "Mock sample",
+    "columns": [
+      "date",
+      "tokens",
+      "chats",
+      "estimated_cost_usd",
+      "gemini_tokens",
+      "codex_tokens",
+      "claude_tokens"
+    ]
+  },
+  "alert": {
+    "usageFraction": 0.9004,
+    "contributor": "Gemini 2.5 Pro",
+    "weeklyIncrease": 12.4,
+    "subtitle": "Mock alert preview for your monthly limit."
+  },
+  "catalog": {
+    "updatedLabel": "Nov 1, 2026",
+    "models": [
+      {
+        "provider": "OpenAI / Codex",
+        "name": "gpt-5.3-codex",
+        "input": 1.75,
+        "cached": 0.175,
+        "output": 14.0,
+        "cacheWrite": null
+      },
+      {
+        "provider": "Google Gemini",
+        "name": "Gemini 4 Argon",
+        "input": 2.0,
+        "cached": 0.1,
+        "output": 10.0,
+        "cacheWrite": null
+      },
+      {
+        "provider": "Anthropic Claude",
+        "name": "Claude Sonnet 5.5",
+        "input": 2.0,
+        "cached": 0.1,
+        "output": 10.0,
+        "cacheWrite": 2.5
+      }
+    ]
+  },
+  "costExample": {
+    "modelIndex": 0,
+    "tier": "Standard",
+    "inputTokens": 100000,
+    "cachedTokens": 20000,
+    "outputTokens": 30000
+  },
+  "ai": {
+    "providers": [
+      {
+        "name": "OpenAI",
+        "models": [
+          "gpt-5.5-mini",
+          "gpt-5.5-codex"
+        ],
+        "keyMask": "sk-demo-••••3f9a"
+      },
+      {
+        "name": "Anthropic",
+        "models": [
+          "claude-sonnet",
+          "claude-haiku"
+        ],
+        "keyMask": "demo-ant-••••a12b"
+      },
+      {
+        "name": "Google Gemini",
+        "models": [
+          "gemini-2.5-pro",
+          "gemini-2.5-flash"
+        ],
+        "keyMask": "demo-gem-••••b34c"
+      }
+    ],
+    "keyChoices": [
+      "Use demo key",
+      "Remove demo key"
+    ],
+    "note": "Mock configuration only. Sample keys stay in memory for this session. No requests are sent."
+  },
+  "installStateHelp": {
+    "permission_denied": {
+      "title": "Desktop log access (demo)",
+      "body": "On the desktop computer, open the collector and allow access to the selected provider log folder. Then return to the install guide and choose Already installed. This preview does not change system permissions."
+    },
+    "unsupported_os": {
+      "title": "Desktop requirements (demo)",
+      "body": "This project targets Windows desktop. Install and run the Windows collector on your computer, then return to Connect desktop. This preview does not download or install software."
+    }
+  },
+  "statePreviewOutcomes": {
+    "signingIn": [
+      {
+        "label": "Sign-in succeeds",
+        "path": "/connect-desktop"
+      },
+      {
+        "label": "Sign-in fails",
+        "path": "/ui-state/failed"
+      },
+      {
+        "label": "Offline",
+        "path": "/ui-state/offline"
+      }
+    ],
+    "verifying": [
+      {
+        "label": "Pairing succeeds",
+        "path": "/ui-state/connected"
+      },
+      {
+        "label": "Wrong code",
+        "path": "/ui-state/wrongCode"
+      },
+      {
+        "label": "Code expired",
+        "path": "/ui-state/codeExpired"
+      }
+    ],
+    "initialLoading": [
+      {
+        "label": "Usage loaded",
+        "path": "/tokens"
+      },
+      {
+        "label": "Partial data",
+        "path": "/ui-state/partialData"
+      },
+      {
+        "label": "Desktop offline",
+        "path": "/ui-state/desktopOffline"
+      }
+    ],
+    "updatingWithData": [
+      {
+        "label": "Refresh succeeds",
+        "path": "/tokens"
+      },
+      {
+        "label": "Data remains stale",
+        "path": "/ui-state/staleData"
+      }
+    ],
+    "insightsAnalyzing": [
+      {
+        "label": "Analysis succeeds",
+        "path": "/insights"
+      },
+      {
+        "label": "Analysis fails",
+        "path": "/ui-state/insightsAnalysisFailed"
+      },
+      {
+        "label": "Insufficient data",
+        "path": "/ui-state/insightsInsufficientData"
+      }
+    ],
+    "desktopConnectionSyncing": [
+      {
+        "label": "Sync succeeds",
+        "path": "/desktop-connection"
+      },
+      {
+        "label": "Sync fails",
+        "path": "/ui-state/desktopConnectionSyncFailed"
+      }
+    ],
+    "privacyExportPreparing": [
+      {
+        "label": "Export ready",
+        "path": "/ui-state/privacyExportSuccess"
+      },
+      {
+        "label": "Export fails",
+        "path": "/ui-state/privacyExportFailed"
+      }
+    ],
+    "privacyDeletingUsage": [
+      {
+        "label": "Deletion succeeds (mock)",
+        "path": "/ui-state/privacyDeleteSuccess"
+      },
+      {
+        "label": "Partial deletion (mock)",
+        "path": "/ui-state/privacyDeletePartial"
+      }
+    ],
+    "accountDeletingAccount": [
+      {
+        "label": "Deletion succeeds (mock)",
+        "path": "/welcome"
+      },
+      {
+        "label": "Deletion fails (mock)",
+        "path": "/ui-state/accountDeleteFailed"
+      },
+      {
+        "label": "Partial deletion (mock)",
+        "path": "/ui-state/accountDeletePartial"
+      }
+    ]
+  }
+}

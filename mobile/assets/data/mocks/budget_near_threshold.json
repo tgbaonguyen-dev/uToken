@@ -1,0 +1,61 @@
+{
+  "screen_id": "M11",
+  "screen_title": "Budget & alerts",
+  "has_back_button": true,
+  "state_type": "near_threshold",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "View budget",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Use estimated cost language consistently."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "74% of $60 used",
+        "subtitle": "$15.60 estimated remaining"
+      },
+      {
+        "title": "Largest contributor · Gemini",
+        "subtitle": "Review usage before changing the limit"
+      }
+    ],
+    "title": "Approaching your alert level",
+    "description": "Estimated cost is close to the next configured threshold.",
+    "icon_type": "offline"
+  },
+  "badge_text": "NEAR THRESHOLD",
+  "specification_subtitle": "State specification · Near threshold",
+  "figma_layout": {
+    "node": "94:4014",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

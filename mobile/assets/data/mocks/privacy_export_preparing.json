@@ -1,0 +1,61 @@
+{
+  "screen_id": "M12",
+  "screen_title": "Privacy & data",
+  "has_back_button": true,
+  "state_type": "export_preparing",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Back to data settings",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Prevent duplicate export jobs."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "CSV and JSON requested",
+        "subtitle": "Prompt and response content is never included"
+      },
+      {
+        "title": "Keep the app open",
+        "subtitle": "Download becomes available when ready"
+      }
+    ],
+    "title": "Preparing your export",
+    "description": "Collecting usage summaries into machine-readable files.",
+    "icon_type": "signing_in"
+  },
+  "badge_text": "PREPARING EXPORT",
+  "specification_subtitle": "State specification · Preparing export",
+  "figma_layout": {
+    "node": "94:4439",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/5a53e.svg",
+    "illustration_rect": {
+      "x": 141.552,
+      "y": 22.023916,
+      "w": 69.472,
+      "h": 42.881784
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/21f2c.svg",
+      "assets/figma/reviewed/f1f72.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

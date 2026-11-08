@@ -1,0 +1,61 @@
+{
+  "screen_id": "M10",
+  "screen_title": "Desktop connection",
+  "has_back_button": true,
+  "state_type": "syncing",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "View connection",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Prevent duplicate sync jobs."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Collector is online",
+        "subtitle": "Only changed aggregates are uploaded"
+      },
+      {
+        "title": "Current data remains visible",
+        "subtitle": "Last successful sync is preserved"
+      }
+    ],
+    "title": "Syncing from desktop",
+    "description": "The companion is scanning local Antigravity usage and uploading aggregate changes.",
+    "icon_type": "signing_in"
+  },
+  "badge_text": "SYNCING",
+  "specification_subtitle": "State specification · Syncing",
+  "figma_layout": {
+    "node": "94:3169",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/5a53e.svg",
+    "illustration_rect": {
+      "x": 141.552,
+      "y": 22.023916,
+      "w": 69.472,
+      "h": 42.881784
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/21f2c.svg",
+      "assets/figma/reviewed/f1f72.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

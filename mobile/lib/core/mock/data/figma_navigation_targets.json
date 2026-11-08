@@ -1,0 +1,120 @@
+{
+  "routes": {
+    "M01": {
+      "Continue with Google": "M02",
+      "View demo": "M04"
+    },
+    "M02": {
+      "Back": "M01",
+      "Pair complete": "S02",
+      "Open install guide": "M03"
+    },
+    "M03": {
+      "Back": "M02",
+      "Download desktop app": "M02",
+      "Already installed": "M02"
+    },
+    "M04": {
+      "Open full report": "M04B",
+      "Open cost breakdown": "O03"
+    },
+    "M04B": {
+      "Back": "M04",
+      "See all days": "M06"
+    },
+    "M05": {
+      "Open cost breakdown": "O03",
+      "Open efficiency": "M05B"
+    },
+    "M05B": {
+      "Back": "M05",
+      "See suggestions": "M07",
+      "Compare models": "M05C"
+    },
+    "M05C": {
+      "Back": "M05B"
+    },
+    "M06": {
+      "Back": "M04B"
+    },
+    "M07": {},
+    "M09": {
+      "Open desktop collector": "M10",
+      "Open budget": "M11",
+      "Open privacy": "M12",
+      "Open account": "M13",
+      "Open model pricing": "M14",
+      "Open AI suggestions": "M15"
+    },
+    "M10": {
+      "Back": "M09",
+      "Sync now": "S03"
+    },
+    "M11": {
+      "Back": "M09",
+      "Save budget": "M09"
+    },
+    "M12": {
+      "Back": "M09",
+      "Delete data": "M09"
+    },
+    "M13": {
+      "Back": "M09",
+      "Export data": "O01",
+      "Sign out": "M01"
+    },
+    "O01": {
+      "Back": "M13",
+      "Download CSV": "M13",
+      "Download JSON": "M13"
+    },
+    "O02": {
+      "Back": "M11",
+      "View usage": "M05",
+      "Dismiss alert": "M11"
+    },
+    "M14": {
+      "Back": "M09",
+      "Back to settings": "M09"
+    },
+    "O03": {
+      "Dismiss": "@pop",
+      "View model pricing": "M14",
+      "Close": "@pop"
+    },
+    "M15": {
+      "Back": "M09",
+      "Test connection": "M09"
+    },
+    "S01": {
+      "Connect desktop": "M02"
+    },
+    "S02": {
+      "Refresh usage": "S03"
+    },
+    "S03": {},
+    "S04": {
+      "Retry sync": "S03",
+      "Desktop connection": "M10"
+    },
+    "M08": {
+      "Back": "M07"
+    }
+  },
+  "bottomBar": {
+    "M04": true,
+    "M05": true,
+    "M07": true,
+    "M09": true,
+    "S01": true,
+    "S02": true,
+    "S03": true,
+    "S04": true
+  },
+  "tabs": [
+    "M04",
+    "M05",
+    "M07",
+    "M09"
+  ]
+}
