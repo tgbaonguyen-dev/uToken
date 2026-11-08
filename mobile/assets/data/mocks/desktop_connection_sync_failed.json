@@ -1,32 +1,61 @@
-﻿{
-    "screen_id":  "M10",
-    "screen_title":  "Desktop connection",
-    "has_back_button":  true,
-    "state_type":  "sync_failed",
-    "state_label":  "SYNC FAILED",
-    "state_context":  "State specification Â· Sync failed",
-    "card_title":  "Latest sync failed",
-    "card_description":  "The collector could read local usage but could not finish the upload.",
-    "icon_type":  "failed",
-    "bullet_points":  [
-                          {
-                              "title":  "Local queue retained",
-                              "subtitle":  "Events will not be lost",
-                              "bullet_color":  "#E0525B"
-                          },
-                          {
-                              "title":  "Retry available",
-                              "subtitle":  "Network or service issue detected",
-                              "bullet_color":  "#E0525B"
-                          }
-                      ],
-    "behavior_label":  "BEHAVIOR",
-    "behavior_text":  "Separate collection success from upload failure.",
-    "action_text":  "Retry sync",
-    "active_tab":  "Settings",
-    "action":  {
-                   "button_label":  "Retry sync",
-                   "background_color":  "#171717",
-                   "text_color":  "#9C9FAB"
-               }
+{
+  "screen_id": "M10",
+  "screen_title": "Desktop connection",
+  "has_back_button": true,
+  "state_type": "sync_failed",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Retry sync",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Separate collection success from upload failure."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Local queue retained",
+        "subtitle": "Events will not be lost"
+      },
+      {
+        "title": "Retry available",
+        "subtitle": "Network or service issue detected"
+      }
+    ],
+    "title": "Latest sync failed",
+    "description": "The collector could read local usage but could not finish the upload.",
+    "icon_type": "failed"
+  },
+  "badge_text": "SYNC FAILED",
+  "specification_subtitle": "State specification · Sync failed",
+  "figma_layout": {
+    "node": "94:3764",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/49cc6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.260016,
+      "w": 89.856,
+      "h": 42.09096
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e35ed.svg",
+      "assets/figma/reviewed/93b03.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
 }

@@ -50,7 +50,7 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 80)),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('Đã chọn Week'), findsWidgets);
+    expect(find.text('2,000,000'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('utoken-tab-1')));
     await tester.pump();

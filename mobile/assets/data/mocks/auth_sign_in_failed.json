@@ -1,37 +1,65 @@
-﻿{
-    "screen_id":  "M01",
-    "state_type":  "failed",
-    "screen_title":  "Sign in",
-    "badge_text":  "FAILED",
-    "specification_subtitle":  "State specification · Failed",
-    "card":  {
-                 "icon_type":  "failed",
-                 "title":  "Couldn\u0027t sign you in",
-                 "description":  "Google authentication did not finish successfully.",
-                 "items":  [
-                               {
-                                   "id":  "account_not_connected",
-                                   "title":  "Account not connected",
-                                   "subtitle":  "No usage data was loaded",
-                                   "bullet_color":  "#E0525B"
-                               },
-                               {
-                                   "id":  "retry_available",
-                                   "title":  "Retry available",
-                                   "subtitle":  "If it repeats, check Google account access",
-                                   "bullet_color":  "#E0525B"
-                               }
-                           ]
-             },
-    "behavior":  {
-                     "label":  "BEHAVIOR",
-                     "description":  "Keep the error actionable and preserve privacy."
-                 },
-    "has_bottom_navigation":  false,
-    "action":  {
-                   "button_label":  "Retry sign-in",
-                   "cancel_label":  "Retry sign-in",
-                   "background_color":  "#F4F4F5",
-                   "text_color":  "#111214"
-               }
+{
+  "screen_id": "M01",
+  "state_type": "failed",
+  "screen_title": "Sign in",
+  "badge_text": "FAILED",
+  "specification_subtitle": "State specification · Failed",
+  "card": {
+    "icon_type": "failed",
+    "title": "Couldn’t sign you in",
+    "description": "Google authentication did not finish successfully.",
+    "items": [
+      {
+        "id": "account_not_connected",
+        "title": "Account not connected",
+        "subtitle": "No usage data was loaded",
+        "bullet_color": "#E0525B"
+      },
+      {
+        "id": "retry_available",
+        "title": "Retry available",
+        "subtitle": "If it repeats, check Google account access",
+        "bullet_color": "#E0525B"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep the error actionable and preserve privacy."
+  },
+  "has_bottom_navigation": false,
+  "action": {
+    "button_label": "Retry sign-in",
+    "cancel_label": "Retry sign-in",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "figma_layout": {
+    "node": "93:320",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 736,
+    "illustration": "assets/figma/reviewed/49cc6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.260015999999997,
+      "w": 89.856,
+      "h": 42.09096000000001
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e35ed.svg",
+      "assets/figma/reviewed/93b03.svg"
+    ],
+    "nav": [
+      null,
+      null,
+      null,
+      null
+    ]
+  }
 }

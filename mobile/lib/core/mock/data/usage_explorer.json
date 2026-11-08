@@ -1,0 +1,584 @@
+{
+  "periods": {
+    "Day": {
+      "inputPercent": 68.2,
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 113641,
+          "provider": "Gemini"
+        },
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 78080,
+          "provider": "Codex"
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 27879,
+          "provider": "Gemini"
+        },
+        {
+          "name": "claude-sonnet",
+          "tokens": 24400,
+          "provider": "Claude"
+        }
+      ],
+      "costChangePercent": 4.2,
+      "efficiency": {
+        "costPerSuccess": 0.28,
+        "changePercent": -12,
+        "successRate": 76,
+        "firstPass": 62,
+        "reworkCost": 14,
+        "cacheHitRate": 74,
+        "contextGrowth": 2.1,
+        "thinkingShare": 46,
+        "retryRate": 12,
+        "periodLabel": "Results per token \u00b7 today"
+      },
+      "suggestions": {
+        "savingsLabel": "today",
+        "affectedChats": 2,
+        "inputReduction": 18,
+        "count": 2,
+        "cachedSessionsLabel": "Long Gemini sessions",
+        "cacheSavings": 0.18,
+        "contextSavings": 0.28
+      },
+      "costBars": [
+        12,
+        8,
+        5,
+        4,
+        7,
+        12,
+        20,
+        35,
+        48,
+        70,
+        82,
+        60,
+        52,
+        75,
+        90,
+        100,
+        85,
+        65,
+        48,
+        32,
+        24,
+        18,
+        10,
+        8
+      ],
+      "costEmphasisBars": 3,
+      "costLabel": "Cost \u00b7 today"
+    },
+    "Week": {
+      "inputPercent": 69.5,
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 963600,
+          "provider": "Gemini"
+        },
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 600000,
+          "provider": "Codex"
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 236400,
+          "provider": "Gemini"
+        },
+        {
+          "name": "claude-sonnet",
+          "tokens": 200000,
+          "provider": "Claude"
+        }
+      ],
+      "costChangePercent": 8.1,
+      "efficiency": {
+        "costPerSuccess": 0.29,
+        "changePercent": -12,
+        "successRate": 74,
+        "firstPass": 60,
+        "reworkCost": 14,
+        "cacheHitRate": 74,
+        "contextGrowth": 2.1,
+        "thinkingShare": 46,
+        "retryRate": 12,
+        "periodLabel": "Results per token \u00b7 last 7 days"
+      },
+      "suggestions": {
+        "savingsLabel": "this week",
+        "affectedChats": 4,
+        "inputReduction": 18,
+        "count": 2,
+        "cachedSessionsLabel": "Long Gemini sessions",
+        "cacheSavings": 1.3,
+        "contextSavings": 1.96
+      },
+      "costBars": [
+        45,
+        62,
+        50,
+        85,
+        70,
+        100,
+        80
+      ],
+      "costEmphasisBars": 3,
+      "costLabel": "Cost \u00b7 this week"
+    },
+    "Month": {
+      "inputPercent": 70.4,
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 3422690,
+          "provider": "Gemini"
+        },
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 1967252,
+          "provider": "Codex"
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 839689,
+          "provider": "Gemini"
+        },
+        {
+          "name": "claude-sonnet",
+          "tokens": 601105,
+          "provider": "Claude"
+        }
+      ],
+      "costChangePercent": 12.4,
+      "efficiency": {
+        "costPerSuccess": 0.31,
+        "changePercent": -12,
+        "successRate": 72,
+        "firstPass": 58,
+        "reworkCost": 14,
+        "cacheHitRate": 74,
+        "contextGrowth": 2.1,
+        "thinkingShare": 46,
+        "retryRate": 12,
+        "periodLabel": "Results per token \u00b7 last 30 days"
+      },
+      "suggestions": {
+        "savingsLabel": "per month",
+        "affectedChats": 6,
+        "inputReduction": 18,
+        "count": 2,
+        "cachedSessionsLabel": "Long Gemini sessions",
+        "cacheSavings": 5.2,
+        "contextSavings": 8.4
+      },
+      "costBars": [
+        20,
+        26,
+        18,
+        34,
+        30,
+        42,
+        38,
+        54,
+        45,
+        62,
+        51,
+        70
+      ],
+      "costEmphasisBars": 3,
+      "costLabel": "Cost \u00b7 this month"
+    },
+    "Total": {
+      "inputPercent": 71.2,
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "tokens": 9037364,
+          "provider": "Gemini"
+        },
+        {
+          "name": "gpt-5.5-codex",
+          "tokens": 5350500,
+          "provider": "Codex"
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "tokens": 2217136,
+          "provider": "Gemini"
+        },
+        {
+          "name": "claude-sonnet",
+          "tokens": 1845000,
+          "provider": "Claude"
+        }
+      ],
+      "costChangePercent": 16.5,
+      "efficiency": {
+        "costPerSuccess": 0.34,
+        "changePercent": -12,
+        "successRate": 70,
+        "firstPass": 56,
+        "reworkCost": 14,
+        "cacheHitRate": 74,
+        "contextGrowth": 2.1,
+        "thinkingShare": 46,
+        "retryRate": 12,
+        "periodLabel": "Results per token \u00b7 all time"
+      },
+      "suggestions": {
+        "savingsLabel": "all time",
+        "affectedChats": 18,
+        "inputReduction": 18,
+        "count": 2,
+        "cachedSessionsLabel": "Long Gemini sessions",
+        "cacheSavings": 15.6,
+        "contextSavings": 25.2
+      },
+      "costBars": [
+        35,
+        48,
+        62,
+        58,
+        85,
+        110
+      ],
+      "costEmphasisBars": 3,
+      "costLabel": "Cost \u00b7 all time"
+    }
+  },
+  "daily": [
+    {
+      "date": "2026-11-01",
+      "label": "01 Nov",
+      "tokens": 482900,
+      "chats": 412
+    },
+    {
+      "date": "2026-10-31",
+      "label": "31 Oct",
+      "tokens": 421700,
+      "chats": 368
+    },
+    {
+      "date": "2026-10-30",
+      "label": "30 Oct",
+      "tokens": 446200,
+      "chats": 391
+    },
+    {
+      "date": "2026-10-29",
+      "label": "29 Oct",
+      "tokens": 319500,
+      "chats": 288
+    },
+    {
+      "date": "2026-10-28",
+      "label": "28 Oct",
+      "tokens": 501100,
+      "chats": 442
+    },
+    {
+      "date": "2026-10-27",
+      "label": "27 Oct",
+      "tokens": 397800,
+      "chats": 351
+    },
+    {
+      "date": "2026-10-26",
+      "label": "26 Oct",
+      "tokens": 361000,
+      "chats": 317
+    },
+    {
+      "date": "2026-10-25",
+      "label": "25 Oct",
+      "tokens": 340400,
+      "chats": 299
+    }
+  ],
+  "projects": [
+    {
+      "label": "Camellia",
+      "tokens": 319500,
+      "chats": 288
+    },
+    {
+      "label": "uToken",
+      "tokens": 501100,
+      "chats": 442
+    },
+    {
+      "label": "Website",
+      "tokens": 397800,
+      "chats": 351
+    },
+    {
+      "label": "API",
+      "tokens": 361000,
+      "chats": 317
+    },
+    {
+      "label": "Mobile",
+      "tokens": 340400,
+      "chats": 299
+    },
+    {
+      "label": "Docs",
+      "tokens": 482900,
+      "chats": 412
+    },
+    {
+      "label": "Tests",
+      "tokens": 421700,
+      "chats": 368
+    },
+    {
+      "label": "Other",
+      "tokens": 446200,
+      "chats": 391
+    }
+  ],
+  "activityLevels": [
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0,
+    2,
+    3,
+    0,
+    2,
+    4,
+    1,
+    3,
+    0
+  ],
+  "comparison": {
+    "Small": {
+      "description": "1\u20132 turns \u00b7 1 file",
+      "medianCost": 0.14,
+      "models": [
+        {
+          "name": "gemini-2.5-flash",
+          "successRate": 88,
+          "costPerSuccess": 0.08,
+          "efficiencyIndex": 1.54
+        },
+        {
+          "name": "gemini-2.5-pro",
+          "successRate": 92,
+          "costPerSuccess": 0.1,
+          "efficiencyIndex": 1.29
+        },
+        {
+          "name": "gpt-5.5-codex",
+          "successRate": 82,
+          "costPerSuccess": 0.18,
+          "efficiencyIndex": 0.64
+        }
+      ],
+      "unranked": {
+        "name": "claude-sonnet",
+        "chats": 9,
+        "requiredChats": 20
+      },
+      "reworkNote": "Rework in 18% of chats"
+    },
+    "Medium": {
+      "description": "2\u201315 turns \u00b7 2\u20135 files",
+      "medianCost": 0.55,
+      "models": [
+        {
+          "name": "gemini-2.5-pro",
+          "successRate": 78,
+          "costPerSuccess": 0.42,
+          "efficiencyIndex": 1.02
+        },
+        {
+          "name": "gpt-5.5-codex",
+          "successRate": 84,
+          "costPerSuccess": 0.61,
+          "efficiencyIndex": 0.76
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "successRate": 51,
+          "costPerSuccess": 0.55,
+          "efficiencyIndex": 0.51
+        }
+      ],
+      "unranked": {
+        "name": "claude-sonnet",
+        "chats": 9,
+        "requiredChats": 20
+      },
+      "reworkNote": "Cheaper per request, but rework in 49% of chats"
+    },
+    "Large": {
+      "description": "16+ turns \u00b7 6+ files",
+      "medianCost": 1.2,
+      "models": [
+        {
+          "name": "gpt-5.5-codex",
+          "successRate": 90,
+          "costPerSuccess": 1.05,
+          "efficiencyIndex": 1.03
+        },
+        {
+          "name": "gemini-2.5-pro",
+          "successRate": 81,
+          "costPerSuccess": 1.1,
+          "efficiencyIndex": 0.88
+        },
+        {
+          "name": "gemini-2.5-flash",
+          "successRate": 40,
+          "costPerSuccess": 1.3,
+          "efficiencyIndex": 0.37
+        }
+      ],
+      "unranked": {
+        "name": "claude-sonnet",
+        "chats": 9,
+        "requiredChats": 20
+      },
+      "reworkNote": "Cheaper per request, but rework in 60% of chats"
+    }
+  },
+  "activityDays": 119
+}

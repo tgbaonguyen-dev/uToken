@@ -1,32 +1,61 @@
-﻿{
-    "screen_id":  "M13",
-    "screen_title":  "Account",
-    "has_back_button":  true,
-    "state_type":  "deleting_account",
-    "state_label":  "DELETING ACCOUNT",
-    "state_context":  "State specification Â· Deleting account",
-    "card_title":  "Deleting your account",
-    "card_description":  "Revoking connected devices and removing account-owned cloud data.",
-    "icon_type":  "offline",
-    "bullet_points":  [
-                          {
-                              "title":  "Desktop access revoked",
-                              "subtitle":  "New syncs will be rejected",
-                              "bullet_color":  "#C27A20"
-                          },
-                          {
-                              "title":  "Deletion is permanent",
-                              "subtitle":  "Some backend cleanup may continue",
-                              "bullet_color":  "#C27A20"
-                          }
-                      ],
-    "behavior_label":  "BEHAVIOR",
-    "behavior_text":  "Block navigation until the backend confirms completion.",
-    "action_text":  "View account status",
-    "active_tab":  "Settings",
-    "action":  {
-                   "button_label":  "View account status",
-                   "background_color":  "#171717",
-                   "text_color":  "#9C9FAB"
-               }
+{
+  "screen_id": "M13",
+  "screen_title": "Account",
+  "has_back_button": true,
+  "state_type": "deleting_account",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "View account status",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show progress until the backend confirms completion."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Desktop access revoked",
+        "subtitle": "New syncs will be rejected"
+      },
+      {
+        "title": "Deletion is permanent",
+        "subtitle": "Some backend cleanup may continue"
+      }
+    ],
+    "title": "Deleting your account",
+    "description": "Revoking connected devices and removing account-owned cloud data.",
+    "icon_type": "offline"
+  },
+  "badge_text": "DELETING ACCOUNT",
+  "specification_subtitle": "State specification · Deleting account",
+  "figma_layout": {
+    "node": "94:5204",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
 }

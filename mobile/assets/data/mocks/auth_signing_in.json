@@ -1,36 +1,64 @@
-﻿{
-    "screen_id":  "M01",
-    "screen_title":  "Sign in",
-    "badge_text":  "SIGNING IN",
-    "specification_subtitle":  "State specification · Signing in",
-    "card":  {
-                 "icon_type":  "signing_in",
-                 "title":  "Signing you in",
-                 "description":  "We\u0027re verifying your Google account and restoring your μToken session.",
-                 "items":  [
-                               {
-                                   "id":  "secure_auth",
-                                   "title":  "Secure authentication",
-                                   "subtitle":  "Handled by Google and Firebase Auth",
-                                   "bullet_color":  "#6678E8"
-                               },
-                               {
-                                   "id":  "data_isolation",
-                                   "title":  "Your data stays isolated",
-                                   "subtitle":  "Usage loads only after the session is valid",
-                                   "bullet_color":  "#6678E8"
-                               }
-                           ]
-             },
-    "behavior":  {
-                     "label":  "BEHAVIOR",
-                     "description":  "Keep this screen focused until authentication finishes."
-                 },
-    "has_bottom_navigation":  false,
-    "action":  {
-                   "button_label":  "Cancel",
-                   "cancel_label":  "Cancel",
-                   "background_color":  "#F4F4F5",
-                   "text_color":  "#111214"
-               }
+{
+  "screen_id": "M01",
+  "screen_title": "Sign in",
+  "badge_text": "SIGNING IN",
+  "specification_subtitle": "State specification · Signing in",
+  "card": {
+    "icon_type": "signing_in",
+    "title": "Signing you in",
+    "description": "We’re verifying your Google account and restoring your μToken session.",
+    "items": [
+      {
+        "id": "secure_auth",
+        "title": "Secure authentication",
+        "subtitle": "Handled by Google and Firebase Auth",
+        "bullet_color": "#6678E8"
+      },
+      {
+        "id": "data_isolation",
+        "title": "Your data stays isolated",
+        "subtitle": "Usage loads only after the session is valid",
+        "bullet_color": "#6678E8"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep this screen focused until authentication finishes."
+  },
+  "has_bottom_navigation": false,
+  "action": {
+    "button_label": "Cancel",
+    "cancel_label": "Cancel",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "figma_layout": {
+    "node": "93:258",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 736,
+    "illustration": "assets/figma/reviewed/5a53e.svg",
+    "illustration_rect": {
+      "x": 141.552,
+      "y": 22.023916,
+      "w": 69.472,
+      "h": 42.881784
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/21f2c.svg",
+      "assets/figma/reviewed/f1f72.svg"
+    ],
+    "nav": [
+      null,
+      null,
+      null,
+      null
+    ]
+  }
 }

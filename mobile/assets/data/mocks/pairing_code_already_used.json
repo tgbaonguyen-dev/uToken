@@ -1,38 +1,66 @@
-﻿{
-    "screen_id":  "M02",
-    "state_type":  "code_already_used",
-    "screen_title":  "Connect desktop",
-    "has_back_button":  true,
-    "badge_text":  "CODE USED",
-    "specification_subtitle":  "State specification · Code used",
-    "card":  {
-                 "icon_type":  "offline",
-                 "title":  "This code was already used",
-                 "description":  "A pairing code can connect only one authenticated session.",
-                 "items":  [
-                               {
-                                   "id":  "code_no_longer_active",
-                                   "title":  "Code is no longer active",
-                                   "subtitle":  "This prevents accidental desktop linking",
-                                   "bullet_color":  "#C27A20"
-                               },
-                               {
-                                   "id":  "create_another_code",
-                                   "title":  "Create another code",
-                                   "subtitle":  "Use the desktop companion to restart pairing",
-                                   "bullet_color":  "#C27A20"
-                               }
-                           ]
-             },
-    "behavior":  {
-                     "label":  "BEHAVIOR",
-                     "description":  "Do not imply that a desktop was connected to this account."
-                 },
-    "has_bottom_navigation":  false,
-    "action":  {
-                   "button_label":  "Use a new code",
-                   "cancel_label":  "Use a new code",
-                   "background_color":  "#F4F4F5",
-                   "text_color":  "#111214"
-               }
+{
+  "screen_id": "M02",
+  "state_type": "code_already_used",
+  "screen_title": "Connect desktop",
+  "has_back_button": true,
+  "badge_text": "CODE USED",
+  "specification_subtitle": "State specification · Code used",
+  "card": {
+    "icon_type": "offline",
+    "title": "This code was already used",
+    "description": "A pairing code can connect only one authenticated session.",
+    "items": [
+      {
+        "id": "code_no_longer_active",
+        "title": "Code is no longer active",
+        "subtitle": "This prevents accidental account linking",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "create_another_code",
+        "title": "Create another code",
+        "subtitle": "Use the desktop companion to restart pairing",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Do not imply that a desktop was connected to this account."
+  },
+  "has_bottom_navigation": false,
+  "action": {
+    "button_label": "Use a new code",
+    "cancel_label": "Use a new code",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "figma_layout": {
+    "node": "93:541",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 736,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      null,
+      null,
+      null,
+      null
+    ]
+  }
 }

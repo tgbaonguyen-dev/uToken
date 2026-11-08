@@ -38,6 +38,7 @@ flutter:
     - assets/images/icons/
     - lib/core/mock/data/
     - assets/figma/
+    - assets/figma/reviewed/
   fonts:
     - family: BeVietnamPro
       fonts:

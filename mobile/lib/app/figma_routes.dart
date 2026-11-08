@@ -1,5 +1,4 @@
-/// Route names correspond exactly to the 20 primary M/O frames in Figma.
-/// S01–S04 are intentionally excluded: they are separate state designs.
+/// Routes for the 24 exported M/O/S Figma frames.
 const Map<String, String> figmaRoutes = {
   'M01': '/welcome',
   'M02': '/connect-desktop',
@@ -27,4 +26,11 @@ const Map<String, String> figmaRoutes = {
   'S04': '/sync-failed',
 };
 
-String? figmaPathFor(String screenId) => figmaRoutes[screenId];
+// Hand-built screens contributed by the other UI branch.
+const supplementalUiRoutes = {
+  'M08 - Insight detail': '/insight-detail',
+  'UI state preview': '/state-preview',
+};
+
+String? figmaPathFor(String screenId) =>
+    screenId == 'M08' ? '/insight-detail' : figmaRoutes[screenId];

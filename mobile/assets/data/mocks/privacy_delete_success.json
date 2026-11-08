@@ -1,32 +1,61 @@
-﻿{
-    "screen_id":  "M12",
-    "screen_title":  "Privacy \u0026 data",
-    "has_back_button":  true,
-    "state_type":  "delete_success",
-    "state_label":  "DELETED",
-    "state_context":  "State specification Â· Deleted",
-    "card_title":  "Usage data deleted",
-    "card_description":  "The selected cloud usage history has been removed.",
-    "icon_type":  "success",
-    "bullet_points":  [
-                          {
-                              "title":  "Account remains active",
-                              "subtitle":  "Google sign-in was not removed",
-                              "bullet_color":  "#22A575"
-                          },
-                          {
-                              "title":  "Desktop may collect new usage",
-                              "subtitle":  "Disconnect it to stop future syncs",
-                              "bullet_color":  "#22A575"
-                          }
-                      ],
-    "behavior_label":  "BEHAVIOR",
-    "behavior_text":  "State exactly what remains after deletion.",
-    "action_text":  "Done",
-    "active_tab":  "Settings",
-    "action":  {
-                   "button_label":  "Done",
-                   "background_color":  "#171717",
-                   "text_color":  "#9C9FAB"
-               }
+{
+  "screen_id": "M12",
+  "screen_title": "Privacy & data",
+  "has_back_button": true,
+  "state_type": "delete_success",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Done",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "State exactly what remains after deletion."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Account remains active",
+        "subtitle": "Google sign-in was not removed"
+      },
+      {
+        "title": "Desktop may collect new usage",
+        "subtitle": "Disconnect it to stop future syncs"
+      }
+    ],
+    "title": "Usage data deleted",
+    "description": "The selected cloud usage history has been removed.",
+    "icon_type": "success"
+  },
+  "badge_text": "DELETED",
+  "specification_subtitle": "State specification · Deleted",
+  "figma_layout": {
+    "node": "94:4779",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/74018.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.4255595,
+      "w": 89.856,
+      "h": 51.883881
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/3284e.svg",
+      "assets/figma/reviewed/003df.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
 }

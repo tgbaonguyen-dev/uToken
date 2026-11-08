@@ -63,6 +63,11 @@ void main() {
     await tester.runAsync(() async {
       for (final id in ['M04', 'M05', 'M07', 'M09']) {
         await FigmaMockRepository.screen(id, Brightness.light);
+        if (id == 'M04') {
+          await FigmaMockRepository.tokensScreen(Brightness.light);
+        } else if (FigmaMockRepository.explorerScreenIds.contains(id)) {
+          await FigmaMockRepository.usageScreen(id, Brightness.light);
+        }
         await FigmaMockRepository.hotspots(id);
       }
       await FigmaMockRepository.demoInteractions();
@@ -110,6 +115,7 @@ void main() {
         await FigmaMockRepository.screen(id, Brightness.light);
         await FigmaMockRepository.hotspots(id);
       }
+      await FigmaMockRepository.tokensScreen(Brightness.light);
     });
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester
@@ -118,7 +124,7 @@ void main() {
     await tester
         .longPress(find.byKey(const ValueKey('figma-screen-gallery-trigger')));
     await tester.pumpAndSettle();
-    expect(find.text('All 24 Figma screens'), findsOneWidget);
+    expect(find.text('All 25 Figma screens'), findsOneWidget);
     final screen = find.text('S01');
     await tester.ensureVisible(screen);
     await tester.tap(screen);

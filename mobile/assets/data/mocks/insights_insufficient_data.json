@@ -1,4 +1,4 @@
-﻿{
+{
   "screen_id": "M07",
   "state_type": "insufficient_data",
   "screen_title": "Insights",
@@ -8,12 +8,12 @@
   "card": {
     "icon_type": "empty",
     "title": "More usage is needed",
-    "description": "Insights require at least 3 days or 10 daily model records.",
+    "description": "Insights require at least 3 days or 10 daily/model records.",
     "items": [
       {
         "id": "current_history_too_short",
         "title": "Current history is too short",
-        "subtitle": "No recommendations generated yet",
+        "subtitle": "No recommendation is generated yet",
         "bullet_color": "#7B7F88"
       },
       {
@@ -34,6 +34,33 @@
     "text_color": "#9C9FA8"
   },
   "has_bottom_navigation": true,
-  "active_tab": "Insights"
+  "active_tab": "Insights",
+  "figma_layout": {
+    "node": "94:2151",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/b67b6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 23.160216,
+      "w": 89.856,
+      "h": 38.086708
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e7cbc.svg",
+      "assets/figma/reviewed/68341.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/b20c3.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
 }
-

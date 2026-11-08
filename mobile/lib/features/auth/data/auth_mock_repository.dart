@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/mock/figma_mock_repository.dart';
 
 import '../domain/signing_in_state_model.dart';
 
@@ -19,84 +20,164 @@ class AuthMockRepository implements AuthRepository {
   const AuthMockRepository();
 
   static const String _signingInPath = 'assets/data/mocks/auth_signing_in.json';
-  static const String _cancelledPath = 'assets/data/mocks/auth_sign_in_cancelled.json';
-  static const String _failedPath = 'assets/data/mocks/auth_sign_in_failed.json';
-  static const String _offlinePath = 'assets/data/mocks/auth_sign_in_offline.json';
-  static const String _sessionExpiredPath = 'assets/data/mocks/auth_session_expired.json';
-  static const String _verifyingPath = 'assets/data/mocks/pairing_verifying.json';
-  static const String _connectedPath = 'assets/data/mocks/pairing_connected.json';
-  static const String _wrongCodePath = 'assets/data/mocks/pairing_wrong_code.json';
-  static const String _codeExpiredPath = 'assets/data/mocks/pairing_code_expired.json';
-  static const String _codeAlreadyUsedPath = 'assets/data/mocks/pairing_code_already_used.json';
-  static const String _desktopNoResponsePath = 'assets/data/mocks/pairing_desktop_no_response.json';
-  static const String _existingDesktopPath = 'assets/data/mocks/pairing_existing_desktop.json';
-  static const String _networkErrorPath = 'assets/data/mocks/pairing_network_error.json';
-  static const String _unsupportedOsPath = 'assets/data/mocks/install_unsupported_os.json';
-  static const String _appNotInstalledPath = 'assets/data/mocks/install_app_not_installed.json';
-  static const String _appNotOpenedPath = 'assets/data/mocks/install_app_not_opened.json';
-  static const String _permissionDeniedPath = 'assets/data/mocks/install_permission_denied.json';
-  static const String _initialLoadingPath = 'assets/data/mocks/tokens_initial_loading.json';
-  static const String _updatingWithDataPath = 'assets/data/mocks/tokens_updating_with_data.json';
-  static const String _partialDataPath = 'assets/data/mocks/tokens_partial_data.json';
-  static const String _desktopOfflinePath = 'assets/data/mocks/tokens_desktop_offline.json';
-  static const String _staleDataPath = 'assets/data/mocks/tokens_stale_data.json';
-  static const String _costUnavailablePath = 'assets/data/mocks/tokens_cost_unavailable.json';
-  static const String _analyticsNoDataPath = 'assets/data/mocks/analytics_no_data.json';
-  static const String _analyticsNoFilterResultsPath = 'assets/data/mocks/analytics_no_filter_results.json';
-  static const String _analyticsPartialDataPath = 'assets/data/mocks/analytics_partial_data.json';
-  static const String _analyticsUnsupportedMetricPath = 'assets/data/mocks/analytics_unsupported_metric.json';
-  static const String _analyticsCostUnavailablePath = 'assets/data/mocks/analytics_cost_unavailable.json';
-  static const String _analyticsQueryErrorPath = 'assets/data/mocks/analytics_query_error.json';
-  static const String _analyticsOfflinePath = 'assets/data/mocks/analytics_offline.json';
-  static const String _breakdownNoUsagePath = 'assets/data/mocks/breakdown_no_usage.json';
-  static const String _breakdownTodayIncompletePath = 'assets/data/mocks/breakdown_today_incomplete.json';
-  static const String _breakdownMissingDataPath = 'assets/data/mocks/breakdown_missing_data.json';
-  static const String _breakdownCostUnavailablePath = 'assets/data/mocks/breakdown_cost_unavailable.json';
-  static const String _breakdownSyncDelayedPath = 'assets/data/mocks/breakdown_sync_delayed.json';
-  static const String _insightsAnalyzingPath = 'assets/data/mocks/insights_analyzing.json';
-  static const String _insightsInsufficientDataPath = 'assets/data/mocks/insights_insufficient_data.json';
-  static const String _insightsNoSignificantIssuesPath = 'assets/data/mocks/insights_no_significant_issues.json';
-  static const String _insightsAnalysisFailedPath = 'assets/data/mocks/insights_analysis_failed.json';
-  static const String _insightsStalePath = 'assets/data/mocks/insights_stale.json';
-  static const String _insightDetailStalePath = 'assets/data/mocks/insight_detail_stale.json';
-  static const String _insightDetailResolvedPath = 'assets/data/mocks/insight_detail_resolved.json';
-  static const String _insightDetailEvidenceUnavailablePath = 'assets/data/mocks/insight_detail_evidence_unavailable.json';
-  static const String _insightDetailActivePath = 'assets/data/mocks/insight_detail_active.json';
-  static const String _settingsNoDesktopPath = 'assets/data/mocks/settings_no_desktop.json';
-  static const String _settingsNotificationsDeniedPath = 'assets/data/mocks/settings_notifications_denied.json';
-  static const String _settingsReauthenticationRequiredPath = 'assets/data/mocks/settings_reauthentication_required.json';
-  static const String _desktopConnectionSyncingPath = 'assets/data/mocks/desktop_connection_syncing.json';
-  static const String _desktopConnectionOfflinePath = 'assets/data/mocks/desktop_connection_offline.json';
-  static const String _desktopConnectionSourceNotFoundPath = 'assets/data/mocks/desktop_connection_source_not_found.json';
-  static const String _desktopConnectionNoUsagePath = 'assets/data/mocks/desktop_connection_no_usage.json';
-  static const String _desktopConnectionPermissionDeniedPath = 'assets/data/mocks/desktop_connection_permission_denied.json';
-  static const String _desktopConnectionSessionRevokedPath = 'assets/data/mocks/desktop_connection_session_revoked.json';
-  static const String _desktopConnectionIncompatibleVersionPath = 'assets/data/mocks/desktop_connection_incompatible_version.json';
-  static const String _desktopConnectionSyncFailedPath = 'assets/data/mocks/desktop_connection_sync_failed.json';
-  static const String _budgetNoBudgetPath = 'assets/data/mocks/budget_no_budget.json';
-  static const String _budgetNearThresholdPath = 'assets/data/mocks/budget_near_threshold.json';
-  static const String _budgetThresholdExceededPath = 'assets/data/mocks/budget_threshold_exceeded.json';
-  static const String _budgetBudgetExceededPath = 'assets/data/mocks/budget_budget_exceeded.json';
-  static const String _budgetCostUnavailablePath = 'assets/data/mocks/budget_cost_unavailable.json';
-  static const String _budgetNotificationsOffPath = 'assets/data/mocks/budget_notifications_off.json';
-  static const String _privacyExportPreparingPath = 'assets/data/mocks/privacy_export_preparing.json';
-  static const String _privacyExportSuccessPath = 'assets/data/mocks/privacy_export_success.json';
-  static const String _privacyExportFailedPath = 'assets/data/mocks/privacy_export_failed.json';
-  static const String _privacyDeletingUsagePath = 'assets/data/mocks/privacy_deleting_usage.json';
-  static const String _privacyDeleteSuccessPath = 'assets/data/mocks/privacy_delete_success.json';
-  static const String _privacyDeletePartialPath = 'assets/data/mocks/privacy_delete_partial.json';
-  static const String _privacyReauthenticationPath = 'assets/data/mocks/privacy_reauthentication.json';
-  static const String _accountReauthenticationPath = 'assets/data/mocks/account_reauthentication.json';
-  static const String _accountSigningOutPath = 'assets/data/mocks/account_signing_out.json';
-  static const String _accountDeletingAccountPath = 'assets/data/mocks/account_deleting_account.json';
-  static const String _accountDeleteFailedPath = 'assets/data/mocks/account_delete_failed.json';
-  static const String _accountDeletePartialPath = 'assets/data/mocks/account_delete_partial.json';
-  static const String _insightsAiNotSetUpPath = 'assets/data/mocks/insights_ai_not_set_up.json';
-  static const String _aiSuggestionsInvalidApiKeyPath = 'assets/data/mocks/ai_suggestions_invalid_api_key.json';
+  static const String _cancelledPath =
+      'assets/data/mocks/auth_sign_in_cancelled.json';
+  static const String _failedPath =
+      'assets/data/mocks/auth_sign_in_failed.json';
+  static const String _offlinePath =
+      'assets/data/mocks/auth_sign_in_offline.json';
+  static const String _sessionExpiredPath =
+      'assets/data/mocks/auth_session_expired.json';
+  static const String _verifyingPath =
+      'assets/data/mocks/pairing_verifying.json';
+  static const String _connectedPath =
+      'assets/data/mocks/pairing_connected.json';
+  static const String _wrongCodePath =
+      'assets/data/mocks/pairing_wrong_code.json';
+  static const String _codeExpiredPath =
+      'assets/data/mocks/pairing_code_expired.json';
+  static const String _codeAlreadyUsedPath =
+      'assets/data/mocks/pairing_code_already_used.json';
+  static const String _desktopNoResponsePath =
+      'assets/data/mocks/pairing_desktop_no_response.json';
+  static const String _existingDesktopPath =
+      'assets/data/mocks/pairing_existing_desktop.json';
+  static const String _networkErrorPath =
+      'assets/data/mocks/pairing_network_error.json';
+  static const String _unsupportedOsPath =
+      'assets/data/mocks/install_unsupported_os.json';
+  static const String _appNotInstalledPath =
+      'assets/data/mocks/install_app_not_installed.json';
+  static const String _appNotOpenedPath =
+      'assets/data/mocks/install_app_not_opened.json';
+  static const String _permissionDeniedPath =
+      'assets/data/mocks/install_permission_denied.json';
+  static const String _initialLoadingPath =
+      'assets/data/mocks/tokens_initial_loading.json';
+  static const String _updatingWithDataPath =
+      'assets/data/mocks/tokens_updating_with_data.json';
+  static const String _partialDataPath =
+      'assets/data/mocks/tokens_partial_data.json';
+  static const String _desktopOfflinePath =
+      'assets/data/mocks/tokens_desktop_offline.json';
+  static const String _staleDataPath =
+      'assets/data/mocks/tokens_stale_data.json';
+  static const String _costUnavailablePath =
+      'assets/data/mocks/tokens_cost_unavailable.json';
+  static const String _analyticsNoDataPath =
+      'assets/data/mocks/analytics_no_data.json';
+  static const String _analyticsNoFilterResultsPath =
+      'assets/data/mocks/analytics_no_filter_results.json';
+  static const String _analyticsPartialDataPath =
+      'assets/data/mocks/analytics_partial_data.json';
+  static const String _analyticsUnsupportedMetricPath =
+      'assets/data/mocks/analytics_unsupported_metric.json';
+  static const String _analyticsCostUnavailablePath =
+      'assets/data/mocks/analytics_cost_unavailable.json';
+  static const String _analyticsQueryErrorPath =
+      'assets/data/mocks/analytics_query_error.json';
+  static const String _analyticsOfflinePath =
+      'assets/data/mocks/analytics_offline.json';
+  static const String _breakdownNoUsagePath =
+      'assets/data/mocks/breakdown_no_usage.json';
+  static const String _breakdownTodayIncompletePath =
+      'assets/data/mocks/breakdown_today_incomplete.json';
+  static const String _breakdownMissingDataPath =
+      'assets/data/mocks/breakdown_missing_data.json';
+  static const String _breakdownCostUnavailablePath =
+      'assets/data/mocks/breakdown_cost_unavailable.json';
+  static const String _breakdownSyncDelayedPath =
+      'assets/data/mocks/breakdown_sync_delayed.json';
+  static const String _insightsAnalyzingPath =
+      'assets/data/mocks/insights_analyzing.json';
+  static const String _insightsInsufficientDataPath =
+      'assets/data/mocks/insights_insufficient_data.json';
+  static const String _insightsNoSignificantIssuesPath =
+      'assets/data/mocks/insights_no_significant_issues.json';
+  static const String _insightsAnalysisFailedPath =
+      'assets/data/mocks/insights_analysis_failed.json';
+  static const String _insightsStalePath =
+      'assets/data/mocks/insights_stale.json';
+  static const String _insightDetailStalePath =
+      'assets/data/mocks/insight_detail_stale.json';
+  static const String _insightDetailResolvedPath =
+      'assets/data/mocks/insight_detail_resolved.json';
+  static const String _insightDetailEvidenceUnavailablePath =
+      'assets/data/mocks/insight_detail_evidence_unavailable.json';
+  static const String _insightDetailActivePath =
+      'assets/data/mocks/insight_detail_active.json';
+  static const String _settingsNoDesktopPath =
+      'assets/data/mocks/settings_no_desktop.json';
+  static const String _settingsNotificationsDeniedPath =
+      'assets/data/mocks/settings_notifications_denied.json';
+  static const String _settingsReauthenticationRequiredPath =
+      'assets/data/mocks/settings_reauthentication_required.json';
+  static const String _desktopConnectionSyncingPath =
+      'assets/data/mocks/desktop_connection_syncing.json';
+  static const String _desktopConnectionOfflinePath =
+      'assets/data/mocks/desktop_connection_offline.json';
+  static const String _desktopConnectionSourceNotFoundPath =
+      'assets/data/mocks/desktop_connection_source_not_found.json';
+  static const String _desktopConnectionNoUsagePath =
+      'assets/data/mocks/desktop_connection_no_usage.json';
+  static const String _desktopConnectionPermissionDeniedPath =
+      'assets/data/mocks/desktop_connection_permission_denied.json';
+  static const String _desktopConnectionSessionRevokedPath =
+      'assets/data/mocks/desktop_connection_session_revoked.json';
+  static const String _desktopConnectionIncompatibleVersionPath =
+      'assets/data/mocks/desktop_connection_incompatible_version.json';
+  static const String _desktopConnectionSyncFailedPath =
+      'assets/data/mocks/desktop_connection_sync_failed.json';
+  static const String _budgetNoBudgetPath =
+      'assets/data/mocks/budget_no_budget.json';
+  static const String _budgetNearThresholdPath =
+      'assets/data/mocks/budget_near_threshold.json';
+  static const String _budgetThresholdExceededPath =
+      'assets/data/mocks/budget_threshold_exceeded.json';
+  static const String _budgetBudgetExceededPath =
+      'assets/data/mocks/budget_budget_exceeded.json';
+  static const String _budgetCostUnavailablePath =
+      'assets/data/mocks/budget_cost_unavailable.json';
+  static const String _budgetNotificationsOffPath =
+      'assets/data/mocks/budget_notifications_off.json';
+  static const String _privacyExportPreparingPath =
+      'assets/data/mocks/privacy_export_preparing.json';
+  static const String _privacyExportSuccessPath =
+      'assets/data/mocks/privacy_export_success.json';
+  static const String _privacyExportFailedPath =
+      'assets/data/mocks/privacy_export_failed.json';
+  static const String _privacyDeletingUsagePath =
+      'assets/data/mocks/privacy_deleting_usage.json';
+  static const String _privacyDeleteSuccessPath =
+      'assets/data/mocks/privacy_delete_success.json';
+  static const String _privacyDeletePartialPath =
+      'assets/data/mocks/privacy_delete_partial.json';
+  static const String _privacyReauthenticationPath =
+      'assets/data/mocks/privacy_reauthentication.json';
+  static const String _accountReauthenticationPath =
+      'assets/data/mocks/account_reauthentication.json';
+  static const String _accountSigningOutPath =
+      'assets/data/mocks/account_signing_out.json';
+  static const String _accountDeletingAccountPath =
+      'assets/data/mocks/account_deleting_account.json';
+  static const String _accountDeleteFailedPath =
+      'assets/data/mocks/account_delete_failed.json';
+  static const String _accountDeletePartialPath =
+      'assets/data/mocks/account_delete_partial.json';
+  static const String _insightsAiNotSetUpPath =
+      'assets/data/mocks/insights_ai_not_set_up.json';
+  static const String _aiSuggestionsInvalidApiKeyPath =
+      'assets/data/mocks/ai_suggestions_invalid_api_key.json';
 
   Future<SigningInStateData> _load(String path) async {
     final jsonString = await rootBundle.loadString(path);
     final map = jsonDecode(jsonString) as Map<String, dynamic>;
+    final countTemplate = map['export_count_template'];
+    if (countTemplate is String) {
+      final rows = (await FigmaMockRepository.exportData())['records'] as List;
+      map['card']['items'][0]['title'] =
+          countTemplate.replaceAll('{count}', rows.length.toString());
+    }
     return SigningInStateData.fromJson(map);
   }
 
@@ -113,7 +194,8 @@ class AuthMockRepository implements AuthRepository {
   Future<SigningInStateData> getOfflineStateData() => _load(_offlinePath);
 
   @override
-  Future<SigningInStateData> getSessionExpiredStateData() => _load(_sessionExpiredPath);
+  Future<SigningInStateData> getSessionExpiredStateData() =>
+      _load(_sessionExpiredPath);
 
   @override
   Future<SigningInStateData> getVerifyingStateData() => _load(_verifyingPath);
@@ -292,10 +374,11 @@ final authStateDataProvider = FutureProvider<SigningInStateData>((ref) async {
   final repo = ref.watch(authRepositoryProvider);
   final state = ref.watch(currentAuthScreenStateProvider);
   return repo.getStateData(state);
-});
+}, dependencies: [authRepositoryProvider, currentAuthScreenStateProvider]);
 
 /// Giữ backward-compatible với provider cũ
-final signingInStateDataProvider = FutureProvider<SigningInStateData>((ref) async {
+final signingInStateDataProvider =
+    FutureProvider<SigningInStateData>((ref) async {
   final repo = ref.watch(authRepositoryProvider);
   return repo.getSigningInStateData();
 });

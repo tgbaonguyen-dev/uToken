@@ -34,6 +34,33 @@
     "text_color": "#9C9FA8"
   },
   "has_bottom_navigation": true,
-  "active_tab": "Insights"
+  "active_tab": "Insights",
+  "figma_layout": {
+    "node": "94:2672",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/74018.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.4255595,
+      "w": 89.856,
+      "h": 51.883881
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/3284e.svg",
+      "assets/figma/reviewed/003df.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/b20c3.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
 }
-

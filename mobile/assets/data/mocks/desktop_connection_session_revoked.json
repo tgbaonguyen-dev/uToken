@@ -1,32 +1,61 @@
-﻿{
-    "screen_id":  "M10",
-    "screen_title":  "Desktop connection",
-    "has_back_button":  true,
-    "state_type":  "session_revoked",
-    "state_label":  "SESSION REVOKED",
-    "state_context":  "State specification Â· Session revoked",
-    "card_title":  "Desktop session was revoked",
-    "card_description":  "This companion can no longer upload usage for the account.",
-    "icon_type":  "failed",
-    "bullet_points":  [
-                          {
-                              "title":  "New syncs are rejected",
-                              "subtitle":  "Past data is preserved",
-                              "bullet_color":  "#E0525B"
-                          },
-                          {
-                              "title":  "Pair again required",
-                              "subtitle":  "Create a new one-time code",
-                              "bullet_color":  "#E0525B"
-                          }
-                      ],
-    "behavior_label":  "BEHAVIOR",
-    "behavior_text":  "Do not auto-restore a revoked session.",
-    "action_text":  "Pair desktop again",
-    "active_tab":  "Settings",
-    "action":  {
-                   "button_label":  "Pair desktop again",
-                   "background_color":  "#171717",
-                   "text_color":  "#9C9FAB"
-               }
+{
+  "screen_id": "M10",
+  "screen_title": "Desktop connection",
+  "has_back_button": true,
+  "state_type": "session_revoked",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Pair desktop again",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Do not auto-restore a revoked session."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "New syncs are rejected",
+        "subtitle": "Historical data remains"
+      },
+      {
+        "title": "Pair again required",
+        "subtitle": "Create a new one-time code"
+      }
+    ],
+    "title": "Desktop session was revoked",
+    "description": "This companion can no longer upload usage for the account.",
+    "icon_type": "failed"
+  },
+  "badge_text": "SESSION REVOKED",
+  "specification_subtitle": "State specification · Session revoked",
+  "figma_layout": {
+    "node": "94:3594",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/49cc6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.260016,
+      "w": 89.856,
+      "h": 42.09096
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e35ed.svg",
+      "assets/figma/reviewed/93b03.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
 }

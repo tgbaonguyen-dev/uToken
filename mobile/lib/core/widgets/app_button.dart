@@ -45,23 +45,25 @@ class AppButton extends StatelessWidget {
           ),
         ],
       ),
-      child: Material(
-        color: backgroundColor ?? AppColors.buttonBg,
-        borderRadius: BorderRadius.circular(borderRadius),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onPressed,
-          child: Center(
-            child: Text(
-              label,
-              style: textColor != null
-                  ? AppTypography.buttonLabel.copyWith(color: textColor)
-                  : AppTypography.buttonLabel,
+      child: Semantics(
+          button: true,
+          enabled: onPressed != null,
+          child: Material(
+            color: backgroundColor ?? AppColors.buttonBg,
+            borderRadius: BorderRadius.circular(borderRadius),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onPressed,
+              child: Center(
+                child: Text(
+                  label,
+                  style: textColor != null
+                      ? AppTypography.buttonLabel.copyWith(color: textColor)
+                      : AppTypography.buttonLabel,
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
+          )),
     );
   }
 }
-

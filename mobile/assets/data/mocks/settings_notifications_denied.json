@@ -1,32 +1,61 @@
-﻿{
-    "screen_id":  "M09",
-    "screen_title":  "Settings",
-    "has_back_button":  false,
-    "state_type":  "notifications_denied",
-    "state_label":  "NOTIFICATIONS OFF",
-    "state_context":  "State specification Â· Notifications off",
-    "card_title":  "Budget alerts are disabled",
-    "card_description":  "Î¼Token cannot display system notifications for budget thresholds.",
-    "icon_type":  "offline",
-    "bullet_points":  [
-                          {
-                              "title":  "Budgets still calculate",
-                              "subtitle":  "Alert history remains inside the app",
-                              "bullet_color":  "#C27A20"
-                          },
-                          {
-                              "title":  "OS permission required",
-                              "subtitle":  "Enable notifications in system settings",
-                              "bullet_color":  "#C27A20"
-                          }
-                      ],
-    "behavior_label":  "BEHAVIOR",
-    "behavior_text":  "Do not imply budget tracking is disabled.",
-    "action_text":  "Review budget alerts",
-    "active_tab":  "Settings",
-    "action":  {
-                   "button_label":  "Review budget alerts",
-                   "background_color":  "#171717",
-                   "text_color":  "#9C9FAB"
-               }
+{
+  "screen_id": "M09",
+  "screen_title": "Settings",
+  "has_back_button": false,
+  "state_type": "notifications_denied",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Review budget alerts",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Do not imply budget tracking is disabled."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Budgets still calculate",
+        "subtitle": "Alert history remains inside the app"
+      },
+      {
+        "title": "OS permission required",
+        "subtitle": "Enable notifications in system settings"
+      }
+    ],
+    "title": "Budget alerts are disabled",
+    "description": "μToken cannot display system notifications for budget thresholds.",
+    "icon_type": "offline"
+  },
+  "badge_text": "NOTIFICATIONS OFF",
+  "specification_subtitle": "State specification · Notifications off",
+  "figma_layout": {
+    "node": "94:2951",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
 }

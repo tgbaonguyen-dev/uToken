@@ -1,38 +1,66 @@
-﻿{
-    "screen_id":  "M03",
-    "state_type":  "app_not_installed",
-    "screen_title":  "Install guide",
-    "has_back_button":  true,
-    "badge_text":  "NOT INSTALLED",
-    "specification_subtitle":  "State specification · Not installed",
-    "card":  {
-                 "icon_type":  "cancelled",
-                 "title":  "Desktop app not detected",
-                 "description":  "Install the companion before trying to pair this device.",
-                 "items":  [
-                               {
-                                   "id":  "no_local_collector",
-                                   "title":  "No local collector found",
-                                   "subtitle":  "Antigravity usage cannot be read yet",
-                                   "bullet_color":  "#7B7F88"
-                               },
-                               {
-                                   "id":  "official_download",
-                                   "title":  "Official download only",
-                                   "subtitle":  "Do not require admin passwords or API keys",
-                                   "bullet_color":  "#7B7F88"
-                               }
-                           ]
-             },
-    "behavior":  {
-                     "label":  "BEHAVIOR",
-                     "description":  "Keep the official source prominent."
-                 },
-    "has_bottom_navigation":  false,
-    "action":  {
-                   "button_label":  "Download desktop app",
-                   "cancel_label":  "Download desktop app",
-                   "background_color":  "#F4F4F5",
-                   "text_color":  "#111214"
-               }
+{
+  "screen_id": "M03",
+  "state_type": "app_not_installed",
+  "screen_title": "Install guide",
+  "has_back_button": true,
+  "badge_text": "NOT INSTALLED",
+  "specification_subtitle": "State specification · Not installed",
+  "card": {
+    "icon_type": "cancelled",
+    "title": "Desktop app not detected",
+    "description": "Install the companion before trying to pair this device.",
+    "items": [
+      {
+        "id": "no_local_collector",
+        "title": "No local collector found",
+        "subtitle": "Antigravity usage cannot be read yet",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "official_download",
+        "title": "Official download only",
+        "subtitle": "Do not request provider passwords or API keys",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep the official source prominent."
+  },
+  "has_bottom_navigation": false,
+  "action": {
+    "button_label": "Download desktop app",
+    "cancel_label": "Download desktop app",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "figma_layout": {
+    "node": "93:701",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 736,
+    "illustration": "assets/figma/reviewed/b67b6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 23.161016,
+      "w": 89.856,
+      "h": 38.086708
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e7cbc.svg",
+      "assets/figma/reviewed/68341.svg"
+    ],
+    "nav": [
+      null,
+      null,
+      null,
+      null
+    ]
+  }
 }

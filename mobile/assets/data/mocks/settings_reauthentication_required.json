@@ -1,32 +1,61 @@
-﻿{
-    "screen_id":  "M09",
-    "screen_title":  "Settings",
-    "has_back_button":  false,
-    "state_type":  "reauthentication_required",
-    "state_label":  "REAUTHENTICATE",
-    "state_context":  "State specification Â· Reauthenticate",
-    "card_title":  "Account verification required",
-    "card_description":  "A sensitive account or data action needs a fresh Google sign-in.",
-    "icon_type":  "offline",
-    "bullet_points":  [
-                          {
-                              "title":  "Current session is read-only",
-                              "subtitle":  "Dashboard previews are available",
-                              "bullet_color":  "#C27A20"
-                          },
-                          {
-                              "title":  "Sensitive actions paused",
-                              "subtitle":  "Re-authenticate to continue",
-                              "bullet_color":  "#C27A20"
-                          }
-                      ],
-    "behavior_label":  "BEHAVIOR",
-    "behavior_text":  "Block only actions that require fresh authentication.",
-    "action_text":  "Open account",
-    "active_tab":  "Settings",
-    "action":  {
-                   "button_label":  "Open account",
-                   "background_color":  "#171717",
-                   "text_color":  "#9C9FAB"
-               }
+{
+  "screen_id": "M09",
+  "screen_title": "Settings",
+  "has_back_button": false,
+  "state_type": "reauthentication_required",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Open account",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Block only actions that require fresh authentication."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Current session is read-only",
+        "subtitle": "Dashboard remains available"
+      },
+      {
+        "title": "Sensitive actions paused",
+        "subtitle": "Reauthenticate to continue"
+      }
+    ],
+    "title": "Account verification required",
+    "description": "A sensitive account or data action needs a fresh Google sign-in.",
+    "icon_type": "offline"
+  },
+  "badge_text": "REAUTHENTICATE",
+  "specification_subtitle": "State specification · Reauthenticate",
+  "figma_layout": {
+    "node": "94:3060",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
 }

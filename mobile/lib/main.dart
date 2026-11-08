@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/router.dart';
+import 'core/widgets/ui_preview_scope.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,21 +18,23 @@ class UTokenApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'μToken',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'BeVietnamPro',
-        brightness: Brightness.light,
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        fontFamily: 'BeVietnamPro',
-        brightness: Brightness.dark,
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.system,
-      routerConfig: appRouter,
-    );
+    return UiPreviewScope(
+        enabled: false,
+        child: MaterialApp.router(
+          title: 'μToken',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            fontFamily: 'BeVietnamPro',
+            brightness: Brightness.light,
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            fontFamily: 'BeVietnamPro',
+            brightness: Brightness.dark,
+            useMaterial3: true,
+          ),
+          themeMode: ThemeMode.dark,
+          routerConfig: appRouter,
+        ));
   }
 }

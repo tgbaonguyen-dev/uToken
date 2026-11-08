@@ -80,6 +80,7 @@ class SigningInStateData {
   const SigningInStateData({
     required this.screenId,
     this.stateType = 'signing_in',
+    this.figmaLayout,
     required this.screenTitle,
     this.hasBackButton = false,
     this.hasBottomNavigation = false,
@@ -93,6 +94,7 @@ class SigningInStateData {
 
   final String screenId;
   final String stateType;
+  final Map<String, dynamic>? figmaLayout;
   final String screenTitle;
   final bool hasBackButton;
   final bool hasBottomNavigation;
@@ -116,7 +118,8 @@ class SigningInStateData {
             title: json['card_title'] as String? ?? '',
             description: json['card_description'] as String? ?? '',
             items: ((json['bullet_points'] as List<dynamic>?) ?? [])
-                .map((item) => SigningInItemData.fromJson(item as Map<String, dynamic>))
+                .map((item) =>
+                    SigningInItemData.fromJson(item as Map<String, dynamic>))
                 .toList(),
           );
 
@@ -128,7 +131,8 @@ class SigningInStateData {
           );
 
     final screenId = json['screen_id'] as String? ?? 'M01';
-    final isPreAppFlow = screenId == 'M01' || screenId == 'M02' || screenId == 'M03';
+    final isPreAppFlow =
+        screenId == 'M01' || screenId == 'M02' || screenId == 'M03';
     final defaultButtonBg = isPreAppFlow ? '#F4F4F5' : '#171717';
     final defaultTextColor = isPreAppFlow ? '#111214' : '#9C9FAB';
 
@@ -138,22 +142,27 @@ class SigningInStateData {
                 (actionJson['cancel_label'] as String?) ??
                 (actionJson['action_text'] as String?) ??
                 'Action',
-            backgroundColor: (actionJson['background_color'] as String?) ?? defaultButtonBg,
-            textColor: (actionJson['text_color'] as String?) ?? defaultTextColor,
+            backgroundColor:
+                (actionJson['background_color'] as String?) ?? defaultButtonBg,
+            textColor:
+                (actionJson['text_color'] as String?) ?? defaultTextColor,
           )
         : SigningInActionData(
             buttonLabel: (json['action_text'] as String?) ??
                 (json['button_label'] as String?) ??
                 'Action',
-            backgroundColor: (json['background_color'] as String?) ?? defaultButtonBg,
+            backgroundColor:
+                (json['background_color'] as String?) ?? defaultButtonBg,
             textColor: (json['text_color'] as String?) ?? defaultTextColor,
           );
 
     final defaultHasBottomNav = !isPreAppFlow;
-    final hasBottomNavigation = json['has_bottom_navigation'] as bool? ?? defaultHasBottomNav;
+    final hasBottomNavigation =
+        json['has_bottom_navigation'] as bool? ?? defaultHasBottomNav;
 
     return SigningInStateData(
       screenId: screenId,
+      figmaLayout: (json['figma_layout'] as Map?)?.cast<String, dynamic>(),
       stateType: json['state_type'] as String? ?? 'signing_in',
       screenTitle: json['screen_title'] as String? ?? 'Sign in',
       hasBackButton: json['has_back_button'] as bool? ?? false,
@@ -191,13 +200,11 @@ class SigningInCardData {
       iconType: json['icon_type'] as String? ?? 'signing_in',
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      items:
-          list
-              .map(
-                (item) =>
-                    SigningInItemData.fromJson(item as Map<String, dynamic>),
-              )
-              .toList(),
+      items: list
+          .map(
+            (item) => SigningInItemData.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(),
     );
   }
 }
@@ -256,8 +263,7 @@ class SigningInActionData {
 
   factory SigningInActionData.fromJson(Map<String, dynamic> json) {
     return SigningInActionData(
-      buttonLabel:
-          (json['button_label'] as String?) ??
+      buttonLabel: (json['button_label'] as String?) ??
           (json['cancel_label'] as String?) ??
           (json['action_text'] as String?) ??
           'Action',

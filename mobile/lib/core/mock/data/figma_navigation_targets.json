@@ -96,6 +96,9 @@
     "S04": {
       "Retry sync": "S03",
       "Desktop connection": "M10"
+    },
+    "M08": {
+      "Back": "M07"
     }
   },
   "bottomBar": {
