@@ -1,0 +1,304 @@
+[
+  {
+    "id": "normal",
+    "name": "Normal",
+    "title": "Collector",
+    "subtitle": "Live ingestion from this device",
+    "status": "Running",
+    "headline": "Collector",
+    "description": "Live ingestion from this device",
+    "accent": "#2EC790",
+    "code": "",
+    "primaryLabel": "",
+    "primaryAction": "",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [],
+    "guide": []
+  },
+  {
+    "id": "offline",
+    "name": "D09 - Collector Offline",
+    "title": "Overview",
+    "subtitle": "No enabled source is being collected.",
+    "status": "COLLECTOR STOPPED",
+    "headline": "Collector is offline",
+    "description": "Enable a source in appsettings.json or install Codex / Claude Code, then restart collection.",
+    "accent": "#F04D57",
+    "code": "09",
+    "primaryLabel": "Rescan sources",
+    "primaryAction": "restart",
+    "secondaryLabel": "View diagnostics",
+    "secondaryAction": "diagnostics",
+    "collectorState": "offline",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Collector process",
+        "value": "Stopped",
+        "color": "#F04D57"
+      },
+      {
+        "label": "Log access",
+        "value": "—",
+        "color": "#2EC790"
+      },
+      {
+        "label": "Local database",
+        "value": "—",
+        "color": "#2EC790"
+      },
+      {
+        "label": "Mobile sync",
+        "value": "—",
+        "color": "#F04D57"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "empty",
+    "name": "D11 - Empty Usage",
+    "title": "Overview",
+    "subtitle": "Usage will appear here after your first supported AI session.",
+    "status": "READY TO COLLECT",
+    "headline": "No usage recorded yet",
+    "description": "The collector is running correctly. Start a supported AI session and data will appear automatically.",
+    "accent": "#4089EF",
+    "code": "11",
+    "primaryLabel": "Check collector",
+    "primaryAction": "check",
+    "secondaryLabel": "View setup guide",
+    "secondaryAction": "setup",
+    "collectorState": "running",
+    "emptyUsage": true,
+    "details": [
+      {
+        "label": "Collector",
+        "value": "—",
+        "color": "#2EC790"
+      }
+    ],
+    "guide": [
+      {
+        "number": "1",
+        "title": "Open a supported AI tool",
+        "description": "Gemini, Codex, or Claude",
+        "action": ""
+      },
+      {
+        "number": "2",
+        "title": "Send a prompt normally",
+        "description": "No special workflow is required",
+        "action": ""
+      },
+      {
+        "number": "3",
+        "title": "Return to uToken",
+        "description": "Usage appears within seconds after the tool writes its log",
+        "action": ""
+      }
+    ]
+  },
+  {
+    "id": "scanning",
+    "name": "D19 - Scanning",
+    "title": "Scanning local usage",
+    "subtitle": "Reading supported provider logs and calculating token summaries on this device.",
+    "status": "Scanning",
+    "headline": "Scanning local usage",
+    "description": "Reading supported provider logs and calculating token summaries on this device.",
+    "accent": "#4089EF",
+    "code": "07",
+    "primaryLabel": "View sources",
+    "primaryAction": "sources",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Sources checked",
+        "value": "2 of 3",
+        "color": "#9096A1"
+      },
+      {
+        "label": "Current source",
+        "value": "Codex",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "not-found",
+    "name": "D21 - Source Not Found",
+    "title": "No supported source found",
+    "subtitle": "Install or use a supported AI tool, then scan this computer again.",
+    "status": "Needs setup",
+    "headline": "No supported source found",
+    "description": "Install or use a supported AI tool, then scan this computer again.",
+    "accent": "#F26039",
+    "code": "09",
+    "primaryLabel": "Configure sources",
+    "primaryAction": "sources",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": true,
+    "details": [
+      {
+        "label": "Codex",
+        "value": "Not found",
+        "color": "#9096A1"
+      },
+      {
+        "label": "Gemini / Claude",
+        "value": "Not found",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": [
+      {
+        "number": "1",
+        "title": "Use a supported AI tool",
+        "description": "Start a Codex or Claude Code session on this computer.",
+        "action": ""
+      },
+      {
+        "number": "2",
+        "title": "Check the expected log path",
+        "description": "The collector reads usage metadata from the provider log folder on this computer.",
+        "action": ""
+      },
+      {
+        "number": "3",
+        "title": "Return and rescan",
+        "description": "Open Sources and press Rescan sources.",
+        "action": ""
+      }
+    ]
+  },
+  {
+    "id": "up-to-date",
+    "name": "D22 - No New Usage",
+    "title": "Everything is up to date",
+    "subtitle": "The scan completed successfully and found no new usage records.",
+    "status": "Up to date",
+    "headline": "Everything is up to date",
+    "description": "The scan completed successfully and found no new usage records.",
+    "accent": "#2EC790",
+    "code": "10",
+    "primaryLabel": "Open overview",
+    "primaryAction": "normal",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Last scan",
+        "value": "—",
+        "color": "#9096A1"
+      },
+      {
+        "label": "New records",
+        "value": "0",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "revoked",
+    "name": "D23 - Session Revoked",
+    "title": "Session expired",
+    "subtitle": "Your Google session expired or was revoked.",
+    "status": "Revoked",
+    "headline": "Sign in again",
+    "description": "Uploads are paused. Local usage is still collected and will upload after you sign in.",
+    "accent": "#F04D57",
+    "code": "11",
+    "primaryLabel": "Sign in again",
+    "primaryAction": "pair",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Local history",
+        "value": "Preserved",
+        "color": "#F04D57"
+      },
+      {
+        "label": "Cloud sync",
+        "value": "Stopped",
+        "color": "#F04D57"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "update",
+    "name": "D24 - Update Required",
+    "title": "Collector update required",
+    "subtitle": "This version is no longer compatible with secure sync. Update before continuing.",
+    "status": "Update required",
+    "headline": "Collector update required",
+    "description": "Some log lines use a format this collector does not recognize. Existing data is kept; update uToken to read them.",
+    "accent": "#F26039",
+    "code": "12",
+    "primaryLabel": "View settings",
+    "primaryAction": "settings",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Installed",
+        "value": "1.0.3",
+        "color": "#9096A1"
+      },
+      {
+        "label": "Minimum",
+        "value": "1.2.0",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "network",
+    "name": "D25 - Network Error",
+    "title": "Unable to reach sync service",
+    "subtitle": "uToken cannot reach Firebase.",
+    "status": "Offline",
+    "headline": "Unable to reach sync service",
+    "description": "Summaries stay queued on this computer and upload automatically when the connection returns.",
+    "accent": "#F04D57",
+    "code": "13",
+    "primaryLabel": "Retry sync",
+    "primaryAction": "retry",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Last successful sync",
+        "value": "—",
+        "color": "#F04D57"
+      },
+      {
+        "label": "Pending records",
+        "value": "—",
+        "color": "#F04D57"
+      }
+    ],
+    "guide": []
+  }
+]

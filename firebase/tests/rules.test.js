@@ -38,3 +38,15 @@ test('không ai ghi được bảng giá', async () => {
   const db = env.authenticatedContext('alice').firestore();
   await assertFails(setDoc(doc(db, 'pricing/v1'), { x: 1 }));
 });
+
+test('efficiency/current: chủ tài khoản ghi được, người khác thì không', async () => {
+  const alice = env.authenticatedContext('alice').firestore();
+  const bob = env.authenticatedContext('bob').firestore();
+  await assertSucceeds(setDoc(doc(alice, 'users/alice/efficiency/current'), { schema_version: 1 }));
+  await assertFails(setDoc(doc(bob, 'users/alice/efficiency/current'), { schema_version: 1 }));
+});
+
+test('daily: tên document phải là ngày YYYY-MM-DD', async () => {
+  const db = env.authenticatedContext('alice').firestore();
+  await assertFails(setDoc(doc(db, 'users/alice/daily/today'), { schema_version: 2 }));
+});

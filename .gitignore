@@ -12,15 +12,55 @@ Thumbs.db
 .codex/
 .aws/
 
+# AI assistant docs, instructions and local state (kept on each member's machine)
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+**/CLAUDE.md
+AGENTS.md
+**/AGENTS.md
+GEMINI.md
+.gemini/
+.cursor/
+.cursorrules
+.cursorignore
+.windsurf/
+.windsurfrules
+.clinerules
+.roo/
+.kiro/
+.continue/
+.serena/
+.aider*
+.orca/
+.omp/
+.github/copilot-instructions.md
+.mcp.json
+*HANDOFF*.md
+*handoff*.md
+
 # Environment files and credentials
 .env
 .env.*
 !.env.example
+*.local
+**/*.local.json
 firebase/.firebaserc
+firebase/.runtimeconfig.json
 mobile/android/app/google-services.json
+mobile/ios/Runner/GoogleService-Info.plist
 mobile/lib/firebase_options.dart
 desktop/src/UToken.Desktop.App/firebase.desktop.json
 **/appsettings.Local.json
+**/appsettings.*.Local.json
+client_secret*.json
+*service-account*.json
+*-firebase-adminsdk-*.json
+credentials.json
+token.json
+*.pem
+*.p12
+*.pfx
 *.jks
 *.keystore
 **/key.properties
@@ -44,6 +84,9 @@ mobile/build/
 mobile/coverage/
 mobile/android/.gradle/
 mobile/android/local.properties
+mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Runner/GeneratedPluginRegistrant.*
 
 # Node.js
 **/node_modules/

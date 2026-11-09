@@ -1,0 +1,61 @@
+{
+  "screen_id": "M10",
+  "screen_title": "Desktop connection",
+  "has_back_button": true,
+  "state_type": "permission_denied",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "View permission help",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "State the exact affected permission."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Collector is connected",
+        "subtitle": "Cloud account remains linked"
+      },
+      {
+        "title": "User action required",
+        "subtitle": "Grant access in desktop settings"
+      }
+    ],
+    "title": "Usage permission is blocked",
+    "description": "The desktop companion cannot read local usage metadata.",
+    "icon_type": "failed"
+  },
+  "badge_text": "PERMISSION DENIED",
+  "specification_subtitle": "State specification · Permission denied",
+  "figma_layout": {
+    "node": "94:3509",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/49cc6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.260016,
+      "w": 89.856,
+      "h": 42.09096
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e35ed.svg",
+      "assets/figma/reviewed/93b03.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

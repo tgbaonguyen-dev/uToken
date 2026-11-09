@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia" x:Class="UToken.Desktop.App.Views.PairingView" x:CompileBindings="False">
+ <StackPanel Spacing="28">
+  <Grid ColumnDefinitions="2.3*,20,*">
+   <Border Classes="card" Padding="30"><StackPanel Spacing="28">
+    <TextBlock Text="GOOGLE ACCOUNT" Classes="label"/>
+    <StackPanel IsVisible="{Binding CanEnterPairing}" Spacing="18">
+     <TextBlock Text="Sign in to sync your usage" FontSize="20" FontWeight="SemiBold"/>
+     <TextBlock Text="Use the same Google account as uToken mobile. Your browser opens for sign-in; uToken never sees your password." Classes="muted" TextWrapping="Wrap"/>
+     <Button Classes="primary" Content="Sign in with Google" Command="{Binding SignInCommand}" IsEnabled="{Binding !IsBusy}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+     <TextBlock Text="{Binding Pairing.SignInHint}" Classes="muted" FontSize="11" TextWrapping="Wrap"/>
+    </StackPanel>
+    <TextBlock Text="{Binding PairingMessage}" Foreground="{Binding PairingMessageColor}" TextWrapping="Wrap"/>
+    <StackPanel IsVisible="{Binding IsPaired}" Spacing="20">
+     <Grid ColumnDefinitions="60,*"><Border Background="#191C20" CornerRadius="14" Width="48" Height="48"><TextBlock Text="{Binding Sync.Device.Initial}" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel Grid.Column="1" Spacing="8"><TextBlock Text="{Binding Sync.Device.Name}" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="{Binding Sync.Device.Version}" Classes="muted"/><TextBlock Text="{Binding Sync.Device.Platform}" Classes="muted" FontSize="11"/></StackPanel></Grid>
+     <Grid ColumnDefinitions="*,*"><StackPanel Spacing="8"><TextBlock Text="Last upload" Classes="muted" FontSize="11"/><TextBlock Text="{Binding Sync.Device.LastSync}"/></StackPanel><StackPanel Grid.Column="1" Spacing="8"><TextBlock Text="Data uploaded" Classes="muted" FontSize="11"/><TextBlock Text="{Binding Sync.Device.Transferred}"/></StackPanel></Grid>
+    </StackPanel>
+    <WrapPanel IsVisible="{Binding IsPaired}"><Button Classes="primary" Content="Open Sync" Command="{Binding ShowSyncCommand}" Margin="0,0,10,0"/><Button Content="Sign out" Command="{Binding RequestDisconnectCommand}" IsEnabled="{Binding !IsBusy}"/></WrapPanel>
+    <Border BorderBrush="#F26039" BorderThickness="1" CornerRadius="10" Padding="12" IsVisible="{Binding ConfirmDisconnect}"><StackPanel Spacing="12"><TextBlock Text="Sign out of Google on this computer? Local usage and data already in the cloud are kept." TextWrapping="Wrap"/><WrapPanel><Button Content="Sign out" Command="{Binding DisconnectCommand}" Margin="0,0,8,0" IsEnabled="{Binding !IsBusy}"/><Button Content="Cancel" Command="{Binding CancelDisconnectCommand}" IsEnabled="{Binding !IsBusy}"/></WrapPanel></StackPanel></Border>
+   </StackPanel></Border>
+   <Border Grid.Column="2" Classes="card"><StackPanel Spacing="30"><TextBlock Text="SECURE BY DEFAULT" Classes="label"/>
+    <ItemsControl ItemsSource="{Binding Pairing.SecurityItems}"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="26,10,*" Margin="0,12"><Border Background="#191C20" CornerRadius="7" Width="26" Height="26"><TextBlock Text="&#x2713;" Foreground="{StaticResource SuccessBrush}" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Grid.Column="2" Text="{Binding}" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+   </StackPanel></Border>
+  </Grid>
+  <Border Classes="card"><StackPanel Spacing="20"><TextBlock Text="SUPPORTED SOURCES" Classes="label"/>
+   <ItemsControl ItemsSource="{Binding SupportedSources}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><Border ToolTip.Tip="{Binding Availability}" Classes="supported-source" Background="#191A1C" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="12" Padding="14,10" MinWidth="170" Margin="0,0,12,8"><StackPanel Orientation="Horizontal" Spacing="12"><svg:Svg Path="{Binding Logo}" Width="32" Height="32"/><Ellipse Classes="status-dot" Fill="{Binding Color}"/><TextBlock Text="{Binding Name}" VerticalAlignment="Center"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+  </StackPanel></Border>
+ </StackPanel>
+</UserControl>

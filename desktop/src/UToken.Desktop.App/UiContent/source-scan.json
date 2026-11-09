@@ -1,0 +1,6 @@
+{
+  "heading": "Scanning local usage",
+  "description": "Checking supported provider sources and calculating token summaries on this device.",
+  "privacyNote": "Only token counts and metadata are read from local logs. Prompt and response content is never stored.",
+  "stepDelayMs": 0
+}

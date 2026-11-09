@@ -20,6 +20,17 @@ public sealed class FirebaseOptions
         ? $"http://{FirestoreEmulatorHost}/v1/projects/{ProjectId}/databases/(default)/documents"
         : $"https://firestore.googleapis.com/v1/projects/{ProjectId}/databases/(default)/documents";
 
+    /// <summary>Endpoint làm mới token (securetoken.googleapis.com).</summary>
+    public string SecureTokenBaseUrl => UseEmulator
+        ? $"http://{AuthEmulatorHost}/securetoken.googleapis.com/v1"
+        : "https://securetoken.googleapis.com/v1";
+
+    /// <summary>Emulator chấp nhận API key bất kỳ.</summary>
+    public string EffectiveApiKey => UseEmulator && string.IsNullOrWhiteSpace(ApiKey) ? "emulator-key" : ApiKey;
+
+    /// <summary>Tên đầy đủ của document để dùng trong :commit, ví dụ users/abc/daily/2026-11-07.</summary>
+    public string DocumentName(string path) => $"projects/{ProjectId}/databases/(default)/documents/{path}";
+
     public string IdentityToolkitBaseUrl => UseEmulator
         ? $"http://{AuthEmulatorHost}/identitytoolkit.googleapis.com/v1"
         : "https://identitytoolkit.googleapis.com/v1";
@@ -35,6 +46,8 @@ public sealed class FirebaseOptions
             if (IsPlaceholder(OAuthClientId)) errors.Add("Firebase:OAuthClientId chưa điền");
             if (IsPlaceholder(OAuthClientSecret)) errors.Add("Firebase:OAuthClientSecret chưa điền");
         }
+        // Đăng nhập Google luôn cần OAuth client (kể cả khi dùng emulator, vì emulator nhận ID token thật của Google).
+        if (UseEmulator && IsPlaceholder(OAuthClientId)) errors.Add("Firebase:OAuthClientId chưa điền (appsettings.Local.json)");
         return errors;
     }
 

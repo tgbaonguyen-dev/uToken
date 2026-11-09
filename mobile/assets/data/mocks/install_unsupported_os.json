@@ -1,0 +1,66 @@
+{
+  "screen_id": "M03",
+  "state_type": "unsupported_os",
+  "screen_title": "Install guide",
+  "has_back_button": true,
+  "badge_text": "UNSUPPORTED",
+  "specification_subtitle": "State specification · Unsupported",
+  "card": {
+    "icon_type": "failed",
+    "title": "This system isn’t supported",
+    "description": "The desktop companion cannot run on this operating system version.",
+    "items": [
+      {
+        "id": "installation_blocked",
+        "title": "Installation blocked",
+        "subtitle": "No collector can be started here",
+        "bullet_color": "#E0525B"
+      },
+      {
+        "id": "check_supported_systems",
+        "title": "Check supported systems",
+        "subtitle": "Use a compatible desktop to continue",
+        "bullet_color": "#E0525B"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "State the minimum supported OS clearly."
+  },
+  "has_bottom_navigation": false,
+  "action": {
+    "button_label": "View requirements",
+    "cancel_label": "View requirements",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "figma_layout": {
+    "node": "93:669",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 736,
+    "illustration": "assets/figma/reviewed/49cc6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.260015999999997,
+      "w": 89.856,
+      "h": 42.09096000000001
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e35ed.svg",
+      "assets/figma/reviewed/93b03.svg"
+    ],
+    "nav": [
+      null,
+      null,
+      null,
+      null
+    ]
+  }
+}

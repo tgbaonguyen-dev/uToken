@@ -1,0 +1,66 @@
+{
+  "screen_id": "M04",
+  "state_type": "desktop_offline",
+  "screen_title": "Tokens",
+  "has_back_button": false,
+  "badge_text": "OFFLINE",
+  "specification_subtitle": "State specification · Offline",
+  "card": {
+    "icon_type": "offline",
+    "title": "Desktop is offline",
+    "description": "Showing the last successfully synced usage while the companion is unavailable.",
+    "items": [
+      {
+        "id": "last_sync",
+        "title": "Last sync · Today, 10:42",
+        "subtitle": "Historical data is still available",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "new_activity_pending",
+        "title": "New activity is pending",
+        "subtitle": "Open the desktop companion to continue",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Preserve cached data and mark its freshness."
+  },
+  "action": {
+    "button_label": "View connection",
+    "background_color": "#171717",
+    "text_color": "#9c9fa8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Tokens",
+  "figma_layout": {
+    "node": "94:599",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/4100e.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

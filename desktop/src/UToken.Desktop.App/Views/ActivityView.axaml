@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="UToken.Desktop.App.Views.ActivityView" x:CompileBindings="False">
+ <UserControl.Styles>
+  <Style Selector="ListBoxItem"><Setter Property="Padding" Value="8,0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="CornerRadius" Value="8"/></Style>
+  <Style Selector="ListBoxItem:selected /template/ ContentPresenter"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#F3F4F7"/></Style>
+  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="#191C20"/></Style>
+  <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="#191C20"/></Style>
+ </UserControl.Styles>
+ <StackPanel Spacing="20">
+  <Border Classes="card" Padding="16">
+   <StackPanel Spacing="12" IsEnabled="{Binding !IsBusy}">
+    <WrapPanel><ComboBox ItemsSource="{Binding ActivityProviders}" SelectedItem="{Binding ActivityProvider, Mode=TwoWay}" MinWidth="140" Margin="0,0,10,6" AutomationProperties.Name="Activity source"><ComboBox.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Classes="status-dot"/><TextBlock Text="{Binding}"/></StackPanel></DataTemplate></ComboBox.ItemTemplate></ComboBox><ComboBox ItemsSource="{Binding ActivityModels}" SelectedItem="{Binding ActivityModel, Mode=TwoWay}" MinWidth="175" Margin="0,0,10,6" AutomationProperties.Name="Activity model"/><ComboBox ItemsSource="{Binding ActivityPeriods}" SelectedItem="{Binding ActivityPeriod, Mode=TwoWay}" MinWidth="140" Margin="0,0,10,6" AutomationProperties.Name="Activity time range"/></WrapPanel>
+    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+     <TextBox Background="#191C20" BorderBrush="{StaticResource LineBrush}" CornerRadius="8" Text="{Binding ActivitySearch, Mode=TwoWay}" Watermark="Search model, provider, or event ID" Margin="0,0,10,0" AutomationProperties.Name="Search activity"><TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding RefreshActivityCommand}"/></TextBox.KeyBindings></TextBox>
+     <Button Grid.Column="1" Content="Search" Command="{Binding RefreshActivityCommand}" Margin="0,0,8,0"/>
+     <Button Grid.Column="2" Classes="filter" Classes.active="{Binding IsCollectedTab}" Command="{Binding ShowCollectedCommand}" Margin="0,0,8,0"><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Classes="status-dot" IsVisible="{Binding IsCollectedTab}"/><TextBlock Text="Collected"/></StackPanel></Button>
+     <Button Grid.Column="3" Classes="filter" Classes.active="{Binding WarningsOnly}" Content="Warnings" Command="{Binding ShowWarningsCommand}" Margin="0,0,8,0"/>
+     <Button Grid.Column="4" Content="Export" Click="ExportClicked"/>
+    </Grid>
+   </StackPanel>
+  </Border>
+  <Grid ColumnDefinitions="2.8*,20,*">
+   <Border Classes="card" Padding="12,18" MinHeight="440"><StackPanel Spacing="12">
+    <Grid ColumnDefinitions="14,65,70,*,65,60,60" Margin="8,0"><TextBlock Grid.Column="1" Text="TIME" Classes="label" FontSize="9"/><TextBlock Grid.Column="2" Text="SOURCE" Classes="label" FontSize="9"/><TextBlock Grid.Column="3" Text="MODEL" Classes="label" FontSize="9"/><TextBlock Grid.Column="4" Text="TOKENS" Classes="label" FontSize="9" TextAlignment="Right"/><TextBlock Grid.Column="5" Text="COST" Classes="label" FontSize="9" TextAlignment="Right"/><TextBlock Grid.Column="6" Text="STATUS" Classes="label" FontSize="9" TextAlignment="Right"/></Grid>
+    <ListBox x:Name="ActivityList" Background="Transparent" BorderThickness="0" ItemsSource="{Binding ActivityPage.Events}" SelectedItem="{Binding SelectedActivity, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}"><ListBox.ItemTemplate><DataTemplate>
+     <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,13"><Grid ColumnDefinitions="14,65,70,*,65,60,60">
+      <Ellipse Width="7" Height="7" Fill="{Binding Color}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+      <TextBlock Grid.Column="1" Text="{Binding TimeLabel}" Classes="muted" FontSize="10" ToolTip.Tip="{Binding TimestampLabel}"/><TextBlock Grid.Column="2" Text="{Binding Provider}" FontSize="10"/><TextBlock Grid.Column="3" Text="{Binding Model}" Classes="muted" FontSize="10" ToolTip.Tip="{Binding Model}"/><TextBlock Grid.Column="4" Text="{Binding TokenLabel}" TextAlignment="Right" FontSize="11"/><TextBlock Grid.Column="5" Text="{Binding CostLabel}" TextAlignment="Right" FontSize="11"/><TextBlock Grid.Column="6" Text="{Binding Status}" Foreground="{Binding StatusColor}" TextAlignment="Right" FontSize="10"/>
+     </Grid></Border>
+    </DataTemplate></ListBox.ItemTemplate></ListBox>
+    <TextBlock Text="No events match these filters." Classes="muted" IsVisible="{Binding IsActivityListEmpty}" Margin="12,24" TextWrapping="Wrap"/>
+   </StackPanel></Border>
+   <Border Grid.Column="2" Classes="card" Padding="18"><StackPanel Spacing="22">
+    <TextBlock Text="Event details" Classes="heading"/>
+    <TextBlock Text="{Binding SelectedActivity.Id, TargetNullValue='Select an event'}" Classes="muted" FontSize="10"/>
+    <Border Height="1" Background="{StaticResource LineBrush}"/>
+    <Grid ColumnDefinitions="60,*"><TextBlock Text="Provider" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedActivity.Provider}" TextAlignment="Right" FontSize="11"/></Grid>
+    <Grid ColumnDefinitions="40,*"><TextBlock Text="Model" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedActivity.Model}" TextAlignment="Right" FontSize="10" TextWrapping="Wrap"/></Grid>
+    <Grid ColumnDefinitions="*,Auto"><TextBlock Text="Input" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedActivity.InputLabel}" FontSize="11"/></Grid>
+    <Grid ColumnDefinitions="*,Auto"><TextBlock Text="Cached" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedActivity.CachedLabel}" FontSize="11"/></Grid>
+    <Grid ColumnDefinitions="*,Auto"><TextBlock Text="Output" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedActivity.OutputLabel}" FontSize="11"/></Grid>
+    <Grid ColumnDefinitions="*,Auto"><TextBlock Text="Latency" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedActivity.Latency}" FontSize="11"/></Grid>
+    <Grid ColumnDefinitions="*,Auto"><TextBlock Text="Est. cost" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedActivity.CostLabel}" FontSize="11"/></Grid>
+    <Border Height="1" Background="{StaticResource LineBrush}"/>
+    <Grid ColumnDefinitions="18,*"><Ellipse Classes="status-dot" HorizontalAlignment="Left"/><TextBlock Grid.Column="1" Text="Prompt content not collected" Foreground="{StaticResource SuccessBrush}" FontSize="10" TextWrapping="Wrap"/></Grid>
+   </StackPanel></Border>
+  </Grid>
+ </StackPanel>
+</UserControl>

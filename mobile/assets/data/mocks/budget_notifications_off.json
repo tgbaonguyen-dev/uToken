@@ -1,0 +1,61 @@
+{
+  "screen_id": "M11",
+  "screen_title": "Budget & alerts",
+  "has_back_button": true,
+  "state_type": "notifications_off",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Review alert settings",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Separate notification delivery from threshold calculation."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "In-app history remains",
+        "subtitle": "Alerts appear when the app is opened"
+      },
+      {
+        "title": "OS permission required",
+        "subtitle": "Enable notifications in system settings"
+      }
+    ],
+    "title": "System alerts are disabled",
+    "description": "Budget thresholds still calculate, but push notifications cannot be delivered.",
+    "icon_type": "offline"
+  },
+  "badge_text": "NOTIFICATIONS OFF",
+  "specification_subtitle": "State specification · Notifications off",
+  "figma_layout": {
+    "node": "94:4354",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

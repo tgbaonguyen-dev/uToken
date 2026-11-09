@@ -31,8 +31,10 @@ service cloud.firestore {
         allow update: if isOwner(uid);
       }
 
-      match /{rest=**} {
-        allow read, write: if isOwner(uid);
+      // Các collection con còn lại (efficiency, budget…). Không áp cho daily và sync_requests:
+      // Firestore OR các luật cùng khớp, nên nếu luật này phủ cả hai thì kiểm tra riêng ở trên bị vô hiệu.
+      match /{collection}/{rest=**} {
+        allow read, write: if isOwner(uid) && !(collection in ['daily', 'sync_requests']);
       }
     }
   }

@@ -9,7 +9,7 @@ public sealed class SyncSettings
     public int MaxRetry { get; init; } = 5;
 }
 
-public sealed class CollectorSettings
+public sealed class SourceCollectorSettings
 {
     public string CodexHome { get; init; } = "~/.codex";
     public string ClaudeHome { get; init; } = "~/.claude";
@@ -27,7 +27,7 @@ public sealed class AppSettings
 {
     public FirebaseOptions Firebase { get; init; } = new();
     public SyncSettings Sync { get; init; } = new();
-    public CollectorSettings Collectors { get; init; } = new();
+    public SourceCollectorSettings Collectors { get; init; } = new();
     public StorageSettings Storage { get; init; } = new();
 
     /// <summary>Windows: %LOCALAPPDATA%\uToken. Linux: ~/.local/share/uToken.</summary>

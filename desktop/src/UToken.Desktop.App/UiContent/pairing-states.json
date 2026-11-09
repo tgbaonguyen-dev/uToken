@@ -1,0 +1,171 @@
+[
+  {
+    "id": "normal",
+    "name": "Normal - Pairing form",
+    "title": "Sign in with Google",
+    "subtitle": "Use the same Google account as uToken mobile.",
+    "status": "Ready",
+    "headline": "Sign in with Google",
+    "description": "Use the same Google account as uToken mobile.",
+    "accent": "#4089EF",
+    "code": "",
+    "primaryLabel": "Back",
+    "primaryAction": "form",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [],
+    "guide": []
+  },
+  {
+    "id": "waiting",
+    "name": "D14 - Pairing Waiting",
+    "title": "Waiting for sign-in",
+    "subtitle": "Finish signing in with Google in your browser.",
+    "status": "Waiting",
+    "headline": "Waiting for sign-in",
+    "description": "Your browser is open on the Google sign-in page.",
+    "accent": "#4089EF",
+    "code": "02",
+    "primaryLabel": "Back",
+    "primaryAction": "form",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Code entry",
+        "value": "On this computer",
+        "color": "#9096A1"
+      },
+      {
+        "label": "Session",
+        "value": "One-time code",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "verifying",
+    "name": "D15 - Pairing Verifying",
+    "title": "Signing in",
+    "subtitle": "Finish signing in with Google in your browser.",
+    "status": "Verifying",
+    "headline": "Waiting for Google",
+    "description": "Complete sign-in in the browser window. This page updates automatically.",
+    "accent": "#4089EF",
+    "code": "03",
+    "primaryLabel": "Back",
+    "primaryAction": "form",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Pairing code",
+        "value": "Checking",
+        "color": "#9096A1"
+      },
+      {
+        "label": "Usage metadata",
+        "value": "Not uploaded during pairing",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "expired",
+    "name": "D16 - Pairing Expired",
+    "title": "Sign-in timed out",
+    "subtitle": "The browser sign-in was not completed in time.",
+    "status": "Expired",
+    "headline": "Sign-in timed out",
+    "description": "Start again and finish signing in within 3 minutes.",
+    "accent": "#F26039",
+    "code": "04",
+    "primaryLabel": "Sign in again",
+    "primaryAction": "restart",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Previous code",
+        "value": "Expired",
+        "color": "#F26039"
+      },
+      {
+        "label": "Usage history",
+        "value": "Preserved",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "rejected",
+    "name": "D17 - Pairing Rejected",
+    "title": "Sign-in did not complete",
+    "subtitle": "Google sign-in was cancelled or failed.",
+    "status": "Rejected",
+    "headline": "Sign-in did not complete",
+    "description": "Check your connection and try again.",
+    "accent": "#F04D57",
+    "code": "05",
+    "primaryLabel": "Back",
+    "primaryAction": "form",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Request",
+        "value": "Rejected",
+        "color": "#F04D57"
+      },
+      {
+        "label": "New connection",
+        "value": "Not created",
+        "color": "#F04D57"
+      }
+    ],
+    "guide": []
+  },
+  {
+    "id": "success",
+    "name": "D18 - Pairing Success",
+    "title": "Signed in",
+    "subtitle": "This collector can now upload usage summaries.",
+    "status": "Connected",
+    "headline": "Signed in with Google",
+    "description": "Open Sync to upload your usage. uToken mobile shows it after you sign in with the same account.",
+    "accent": "#2EC790",
+    "code": "06",
+    "primaryLabel": "Open Sync",
+    "primaryAction": "sync",
+    "secondaryLabel": "Open settings",
+    "secondaryAction": "settings",
+    "collectorState": "running",
+    "emptyUsage": false,
+    "details": [
+      {
+        "label": "Pairing",
+        "value": "Complete",
+        "color": "#9096A1"
+      },
+      {
+        "label": "Usage history",
+        "value": "Preserved",
+        "color": "#9096A1"
+      }
+    ],
+    "guide": []
+  }
+]
