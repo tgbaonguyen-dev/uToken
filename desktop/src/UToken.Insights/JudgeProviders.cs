@@ -45,3 +45,18 @@ public static class JudgeDefaults
             "Unsupported judge provider."),
     };
 }
+
+/// <summary>Creates the real adapter for a provider.</summary>
+public static class JudgeModels
+{
+    public static IJudgeModel Create(
+        string provider, string model, string apiKey, HttpClient http) =>
+        provider switch
+        {
+            JudgeProviders.Google => new GeminiJudgeModel(http, apiKey, model),
+            JudgeProviders.OpenAi => new OpenAiJudgeModel(http, apiKey, model),
+            JudgeProviders.Anthropic => new AnthropicJudgeModel(apiKey, model),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(provider), provider, "Unsupported judge provider."),
+        };
+}

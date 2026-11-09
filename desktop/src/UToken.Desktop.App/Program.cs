@@ -7,7 +7,8 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
-        if (args.Contains("--scan")) return CliScan.Run(args); // chạy core không mở giao diện
+        if (args.Contains("--scan") || args.Contains("--judge"))
+            return CliScan.Run(args); // chạy core không mở giao diện
         return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

@@ -147,6 +147,9 @@ public static class JudgeBriefBuilder
         "tokens_per_turn_vs_median" => "Tokens per turn vs median",
         "cost_tail" => "Cost tail",
         "error_rate" => "Error rate",
+        "thinking_share" => "Thinking share",
+        "retry_rate" => "Retry rate",
+        "hidden_cost_share" => "Hidden cost share",
         _ => metric.Replace('_', ' '),
     };
 }

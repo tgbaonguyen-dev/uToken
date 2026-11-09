@@ -110,15 +110,7 @@ public sealed partial class RealDesktopApi
     private IJudgeModel CreateJudgeModel(string provider, string model, string key)
     {
         if (JudgeModelFactory is not null) return JudgeModelFactory(provider, model, key);
-        var http = JudgeHttpClient ?? Http.Value;
-        return provider switch
-        {
-            JudgeProviders.Google => new GeminiJudgeModel(http, key, model),
-            JudgeProviders.OpenAi => new OpenAiJudgeModel(http, key, model),
-            JudgeProviders.Anthropic => new AnthropicJudgeModel(key, model),
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(provider), provider, "Unknown provider."),
-        };
+        return JudgeModels.Create(provider, model, key, JudgeHttpClient ?? Http.Value);
     }
 
     /// <summary>
