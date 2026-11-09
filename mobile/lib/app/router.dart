@@ -11,12 +11,19 @@ import '../features/auth/presentation/signing_in_screen.dart';
 import '../features/auth/data/auth_mock_repository.dart';
 import '../features/auth/domain/signing_in_state_model.dart';
 import '../features/insights/presentation/insight_detail_screen.dart';
+import '../features/tokens/presentation/tokens_screen.dart';
+import '../features/analytics/presentation/analytics_screen.dart';
+import '../features/efficiency/presentation/efficiency_screen.dart';
+import '../features/insights/presentation/insights_screen.dart';
+import '../features/settings/presentation/last_sync_screen.dart';
+import '../core/data/usage_repository.dart';
 
 /// Combined UI routes: exported Figma frames, hand-built states and insight detail.
 final appRouter = createAppRouter();
 
 /// Desktop và mobile kết nối bằng cách đăng nhập cùng tài khoản Google (không dùng mã ghép đôi).
-GoRouter createAppRouter({MobileAuthController? auth}) =>
+GoRouter createAppRouter(
+        {MobileAuthController? auth, UsageRepository? usage}) =>
     GoRouter(
       refreshListenable: auth,
       redirect: (_, state) {
@@ -73,9 +80,32 @@ GoRouter createAppRouter({MobileAuthController? auth}) =>
           builder: (_, __) => const SigningInScreen(),
         ),
         GoRoute(
+          path: '/insights/:id',
+          builder: (_, state) {
+            final uid = auth?.user?.uid;
+            if (_hasRealUser(auth, usage) && uid != null) {
+              return RealInsightDetailScreen(
+                uid: uid,
+                repository: usage!,
+                insightId: state.pathParameters['id']!,
+              );
+            }
+            return InsightDetailScreen(
+              initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
+            );
+          },
+        ),
+        GoRoute(
           path: '/insight-detail',
-          builder: (_, route) => InsightDetailScreen(
-              initialPeriod: route.uri.queryParameters['period'] ?? 'Month'),
+          builder: (_, route) {
+            final real = _hasRealUser(auth, usage);
+            final uid = auth?.user?.uid;
+            return real && uid != null
+                ? InsightsScreen(uid: uid, repository: usage!)
+                : InsightDetailScreen(
+                    initialPeriod:
+                        route.uri.queryParameters['period'] ?? 'Month');
+          },
         ),
         GoRoute(
           path: '/analytics/efficiency',
@@ -88,12 +118,35 @@ GoRouter createAppRouter({MobileAuthController? auth}) =>
         for (final entry in figmaRoutes.entries)
           GoRoute(
             path: entry.value,
-            builder: (context, state) => FigmaPixelScreen(
-                    screenId: entry.key,
-                    initialPeriod:
-                        state.uri.queryParameters['period'] ?? 'Month',
-                    selectedDay: state.uri.queryParameters['day'],
-                  ),
+            builder: (context, state) {
+              final real = _hasRealUser(auth, usage);
+              final uid = auth?.user?.uid;
+              if (real && uid != null) {
+                final repository = usage!;
+                if (entry.key == 'M04') {
+                  return TokensScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M05') {
+                  return AnalyticsScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M05B') {
+                  return EfficiencyScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M07') {
+                  return InsightsScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M10') {
+                  return LastSyncScreen(uid: uid, repository: repository);
+                }
+              }
+              return FigmaPixelScreen(
+                  screenId: entry.key,
+                  initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
+                  selectedDay: state.uri.queryParameters['day']);
+            },
           ),
       ],
     );
+
+bool _hasRealUser(MobileAuthController? auth, UsageRepository? usage) =>
+    auth?.user != null && !auth!.demoMode && usage != null;
