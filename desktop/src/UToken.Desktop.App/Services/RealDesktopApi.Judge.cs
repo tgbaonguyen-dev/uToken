@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using UToken.Core.Aggregation;
+using UToken.Desktop.App.Models;
 using UToken.Insights;
 
 namespace UToken.Desktop.App.Services;
@@ -74,8 +75,37 @@ public sealed partial class RealDesktopApi
         File.Move(temporary, path, true);
     }
 
-    public Task<JudgeState> SaveJudgeSettingsAsync(
+    /// <summary>
+    /// Cấu hình hiện tại, trạng thái lần chạy cuối và danh sách model của 3 nhà cung cấp.
+    /// </summary>
+    public async Task<JudgeSettingsData> GetJudgeSettingsAsync(CancellationToken ct = default)
+    {
+        var state = GetJudgeState();
+        var models = await WithStoreAsync(() => _store.LoadAllPrices()
+            .Where(entry => JudgeProviders.All.Contains(entry.Vendor))
+            .GroupBy(entry => (entry.Vendor, entry.Model))
+            .Select(group => group.MaxBy(entry => entry.EffectiveFrom)!)
+            .OrderBy(entry => VendorOrder(entry.Vendor))
+            .ThenBy(entry => entry.Model, StringComparer.Ordinal)
+            .Select(entry => new JudgeModelOption(
+                entry.Vendor, entry.Model, RunCost(entry.Schedule.Base)))
+            .ToArray(), ct);
+        return new(state.Settings, HasJudgeKey(state.Settings.Provider), state.LastRunAt,
+            state.LastStatus, state.LastErrorCode, state.LastInsights, models);
+    }
+
+    private static decimal RunCost(UToken.Core.Pricing.Price price) =>
+        (JudgeSettingsData.EstimatedInputTokens * price.InputPerMTok
+         + JudgeSettingsData.EstimatedOutputTokens * price.OutputPerMTok) / 1_000_000m;
+
+    public async Task<JudgeSettingsData> SaveJudgeSettingsAsync(
         JudgeProviderSettings settings, string? apiKey, CancellationToken ct = default)
+    {
+        SaveJudgeSettings(settings, apiKey);
+        return await GetJudgeSettingsAsync(ct);
+    }
+
+    private void SaveJudgeSettings(JudgeProviderSettings settings, string? apiKey)
     {
         if (!JudgeProviders.All.Contains(settings.Provider))
             throw new ArgumentOutOfRangeException(
@@ -90,7 +120,6 @@ public sealed partial class RealDesktopApi
         var state = GetJudgeState() with { Settings = settings };
         SaveJudgeState(state);
         _localSettings?.Record($"AI review settings: {settings.Provider} · {settings.Model}");
-        return Task.FromResult(state);
     }
 
     public bool HasJudgeKey(string provider) => JudgeKey(provider) is { Length: > 0 };

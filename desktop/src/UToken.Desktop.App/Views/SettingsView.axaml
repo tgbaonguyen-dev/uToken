@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:views="using:UToken.Desktop.App.Views"
  x:Class="UToken.Desktop.App.Views.SettingsView" x:CompileBindings="False">
+ <UserControl.Styles><Style Selector="TextBlock.judge-message"><Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/></Style><Style Selector="TextBlock.judge-message.judge-error"><Setter Property="Foreground" Value="#F26039"/></Style></UserControl.Styles>
  <UserControl.Resources><SolidColorBrush x:Key="ToggleSwitchFillOn">#2EC790</SolidColorBrush><SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver">#37D99F</SolidColorBrush><SolidColorBrush x:Key="ToggleSwitchFillOnPressed">#25A879</SolidColorBrush></UserControl.Resources>
  <StackPanel Spacing="16">
  <TextBlock Text="{Binding SettingsMessage}" IsVisible="{Binding HasSettingsMessage}" TextWrapping="Wrap" Foreground="{StaticResource SuccessBrush}"/>
@@ -29,6 +30,28 @@
  <Border Background="{StaticResource LineBrush}" Height="1"/>
  <StackPanel Spacing="8"><TextBlock Text="Collector diagnostics" FontSize="12"/><TextBlock Text="Logs contain metadata only." Classes="muted" FontSize="10"/><Button Content="Open diagnostics" Command="{Binding OpenDiagnosticsCommand}" Margin="0,6,0,0"/></StackPanel>
  </StackPanel></Border></StackPanel></Grid>
+
+ <Border Classes="card" IsEnabled="{Binding !IsBusy}"><StackPanel Spacing="14">
+ <Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="6"><TextBlock Text="AI review" Classes="heading"/>
+ <TextBlock Text="An AI model reviews your usage summary (metrics only, never prompts, code or project names) and suggests ways to save tokens." Classes="muted" FontSize="10" TextWrapping="Wrap"/></StackPanel>
+ <ToggleSwitch Grid.Column="1" IsChecked="{Binding JudgeEnabled, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" VerticalAlignment="Center" AutomationProperties.Name="AI review enabled"/></Grid>
+ <Grid ColumnDefinitions="*,20,*" RowDefinitions="Auto,Auto">
+ <StackPanel Spacing="6"><TextBlock Text="Provider" Classes="muted" FontSize="10"/>
+ <ComboBox ItemsSource="{Binding JudgeProviderOptions}" SelectedItem="{Binding SelectedJudgeProvider, Mode=TwoWay}" HorizontalAlignment="Stretch" AutomationProperties.Name="AI review provider"/></StackPanel>
+ <StackPanel Grid.Column="2" Spacing="6"><TextBlock Text="Model" Classes="muted" FontSize="10"/>
+ <TextBox Text="{Binding JudgeModel, Mode=TwoWay}" Watermark="Model id" AutomationProperties.Name="AI review model"/>
+ <ComboBox ItemsSource="{Binding JudgeModelOptions}" SelectedItem="{Binding SelectedJudgeModelOption, Mode=TwoWay}" PlaceholderText="Pick from the price catalog" HorizontalAlignment="Stretch" MaxDropDownHeight="320" AutomationProperties.Name="AI review model suggestions"><ComboBox.ItemTemplate><DataTemplate><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Model}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding CostLabel}" Classes="muted" FontSize="10" Margin="12,0,0,0"/></Grid></DataTemplate></ComboBox.ItemTemplate></ComboBox>
+ <TextBlock Text="{Binding JudgeModelCost}" Classes="muted" FontSize="10"/></StackPanel>
+ <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Spacing="6" Margin="0,14,0,0"><TextBlock Text="API key" Classes="muted" FontSize="10"/>
+ <TextBox Text="{Binding JudgeApiKey, Mode=TwoWay}" PasswordChar="•" Watermark="Paste API key" AutomationProperties.Name="AI review API key"/>
+ <TextBlock Text="{Binding JudgeKeyState}" Classes="muted" FontSize="10" TextWrapping="Wrap"/>
+ <TextBlock Text="{Binding JudgeKeyHint}" Classes="muted" FontSize="10" TextWrapping="Wrap"/></StackPanel></Grid>
+ <WrapPanel><Button Content="Save AI review" Command="{Binding SaveJudgeCommand}" Margin="0,0,10,8"/><Button Content="Test connection" Command="{Binding TestJudgeConnectionCommand}" Margin="0,0,10,8"/><Button Content="Run AI review now" Command="{Binding RunJudgeNowCommand}" Margin="0,0,0,8"/></WrapPanel>
+ <TextBlock Text="{Binding JudgeMessage}" IsVisible="{Binding HasJudgeMessage}" TextWrapping="Wrap" FontSize="11" Classes="judge-message" Classes.judge-error="{Binding JudgeMessageIsError}"/>
+ <Border Background="{StaticResource LineBrush}" Height="1"/>
+ <Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="6"><TextBlock Text="{Binding JudgeStatusLabel}" FontSize="12"/><TextBlock Text="{Binding JudgeHeadline}" IsVisible="{Binding JudgeHeadline, Converter={x:Static ObjectConverters.IsNotNull}}" Classes="muted" FontSize="11" TextWrapping="Wrap"/></StackPanel>
+ <TextBlock Grid.Column="1" Text="{Binding JudgeLastRunLabel}" Classes="muted" FontSize="10" VerticalAlignment="Top" TextWrapping="Wrap" MaxWidth="260"/></Grid>
+ </StackPanel></Border>
 
  <TextBlock Text="Preferences are saved on this computer. Launch at startup uses the autostart folder on Linux and the Run registry key on Windows. Retention deletes usage older than the selected period after each scan." Classes="muted" FontSize="10" TextWrapping="Wrap"/>
  </StackPanel>

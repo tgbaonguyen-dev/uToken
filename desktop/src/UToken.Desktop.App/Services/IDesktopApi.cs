@@ -1,4 +1,5 @@
 using UToken.Desktop.App.Models;
+using UToken.Insights;
 namespace UToken.Desktop.App.Services;
 
 /// <summary>Dịch vụ dữ liệu của giao diện desktop. Bản cài đặt duy nhất: <see cref="RealDesktopApi"/> (log thật, SQLite, Firestore).</summary>
@@ -50,6 +51,10 @@ public interface IDesktopApi
     Task<PairingResult> SignInAsync(CancellationToken ct = default);
 
     // AI review (LLM judge)
+    Task<JudgeSettingsData> GetJudgeSettingsAsync(CancellationToken ct = default);
+    /// <summary>Lưu cấu hình; <paramref name="apiKey"/> null: giữ key cũ, rỗng: xóa key.</summary>
+    Task<JudgeSettingsData> SaveJudgeSettingsAsync(
+        JudgeProviderSettings settings, string? apiKey, CancellationToken ct = default);
     /// <summary>
     /// Chạy AI review; <paramref name="force"/> bỏ qua giới hạn giờ và công tắc bật/tắt.
     /// </summary>

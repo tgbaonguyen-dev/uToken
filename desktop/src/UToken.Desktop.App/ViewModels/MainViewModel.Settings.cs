@@ -38,8 +38,9 @@ public partial class MainViewModel
 
     [RelayCommand] private Task ShowSettingsAsync() => NavigateAsync(async () =>
     {
-        Page = "settings"; SettingsMessage = null; ConfirmClearData = false;
+        Page = "settings"; SettingsMessage = null; ConfirmClearData = false; JudgeMessage = null;
         ApplySettings(await api.GetSettingsAsync());
+        ApplyJudge(await api.GetJudgeSettingsAsync());
     });
     [RelayCommand] private Task SaveSettingsAsync() => RunAsync(async () =>
     {
