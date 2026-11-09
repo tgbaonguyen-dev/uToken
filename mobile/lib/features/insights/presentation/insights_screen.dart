@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/data/usage_repository.dart';
+import '../../../core/data/stream_status.dart';
 import '../../../core/models/usage_docs.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -22,10 +23,10 @@ class InsightsScreen extends StatelessWidget {
           stream: repository.watchInsights(uid: uid),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Center(
-                  child: Text('Không thể đọc dữ liệu: ${snapshot.error}'));
+              return Center(child: Text(friendlyStreamError(snapshot.error!)));
             }
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                !snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
             final document = snapshot.data;
@@ -45,7 +46,7 @@ class InsightsScreen extends StatelessWidget {
                 if (document.status == 'failed')
                   SectionCard(
                     child: Text(
-                      'Đánh giá lỗi: ${document.errorCode ?? 'không rõ'}',
+                      friendlyAiError(document.errorCode),
                     ),
                   ),
                 ...document.insights.map(

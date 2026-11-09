@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/data/usage_repository.dart';
+import '../../../core/data/stream_status.dart';
 import '../../../core/format/token_format.dart';
 import '../../../core/models/daily_doc.dart';
 import '../../../core/theme/app_colors.dart';
@@ -37,10 +38,10 @@ class _TokensScreenState extends State<TokensScreen> {
         ),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(
-                child: Text('Không thể đọc dữ liệu: ${snapshot.error}'));
+            return Center(child: Text(friendlyStreamError(snapshot.error!)));
           }
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
           final docs = _filter(snapshot.data!, now);

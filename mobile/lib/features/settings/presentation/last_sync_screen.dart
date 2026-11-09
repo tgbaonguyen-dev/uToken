@@ -17,7 +17,8 @@ class LastSyncScreen extends StatelessWidget {
         body: StreamBuilder<DateTime?>(
           stream: repository.watchLastSync(uid: uid),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                !snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
             final value = snapshot.data;

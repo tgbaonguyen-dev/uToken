@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/data/usage_repository.dart';
+import '../../../core/data/stream_status.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/real_screen_scaffold.dart';
@@ -21,10 +22,10 @@ class AnalyticsScreen extends StatelessWidget {
           stream: repository.watchEfficiency(uid: uid),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Center(
-                  child: Text('Không thể đọc dữ liệu: ${snapshot.error}'));
+              return Center(child: Text(friendlyStreamError(snapshot.error!)));
             }
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                !snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
             final document = snapshot.data;
