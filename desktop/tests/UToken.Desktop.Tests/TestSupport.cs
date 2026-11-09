@@ -8,6 +8,7 @@ using UToken.Core.Aggregation;
 using UToken.Core.Efficiency;
 using UToken.Desktop.App.Services;
 using UToken.Engine;
+using UToken.Insights;
 using UToken.Storage;
 using UToken.Sync;
 using UToken.Sync.Auth;
@@ -115,6 +116,7 @@ public sealed class FakeCloud : ICloudSync
     public bool SignInFails { get; set; }
     public Exception? SignInError { get; set; }
     public List<(IReadOnlyList<DailyDoc> Daily, EfficiencyDoc Efficiency)> Uploads { get; } = [];
+    public List<InsightDoc> InsightUploads { get; } = [];
 
     public Task<CloudAccount?> RestoreAsync(CancellationToken ct = default) => Task.FromResult(Account);
 
@@ -145,5 +147,11 @@ public sealed class FakeCloud : ICloudSync
             Uploads.Add((daily, efficiency));
             return Task.FromResult(1000L * (daily.Count + 1));
         }
+    }
+
+    public Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default)
+    {
+        InsightUploads.Add(insights);
+        return Task.FromResult(500L);
     }
 }

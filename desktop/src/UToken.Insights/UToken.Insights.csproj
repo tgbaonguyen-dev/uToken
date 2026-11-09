@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><RootNamespace>UToken.Insights</RootNamespace></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Anthropic" />
+    <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
+    <ProjectReference Include="../UToken.Engine/UToken.Engine.csproj" />
+  </ItemGroup>
+</Project>

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using UToken.Core.Aggregation;
 using UToken.Core.Efficiency;
 using UToken.Sync.Auth;
+using UToken.Insights;
 
 namespace UToken.Sync;
 
@@ -26,6 +27,8 @@ public interface ICloudSync
 
     /// <summary>Ghi users/{uid}/daily/{date}, users/{uid}/efficiency/current và users/{uid}.last_sync_at. Trả về số byte đã gửi.</summary>
     Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default);
+
+    Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default);
 }
 
 /// <summary>
@@ -136,6 +139,20 @@ public sealed class FirebaseCloudSync : ICloudSync
             ClearSession();
             throw;
         }
+        finally { _tokenLock.Release(); }
+    }
+
+    public async Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default)
+    {
+        await _tokenLock.WaitAsync(ct);
+        try
+        {
+            if (_session is not { } session) throw new CloudAuthException("Not signed in.");
+            var body = new JsonObject { ["writes"] = new JsonArray(Update($"users/{session.Uid}/insights/current", FirestoreValues.Fields(insights))) }.ToJsonString();
+            await _firestore.CommitAsync(body, ct);
+            return Encoding.UTF8.GetByteCount(body);
+        }
+        catch (CloudAuthException) { ClearSession(); throw; }
         finally { _tokenLock.Release(); }
     }
 
