@@ -41,7 +41,8 @@ public sealed class InsightDocSchemaTests
             """;
 
         AssertValid(await service.RunAsync(Brief, new FakeModel(output), default));
-        AssertValid(await service.RunAsync(Brief with { Chats = 1 }, new FakeModel(output), default));
+        var fewChats = Brief with { Chats = 1 };
+        AssertValid(await service.RunAsync(fewChats, new FakeModel(output), default));
         AssertValid(await service.RunAsync(Brief, new FakeModel("not json"), default));
     }
 

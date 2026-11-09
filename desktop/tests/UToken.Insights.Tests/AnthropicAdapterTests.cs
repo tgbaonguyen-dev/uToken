@@ -9,7 +9,8 @@ namespace UToken.Insights.Tests;
 
 public sealed class AnthropicAdapterTests
 {
-    private static readonly IReadOnlyDictionary<string, JsonElement> Schema = ProviderSchema.Create();
+    private static readonly IReadOnlyDictionary<string, JsonElement> Schema =
+        ProviderSchema.Create();
 
     private static (AnthropicJudgeModel Model, StubHandler Handler) Create(
         HttpStatusCode status, string body)

@@ -67,7 +67,7 @@ public sealed class AnthropicJudgeModel : IJudgeModel
         catch (Exception exception) when (exception is AnthropicException
             or HttpRequestException or IOException)
         {
-            // 5xx, lỗi kết nối, dữ liệu trả về không đọc được: lỗi phía nhà cung cấp.
+            // 5xx, connection or unreadable response: a provider-side failure.
             throw new JudgeModelException("provider_error");
         }
     }
