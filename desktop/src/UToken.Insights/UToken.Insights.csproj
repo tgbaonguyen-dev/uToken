@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><RootNamespace>UToken.Insights</RootNamespace></PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/judge-output.schema.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Anthropic" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
+    <ProjectReference Include="../UToken.Engine/UToken.Engine.csproj" />
+  </ItemGroup>
+</Project>

@@ -20,6 +20,7 @@
     <ProjectReference Include="../UToken.Storage/UToken.Storage.csproj" />
     <ProjectReference Include="../UToken.Engine/UToken.Engine.csproj" />
     <ProjectReference Include="../UToken.Sync/UToken.Sync.csproj" />
+    <ProjectReference Include="../UToken.Insights/UToken.Insights.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />

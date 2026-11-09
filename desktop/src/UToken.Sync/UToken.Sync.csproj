@@ -2,6 +2,7 @@
   <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.ProtectedData" />
     <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
+    <ProjectReference Include="../UToken.Insights/UToken.Insights.csproj" />
     <ProjectReference Include="../UToken.Storage/UToken.Storage.csproj" />
   </ItemGroup>
 </Project>

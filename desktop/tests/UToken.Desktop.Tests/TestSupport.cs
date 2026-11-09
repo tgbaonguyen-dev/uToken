@@ -8,6 +8,7 @@ using UToken.Core.Aggregation;
 using UToken.Core.Efficiency;
 using UToken.Desktop.App.Services;
 using UToken.Engine;
+using UToken.Insights;
 using UToken.Storage;
 using UToken.Sync;
 using UToken.Sync.Auth;
@@ -75,7 +76,9 @@ public sealed class RealHome : IDisposable
     }
 
     /// <summary>API dữ liệu thật trên thư mục này. <paramref name="cloud"/> = false: chưa cấu hình đăng nhập Google.</summary>
-    public RealDesktopApi Api(bool cloud = true, ICloudSync? cloudSync = null)
+    public RealDesktopApi Api(bool cloud = true, ICloudSync? cloudSync = null,
+        string? judgeDirectory = null,
+        Func<string, string, string, IJudgeModel>? judgeFactory = null)
     {
         var store = new SqliteStore(DatabasePath);
         var engine = new UsageEngine(store, [new CodexCollector(), new ClaudeCodeCollector()], Home, Utc7, clock: Clock);
@@ -84,6 +87,9 @@ public sealed class RealHome : IDisposable
         {
             Startup = new StartupRegistration(AutostartDirectory, "/opt/utoken/UToken.Desktop.App"),
             PriceHttpClient = new HttpClient(new OfflineHandler()), // test không gọi mạng
+            JudgeHttpClient = new HttpClient(new OfflineHandler()),
+            JudgeDirectory = judgeDirectory,
+            JudgeModelFactory = judgeFactory,
         };
     }
 
@@ -115,6 +121,7 @@ public sealed class FakeCloud : ICloudSync
     public bool SignInFails { get; set; }
     public Exception? SignInError { get; set; }
     public List<(IReadOnlyList<DailyDoc> Daily, EfficiencyDoc Efficiency)> Uploads { get; } = [];
+    public List<InsightDoc> InsightUploads { get; } = [];
 
     public Task<CloudAccount?> RestoreAsync(CancellationToken ct = default) => Task.FromResult(Account);
 
@@ -145,5 +152,11 @@ public sealed class FakeCloud : ICloudSync
             Uploads.Add((daily, efficiency));
             return Task.FromResult(1000L * (daily.Count + 1));
         }
+    }
+
+    public Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default)
+    {
+        InsightUploads.Add(insights);
+        return Task.FromResult(500L);
     }
 }

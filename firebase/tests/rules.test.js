@@ -50,3 +50,13 @@ test('daily: tên document phải là ngày YYYY-MM-DD', async () => {
   const db = env.authenticatedContext('alice').firestore();
   await assertFails(setDoc(doc(db, 'users/alice/daily/today'), { schema_version: 2 }));
 });
+
+test('insights/current: chủ tài khoản ghi được, người khác thì không', async () => {
+  const alice = env.authenticatedContext('alice').firestore();
+  const bob = env.authenticatedContext('bob').firestore();
+  const insights = { schema_version: 1, status: 'ok', score: 72 };
+  await assertSucceeds(setDoc(doc(alice, 'users/alice/insights/current'), insights));
+  await assertSucceeds(getDoc(doc(alice, 'users/alice/insights/current')));
+  await assertFails(setDoc(doc(bob, 'users/alice/insights/current'), insights));
+  await assertFails(getDoc(doc(bob, 'users/alice/insights/current')));
+});

@@ -5,6 +5,7 @@
     <Project Path="src/UToken.Storage/UToken.Storage.csproj" />
     <Project Path="src/UToken.Engine/UToken.Engine.csproj" />
     <Project Path="src/UToken.Sync/UToken.Sync.csproj" />
+  <Project Path="src/UToken.Insights/UToken.Insights.csproj" />
     <Project Path="src/UToken.Desktop.App/UToken.Desktop.App.csproj" />
   </Folder>
   <Folder Name="/tests/">
@@ -12,6 +13,7 @@
     <Project Path="tests/UToken.Collectors.Tests/UToken.Collectors.Tests.csproj" />
     <Project Path="tests/UToken.Engine.Tests/UToken.Engine.Tests.csproj" />
     <Project Path="tests/UToken.Desktop.Tests/UToken.Desktop.Tests.csproj" />
+  <Project Path="tests/UToken.Insights.Tests/UToken.Insights.Tests.csproj" />
     <Project Path="tests/UToken.Storage.Tests/UToken.Storage.Tests.csproj" />
     <Project Path="tests/UToken.Sync.Tests/UToken.Sync.Tests.csproj" />
   </Folder>
