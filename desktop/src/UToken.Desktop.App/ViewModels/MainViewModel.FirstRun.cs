@@ -25,6 +25,12 @@ public partial class MainViewModel
     [RelayCommand] private Task ContinueSetupAsync() => RunAsync(async () =>
     {
         if (FirstRun is null) return;
+        if (IsRealPairing && SetupStepIndex == 0 && googleAuth is not null)
+        {
+            try { await googleAuth.TokenAsync(default); }
+            catch (InvalidOperationException) { await googleAuth.SignInAsync(); }
+            GoogleAccount = googleAuth.Account;
+        }
         if (SetupStepIndex < FirstRun.Steps.Length - 1) { SetupStepIndex++; return; }
         await LoadPairingPageCoreAsync();
         await api.CompleteSetupAsync();

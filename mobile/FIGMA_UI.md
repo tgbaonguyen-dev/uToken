@@ -2,6 +2,10 @@
 
 ## Scope
 
+Live `main.dart` now replaces M02/M10/S02 with real Firebase pairing views; all
+usage screens remain fixtures. `main_ui_preview.dart` preserves the original
+Figma canvases and mock pairing/state controls. See [PAIRING.md](../PAIRING.md).
+
 24 Figma frames (20 M/O screens and 4 S01-S04 state screens) are implemented for Light and Dark at the 390 x 844 source size.
 
 The original Figma file was accessed in read-only mode. No Figma layers or styles were modified.
@@ -213,3 +217,7 @@ Tests include 320x568 with keyboard insets and 1.5x text, safe areas, canvas pan
 
 - Follow-up during regression testing: bottom tabs are pinned outside the scrolling canvas in both main screens and reviewed states, preserving source dock layers and rounded corners. The wide LDPlayer test and a short-height state test cover visibility and taps.
 - Validation: all 139 existing tests passed in the full regression run. All 6 new handoff tests passed in the final targeted rerun after correcting a touch-area assertion that incorrectly included the dock border. Analyzer reports no issues; git diff --check passes with the pre-existing line-ending warning. No production code changed after that regression run.
+
+## Live Android authentication (2026-11-08)
+
+`main.dart` now creates an injected Firebase/Google auth session and guarded router. Google sign-in, session restoration, sign-out and live profile binding are connected. `main_ui_preview.dart` retains the independent mock router and previews. Usage/pairing/sync remain mock. See FIREBASE_LOGIN.md for setup, execution, validation and device checks. Full suite: 151 tests passed; analyzer clean; debug APK builds. Real-account/device verification remains pending.

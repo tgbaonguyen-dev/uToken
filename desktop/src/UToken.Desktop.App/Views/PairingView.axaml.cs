@@ -16,7 +16,8 @@ public partial class PairingView : UserControl
             DataContext is not MainViewModel vm) return;
         var index = Array.IndexOf(vm.PairingDigits, digit);
         if (index < 0) return;
-        var text = new string((box.Text ?? "").Where(c => c >= '0' && c <= '9').ToArray());
+        var text = new string((box.Text ?? "").ToUpperInvariant().Where(c => vm.IsRealPairing
+            ? Services.PairingCodes.Alphabet.Contains(c) : c >= '0' && c <= '9').ToArray());
         _updating = true;
         try
         {

@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pairing.schema.json",
+  "title": "Pairing v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "state",
+    "code",
+    "connectionId",
+    "mobileName",
+    "desktopName",
+    "desktopId",
+    "createdAt",
+    "pairedAt",
+    "revokedAt",
+    "cancelledAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "state": {
+      "enum": [
+        "pending",
+        "paired",
+        "revoked",
+        "cancelled"
+      ]
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[A-HJ-NP-Z2-9]{6}$"
+    },
+    "connectionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "mobileName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "desktopName": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "desktopId": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{32})?$"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pairedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "revokedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "cancelledAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "pending"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "desktopId": {
+            "const": ""
+          },
+          "desktopName": {
+            "const": ""
+          },
+          "pairedAt": {
+            "type": "null"
+          },
+          "revokedAt": {
+            "type": "null"
+          },
+          "cancelledAt": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "paired"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "desktopId": {
+            "pattern": "^[a-f0-9]{32}$"
+          },
+          "desktopName": {
+            "minLength": 1
+          },
+          "pairedAt": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "null"
+          },
+          "cancelledAt": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "revoked"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "desktopId": {
+            "pattern": "^[a-f0-9]{32}$"
+          },
+          "desktopName": {
+            "minLength": 1
+          },
+          "pairedAt": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string"
+          },
+          "cancelledAt": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "cancelled"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "desktopId": {
+            "const": ""
+          },
+          "desktopName": {
+            "const": ""
+          },
+          "pairedAt": {
+            "type": "null"
+          },
+          "revokedAt": {
+            "type": "null"
+          },
+          "cancelledAt": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

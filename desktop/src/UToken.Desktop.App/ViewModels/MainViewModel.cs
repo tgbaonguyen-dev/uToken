@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace UToken.Desktop.App.ViewModels;
 
-public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnStart = false, Services.DesktopUiStateStore? uiStateStore = null, TimeProvider? timeProvider = null) : ObservableObject
+public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnStart = false, Services.DesktopUiStateStore? uiStateStore = null, TimeProvider? timeProvider = null, Services.DesktopGoogleAuth? googleAuth = null) : ObservableObject
 {
     [ObservableProperty, NotifyPropertyChangedFor(nameof(IsActivityEmpty)), NotifyPropertyChangedFor(nameof(DisplayedCollector))] private Models.OverviewData? _overview;
     [ObservableProperty, NotifyPropertyChangedFor(nameof(IsSourceListEmpty)), NotifyPropertyChangedFor(nameof(HasPermissionIssue)), NotifyPropertyChangedFor(nameof(IsPermissionRequired)), NotifyPropertyChangedFor(nameof(IsSourcesNormal)), NotifyPropertyChangedFor(nameof(PermissionSource)), NotifyPropertyChangedFor(nameof(PermissionProviders)), NotifyPropertyChangedFor(nameof(Subtitle)), NotifyPropertyChangedFor(nameof(HasNoSupportedSources)), NotifyPropertyChangedFor(nameof(IsSourceNotFound)), NotifyPropertyChangedFor(nameof(DiscoveryProviders)), NotifyPropertyChangedFor(nameof(PageTitle))] private Models.SourcesData? _sourceList;
@@ -48,6 +48,7 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     partial void OnErrorChanged(string? value) => OnPropertyChanged(nameof(HasError));
     partial void OnPageChanged(string value)
     {
+        OnPropertyChanged(nameof(IsDemoSync)); OnPropertyChanged(nameof(IsDemoPairing));
         foreach (var name in new[] { nameof(IsOverview), nameof(IsSources), nameof(IsDetail), nameof(IsSourceSection), nameof(PageTitle), nameof(Subtitle), nameof(IsActivityPage), nameof(IsSyncPage), nameof(IsPairingPage), nameof(IsOverviewSection), nameof(IsSyncSection), nameof(IsSettingsPage), nameof(IsFirstRunPage), nameof(CanNavigate), nameof(CanSkipSetup), nameof(IsOverviewDashboard), nameof(IsOverviewState), nameof(DisplayedCollector), nameof(IsPermissionRequired), nameof(IsSourcesNormal), nameof(IsSourceNotFound), nameof(IsSourcesStatePreview), nameof(IsSyncStatePreview), nameof(IsSectionStatePreview), nameof(IsSyncNormal), nameof(ActiveSyncScenario), nameof(IsSyncDetailState), nameof(IsSyncFailure), nameof(IsSyncProgress), nameof(SyncStateDetails), nameof(ActivePairingScenario), nameof(IsPairingStateVisible), nameof(IsPairingFormVisible), nameof(IsPairingVerifying) }) OnPropertyChanged(name);
         NotifyVisualStatus();
         SkipSetupCommand.NotifyCanExecuteChanged();
@@ -57,6 +58,9 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
         if (IsBusy) return;
         IsBusy = true; Error = null;
         try { await action(); }
+        catch (Services.FirebaseSessionExpiredException ex) { Sync = null; GoogleAccount = ex.Message; Error = ex.Message; }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or System.Net.HttpListenerException or InvalidOperationException or System.Security.Cryptography.CryptographicException or System.ComponentModel.Win32Exception)
+        { Error = ex is InvalidOperationException ? ex.Message : "Could not complete the Firebase request. Check your connection, sign-in and Firebase configuration, then retry."; }
         catch (Exception ex) when (ex is System.IO.IOException or System.IO.InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException)
         { Error = IsSettingsPage ? "Could not read or save settings. Check folder permissions. For invalid settings JSON, Restore defaults resets your preferences." : "Could not load demo data. Please try again."; }
         finally { IsBusy = false; }

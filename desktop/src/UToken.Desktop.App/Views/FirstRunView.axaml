@@ -13,6 +13,6 @@
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  </StackPanel></Border>
  <WrapPanel><Button Classes="primary" Content="{Binding SetupAction}" Command="{Binding ContinueSetupCommand}" MinWidth="270" Margin="0,0,16,12"/><TextBlock Text="Takes about 2 minutes" Classes="muted" FontSize="10" VerticalAlignment="Center" Margin="0,0,16,12"/><Button Content="Skip setup" IsVisible="{Binding CanSkipSetup}" Command="{Binding SkipSetupCommand}" Margin="0,0,0,12"/></WrapPanel>
- <TextBlock Text="UI demo: Google sign-in and log permissions are simulated. No account or provider files are accessed." Classes="muted" FontSize="11" TextWrapping="Wrap"/>
+ <TextBlock Text="{Binding SetupModeLabel}" Classes="muted" FontSize="11" TextWrapping="Wrap"/>
  </StackPanel>
 </UserControl>

@@ -1,12 +1,18 @@
 # Mobile (Flutter, Android)
 
-Thư mục `android/` chưa có trong mẫu. Lần đầu chạy:
+Android is already configured for `com.utoken_mobile`; do not run `flutter create`
+over this project. Place the correct ignored `android/app/google-services.json`,
+register the signing SHA and enable Google Authentication in Firebase.
 
-```bash
-flutter create --platforms=android --org com.yourteam --project-name utoken_mobile .
+```powershell
 flutter pub get
-flutterfire configure   # sinh lib/firebase_options.dart (đã gitignore)
+flutter run -d emulator-5554 -t lib/main.dart
 ```
+
+See [FIREBASE_LOGIN.md](FIREBASE_LOGIN.md) and [PAIRING.md](../PAIRING.md) for real
+login/pairing, new Rules and the distinction between live and demo modes.
+`main.dart` uses native Android Firebase resources; `firebase_options.dart` is not
+required for this Android setup. `main_ui_preview.dart` keeps the UI fixtures.
 
 ## Cấu trúc (feature-first)
 

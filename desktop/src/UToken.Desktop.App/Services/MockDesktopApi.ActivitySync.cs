@@ -57,6 +57,7 @@ public sealed partial class MockDesktopApi
 
     public async Task<SyncData> GetSyncAsync(CancellationToken ct = default)
     {
+        if (realPairing is not null) return await realPairing.GetSyncAsync(ct);
         if (_sync is not null) return _sync;
         var data = await ReadAsync<SyncData>("sync.json", ct);
         return _sync = data with { Device = data.Device is null ? null : data.Device with { ReferenceTime = data.ReferenceTime } };
@@ -65,6 +66,7 @@ public sealed partial class MockDesktopApi
     public async Task<SyncResult> SyncNowAsync(CancellationToken ct = default)
     {
         var current = await GetSyncAsync(ct);
+        if (realPairing is not null) return new("no_new_usage", "Pairing only. Usage synchronization is not enabled yet.", current);
         await Task.Delay(700, ct);
         if (current.Device is null) return new("not_paired", "Pair a mobile device before synchronizing.", current);
         if (!current.Device.IsOnline) return new("offline", "This device is paired but currently offline. Try again when it is online.", current);
@@ -88,6 +90,7 @@ public sealed partial class MockDesktopApi
 
     public async Task<SyncData> DisconnectAsync(CancellationToken ct = default)
     {
+        if (realPairing is not null) return await realPairing.DisconnectAsync(ct);
         var current = await GetSyncAsync(ct);
         await Task.Delay(300, ct);
         return _sync = current with { Device = null };
@@ -97,6 +100,9 @@ public sealed partial class MockDesktopApi
 
     public async Task<PairingData> GetPairingInfoAsync(CancellationToken ct = default)
     {
+        if (realPairing is not null) return new(_clock.GetUtcNow().AddMinutes(10), 10,
+            "Sign in with the same Google account as your phone. Generate a fresh code in Connect desktop. The phone shows the actual expiry.",
+            ["Same Google account", "One-time pairing code", "No usage upload yet", "Disconnect anytime"]);
         var config = await ReadAsync<PairingConfig>("pairing.json", ct);
         return new(_clock.GetUtcNow().AddMinutes(config.ExpiryMinutes), config.ExpiryMinutes,
             config.DemoHint, config.SecurityItems);
@@ -106,6 +112,7 @@ public sealed partial class MockDesktopApi
 
     public async Task<PairingResult> PairDeviceAsync(string code, CancellationToken ct = default)
     {
+        if (realPairing is not null) return await realPairing.PairAsync(code, ct);
         if (code.Length != 6 || code.Any(c => c < '0' || c > '9'))
             return new("invalid", "Enter all six digits of the pairing code.");
         var config = await ReadAsync<PairingConfig>("pairing.json", ct);

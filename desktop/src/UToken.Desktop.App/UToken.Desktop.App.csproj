@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="firebase.desktop.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="firebase.desktop.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Update="MockData/**/*.json" CopyToOutputDirectory="PreserveNewest" />
     <AvaloniaResource Include="Assets/**" />
   </ItemGroup>

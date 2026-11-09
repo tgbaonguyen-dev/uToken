@@ -11,6 +11,8 @@ import '../../../core/widgets/budget_limit_dialog.dart';
 import '../../../core/widgets/ui_preview_scope.dart';
 import '../../../core/mock/figma_mock_repository.dart';
 import '../../auth/presentation/reviewed_state_navigation.dart';
+import '../../auth/domain/mobile_auth.dart';
+import '../../auth/presentation/mobile_auth_status.dart';
 
 part 'extra_mock_actions.dart';
 
@@ -38,6 +40,7 @@ class FigmaPixelScreen extends StatefulWidget {
 }
 
 class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
+  final _noticeMessengerKey = GlobalKey<ScaffoldMessengerState>();
   Future<FigmaMockScreen>? _screenFuture;
   Future<List<FigmaMockHotspot>>? _hotspotsFuture;
   String? _loadedScreenId;
@@ -51,10 +54,16 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
   }
 
   Brightness? _loadedBrightness;
+  String? _authUid;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final uid = MobileAuthScope.maybeOf(context)?.user?.uid;
+    if (_authUid != uid) {
+      _authUid = uid;
+      _screenFuture = null;
+    }
     _loadScreenIfNeeded(Theme.of(context).brightness);
   }
 
@@ -102,7 +111,9 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
     }
     if (_settingsScreens.contains(widget.screenId)) {
       return FigmaMockRepository.settingsScreen(widget.screenId, brightness,
-          budgetDraft: _budgetDraft);
+          budgetDraft: _budgetDraft,
+          accountName: MobileAuthScope.maybeOf(context)?.user?.displayName,
+          accountEmail: MobileAuthScope.maybeOf(context)?.user?.email);
     }
     if (widget.screenId == 'M04') {
       return FigmaMockRepository.tokensScreen(brightness,
@@ -322,7 +333,8 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
 
   void _showNotice(String message) {
     if (message.isEmpty || !mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = _noticeMessengerKey.currentState;
+    if (messenger == null) return;
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
       SnackBar(
@@ -349,6 +361,87 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
   }
 
   Future<void> _runHotspot(String name) async {
+    final auth = MobileAuthScope.maybeOf(context);
+    if (auth != null) {
+      if (widget.screenId == 'M04' && name == 'Refresh') {
+        final refreshed =
+            _loadData(_loadedBrightness ?? Theme.of(context).brightness);
+        setState(() {
+          _screenFuture = refreshed;
+        });
+        try {
+          await refreshed;
+          if (mounted) _showNotice('Sample usage refreshed.');
+        } catch (_) {
+          if (mounted) {
+            _showNotice('Could not refresh sample usage. Try again.');
+          }
+        }
+        return;
+      }
+      if (widget.screenId == 'M02' &&
+          (name == 'Back' ||
+              name == 'Pair complete' ||
+              name == 'I’ve paired my device' ||
+              name == 'I?ve paired my device')) {
+        auth.leaveDesktopSetup();
+        if (name == 'Back') {
+          context.go(_withPeriod('/tokens'));
+        } else {
+          context.go(_withPeriod('/waiting-first-usage'));
+        }
+        return;
+      }
+      if (widget.screenId == 'M01' && name == 'Continue with Google') {
+        await auth.signIn();
+        return;
+      }
+      if (widget.screenId == 'M01' && name == 'View demo') {
+        auth.enterDemo();
+        context.go('/tokens');
+        return;
+      }
+      if (name == 'Sign out') {
+        if (auth.demoMode) {
+          auth.exitDemo();
+          context.go('/welcome');
+          return;
+        }
+        final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (dialog) => AlertDialog(
+                    scrollable: true,
+                    title: const Text('Sign out?'),
+                    content: const Text(
+                        'You can sign in again with your Google account.'),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(dialog, false),
+                          child: const Text('Cancel')),
+                      FilledButton(
+                          onPressed: () => Navigator.pop(dialog, true),
+                          child: const Text('Sign out')),
+                    ]));
+        if (confirmed == true && mounted) await auth.signOut();
+        return;
+      }
+      if (widget.screenId == 'M13' && name == 'Google account') {
+        final user = auth.user;
+        await showDialog<void>(
+            context: context,
+            builder: (dialog) => AlertDialog(
+                    scrollable: true,
+                    title: const Text('Google account'),
+                    content: Text(
+                        '${user?.displayName ?? ''}\n${user?.email ?? ''}'),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(dialog),
+                          child: const Text('Close'))
+                    ]));
+        return;
+      }
+    }
     if (widget.screenId == 'S03' && name == 'Complete demo sync') {
       await FigmaMockRepository.updateSettings({'lastSync': 'Just now'});
       if (mounted) context.go(_withPeriod('/tokens'));
@@ -600,76 +693,81 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
       'O02',
       'O03'
     ].contains(widget.screenId);
-    return PopScope(
-        canPop: router == null || router.canPop() || !hasBack,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) {
-            _handleHotspot(widget.screenId == 'O03' ? 'Dismiss' : 'Back');
-          }
-        },
-        child: Scaffold(
-          backgroundColor: pageBackground,
-          body: FutureBuilder<FigmaMockScreen>(
-            future: _screenFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      snapshot.error.toString(),
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox.expand();
-              }
-              final screen = snapshot.data!;
-              return FigmaViewport(
-                width: screen.width,
-                height: screen.height,
-                footerBuilder: _hasBottomBar
-                    ? (scale) => _bottomDock(screen, scale)
-                    : null,
-                builder: (scale) => SizedBox(
-                  width: screen.width * scale,
-                  height: screen.height * scale,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Positioned.fill(
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: SizedBox(
-                            width: screen.width,
-                            height: screen.height,
-                            child: _buildFigmaCanvas(context, screen),
+    return MobileAuthStatus(
+        child: ScaffoldMessenger(
+            key: _noticeMessengerKey,
+            child: PopScope(
+                canPop: router == null || router.canPop() || !hasBack,
+                onPopInvokedWithResult: (didPop, _) {
+                  if (!didPop) {
+                    _handleHotspot(
+                        widget.screenId == 'O03' ? 'Dismiss' : 'Back');
+                  }
+                },
+                child: Scaffold(
+                  backgroundColor: pageBackground,
+                  body: FutureBuilder<FigmaMockScreen>(
+                    future: _screenFuture,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              snapshot.error.toString(),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.expand();
+                      }
+                      final screen = snapshot.data!;
+                      return FigmaViewport(
+                        width: screen.width,
+                        height: screen.height,
+                        footerBuilder: _hasBottomBar
+                            ? (scale) => _bottomDock(screen, scale)
+                            : null,
+                        builder: (scale) => SizedBox(
+                          width: screen.width * scale,
+                          height: screen.height * scale,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned.fill(
+                                child: FittedBox(
+                                  fit: BoxFit.fill,
+                                  child: SizedBox(
+                                    width: screen.width,
+                                    height: screen.height,
+                                    child: _buildFigmaCanvas(context, screen),
+                                  ),
+                                ),
+                              ),
+                              // Preview-only index: accessible without changing the
+                              // original Figma appearance (hold any screen title).
+                              if (UiPreviewScope.enabledOf(context))
+                                Positioned(
+                                  left: 78 * scale,
+                                  top: 38 * scale,
+                                  width: 234 * scale,
+                                  height: 62 * scale,
+                                  child: GestureDetector(
+                                    key: const ValueKey(
+                                        'figma-screen-gallery-trigger'),
+                                    behavior: HitTestBehavior.translucent,
+                                    onLongPress: _openScreenGallery,
+                                    child: const SizedBox.expand(),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                      ),
-                      // Preview-only index: accessible without changing the
-                      // original Figma appearance (hold any screen title).
-                      if (UiPreviewScope.enabledOf(context))
-                        Positioned(
-                          left: 78 * scale,
-                          top: 38 * scale,
-                          width: 234 * scale,
-                          height: 62 * scale,
-                          child: GestureDetector(
-                            key: const ValueKey('figma-screen-gallery-trigger'),
-                            behavior: HitTestBehavior.translucent,
-                            onLongPress: _openScreenGallery,
-                            child: const SizedBox.expand(),
-                          ),
-                        ),
-                    ],
+                      );
+                    },
                   ),
-                ),
-              );
-            },
-          ),
-        ));
+                ))));
   }
 
   Widget _bottomDock(FigmaMockScreen screen, double scale) => ClipRRect(
@@ -720,6 +818,30 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
           ...screen.layers
               .where((layer) => !_hasBottomBar || _number(layer['y']) < 776)
               .map(_paintLayer),
+          if (widget.screenId == 'M13' &&
+              MobileAuthScope.maybeOf(context)?.user?.photoUrl != null)
+            Positioned(
+                left: 36,
+                top: 180,
+                width: 46,
+                height: 46,
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.network(
+                        MobileAuthScope.maybeOf(context)!.user!.photoUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => ColoredBox(
+                            color: const Color(0xfff2f3f5),
+                            child: Center(
+                                child: Text(
+                                    String.fromCharCode(
+                                        MobileAuthScope.maybeOf(context)!
+                                            .user!
+                                            .displayName
+                                            .runes
+                                            .first),
+                                    style:
+                                        const TextStyle(color: Color(0xff080a0d)))))))),
           if (widget.screenId == 'S03')
             Positioned(
                 left: 60,

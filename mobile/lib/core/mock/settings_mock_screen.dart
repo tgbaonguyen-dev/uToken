@@ -20,6 +20,7 @@ FigmaMockScreen _settingsMockScreen(
       text(19, data['numberFormat']);
       text(23, data['syncInterval']);
       text(31, data['accountEmail']);
+      layers[31]['fit'] = 'scaleDown';
       text(57, '${data['aiProvider']} \u00b7 ${data['aiModel']}');
     case 'M10':
       final connected = data['connected'] as bool;
@@ -65,9 +66,11 @@ FigmaMockScreen _settingsMockScreen(
     case 'M12':
       text(30, on('diagnostics'));
     case 'M13':
-      text(6, (data['accountName'] as String).substring(0, 1));
+      text(6, String.fromCharCode((data['accountName'] as String).runes.first));
       text(7, data['accountName']);
       text(8, data['accountEmail']);
+      layers[7]['fit'] = 'scaleDown';
+      layers[8]['fit'] = 'scaleDown';
       text(13, data['connected'] ? 'Active' : 'Paused');
       text(20, data['connected'] ? '1 computer' : '0 computers');
       text(29, 'Version ${data['appVersion']}');

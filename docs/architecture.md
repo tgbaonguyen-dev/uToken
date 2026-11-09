@@ -30,3 +30,14 @@ flowchart LR
 3. Gom turn thành task, suy ra `outcome_state`, ghi `task_outcomes`.
 4. Tính lại document ngày hôm nay và `efficiency/current`, đánh dấu `dirty`.
 5. Theo chu kỳ sync (hoặc khi có `sync_requests`), đẩy các document `dirty` qua `sync_queue`.
+
+
+## Login / pairing implementation
+
+[PAIRING.md](../PAIRING.md) records the live implementation and SRS clarifications.
+Current request: `users/{uid}/pairing/current`; durable records:
+`users/{uid}/connections/{connectionId}`. Confirmation/revocation are atomic;
+server-created timestamps enforce expiry. Revoked history is retained. Desktop
+polls connection status every four seconds while signed in on Sync/Pairing; this is not usage sync.
+The architecture diagram describes the target usage pipeline; current usage UI
+still reads fixtures. Desktop OAuth/pairing adapters live in App/Services today.

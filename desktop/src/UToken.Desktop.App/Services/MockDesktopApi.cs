@@ -2,7 +2,7 @@ using System.Text.Json;
 using UToken.Desktop.App.Models;
 namespace UToken.Desktop.App.Services;
 // shortcut: JSON simulates API responses; replace this service when real data services are ready.
-public sealed partial class MockDesktopApi(string? dataDirectory = null, TimeProvider? timeProvider = null, LocalSettingsStore? localSettings = null) : IDesktopApi
+public sealed partial class MockDesktopApi(string? dataDirectory = null, TimeProvider? timeProvider = null, LocalSettingsStore? localSettings = null, FirebasePairing? realPairing = null) : IDesktopApi
 {
     private readonly string _directory = dataDirectory ?? Path.Combine(AppContext.BaseDirectory, "MockData");
     private static readonly JsonSerializerOptions Options = new()

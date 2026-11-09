@@ -26,12 +26,12 @@ public sealed record ActivityQuery(string Provider = "All sources", string Model
 public sealed record ActivityPageData(DateTimeOffset ReferenceTime, string[] Providers, string[] Models,
     string[] Periods, UsageActivity[] Events);
 public sealed record MobileDevice(string Name, string Platform, string Version, string Initial,
-    bool IsOnline, DateTimeOffset? LastSyncAt, long TransferredBytes, DateTimeOffset ReferenceTime = default)
+    bool IsOnline, DateTimeOffset? LastSyncAt, long TransferredBytes, DateTimeOffset ReferenceTime = default, bool PairingOnly = false)
 {
     public string LastSync => LastSyncAt is null ? "Not synchronized yet" : DisplayFormat.Relative(LastSyncAt, ReferenceTime);
     public string Transferred => DisplayFormat.Bytes(TransferredBytes);
-    public string ConnectionLabel => IsOnline ? "Online" : "Offline";
-    public string ConnectionColor => IsOnline ? "#2EC790" : "#9096A1";
+    public string ConnectionLabel => PairingOnly ? "Paired" : IsOnline ? "Online" : "Offline";
+    public string ConnectionColor => PairingOnly || IsOnline ? "#2EC790" : "#9096A1";
 }
 public sealed record SyncHistoryData(DateTimeOffset OccurredAt, string Device, int Events, long Bytes, string Result)
 {
@@ -47,7 +47,7 @@ public sealed record PairingConfig(string ValidCode, string ExpiredCode, int Exp
     string DemoHint, string RejectedMessage, string ExpiredMessage, string SuccessMessage,
     string[] SecurityItems, MobileDevice Device);
 public sealed record PairingData(DateTimeOffset ExpiresAt, int ExpiryMinutes, string DemoHint, string[] SecurityItems);
-public sealed record PairingResult(string State, string Message, SyncData? Data = null);
+public sealed record PairingResult(string State, string Message, SyncData? Data = null, string? ErrorCode = null);
 
 public sealed record SyncQueueItem(string Id, string Name, int Events, long Bytes)
 {

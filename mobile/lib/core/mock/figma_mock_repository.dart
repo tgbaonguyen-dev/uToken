@@ -319,11 +319,15 @@ class FigmaMockRepository {
 
   static Future<FigmaMockScreen> settingsScreen(
       String id, Brightness brightness,
-      {Map<String, dynamic>? budgetDraft}) async {
+      {Map<String, dynamic>? budgetDraft,
+      String? accountName,
+      String? accountEmail}) async {
     if (!const ['M09', 'M10', 'M11', 'M12', 'M13'].contains(id)) {
       throw ArgumentError.value(id, 'id');
     }
     final preferences = {...await settingsData(), ...?budgetDraft};
+    if (accountName != null) preferences['accountName'] = accountName;
+    if (accountEmail != null) preferences['accountEmail'] = accountEmail;
     final periods = await _loadFile('lib/core/mock/data/tokens_periods.json');
     return _settingsMockScreen(
         await screen(id, brightness), id, preferences, periods['Month'] as Map);

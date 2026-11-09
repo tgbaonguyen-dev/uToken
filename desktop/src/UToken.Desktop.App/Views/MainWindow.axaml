@@ -32,7 +32,7 @@
      <Button x:Name="RescanSourcesButton" Content="Rescan sources" IsVisible="{Binding IsSources}" Command="{Binding RescanSourcesCommand}" IsEnabled="{Binding !IsBusy}"/>
      <Button Content="Back to Overview" IsVisible="{Binding IsActivityPage}" Command="{Binding ShowOverviewCommand}"/>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSyncStatePreview}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="{Binding ActiveSyncScenario.Accent}"/><TextBlock Text="{Binding ActiveSyncScenario.Status}" FontSize="11"/></StackPanel></Border>
-     <Button Content="Sync now" IsVisible="{Binding IsSyncNormal}" Command="{Binding SyncNowCommand}" IsEnabled="{Binding !IsBusy}"/>
+     <Button Content="{Binding SyncActionLabel}" IsVisible="{Binding IsSyncNormal}" Command="{Binding SyncNowCommand}" IsEnabled="{Binding !IsBusy}"/>
      <Button Classes="primary" Content="{Binding PairingActionLabel}" IsVisible="{Binding IsSyncNormal}" Command="{Binding ShowPairingCommand}" IsEnabled="{Binding !IsBusy}"/>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsPairingStateVisible}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="PairingStateHeaderDot" Classes="status-dot" Fill="{Binding ActivePairingScenario.Accent}"/><TextBlock Text="{Binding ActivePairingScenario.Status}" FontSize="11"/></StackPanel></Border>
      <Button Content="Back to Sync" IsVisible="{Binding IsPairingPage}" Command="{Binding ShowSyncCommand}"/>
@@ -137,13 +137,13 @@
       </StackPanel></Border>
      </StackPanel>
      <views:ActivityView IsVisible="{Binding IsActivityPage}"/>
-     <StackPanel IsVisible="{Binding IsSyncPage}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="SyncScenarioSelector" ItemsSource="{Binding SyncPreviewOptions}" SelectedItem="{Binding SelectedSyncScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Sync demo state"/></StackPanel>
+     <StackPanel IsVisible="{Binding IsDemoSync}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="SyncScenarioSelector" ItemsSource="{Binding SyncPreviewOptions}" SelectedItem="{Binding SelectedSyncScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Sync demo state"/></StackPanel>
      <views:SectionStateView IsVisible="{Binding IsSectionStatePreview}"/>
      <views:SyncStateView IsVisible="{Binding IsSyncDetailState}"/>
      <views:SyncView IsVisible="{Binding IsSyncNormal}"/>
      <views:FirstRunView IsVisible="{Binding IsFirstRunPage}"/>
      <views:SettingsView IsVisible="{Binding IsSettingsPage}"/>
-     <StackPanel IsVisible="{Binding IsPairingPage}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="PairingScenarioSelector" ItemsSource="{Binding PairingScenarios}" SelectedItem="{Binding SelectedPairingScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Pairing demo state"/></StackPanel>
+     <StackPanel IsVisible="{Binding IsDemoPairing}" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18"><TextBlock Text="Demo state" Classes="muted" FontSize="11" VerticalAlignment="Center"/><ComboBox x:Name="PairingScenarioSelector" ItemsSource="{Binding PairingScenarios}" SelectedItem="{Binding SelectedPairingScenario, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" MinWidth="240" AutomationProperties.Name="Pairing demo state"/></StackPanel>
      <views:PairingStateView IsVisible="{Binding IsPairingStateVisible}"/>
      <views:PairingView IsVisible="{Binding IsPairingFormVisible}"/>
     </StackPanel>

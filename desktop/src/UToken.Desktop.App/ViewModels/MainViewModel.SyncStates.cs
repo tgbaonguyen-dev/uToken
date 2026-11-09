@@ -8,7 +8,7 @@ public partial class MainViewModel
     [ObservableProperty, NotifyPropertyChangedFor(nameof(SyncPreviewOptions)), NotifyPropertyChangedFor(nameof(SyncQueuedLabel))]
     private SyncStateConfig? _syncStateConfig;
     partial void OnSyncStateConfigChanged(SyncStateConfig? value) => NotifySyncState();
-    public OverviewScenario? ActiveSyncScenario => !IsSyncPage ? null
+    public OverviewScenario? ActiveSyncScenario => IsRealPairing || !IsSyncPage ? null
         : IsSyncing ? SyncStateConfig?.Scenarios.FirstOrDefault(s => s.Id == "syncing")
         : SectionScenario?.Id is "sync-failed" or "not-paired" or "syncing" or "revoked" or "network" ? SectionScenario
         : HasNoDevice ? SyncStateConfig?.Scenarios.FirstOrDefault(s => s.Id == "not-paired") : null;

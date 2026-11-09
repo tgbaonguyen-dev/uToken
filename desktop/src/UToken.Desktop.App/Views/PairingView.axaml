@@ -1,10 +1,11 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia" x:Class="UToken.Desktop.App.Views.PairingView" x:CompileBindings="False">
  <StackPanel Spacing="28">
+  <Border Classes="card" IsVisible="{Binding IsRealPairing}"><StackPanel Spacing="12"><TextBlock Text="Google account" Classes="heading"/><TextBlock Text="{Binding GoogleAccount}" TextWrapping="Wrap"/><WrapPanel><Button Content="Sign in with Google" Command="{Binding SignInGoogleCommand}" IsEnabled="{Binding !IsBusy}" Margin="0,0,12,0"/><Button Content="Sign out" Command="{Binding SignOutGoogleCommand}" IsEnabled="{Binding !IsBusy}"/></WrapPanel></StackPanel></Border>
   <Grid ColumnDefinitions="2.3*,20,*">
    <Border Classes="card" Padding="30"><StackPanel Spacing="28">
     <TextBlock Text="PAIRING CODE" Classes="label" IsVisible="{Binding CanEnterPairing}"/><TextBlock Text="CONNECTED DEVICE" Classes="label" IsVisible="{Binding IsPaired}"/>
     <ItemsControl ItemsSource="{Binding PairingDigits}" IsEnabled="{Binding !IsBusy}" IsVisible="{Binding CanEnterPairing}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="6"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate>
-     <TextBox Text="{Binding Text, Mode=TwoWay}" MaxLength="6" TextChanged="DigitChanged" KeyDown="DigitKeyDown" Height="76" Margin="0,0,10,0" FontSize="30" TextAlignment="Center" VerticalContentAlignment="Center" Background="#191A1C" BorderThickness="0" CornerRadius="14" AutomationProperties.Name="Pairing code digit"/>
+     <TextBox Text="{Binding Text, Mode=TwoWay}" MaxLength="16" TextChanged="DigitChanged" KeyDown="DigitKeyDown" Height="76" Margin="0,0,10,0" FontSize="30" TextAlignment="Center" VerticalContentAlignment="Center" Background="#191A1C" BorderThickness="0" CornerRadius="14" AutomationProperties.Name="Pairing code character"/>
     </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
     <TextBlock IsVisible="{Binding CanEnterPairing}" Text="{Binding PairingCountdownLabel}" Foreground="#F26039" FontSize="11"/>
     <TextBlock Text="{Binding PairingMessage}" Foreground="{Binding PairingMessageColor}" TextWrapping="Wrap"/>

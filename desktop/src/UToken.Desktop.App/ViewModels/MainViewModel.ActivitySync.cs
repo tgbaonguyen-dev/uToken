@@ -23,7 +23,7 @@ public partial class MainViewModel
     [ObservableProperty] private bool _confirmDisconnect;
     [ObservableProperty] private bool _isSyncing;
     partial void OnIsSyncingChanged(bool value) => NotifySyncState();
-    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); }
+    partial void OnSyncChanged(SyncData? value) { if (googleAuth is not null) GoogleAccount = googleAuth.Account; NotifySyncState(); NotifyPairingState(); }
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasSyncMessage))] private string _syncMessage = "";
     [ObservableProperty] private string _syncMessageColor = "#2EC790";
     [ObservableProperty] private PairingData? _pairing;
@@ -95,7 +95,7 @@ public partial class MainViewModel
     [RelayCommand]
     private Task SyncNowAsync() => RunAsync(async () =>
     {
-        IsSyncing = true; SyncMessage = "Synchronizing demo usage metadata...";
+        IsSyncing = true; SyncMessage = IsRealPairing ? "Checking the device connection..." : "Synchronizing demo usage metadata...";
         try
         {
             var result = await api.SyncNowAsync();
@@ -114,7 +114,7 @@ public partial class MainViewModel
     private Task DisconnectAsync() => RunAsync(async () =>
     {
         Sync = await api.DisconnectAsync(); ConfirmDisconnect = false;
-        SyncMessage = "Demo device disconnected. Pair a device to resume sync."; SyncMessageColor = "#9096A1";
+        SyncMessage = IsRealPairing ? "Mobile device disconnected." : "Demo device disconnected. Pair a device to resume sync."; SyncMessageColor = "#9096A1";
     });
     private async Task StartPairingCoreAsync()
     {

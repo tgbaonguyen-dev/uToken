@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "connection.schema.json",
+  "title": "Durable connection history",
+  "allOf": [
+    {
+      "$ref": "pairing.schema.json"
+    },
+    {
+      "properties": {
+        "state": {
+          "enum": [
+            "paired",
+            "revoked"
+          ]
+        },
+        "desktopId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "desktopName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pairedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  ]
+}

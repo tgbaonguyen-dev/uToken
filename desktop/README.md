@@ -16,11 +16,21 @@ dotnet test
 dotnet run --project src/UToken.Desktop.App
 ```
 
+## Live login / pairing
+
+See [PAIRING.md](../PAIRING.md) for real Android/Windows login, code format,
+connection history, revocation, Firebase rules and manual verification.
+With `firebase.desktop.json`, D01 signs in for real and Sync/Pairing use Firebase.
+Without that file, the original demo below remains available. Usage remains mock
+in both modes. Invalid live configuration opens a Retry recovery window.
+
 ## Desktop UI demo (D02, D05, D06, D04, D07, D03)
+
+The following simulated login/pairing descriptions apply only to demo mode.
 
 - Overview displays the dashboard. Sources opens the provider list; select a card to open its detail, then use Back to sources.
 - Rescan sources simulates a scan and reloads JSON. Settings remains disabled until its screen is implemented.
-- The demo does not read local AI logs or contact Firebase. Gemini and all collector statuses are sample data.
+- Without live configuration, the demo does not read local AI logs or contact Firebase. Gemini and all collector statuses are sample data.
 - `src/UToken.Desktop.App/MockData/overview.json` contains collector state, sync timestamp, reference time and privacy rows. Dashboard totals are computed from `sources.json`; recent activity is taken from `activity.json`. `sources.json` holds discovered sources and their authoritative 30-day usage, model lists, health and coverage.
 - `MockData/source-periods.json` contains separate usage responses for 1 day, Week and Total (30 days uses `sources.json`) for each provider. The detail selector reloads tokens, cost, cache metrics, models, chart and axis labels through `IDesktopApi.GetSourceAsync`. Selection is retained between providers; a failed request keeps the last successful range and data.
 - Collector/source/device states determine status labels and dot colors. Coverage uses numeric available/total counts; zero coverage remains gray. Provider icons are 32 px and navigation icons are 22 px.
@@ -70,7 +80,7 @@ D01 uses `MockData/first-run.json`. On the first production launch it shows the 
 
 On Windows the native tray menu has Open uToken and Quit. Closing the window hides it when the **saved** Background collection preference is enabled. Open restores the window without reloading data; Quit exits. Disabling the preference and saving makes closing exit normally. OS/application shutdown is not intercepted. Platforms without the installed Windows tray always close normally. This keeps the UI process alive only; no background provider collector is started.
 
-Launch at startup is a saved UI preference only. No Windows startup registration, real Google authentication or provider file permissions are implemented in this UI scope.
+Launch at startup is a saved UI preference only. Windows startup registration and provider file permissions remain simulated. Google authentication is real when live Firebase configuration is present; see PAIRING.md.
 
 ### Overview state previews
 

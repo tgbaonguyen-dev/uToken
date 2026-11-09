@@ -8,11 +8,11 @@ public partial class MainViewModel
     private bool _uiPreferencesLoaded;
     [ObservableProperty, NotifyPropertyChangedFor(nameof(PairingCountdownLabel))]
     private TimeSpan _pairingRemaining;
-    public string PairingCountdownLabel => $"Code expires in {(int)Math.Ceiling(PairingRemaining.TotalSeconds) / 60:00}:{(int)Math.Ceiling(PairingRemaining.TotalSeconds) % 60:00}";
+    public string PairingCountdownLabel => IsRealPairing ? "Check the code expiry on your phone." : $"Code expires in {(int)Math.Ceiling(PairingRemaining.TotalSeconds) / 60:00}:{(int)Math.Ceiling(PairingRemaining.TotalSeconds) % 60:00}";
 
     public void UpdatePairingCountdown()
     {
-        if (!IsPairingPage || HasDevice || IsPairingPreview || Pairing is null) return;
+        if (IsRealPairing || !IsPairingPage || HasDevice || IsPairingPreview || Pairing is null) return;
         var now = _uiClock.GetUtcNow();
         PairingRemaining = Pairing.ExpiresAt > now ? Pairing.ExpiresAt - now : TimeSpan.Zero;
         if (PairingRemaining == TimeSpan.Zero && !IsBusy && PairingState is "waiting" or "rejected" or "invalid" or "error")

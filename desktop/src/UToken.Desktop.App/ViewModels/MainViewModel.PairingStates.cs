@@ -10,7 +10,7 @@ public partial class MainViewModel
     [ObservableProperty] private OverviewScenario? _selectedPairingScenario;
     private bool _restoringPairingSelection;
     private bool _pairingPreview;
-    public OverviewScenario? ActivePairingScenario => !IsPairingPage ? null
+    public OverviewScenario? ActivePairingScenario => IsRealPairing || !IsPairingPage ? null
         : IsPairingPreview ? SelectedPairingScenario
         : PairingScenarios.FirstOrDefault(s => s.Id == PairingState && s.Id is "verifying" or "expired" or "rejected" or "success");
     public bool IsPairingStateVisible => ActivePairingScenario is not null;
