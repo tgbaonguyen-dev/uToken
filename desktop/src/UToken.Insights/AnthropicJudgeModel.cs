@@ -9,11 +9,14 @@ namespace UToken.Insights;
 public sealed class AnthropicJudgeModel : IJudgeModel
 {
     private readonly AnthropicClient _client;
+
+    /// <summary>Creates an adapter that calls the public Anthropic API.</summary>
     public AnthropicJudgeModel(string apiKey, string model)
     {
         _client = new AnthropicClient { ApiKey = apiKey };
         Model = model;
     }
+    /// <summary>Creates an adapter around a configured client (used by tests).</summary>
     public AnthropicJudgeModel(AnthropicClient client, string model)
     {
         _client = client;
@@ -46,12 +49,14 @@ public sealed class AnthropicJudgeModel : IJudgeModel
                 throw new JudgeModelException("refused");
             if (response.StopReason == StopReason.MaxTokens)
                 throw new JudgeModelException("truncated");
-            var json = JsonSerializer.SerializeToNode(response.Content)?.AsArray();
-            return json?.Select(value => value?["text"]?.GetValue<string>())
-                .FirstOrDefault(value => value is not null)
-                ?? throw new JsonException("Anthropic response has no text.");
+            foreach (var block in response.Content)
+            {
+                if (block.TryPickText(out TextBlock? text)) return text.Text;
+            }
+            throw new JsonException("Anthropic response has no text.");
         }
-        catch (AnthropicUnauthorizedException)
+        catch (Exception exception) when (exception is AnthropicUnauthorizedException
+            or AnthropicForbiddenException)
         {
             throw new JudgeModelException("invalid_api_key");
         }
@@ -59,16 +64,10 @@ public sealed class AnthropicJudgeModel : IJudgeModel
         {
             throw new JudgeModelException("rate_limited");
         }
-        catch (AnthropicUnexpectedStatusCodeException)
+        catch (Exception exception) when (exception is AnthropicException
+            or HttpRequestException or IOException)
         {
-            throw new JudgeModelException("provider_error");
-        }
-        catch (IOException)
-        {
-            throw new JudgeModelException("provider_error");
-        }
-        catch (HttpRequestException)
-        {
+            // 5xx, lỗi kết nối, dữ liệu trả về không đọc được: lỗi phía nhà cung cấp.
             throw new JudgeModelException("provider_error");
         }
     }
