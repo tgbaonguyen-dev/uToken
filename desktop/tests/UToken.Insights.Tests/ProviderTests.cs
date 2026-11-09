@@ -34,9 +34,15 @@ public sealed class ProviderTests
     public async Task JudgeServiceMapsOutputAndClampsSaving()
     {
         var model = new FakeModel("""
-        {"score":120,"grade":"Z","headline":"ok","dimensions":[],"insights":[{"id":"x","title":"x","severity":"low","category":"cache","provider":null,"evidence":[{"metric":"usage.chats"}],"recommendation":"r","estimated_impact":null,"estimated_saving_usd_per_month":1,"confidence":"low"}]}
+        {"score":120,"grade":"Z","headline":"ok","dimensions":[],"insights":[
+        {"id":"x","title":"x","severity":"low","category":"cache","provider":null,
+        "evidence":[{"metric":"usage.chats"}],"recommendation":"r","estimated_impact":null,
+        "estimated_saving_usd_per_month":1,"confidence":"low"}]}
         """);
-        var result = await new JudgeService().RunAsync(Brief(8, true), model, CancellationToken.None);
+        var result = await new JudgeService().RunAsync(
+            Brief(8, true),
+            model,
+            CancellationToken.None);
         Assert.Equal("ok", result.Status);
         Assert.Equal(100, result.Score);
         Assert.Null(result.Grade);
@@ -47,7 +53,10 @@ public sealed class ProviderTests
     public async Task JudgeServiceMapsErrorsWithoutLeakingKey()
     {
         var model = new ErrorModel("invalid_api_key");
-        var result = await new JudgeService().RunAsync(Brief(8, true), model, CancellationToken.None);
+        var result = await new JudgeService().RunAsync(
+            Brief(8, true),
+            model,
+            CancellationToken.None);
         Assert.Equal("invalid_api_key", result.ErrorCode);
         Assert.DoesNotContain("secret-key", JsonSerializer.Serialize(result));
     }
