@@ -93,6 +93,7 @@ public partial class App : Application
         return new RealDesktopApi(engine, sqlite, locations, settings.DatabasePath, store, cloud: cloud)
         {
             Startup = new StartupRegistration(),
+            JudgeDirectory = AppSettings.DataDirectory,
         };
     }
 }

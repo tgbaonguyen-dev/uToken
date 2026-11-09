@@ -76,7 +76,9 @@ public sealed class RealHome : IDisposable
     }
 
     /// <summary>API dữ liệu thật trên thư mục này. <paramref name="cloud"/> = false: chưa cấu hình đăng nhập Google.</summary>
-    public RealDesktopApi Api(bool cloud = true, ICloudSync? cloudSync = null)
+    public RealDesktopApi Api(bool cloud = true, ICloudSync? cloudSync = null,
+        string? judgeDirectory = null,
+        Func<string, string, string, IJudgeModel>? judgeFactory = null)
     {
         var store = new SqliteStore(DatabasePath);
         var engine = new UsageEngine(store, [new CodexCollector(), new ClaudeCodeCollector()], Home, Utc7, clock: Clock);
@@ -85,6 +87,9 @@ public sealed class RealHome : IDisposable
         {
             Startup = new StartupRegistration(AutostartDirectory, "/opt/utoken/UToken.Desktop.App"),
             PriceHttpClient = new HttpClient(new OfflineHandler()), // test không gọi mạng
+            JudgeHttpClient = new HttpClient(new OfflineHandler()),
+            JudgeDirectory = judgeDirectory,
+            JudgeModelFactory = judgeFactory,
         };
     }
 

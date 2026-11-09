@@ -264,6 +264,11 @@ public sealed class SqliteStore : IDisposable
     public IReadOnlyList<(string Date, string Json)> GetDirtyDaily() =>
         _db.Query<(string, string)>("SELECT date, json FROM daily_local WHERE dirty = 1 ORDER BY date").ToList();
 
+    /// <summary>Bản daily cục bộ từ ngày <paramref name="fromDate"/> (yyyy-MM-dd) trở đi.</summary>
+    public IReadOnlyList<string> GetDailyJsonSince(string fromDate) =>
+        _db.Query<string>("SELECT json FROM daily_local WHERE date >= @fromDate ORDER BY date",
+            new { fromDate }).ToList();
+
     public void MarkDailySynced(string date) =>
         _db.Execute("UPDATE daily_local SET dirty = 0 WHERE date = @date", new { date });
 

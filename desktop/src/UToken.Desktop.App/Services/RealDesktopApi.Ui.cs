@@ -115,6 +115,7 @@ public sealed partial class RealDesktopApi
         if (_lastScan?.Errors is { Count: > 0 } errors)
             foreach (var e in errors.Take(10)) report.AppendLine($"  scan error: {e}");
 
+        AppendJudgeDiagnostics(report);
         report.AppendLine("Sources:");
         foreach (var l in _locations)
             report.AppendLine($"  {l.Name}: {l.DisplayPath} → {CheckFolder(l)}");

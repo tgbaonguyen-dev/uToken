@@ -141,6 +141,7 @@ public sealed partial class RealDesktopApi
             // Cột EVENTS: số lần gọi model nằm trong các bản daily vừa đẩy lên.
             _history.Insert(0, new SyncHistoryData(Now, account.Email, docs.Sum(d => d.Totals.Requests), sent, "Success"));
             var state = dirty.Count == 0 && snapshot.Scan.NewEvents == 0 ? "no_new_usage" : "success";
+            await RunJudgeAfterSyncAsync(ct);
             return new(state,
                 state == "success" ? $"Uploaded {dirty.Count} daily summaries and the efficiency report." : "No new usage since the last sync.",
                 await GetSyncAsync(ct));
