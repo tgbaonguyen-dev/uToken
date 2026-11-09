@@ -1,0 +1,61 @@
+{
+  "screen_id": "M13",
+  "screen_title": "Account",
+  "has_back_button": true,
+  "state_type": "delete_failed",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Retry deletion",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep the user informed of retained access."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Sign-in remains valid",
+        "subtitle": "Retry is safe"
+      },
+      {
+        "title": "No silent partial deletion",
+        "subtitle": "Review the error before trying again"
+      }
+    ],
+    "title": "Account deletion didn’t finish",
+    "description": "The account is still active because a required cleanup step failed.",
+    "icon_type": "failed"
+  },
+  "badge_text": "DELETION FAILED",
+  "specification_subtitle": "State specification · Deletion failed",
+  "figma_layout": {
+    "node": "94:5289",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/49cc6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.260016,
+      "w": 89.856,
+      "h": 42.09096
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e35ed.svg",
+      "assets/figma/reviewed/93b03.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

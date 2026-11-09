@@ -1,0 +1,61 @@
+{
+  "screen_id": "M11",
+  "screen_title": "Budget & alerts",
+  "has_back_button": true,
+  "state_type": "cost_unavailable",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "View model pricing",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Suspend cost alerts instead of treating cost as zero."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Budget remains configured",
+        "subtitle": "Thresholds are not evaluated"
+      },
+      {
+        "title": "Token tracking continues",
+        "subtitle": "Resolve pricing to restore alerts"
+      }
+    ],
+    "title": "Budget status can’t be calculated",
+    "description": "One or more models are missing a valid pricing version.",
+    "icon_type": "empty"
+  },
+  "badge_text": "COST UNAVAILABLE",
+  "specification_subtitle": "State specification · Cost unavailable",
+  "figma_layout": {
+    "node": "94:4269",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/b67b6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 23.160216,
+      "w": 89.856,
+      "h": 38.086708
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e7cbc.svg",
+      "assets/figma/reviewed/68341.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

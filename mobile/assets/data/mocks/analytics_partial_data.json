@@ -1,0 +1,66 @@
+{
+  "screen_id": "M05",
+  "state_type": "partial_data",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "PARTIAL DATA",
+  "specification_subtitle": "State specification · Partial data",
+  "card": {
+    "icon_type": "offline",
+    "title": "Analysis is incomplete",
+    "description": "Some days or sources are missing one or more metrics.",
+    "items": [
+      {
+        "id": "trend_uses_available",
+        "title": "Trend uses available records",
+        "subtitle": "Gaps remain visible in the chart",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "comparison_confidence_reduced",
+        "title": "Comparison confidence reduced",
+        "subtitle": "Contributor ranking may change after sync",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Never interpolate missing provider data silently."
+  },
+  "action": {
+    "button_label": "View available analysis",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics",
+  "figma_layout": {
+    "node": "94:1072",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/2521a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

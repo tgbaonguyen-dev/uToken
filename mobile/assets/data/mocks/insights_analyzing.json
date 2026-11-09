@@ -1,0 +1,66 @@
+{
+  "screen_id": "M07",
+  "state_type": "analyzing",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "badge_text": "ANALYZING",
+  "specification_subtitle": "State specification · Analyzing",
+  "card": {
+    "icon_type": "signing_in",
+    "title": "Analyzing recent usage",
+    "description": "The optimizer is reviewing aggregate token, cost, latency and error patterns.",
+    "items": [
+      {
+        "id": "privacy_safe_evidence",
+        "title": "Privacy-safe evidence",
+        "subtitle": "No prompts, responses or source code",
+        "bullet_color": "#6678E8"
+      },
+      {
+        "id": "minimum_history_required",
+        "title": "Minimum history required",
+        "subtitle": "Results appear after analysis completes",
+        "bullet_color": "#6678E8"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep existing insights visible during re-analysis."
+  },
+  "action": {
+    "button_label": "View current insights",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights",
+  "figma_layout": {
+    "node": "94:2042",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/5a53e.svg",
+    "illustration_rect": {
+      "x": 141.552,
+      "y": 22.023916,
+      "w": 69.472,
+      "h": 42.881784
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/21f2c.svg",
+      "assets/figma/reviewed/f1f72.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/b20c3.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

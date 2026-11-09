@@ -1,0 +1,10 @@
+{
+  "progress": 0.64,
+  "lastSuccessfulSync": "Today, 10:42",
+  "queuedEvents": 128,
+  "providers": [
+    {"name": "Gemini", "status": "Ready"},
+    {"name": "Codex", "status": "Ready"},
+    {"name": "Claude", "status": "Ready"}
+  ]
+}

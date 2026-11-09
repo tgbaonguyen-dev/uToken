@@ -1,0 +1,66 @@
+{
+  "screen_id": "M07",
+  "state_type": "insights_stale",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "badge_text": "INSIGHTS ARE STALE",
+  "specification_subtitle": "State specification · Insights are stale",
+  "card": {
+    "icon_type": "offline",
+    "title": "New usage isn’t reflected yet",
+    "description": "These recommendations were generated before the latest desktop sync.",
+    "items": [
+      {
+        "id": "last_analyzed",
+        "title": "Last analyzed · 2 days ago",
+        "subtitle": "Evidence may have changed",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "reanalysis_recommended",
+        "title": "Re-analysis recommended",
+        "subtitle": "Old insight remains readable",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show generated and last-sync timestamps together."
+  },
+  "action": {
+    "button_label": "Analyze latest usage",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights",
+  "figma_layout": {
+    "node": "94:2478",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/b20c3.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

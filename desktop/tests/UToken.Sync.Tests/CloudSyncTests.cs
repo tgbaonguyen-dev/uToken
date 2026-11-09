@@ -175,8 +175,22 @@ public sealed class CloudSyncTests : IDisposable
         var sync = NewSync();
         await sync.SignInAsync();
         Directory.CreateDirectory(SessionFile + ".signed-out");
-        using var locked = new FileStream(SessionFile, FileMode.Open, FileAccess.Read, FileShare.None);
-        await Assert.ThrowsAsync<IOException>(() => sync.SignOutAsync());
+        if (OperatingSystem.IsWindows())
+        {
+            // Windows: file đang mở với FileShare.None thì không xóa được.
+            using var locked = new FileStream(SessionFile, FileMode.Open, FileAccess.Read, FileShare.None);
+            await Assert.ThrowsAsync<IOException>(() => sync.SignOutAsync());
+        }
+        else
+        {
+            // Linux/macOS cho xóa file đang mở; thư mục chỉ-đọc thì không xóa và không tạo được file nào.
+            if (Environment.UserName == "root") return; // root bỏ qua quyền thư mục
+            var dir = Path.GetDirectoryName(SessionFile)!;
+            var mode = File.GetUnixFileMode(dir);
+            File.SetUnixFileMode(dir, UnixFileMode.UserRead | UnixFileMode.UserExecute);
+            try { await Assert.ThrowsAnyAsync<Exception>(() => sync.SignOutAsync()); }
+            finally { File.SetUnixFileMode(dir, mode); }
+        }
         Assert.Null(sync.Account);
     }
 

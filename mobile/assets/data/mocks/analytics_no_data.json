@@ -1,0 +1,66 @@
+{
+  "screen_id": "M05",
+  "state_type": "no_data",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "NO DATA",
+  "specification_subtitle": "State specification · No data",
+  "card": {
+    "icon_type": "empty",
+    "title": "No usage to analyze",
+    "description": "There are no records in the selected time range.",
+    "items": [
+      {
+        "id": "current_range_empty",
+        "title": "Current range is empty",
+        "subtitle": "Try a wider date range",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "filters_not_cause",
+        "title": "Filters are not the cause",
+        "subtitle": "Desktop connection may still be active",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Do not render an empty chart with zero labels."
+  },
+  "action": {
+    "button_label": "Change date range",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics",
+  "figma_layout": {
+    "node": "94:854",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/b67b6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 23.160216,
+      "w": 89.856,
+      "h": 38.086708
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e7cbc.svg",
+      "assets/figma/reviewed/68341.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/2521a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}
