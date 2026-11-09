@@ -1,5 +1,12 @@
 /// Ánh xạ verdict trong efficiency/current (contracts/firestore/efficiency.schema.json) sang nhãn hiển thị.
-enum Verdict { better, cheaperNotWorse, tradeoff, worse, noClearDifference, insufficient }
+enum Verdict {
+  better,
+  cheaperNotWorse,
+  tradeoff,
+  worse,
+  noClearDifference,
+  insufficient
+}
 
 Verdict verdictFromJson(String v) => switch (v) {
       'better' => Verdict.better,

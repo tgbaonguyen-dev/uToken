@@ -1,10 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app/router.dart';
 import 'core/widgets/ui_preview_scope.dart';
+import 'core/data/usage_repository.dart';
 import 'features/auth/data/firebase_mobile_auth.dart';
 import 'features/auth/domain/mobile_auth.dart';
 
@@ -39,7 +41,12 @@ class _UTokenAppState extends State<UTokenApp> {
       final auth = MobileAuthController(FirebaseMobileAuth());
       setState(() {
         _auth = auth;
-        _router = createAppRouter(auth: auth);
+        _router = createAppRouter(
+          auth: auth,
+          usage: FirestoreUsageRepository(
+            firestore: FirebaseFirestore.instance,
+          ),
+        );
       });
     } catch (_) {
       if (mounted) setState(() => _failed = true);

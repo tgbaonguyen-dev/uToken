@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 import '../features/figma/presentation/figma_pixel_screen.dart';
 import 'figma_routes.dart';
@@ -23,7 +22,8 @@ import '../core/data/usage_repository.dart';
 final appRouter = createAppRouter();
 
 /// Desktop và mobile kết nối bằng cách đăng nhập cùng tài khoản Google (không dùng mã ghép đôi).
-GoRouter createAppRouter({MobileAuthController? auth}) =>
+GoRouter createAppRouter(
+        {MobileAuthController? auth, UsageRepository? usage}) =>
     GoRouter(
       refreshListenable: auth,
       redirect: (_, state) {
@@ -82,11 +82,13 @@ GoRouter createAppRouter({MobileAuthController? auth}) =>
         GoRoute(
           path: '/insight-detail',
           builder: (_, route) {
-            final real = auth?.user != null && !auth!.demoMode && Firebase.apps.isNotEmpty;
+            final real = _hasRealUser(auth, usage);
             final uid = auth?.user?.uid;
             return real && uid != null
-                ? InsightsScreen(uid: uid, repository: defaultUsageRepository())
-                : InsightDetailScreen(initialPeriod: route.uri.queryParameters['period'] ?? 'Month');
+                ? InsightsScreen(uid: uid, repository: usage!)
+                : InsightDetailScreen(
+                    initialPeriod:
+                        route.uri.queryParameters['period'] ?? 'Month');
           },
         ),
         GoRoute(
@@ -101,18 +103,34 @@ GoRouter createAppRouter({MobileAuthController? auth}) =>
           GoRoute(
             path: entry.value,
             builder: (context, state) {
-            final real = auth?.user != null && !auth!.demoMode && Firebase.apps.isNotEmpty;
+              final real = _hasRealUser(auth, usage);
               final uid = auth?.user?.uid;
               if (real && uid != null) {
-                final repository = defaultUsageRepository();
-                if (entry.key == 'M04') return TokensScreen(uid: uid, repository: repository);
-                if (entry.key == 'M05') return AnalyticsScreen(uid: uid, repository: repository);
-                if (entry.key == 'M05B') return EfficiencyScreen(uid: uid, repository: repository);
-                if (entry.key == 'M07') return InsightsScreen(uid: uid, repository: repository);
-                if (entry.key == 'M10') return LastSyncScreen(uid: uid, repository: repository);
+                final repository = usage!;
+                if (entry.key == 'M04') {
+                  return TokensScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M05') {
+                  return AnalyticsScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M05B') {
+                  return EfficiencyScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M07') {
+                  return InsightsScreen(uid: uid, repository: repository);
+                }
+                if (entry.key == 'M10') {
+                  return LastSyncScreen(uid: uid, repository: repository);
+                }
               }
-              return FigmaPixelScreen(screenId: entry.key, initialPeriod: state.uri.queryParameters['period'] ?? 'Month', selectedDay: state.uri.queryParameters['day']);
+              return FigmaPixelScreen(
+                  screenId: entry.key,
+                  initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
+                  selectedDay: state.uri.queryParameters['day']);
             },
           ),
       ],
     );
+
+bool _hasRealUser(MobileAuthController? auth, UsageRepository? usage) =>
+    auth?.user != null && !auth!.demoMode && usage != null;

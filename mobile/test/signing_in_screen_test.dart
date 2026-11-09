@@ -2605,7 +2605,8 @@ void main() {
       expect(find.text('CANCELLED'), findsOneWidget);
       expect(find.text('Sign-in was cancelled'), findsOneWidget);
       expect(find.text('Nothing was connected'), findsOneWidget);
-      expect(find.text('Do not show this as a destructive error.'), findsOneWidget);
+      expect(find.text('Do not show this as a destructive error.'),
+          findsOneWidget);
       expect(find.text('Try again'), findsOneWidget);
     });
 
@@ -2628,7 +2629,8 @@ void main() {
       expect(find.text('FAILED'), findsOneWidget);
       expect(find.text('Couldn’t sign you in'), findsOneWidget);
       expect(find.text('Account not connected'), findsOneWidget);
-      expect(find.text('Keep the error actionable and preserve privacy.'), findsOneWidget);
+      expect(find.text('Keep the error actionable and preserve privacy.'),
+          findsOneWidget);
       expect(find.text('Retry sign-in'), findsOneWidget);
     });
 
@@ -2651,7 +2653,9 @@ void main() {
       expect(find.text('OFFLINE'), findsOneWidget);
       expect(find.text('You’re offline'), findsOneWidget);
       expect(find.text('Authentication paused'), findsOneWidget);
-      expect(find.text('Never replace network failure with a generic auth error.'), findsOneWidget);
+      expect(
+          find.text('Never replace network failure with a generic auth error.'),
+          findsOneWidget);
       expect(find.text('Try again'), findsOneWidget);
     });
 
@@ -2673,16 +2677,24 @@ void main() {
       expect(find.text('Sign in'), findsOneWidget);
       expect(find.text('SESSION EXPIRED'), findsOneWidget);
       expect(find.text('Sign in again'), findsOneWidget);
-      expect(find.text('Your session expired before μToken could load your account.'), findsOneWidget);
+      expect(
+          find.text(
+              'Your session expired before μToken could load your account.'),
+          findsOneWidget);
       expect(find.text('Re-authentication required'), findsOneWidget);
       expect(find.text('Google confirms that it is still you'), findsOneWidget);
       expect(find.text('Usage remains in cloud'), findsOneWidget);
-      expect(find.text('Nothing is deleted when a session expires'), findsOneWidget);
-      expect(find.text('Return the user to their previous destination after sign-in.'), findsOneWidget);
+      expect(find.text('Nothing is deleted when a session expires'),
+          findsOneWidget);
+      expect(
+          find.text(
+              'Return the user to their previous destination after sign-in.'),
+          findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
     });
 
-    testWidgets('renders Verifying state accurately with back chevron', (tester) async {
+    testWidgets('renders Verifying state accurately with back chevron',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(verifyingJson) as Map<String, dynamic>,
       );
@@ -2701,16 +2713,21 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('VERIFYING'), findsOneWidget);
       expect(find.text('Verifying this desktop'), findsOneWidget);
-      expect(find.text('Checking the one-time code and desktop identity.'), findsOneWidget);
+      expect(find.text('Checking the one-time code and desktop identity.'),
+          findsOneWidget);
       expect(find.text('Pairing code received'), findsOneWidget);
       expect(find.text('Codes expire after 10 minutes'), findsOneWidget);
       expect(find.text('Waiting for desktop'), findsOneWidget);
       expect(find.text('Keep the companion app open'), findsOneWidget);
-      expect(find.text('Disable duplicate code submits while verification is running.'), findsOneWidget);
+      expect(
+          find.text(
+              'Disable duplicate code submits while verification is running.'),
+          findsOneWidget);
       expect(find.text('Cancel pairing'), findsOneWidget);
     });
 
-    testWidgets('renders Connected state accurately with success illustration', (tester) async {
+    testWidgets('renders Connected state accurately with success illustration',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(connectedJson) as Map<String, dynamic>,
       );
@@ -2729,12 +2746,19 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('CONNECTED'), findsOneWidget);
       expect(find.text('Desktop connected'), findsOneWidget);
-      expect(find.text('The desktop companion can now send aggregate usage metadata.'), findsOneWidget);
+      expect(
+          find.text(
+              'The desktop companion can now send aggregate usage metadata.'),
+          findsOneWidget);
       expect(find.text('Collector authorized'), findsOneWidget);
-      expect(find.text('Prompt and response content remain local'), findsOneWidget);
+      expect(find.text('Prompt and response content remain local'),
+          findsOneWidget);
       expect(find.text('Initial sync pending'), findsOneWidget);
       expect(find.text('Usage appears after the first claim'), findsOneWidget);
-      expect(find.text('Move into the empty-data state before showing zero values.'), findsOneWidget);
+      expect(
+          find.text(
+              'Move into the empty-data state before showing zero values.'),
+          findsOneWidget);
       expect(find.text('Continue'), findsOneWidget);
     });
 
@@ -2756,12 +2780,16 @@ void main() {
       expect(find.text('Connect desktop'), findsOneWidget);
       expect(find.text('INVALID CODE'), findsOneWidget);
       expect(find.text('That code isn’t valid'), findsOneWidget);
-      expect(find.text('Check every character and enter the latest code shown on desktop.'), findsOneWidget);
+      expect(
+          find.text(
+              'Check every character and enter the latest code shown on desktop.'),
+          findsOneWidget);
       expect(find.text('Code rejected'), findsOneWidget);
       expect(find.text('It may have been typed incorrectly'), findsOneWidget);
       expect(find.text('Attempts are safe'), findsOneWidget);
       expect(find.text('Generate a new code if needed'), findsOneWidget);
-      expect(find.text('Keep the input and point to the exact field.'), findsOneWidget);
+      expect(find.text('Keep the input and point to the exact field.'),
+          findsOneWidget);
       expect(find.text('Enter another code'), findsOneWidget);
     });
 
@@ -2783,12 +2811,15 @@ void main() {
       expect(find.text('Connect desktop'), findsOneWidget);
       expect(find.text('EXPIRED'), findsOneWidget);
       expect(find.text('Pairing code expired'), findsOneWidget);
-      expect(find.text('One-time codes are valid for 10 minutes.'), findsOneWidget);
+      expect(find.text('One-time codes are valid for 10 minutes.'),
+          findsOneWidget);
       expect(find.text('Old code disabled'), findsOneWidget);
       expect(find.text('It can no longer be reused'), findsOneWidget);
       expect(find.text('New code required'), findsOneWidget);
-      expect(find.text('Generate it from the desktop companion'), findsOneWidget);
-      expect(find.text('Show expiry before the user submits again.'), findsOneWidget);
+      expect(
+          find.text('Generate it from the desktop companion'), findsOneWidget);
+      expect(find.text('Show expiry before the user submits again.'),
+          findsOneWidget);
       expect(find.text('Generate new code'), findsOneWidget);
     });
 
@@ -2810,12 +2841,20 @@ void main() {
       expect(find.text('Connect desktop'), findsOneWidget);
       expect(find.text('CODE USED'), findsOneWidget);
       expect(find.text('This code was already used'), findsOneWidget);
-      expect(find.text('A pairing code can connect only one authenticated session.'), findsOneWidget);
+      expect(
+          find.text(
+              'A pairing code can connect only one authenticated session.'),
+          findsOneWidget);
       expect(find.text('Code is no longer active'), findsOneWidget);
-      expect(find.text('This prevents accidental desktop linking'), findsOneWidget);
+      expect(find.text('This prevents accidental desktop linking'),
+          findsOneWidget);
       expect(find.text('Create another code'), findsOneWidget);
-      expect(find.text('Use the desktop companion to restart pairing'), findsOneWidget);
-      expect(find.text('Do not imply that a desktop was connected to this account.'), findsOneWidget);
+      expect(find.text('Use the desktop companion to restart pairing'),
+          findsOneWidget);
+      expect(
+          find.text(
+              'Do not imply that a desktop was connected to this account.'),
+          findsOneWidget);
       expect(find.text('Use a new code'), findsOneWidget);
     });
 
@@ -2837,12 +2876,18 @@ void main() {
       expect(find.text('Connect desktop'), findsOneWidget);
       expect(find.text('NO RESPONSE'), findsOneWidget);
       expect(find.text('Desktop didn’t respond'), findsOneWidget);
-      expect(find.text('The companion may be closed, asleep or blocked by the network.'), findsOneWidget);
+      expect(
+          find.text(
+              'The companion may be closed, asleep or blocked by the network.'),
+          findsOneWidget);
       expect(find.text('Mobile request received'), findsOneWidget);
-      expect(find.text('Desktop confirmation is still missing'), findsOneWidget);
+      expect(
+          find.text('Desktop confirmation is still missing'), findsOneWidget);
       expect(find.text('Local data remains unchanged'), findsOneWidget);
       expect(find.text('Open the companion and retry'), findsOneWidget);
-      expect(find.text('Allow retry without generating a new code immediately.'), findsOneWidget);
+      expect(
+          find.text('Allow retry without generating a new code immediately.'),
+          findsOneWidget);
       expect(find.text('Retry pairing'), findsOneWidget);
     });
 
@@ -2864,12 +2909,15 @@ void main() {
       expect(find.text('Connect desktop'), findsOneWidget);
       expect(find.text('REPLACE DEVICE'), findsOneWidget);
       expect(find.text('Another desktop is connected'), findsOneWidget);
-      expect(find.text('μToken supports one active desktop companion in the MVP.'), findsOneWidget);
+      expect(
+          find.text('μToken supports one active desktop companion in the MVP.'),
+          findsOneWidget);
       expect(find.text('Current device'), findsOneWidget);
       expect(find.text("Corneliya's Mac · last seen 2 m ago"), findsOneWidget);
       expect(find.text('Replacing revokes the old session'), findsOneWidget);
       expect(find.text('Historic usage will be kept'), findsOneWidget);
-      expect(find.text('Require explicit confirmation before replacement.'), findsOneWidget);
+      expect(find.text('Require explicit confirmation before replacement.'),
+          findsOneWidget);
       expect(find.text('Review connection'), findsOneWidget);
     });
 
@@ -2891,10 +2939,15 @@ void main() {
       expect(find.text('Connect desktop'), findsOneWidget);
       expect(find.text('NETWORK ERROR'), findsOneWidget);
       expect(find.text('Pairing couldn’t finish'), findsOneWidget);
-      expect(find.text('The account is valid, but the pairing service could not be reached.'), findsOneWidget);
+      expect(
+          find.text(
+              'The account is valid, but the pairing service could not be reached.'),
+          findsOneWidget);
       expect(find.text('No partial connection'), findsOneWidget);
       expect(find.text('Safe to retry'), findsOneWidget);
-      expect(find.text('Differentiate network errors from invalid pairing codes.'), findsOneWidget);
+      expect(
+          find.text('Differentiate network errors from invalid pairing codes.'),
+          findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
     });
 
@@ -2916,10 +2969,14 @@ void main() {
       expect(find.text('Install guide'), findsOneWidget);
       expect(find.text('UNSUPPORTED OS'), findsOneWidget);
       expect(find.text('This system isn’t supported'), findsOneWidget);
-      expect(find.text('The desktop companion cannot run on this operating system version.'), findsOneWidget);
+      expect(
+          find.text(
+              'The desktop companion cannot run on this operating system version.'),
+          findsOneWidget);
       expect(find.text('Installation blocked'), findsOneWidget);
       expect(find.text('Check supported systems'), findsOneWidget);
-      expect(find.text('State the minimum supported OS clearly.'), findsOneWidget);
+      expect(
+          find.text('State the minimum supported OS clearly.'), findsOneWidget);
       expect(find.text('View requirements'), findsOneWidget);
     });
 
@@ -2941,7 +2998,9 @@ void main() {
       expect(find.text('Install guide'), findsOneWidget);
       expect(find.text('NOT INSTALLED'), findsOneWidget);
       expect(find.text('Desktop app not detected'), findsOneWidget);
-      expect(find.text('Install the companion before trying to pair this device.'), findsOneWidget);
+      expect(
+          find.text('Install the companion before trying to pair this device.'),
+          findsOneWidget);
       expect(find.text('No local collector found'), findsOneWidget);
       expect(find.text('Official download only'), findsOneWidget);
       expect(find.text('Keep the official source prominent.'), findsOneWidget);
@@ -2966,10 +3025,14 @@ void main() {
       expect(find.text('Install guide'), findsOneWidget);
       expect(find.text('NOT RUNNING'), findsOneWidget);
       expect(find.text('Open the desktop companion'), findsOneWidget);
-      expect(find.text('The app is installed but has not started a pairing session.'), findsOneWidget);
+      expect(
+          find.text(
+              'The app is installed but has not started a pairing session.'),
+          findsOneWidget);
       expect(find.text('Installation detected'), findsOneWidget);
       expect(find.text('Pairing will appear after launch'), findsOneWidget);
-      expect(find.text('Recheck desktop presence after the CTA.'), findsOneWidget);
+      expect(
+          find.text('Recheck desktop presence after the CTA.'), findsOneWidget);
       expect(find.text('I opened it'), findsOneWidget);
     });
 
@@ -2991,14 +3054,20 @@ void main() {
       expect(find.text('Install guide'), findsOneWidget);
       expect(find.text('PERMISSION DENIED'), findsOneWidget);
       expect(find.text('Local usage access is blocked'), findsOneWidget);
-      expect(find.text('The companion needs permission to read Antigravity usage metadata.'), findsOneWidget);
+      expect(
+          find.text(
+              'The companion needs permission to read Antigravity usage metadata.'),
+          findsOneWidget);
       expect(find.text('No prompt content requested'), findsOneWidget);
       expect(find.text('Permission can be changed'), findsOneWidget);
-      expect(find.text('Explain the exact permission and why it is needed.'), findsOneWidget);
+      expect(find.text('Explain the exact permission and why it is needed.'),
+          findsOneWidget);
       expect(find.text('Open permission guide'), findsOneWidget);
     });
 
-    testWidgets('renders Initial loading state with bottom navigation bar and elevated button', (tester) async {
+    testWidgets(
+        'renders Initial loading state with bottom navigation bar and elevated button',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(initialLoadingJson) as Map<String, dynamic>,
       );
@@ -3016,12 +3085,18 @@ void main() {
       expect(find.text('Tokens'), findsAtLeastNWidgets(1));
       expect(find.text('LOADING'), findsOneWidget);
       expect(find.text('Loading your usage'), findsOneWidget);
-      expect(find.text('Fetching the latest daily summaries and pricing metadata.'), findsOneWidget);
+      expect(
+          find.text(
+              'Fetching the latest daily summaries and pricing metadata.'),
+          findsOneWidget);
       expect(find.text('Account verified'), findsOneWidget);
       expect(find.text('Usage is being prepared'), findsOneWidget);
       expect(find.text('No zero values shown'), findsOneWidget);
       expect(find.text('Unknown metrics remain unavailable'), findsOneWidget);
-      expect(find.text('Use skeletons only for metrics that are actually loading.'), findsOneWidget);
+      expect(
+          find.text(
+              'Use skeletons only for metrics that are actually loading.'),
+          findsOneWidget);
       expect(find.text('Back to overview'), findsOneWidget);
 
       // Verify bottom navigation bar tabs exist
@@ -3048,16 +3123,24 @@ void main() {
       expect(find.text('Tokens'), findsAtLeastNWidgets(1));
       expect(find.text('REFRESHING'), findsOneWidget);
       expect(find.text('Updating latest usage'), findsOneWidget);
-      expect(find.text('The current dashboard remains visible while new desktop data is processed.'), findsOneWidget);
+      expect(
+          find.text(
+              'The current dashboard remains visible while new desktop data is processed.'),
+          findsOneWidget);
       expect(find.text('Existing totals stay readable'), findsOneWidget);
-      expect(find.text('Never replace valid data with a blank screen'), findsOneWidget);
+      expect(find.text('Never replace valid data with a blank screen'),
+          findsOneWidget);
       expect(find.text('Last sync remains visible'), findsOneWidget);
-      expect(find.text('Fresh values replace it when complete'), findsOneWidget);
-      expect(find.text('Show progress without blocking exploration.'), findsOneWidget);
+      expect(
+          find.text('Fresh values replace it when complete'), findsOneWidget);
+      expect(find.text('Show progress without blocking exploration.'),
+          findsOneWidget);
       expect(find.text('View current data'), findsOneWidget);
     });
 
-    testWidgets('renders Partial data state accurately with custom button colors', (tester) async {
+    testWidgets(
+        'renders Partial data state accurately with custom button colors',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(partialDataJson) as Map<String, dynamic>,
       );
@@ -3075,12 +3158,18 @@ void main() {
       expect(find.text('Tokens'), findsAtLeastNWidgets(1));
       expect(find.text('PARTIAL DATA'), findsOneWidget);
       expect(find.text('Some metrics are missing'), findsOneWidget);
-      expect(find.text('Token totals are available, but one or more sources did not provide complete metadata.'), findsOneWidget);
+      expect(
+          find.text(
+              'Token totals are available, but one or more sources did not provide complete metadata.'),
+          findsOneWidget);
       expect(find.text('Available metrics remain visible'), findsOneWidget);
-      expect(find.text('Missing values are labelled, not shown as zero'), findsOneWidget);
+      expect(find.text('Missing values are labelled, not shown as zero'),
+          findsOneWidget);
       expect(find.text('Analysis is limited'), findsOneWidget);
-      expect(find.text('Insights explain which evidence is incomplete'), findsOneWidget);
-      expect(find.text('Name the affected provider, project or time range.'), findsOneWidget);
+      expect(find.text('Insights explain which evidence is incomplete'),
+          findsOneWidget);
+      expect(find.text('Name the affected provider, project or time range.'),
+          findsOneWidget);
       expect(find.text('View available data'), findsOneWidget);
     });
 
@@ -3103,12 +3192,17 @@ void main() {
       expect(find.text('OFFLINE'), findsOneWidget);
       expect(find.text('State specification · Offline'), findsOneWidget);
       expect(find.text('Desktop is offline'), findsOneWidget);
-      expect(find.text('Showing the last successfully synced usage while the companion is unavailable.'), findsOneWidget);
+      expect(
+          find.text(
+              'Showing the last successfully synced usage while the companion is unavailable.'),
+          findsOneWidget);
       expect(find.text('Last sync · Today, 10:42'), findsOneWidget);
       expect(find.text('Historical details still available'), findsOneWidget);
       expect(find.text('New activity is pending'), findsOneWidget);
-      expect(find.text('Open the desktop companion to continue'), findsOneWidget);
-      expect(find.text('Preserve cached data and mark its freshness.'), findsOneWidget);
+      expect(
+          find.text('Open the desktop companion to continue'), findsOneWidget);
+      expect(find.text('Preserve cached data and mark its freshness.'),
+          findsOneWidget);
       expect(find.text('View connection'), findsOneWidget);
 
       // Bottom nav exists
@@ -3136,12 +3230,16 @@ void main() {
       expect(find.text('DATA IS STALE'), findsOneWidget);
       expect(find.text('State specification · Data is stale'), findsOneWidget);
       expect(find.text('Usage hasn’t updated recently'), findsOneWidget);
-      expect(find.text('The dashboard is more than 24 hours behind the desktop activity.'), findsOneWidget);
+      expect(
+          find.text(
+              'The dashboard is more than 24 hours behind the desktop activity.'),
+          findsOneWidget);
       expect(find.text('Last successful sync · 26h ago'), findsOneWidget);
       expect(find.text('Displayed totals may be incomplete'), findsOneWidget);
       expect(find.text('Manual sync recommended'), findsOneWidget);
       expect(find.text('Desktop must be online'), findsOneWidget);
-      expect(find.text('Keep stale data visible with an explicit timestamp.'), findsOneWidget);
+      expect(find.text('Keep stale data visible with an explicit timestamp.'),
+          findsOneWidget);
       expect(find.text('Sync now'), findsOneWidget);
     });
 
@@ -3162,18 +3260,24 @@ void main() {
 
       expect(find.text('Tokens'), findsAtLeastNWidgets(1));
       expect(find.text('COST UNAVAILABLE'), findsOneWidget);
-      expect(find.text('State specification · Cost unavailable'), findsOneWidget);
+      expect(
+          find.text('State specification · Cost unavailable'), findsOneWidget);
       expect(find.text('Cost can’t be estimated'), findsOneWidget);
-      expect(find.text('Token usage is available, but pricing is missing for one or more models.'), findsOneWidget);
+      expect(
+          find.text(
+              'Token usage is available, but pricing is missing for one or more models.'),
+          findsOneWidget);
       expect(find.text('Token totals are unaffected'), findsOneWidget);
       expect(find.text('Usage counts remain accurate'), findsOneWidget);
       expect(find.text('Pricing catalog missing'), findsOneWidget);
       expect(find.text('Never substitute \$0.00'), findsOneWidget);
-      expect(find.text('Separate token accuracy from cost availability.'), findsOneWidget);
+      expect(find.text('Separate token accuracy from cost availability.'),
+          findsOneWidget);
       expect(find.text('View model pricing'), findsOneWidget);
     });
 
-    testWidgets('renders M05 No data state with Analytics tab active', (tester) async {
+    testWidgets('renders M05 No data state with Analytics tab active',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(analyticsNoDataJson) as Map<String, dynamic>,
       );
@@ -3192,12 +3296,14 @@ void main() {
       expect(find.text('NO DATA'), findsOneWidget);
       expect(find.text('State specification · No data'), findsOneWidget);
       expect(find.text('No usage to analyze'), findsOneWidget);
-      expect(find.text('There are no records in the selected time range.'), findsOneWidget);
+      expect(find.text('There are no records in the selected time range.'),
+          findsOneWidget);
       expect(find.text('Current range is empty'), findsOneWidget);
       expect(find.text('Try a wider date range'), findsOneWidget);
       expect(find.text('Filters are not the cause'), findsOneWidget);
       expect(find.text('Desktop connection was still active'), findsOneWidget);
-      expect(find.text('Do not render an empty chart with zero labels.'), findsOneWidget);
+      expect(find.text('Do not render an empty chart with zero labels.'),
+          findsOneWidget);
       expect(find.text('Change date range'), findsOneWidget);
 
       // Bottom nav exists
@@ -3206,7 +3312,8 @@ void main() {
       expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('renders M05 No filter results state accurately', (tester) async {
+    testWidgets('renders M05 No filter results state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(analyticsNoFilterResultsJson) as Map<String, dynamic>,
       );
@@ -3225,12 +3332,16 @@ void main() {
       expect(find.text('NO RESULTS'), findsOneWidget);
       expect(find.text('State specification · No results'), findsOneWidget);
       expect(find.text('No results match these filters'), findsOneWidget);
-      expect(find.text('Usage exists, but not for this source, model or project combination.'), findsOneWidget);
+      expect(
+          find.text(
+              'Usage exists, but not for this source, model or project combination.'),
+          findsOneWidget);
       expect(find.text('Filters are active'), findsOneWidget);
       expect(find.text('Original data is unchanged'), findsOneWidget);
       expect(find.text('Clear filters to recover'), findsOneWidget);
       expect(find.text('Keep the selected time range'), findsOneWidget);
-      expect(find.text('Differentiate filter-empty from no usage.'), findsOneWidget);
+      expect(find.text('Differentiate filter-empty from no usage.'),
+          findsOneWidget);
       expect(find.text('Clear filters'), findsOneWidget);
     });
 
@@ -3253,16 +3364,20 @@ void main() {
       expect(find.text('PARTIAL DATA'), findsOneWidget);
       expect(find.text('State specification · Partial data'), findsOneWidget);
       expect(find.text('Analysis is incomplete'), findsOneWidget);
-      expect(find.text('Some days or sources are missing one or more metrics.'), findsOneWidget);
+      expect(find.text('Some days or sources are missing one or more metrics.'),
+          findsOneWidget);
       expect(find.text('Trend uses available records'), findsOneWidget);
       expect(find.text('Gaps remain visible in the chart'), findsOneWidget);
       expect(find.text('Comparison confidence reduced'), findsOneWidget);
-      expect(find.text('Contribution ranking may change after sync'), findsOneWidget);
-      expect(find.text('Never interpolate missing provider data silently.'), findsOneWidget);
+      expect(find.text('Contribution ranking may change after sync'),
+          findsOneWidget);
+      expect(find.text('Never interpolate missing provider data silently.'),
+          findsOneWidget);
       expect(find.text('View available analysis'), findsOneWidget);
     });
 
-    testWidgets('renders M05 Unsupported metric state accurately', (tester) async {
+    testWidgets('renders M05 Unsupported metric state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(analyticsUnsupportedMetricJson) as Map<String, dynamic>,
       );
@@ -3281,16 +3396,21 @@ void main() {
       expect(find.text('UNSUPPORTED'), findsOneWidget);
       expect(find.text('State specification · Unsupported'), findsOneWidget);
       expect(find.text('This metric isn’t supported'), findsOneWidget);
-      expect(find.text('The selected source does not provide latency, error or cache information.'), findsOneWidget);
+      expect(
+          find.text(
+              'The selected source does not provide latency, error or cache information.'),
+          findsOneWidget);
       expect(find.text('Source limitation'), findsOneWidget);
       expect(find.text('Not a value of zero'), findsOneWidget);
       expect(find.text('Other metrics still work'), findsOneWidget);
       expect(find.text('Switch to tokens, requests or cost'), findsOneWidget);
-      expect(find.text('Explain unsupported source capability.'), findsOneWidget);
+      expect(
+          find.text('Explain unsupported source capability.'), findsOneWidget);
       expect(find.text('Choose another metric'), findsOneWidget);
     });
 
-    testWidgets('renders M05 Cost unavailable state accurately', (tester) async {
+    testWidgets('renders M05 Cost unavailable state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(analyticsCostUnavailableJson) as Map<String, dynamic>,
       );
@@ -3307,14 +3427,20 @@ void main() {
 
       expect(find.text('Analytics'), findsAtLeastNWidgets(1));
       expect(find.text('COST UNAVAILABLE'), findsOneWidget);
-      expect(find.text('State specification · Cost unavailable'), findsOneWidget);
+      expect(
+          find.text('State specification · Cost unavailable'), findsOneWidget);
       expect(find.text('Cost analysis is unavailable'), findsOneWidget);
-      expect(find.text('Pricing could not be resolved for the current model selection.'), findsOneWidget);
+      expect(
+          find.text(
+              'Pricing could not be resolved for the current model selection.'),
+          findsOneWidget);
       expect(find.text('Token analysis remains available'), findsOneWidget);
       expect(find.text('No records are discarded'), findsOneWidget);
       expect(find.text('Missing pricing version'), findsOneWidget);
-      expect(find.text('Historical costs are never recalculated silently'), findsOneWidget);
-      expect(find.text('Keep the active filters when switching metrics.'), findsOneWidget);
+      expect(find.text('Historical costs are never recalculated silently'),
+          findsOneWidget);
+      expect(find.text('Keep the active filters when switching metrics.'),
+          findsOneWidget);
       expect(find.text('View token analytics'), findsOneWidget);
     });
 
@@ -3337,11 +3463,15 @@ void main() {
       expect(find.text('QUERY FAILED'), findsOneWidget);
       expect(find.text('State specification · Query failed'), findsOneWidget);
       expect(find.text('Couldn’t load this analysis'), findsOneWidget);
-      expect(find.text('The analytics query failed before results were returned.'), findsOneWidget);
+      expect(
+          find.text('The analytics query failed before results were returned.'),
+          findsOneWidget);
       expect(find.text('No partial chart shown'), findsOneWidget);
-      expect(find.text('No previous valid model data is preserved'), findsOneWidget);
+      expect(find.text('No previous valid model data is preserved'),
+          findsOneWidget);
       expect(find.text('Safe to retry'), findsOneWidget);
-      expect(find.text('Filters and date range remain selected'), findsOneWidget);
+      expect(
+          find.text('Filters and date range remain selected'), findsOneWidget);
       expect(find.text('Expose a clear retry action.'), findsOneWidget);
       expect(find.text('Retry analysis'), findsOneWidget);
     });
@@ -3365,16 +3495,22 @@ void main() {
       expect(find.text('OFFLINE'), findsOneWidget);
       expect(find.text('State specification · Offline'), findsOneWidget);
       expect(find.text('Analytics needs a connection'), findsOneWidget);
-      expect(find.text('This filtered view is not available from the local cache.'), findsOneWidget);
+      expect(
+          find.text(
+              'This filtered view is not available from the local cache.'),
+          findsOneWidget);
       expect(find.text('Dashboard may still work'), findsOneWidget);
-      expect(find.text('Previously loaded summaries remain available'), findsOneWidget);
+      expect(find.text('Previously loaded summaries remain available'),
+          findsOneWidget);
       expect(find.text('Query is paused'), findsOneWidget);
       expect(find.text('Reconnect to load this breakdown'), findsOneWidget);
-      expect(find.text('Distinguish cached overview from uncached analytics.'), findsOneWidget);
+      expect(find.text('Distinguish cached overview from uncached analytics.'),
+          findsOneWidget);
       expect(find.text('Try again'), findsOneWidget);
     });
 
-    testWidgets('renders M06 No usage state with back chevron accurately', (tester) async {
+    testWidgets('renders M06 No usage state with back chevron accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(breakdownNoUsageJson) as Map<String, dynamic>,
       );
@@ -3394,7 +3530,10 @@ void main() {
       expect(find.text('NO USAGE'), findsOneWidget);
       expect(find.text('State specification · No usage'), findsOneWidget);
       expect(find.text('No activity on this day'), findsOneWidget);
-      expect(find.text('No supported AI usage was recorded for the selected date.'), findsOneWidget);
+      expect(
+          find.text(
+              'No supported AI usage was recorded for the selected date.'),
+          findsOneWidget);
       expect(find.text('Daily total is unknown'), findsOneWidget);
       expect(find.text('Do not display zero unless confirmed'), findsOneWidget);
       expect(find.text('Choose another day'), findsAtLeastNWidgets(1));
@@ -3402,7 +3541,8 @@ void main() {
       expect(find.text('Keep date navigation available.'), findsOneWidget);
     });
 
-    testWidgets('renders M06 Today incomplete state accurately', (tester) async {
+    testWidgets('renders M06 Today incomplete state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(breakdownTodayIncompleteJson) as Map<String, dynamic>,
       );
@@ -3422,12 +3562,17 @@ void main() {
       expect(find.text('IN PROGRESS'), findsOneWidget);
       expect(find.text('State specification · In progress'), findsOneWidget);
       expect(find.text('Today is still in progress'), findsOneWidget);
-      expect(find.text('New usage can continue to arrive until the local day ends.'), findsOneWidget);
+      expect(
+          find.text(
+              'New usage can continue to arrive until the local day ends.'),
+          findsOneWidget);
       expect(find.text('Totals are provisional'), findsOneWidget);
-      expect(find.text('Time stamps follow the device timezone'), findsOneWidget);
+      expect(
+          find.text('Time stamps follow the device timezone'), findsOneWidget);
       expect(find.text('Sync may update the chart'), findsOneWidget);
       expect(find.text('New bars appear after day close'), findsOneWidget);
-      expect(find.text('Mark incomplete periods without hiding current data.'), findsOneWidget);
+      expect(find.text('Mark incomplete periods without hiding current data.'),
+          findsOneWidget);
       expect(find.text('View current totals'), findsOneWidget);
     });
 
@@ -3451,16 +3596,19 @@ void main() {
       expect(find.text('PARTIAL DATA'), findsOneWidget);
       expect(find.text('State specification · Partial data'), findsOneWidget);
       expect(find.text('Part of this day is missing'), findsOneWidget);
-      expect(find.text('One source or time window did not sync completely.'), findsOneWidget);
+      expect(find.text('One source or time window did not sync completely.'),
+          findsOneWidget);
       expect(find.text('Available activity is shown'), findsOneWidget);
       expect(find.text('Missing intervals stay explicit'), findsOneWidget);
       expect(find.text('Contributor totals may differ'), findsOneWidget);
       expect(find.text('Retry when desktop is online'), findsOneWidget);
-      expect(find.text('Show the affected interval and source.'), findsOneWidget);
+      expect(
+          find.text('Show the affected interval and source.'), findsOneWidget);
       expect(find.text('View available data'), findsOneWidget);
     });
 
-    testWidgets('renders M06 Cost unavailable state accurately', (tester) async {
+    testWidgets('renders M06 Cost unavailable state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(breakdownCostUnavailableJson) as Map<String, dynamic>,
       );
@@ -3478,9 +3626,13 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Daily breakdown'), findsOneWidget);
       expect(find.text('COST UNAVAILABLE'), findsOneWidget);
-      expect(find.text('State specification · Cost unavailable'), findsOneWidget);
+      expect(
+          find.text('State specification · Cost unavailable'), findsOneWidget);
       expect(find.text('Daily cost can’t be calculated'), findsOneWidget);
-      expect(find.text('Token and request data are present, but model pricing is unavailable.'), findsOneWidget);
+      expect(
+          find.text(
+              'Token and request data are present, but model pricing is unavailable.'),
+          findsOneWidget);
       expect(find.text('Daily token total is valid'), findsOneWidget);
       expect(find.text('Only the cost field is unavailable'), findsOneWidget);
       expect(find.text('Pricing review available'), findsOneWidget);
@@ -3489,7 +3641,8 @@ void main() {
       expect(find.text('View model pricing'), findsOneWidget);
     });
 
-    testWidgets('renders M07 Analyzing state with Insights tab active', (tester) async {
+    testWidgets('renders M07 Analyzing state with Insights tab active',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(insightsAnalyzingJson) as Map<String, dynamic>,
       );
@@ -3508,12 +3661,17 @@ void main() {
       expect(find.text('ANALYZING'), findsOneWidget);
       expect(find.text('State specification · Analyzing'), findsOneWidget);
       expect(find.text('Analyzing recent usage'), findsOneWidget);
-      expect(find.text('The optimizer is reviewing aggregate token, cost, latency and error patterns.'), findsOneWidget);
+      expect(
+          find.text(
+              'The optimizer is reviewing aggregate token, cost, latency and error patterns.'),
+          findsOneWidget);
       expect(find.text('Privacy-safe evidence'), findsOneWidget);
       expect(find.text('No prompts, responses or source code'), findsOneWidget);
       expect(find.text('Minimum history required'), findsOneWidget);
-      expect(find.text('Results appear after analysis completes'), findsOneWidget);
-      expect(find.text('Keep existing insights visible during re-analysis.'), findsOneWidget);
+      expect(
+          find.text('Results appear after analysis completes'), findsOneWidget);
+      expect(find.text('Keep existing insights visible during re-analysis.'),
+          findsOneWidget);
       expect(find.text('View current insights'), findsOneWidget);
 
       // Verify bottom navigation tabs
@@ -3522,7 +3680,8 @@ void main() {
       expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('renders M07 Insufficient data state accurately', (tester) async {
+    testWidgets('renders M07 Insufficient data state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(insightsInsufficientDataJson) as Map<String, dynamic>,
       );
@@ -3539,18 +3698,25 @@ void main() {
 
       expect(find.text('Insights'), findsAtLeastNWidgets(1));
       expect(find.text('NOT ENOUGH DATA'), findsOneWidget);
-      expect(find.text('State specification · Not enough data'), findsOneWidget);
+      expect(
+          find.text('State specification · Not enough data'), findsOneWidget);
       expect(find.text('More usage is needed'), findsOneWidget);
-      expect(find.text('Insights require at least 3 days or 10 daily model records.'), findsOneWidget);
+      expect(
+          find.text(
+              'Insights require at least 3 days or 10 daily model records.'),
+          findsOneWidget);
       expect(find.text('Current history is too short'), findsOneWidget);
       expect(find.text('No recommendations generated yet'), findsOneWidget);
       expect(find.text('Tracking is active'), findsOneWidget);
       expect(find.text('Continue using supported AI tools'), findsOneWidget);
-      expect(find.text('Explain the threshold instead of showing an empty feed.'), findsOneWidget);
+      expect(
+          find.text('Explain the threshold instead of showing an empty feed.'),
+          findsOneWidget);
       expect(find.text('View usage'), findsOneWidget);
     });
 
-    testWidgets('renders M07 No significant issues state accurately', (tester) async {
+    testWidgets('renders M07 No significant issues state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(insightsNoSignificantIssuesJson) as Map<String, dynamic>,
       );
@@ -3569,12 +3735,19 @@ void main() {
       expect(find.text('ALL CLEAR'), findsOneWidget);
       expect(find.text('State specification · All clear'), findsOneWidget);
       expect(find.text('No significant issues found'), findsOneWidget);
-      expect(find.text('Recent usage is within its normal pattern and no reliable optimization stands out.'), findsOneWidget);
+      expect(
+          find.text(
+              'Recent usage is within its normal pattern and no reliable optimization stands out.'),
+          findsOneWidget);
       expect(find.text('Analysis completed'), findsOneWidget);
       expect(find.text('Models and projects were compared'), findsOneWidget);
       expect(find.text('Keep collecting usage'), findsOneWidget);
-      expect(find.text('New activity may reveal opportunities later'), findsOneWidget);
-      expect(find.text('A positive empty state should still show analysis freshness.'), findsOneWidget);
+      expect(find.text('New activity may reveal opportunities later'),
+          findsOneWidget);
+      expect(
+          find.text(
+              'A positive empty state should still show analysis freshness.'),
+          findsOneWidget);
       expect(find.text('Review analytics'), findsOneWidget);
     });
 
@@ -3595,14 +3768,18 @@ void main() {
 
       expect(find.text('Insights'), findsAtLeastNWidgets(1));
       expect(find.text('ANALYSIS FAILED'), findsOneWidget);
-      expect(find.text('State specification · Analysis failed'), findsOneWidget);
+      expect(
+          find.text('State specification · Analysis failed'), findsOneWidget);
       expect(find.text('Insights couldn’t be generated'), findsOneWidget);
-      expect(find.text('The aggregate usage analysis did not complete.'), findsOneWidget);
+      expect(find.text('The aggregate usage analysis did not complete.'),
+          findsOneWidget);
       expect(find.text('Usage data is still safe'), findsOneWidget);
       expect(find.text('No records were changed'), findsOneWidget);
       expect(find.text('Retry available'), findsOneWidget);
-      expect(find.text('The same analysis window will be used'), findsOneWidget);
-      expect(find.text('Do not surface unverified partial recommendations.'), findsOneWidget);
+      expect(
+          find.text('The same analysis window will be used'), findsOneWidget);
+      expect(find.text('Do not surface unverified partial recommendations.'),
+          findsOneWidget);
       expect(find.text('Analyze again'), findsOneWidget);
     });
 
@@ -3623,14 +3800,19 @@ void main() {
 
       expect(find.text('Insights'), findsAtLeastNWidgets(1));
       expect(find.text('INSIGHTS ARE STALE'), findsOneWidget);
-      expect(find.text('State specification · Insights are stale'), findsOneWidget);
+      expect(find.text('State specification · Insights are stale'),
+          findsOneWidget);
       expect(find.text('New usage isn’t reflected yet'), findsOneWidget);
-      expect(find.text('These recommendations were generated before the latest desktop sync.'), findsOneWidget);
+      expect(
+          find.text(
+              'These recommendations were generated before the latest desktop sync.'),
+          findsOneWidget);
       expect(find.text('Last analyzed · 2 days ago'), findsOneWidget);
       expect(find.text('Evidence may have changed'), findsOneWidget);
       expect(find.text('Re-analysis recommended'), findsOneWidget);
       expect(find.text('Old insights remain readable'), findsOneWidget);
-      expect(find.text('Show generated and last-sync timestamps together.'), findsOneWidget);
+      expect(find.text('Show generated and last-sync timestamps together.'),
+          findsOneWidget);
       expect(find.text('Analyze latest usage'), findsOneWidget);
     });
 
@@ -3654,16 +3836,23 @@ void main() {
       expect(find.text('STALE'), findsOneWidget);
       expect(find.text('State specification · Stale'), findsOneWidget);
       expect(find.text('This insight may be outdated'), findsOneWidget);
-      expect(find.text('Its evidence period ends before the most recent usage update.'), findsOneWidget);
+      expect(
+          find.text(
+              'Its evidence period ends before the most recent usage update.'),
+          findsOneWidget);
       expect(find.text('Original finding preserved'), findsOneWidget);
-      expect(find.text('You can still inspect the prior evidence'), findsOneWidget);
+      expect(find.text('You can still inspect the prior evidence'),
+          findsOneWidget);
       expect(find.text('Confidence reduced'), findsOneWidget);
-      expect(find.text('Re-analysis may change the recommendation'), findsOneWidget);
-      expect(find.text('Never silently rewrite historical evidence.'), findsOneWidget);
+      expect(find.text('Re-analysis may change the recommendation'),
+          findsOneWidget);
+      expect(find.text('Never silently rewrite historical evidence.'),
+          findsOneWidget);
       expect(find.text('Back to insights'), findsOneWidget);
     });
 
-    testWidgets('renders M08 Insight resolved state accurately', (tester) async {
+    testWidgets('renders M08 Insight resolved state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(insightDetailResolvedJson) as Map<String, dynamic>,
       );
@@ -3683,18 +3872,27 @@ void main() {
       expect(find.text('RESOLVED'), findsOneWidget);
       expect(find.text('State specification · Resolved'), findsOneWidget);
       expect(find.text('Marked as addressed'), findsOneWidget);
-      expect(find.text('This recommendation is no longer active in the current workflow.'), findsOneWidget);
+      expect(
+          find.text(
+              'This recommendation is no longer active in the current workflow.'),
+          findsOneWidget);
       expect(find.text('Resolution recorded'), findsOneWidget);
-      expect(find.text('The underlying evidence remains available'), findsOneWidget);
+      expect(find.text('The underlying evidence remains available'),
+          findsOneWidget);
       expect(find.text('Can be revisited'), findsOneWidget);
-      expect(find.text('New data may create a separate insight'), findsOneWidget);
-      expect(find.text('Keep status, created date and resolution date visible.'), findsOneWidget);
+      expect(
+          find.text('New data may create a separate insight'), findsOneWidget);
+      expect(
+          find.text('Keep status, created date and resolution date visible.'),
+          findsOneWidget);
       expect(find.text('Back to insights'), findsOneWidget);
     });
 
-    testWidgets('renders M08 Evidence unavailable state accurately', (tester) async {
+    testWidgets('renders M08 Evidence unavailable state accurately',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
-        jsonDecode(insightDetailEvidenceUnavailableJson) as Map<String, dynamic>,
+        jsonDecode(insightDetailEvidenceUnavailableJson)
+            as Map<String, dynamic>,
       );
 
       await tester.pumpWidget(
@@ -3710,18 +3908,24 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Insight detail'), findsOneWidget);
       expect(find.text('EVIDENCE UNAVAILABLE'), findsOneWidget);
-      expect(find.text('State specification · Evidence unavailable'), findsOneWidget);
+      expect(find.text('State specification · Evidence unavailable'),
+          findsOneWidget);
       expect(find.text('Supporting data isn’t available'), findsOneWidget);
-      expect(find.text('The source records for this recommendation were removed or are no longer accessible.'), findsOneWidget);
+      expect(
+          find.text(
+              'The source records for this recommendation were removed or are no longer accessible.'),
+          findsOneWidget);
       expect(find.text('Recommendation is preserved'), findsOneWidget);
       expect(find.text('It cannot be independently verified'), findsOneWidget);
       expect(find.text('No new action suggested'), findsOneWidget);
       expect(find.text('Re-analyze current usage instead'), findsOneWidget);
-      expect(find.text('Avoid presenting estimated savings without evidence.'), findsOneWidget);
+      expect(find.text('Avoid presenting estimated savings without evidence.'),
+          findsOneWidget);
       expect(find.text('Back to insights'), findsOneWidget);
     });
 
-    testWidgets('renders M09 No desktop state with Settings tab active', (tester) async {
+    testWidgets('renders M09 No desktop state with Settings tab active',
+        (tester) async {
       final mockData = SigningInStateData.fromJson(
         jsonDecode(settingsNoDesktopJson) as Map<String, dynamic>,
       );
@@ -3740,12 +3944,15 @@ void main() {
       expect(find.text('NOT CONNECTED'), findsOneWidget);
       expect(find.text('State specification · Not connected'), findsOneWidget);
       expect(find.text('No desktop companion connected'), findsOneWidget);
-      expect(find.text('Automatic usage tracking requires a paired desktop.'), findsOneWidget);
+      expect(find.text('Automatic usage tracking requires a paired desktop.'),
+          findsOneWidget);
       expect(find.text('Historical data remains'), findsOneWidget);
       expect(find.text('Existing usage is still available'), findsOneWidget);
       expect(find.text('New usage paused'), findsOneWidget);
-      expect(find.text('Connect a desktop to resume collection'), findsOneWidget);
-      expect(find.text('Show the state in the settings summary row.'), findsOneWidget);
+      expect(
+          find.text('Connect a desktop to resume collection'), findsOneWidget);
+      expect(find.text('Show the state in the settings summary row.'),
+          findsOneWidget);
       expect(find.text('Connect desktop'), findsOneWidget);
 
       // Verify bottom nav items
@@ -3772,20 +3979,27 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsNothing);
       expect(find.text('Settings'), findsAtLeastNWidgets(1));
       expect(find.text('NOTIFICATIONS OFF'), findsOneWidget);
-      expect(find.text('State specification · Notifications off'), findsOneWidget);
+      expect(
+          find.text('State specification · Notifications off'), findsOneWidget);
       expect(find.text('Budget alerts are disabled'), findsOneWidget);
-      expect(find.text('μToken cannot display system notifications for budget thresholds.'), findsOneWidget);
+      expect(
+          find.text(
+              'μToken cannot display system notifications for budget thresholds.'),
+          findsOneWidget);
       expect(find.text('Budgets still calculate'), findsOneWidget);
       expect(find.text('Alert history remains inside the app'), findsOneWidget);
       expect(find.text('OS permission required'), findsOneWidget);
-      expect(find.text('Enable notifications in system settings'), findsOneWidget);
-      expect(find.text('Do not imply budget tracking is disabled.'), findsOneWidget);
+      expect(
+          find.text('Enable notifications in system settings'), findsOneWidget);
+      expect(find.text('Do not imply budget tracking is disabled.'),
+          findsOneWidget);
       expect(find.text('Review budget alerts'), findsOneWidget);
     });
 
     testWidgets('renders M09 Reauthentication required state', (tester) async {
       final mockData = SigningInStateData.fromJson(
-        jsonDecode(settingsReauthenticationRequiredJson) as Map<String, dynamic>,
+        jsonDecode(settingsReauthenticationRequiredJson)
+            as Map<String, dynamic>,
       );
 
       await tester.pumpWidget(
@@ -3803,12 +4017,16 @@ void main() {
       expect(find.text('REAUTHENTICATE'), findsOneWidget);
       expect(find.text('State specification · Reauthenticate'), findsOneWidget);
       expect(find.text('Account verification required'), findsOneWidget);
-      expect(find.text('A sensitive account or data action needs a fresh Google sign-in.'), findsOneWidget);
+      expect(
+          find.text(
+              'A sensitive account or data action needs a fresh Google sign-in.'),
+          findsOneWidget);
       expect(find.text('Current session is read-only'), findsOneWidget);
       expect(find.text('Dashboard previews are available'), findsOneWidget);
       expect(find.text('Sensitive actions paused'), findsOneWidget);
       expect(find.text('Re-authenticate to continue'), findsOneWidget);
-      expect(find.text('Block only actions that require fresh authentication.'), findsOneWidget);
+      expect(find.text('Block only actions that require fresh authentication.'),
+          findsOneWidget);
       expect(find.text('Open account'), findsOneWidget);
     });
 
@@ -3832,7 +4050,10 @@ void main() {
       expect(find.text('SYNCING'), findsOneWidget);
       expect(find.text('State specification · Syncing'), findsOneWidget);
       expect(find.text('Syncing from desktop'), findsOneWidget);
-      expect(find.text('The companion is scanning local Antigravity usage and uploading aggregate changes.'), findsOneWidget);
+      expect(
+          find.text(
+              'The companion is scanning local Antigravity usage and uploading aggregate changes.'),
+          findsOneWidget);
       expect(find.text('Collector is online'), findsOneWidget);
       expect(find.text('Only changed aggregates are uploaded'), findsOneWidget);
       expect(find.text('Current data remains visible'), findsOneWidget);
@@ -3861,12 +4082,16 @@ void main() {
       expect(find.text('OFFLINE'), findsOneWidget);
       expect(find.text('State specification · Offline'), findsOneWidget);
       expect(find.text('Desktop companion is offline'), findsOneWidget);
-      expect(find.text('No new usage can be collected until the desktop app reconnects.'), findsOneWidget);
+      expect(
+          find.text(
+              'No new usage can be collected until the desktop app reconnects.'),
+          findsOneWidget);
       expect(find.text('Last seen · 26m ago'), findsOneWidget);
       expect(find.text('Historical usage remains available'), findsOneWidget);
       expect(find.text('New events stay local'), findsOneWidget);
       expect(find.text('Open the desktop companion'), findsOneWidget);
-      expect(find.text('Show last seen and last successful sync separately.'), findsOneWidget);
+      expect(find.text('Show last seen and last successful sync separately.'),
+          findsOneWidget);
       expect(find.text('Retry connection'), findsOneWidget);
     });
 
@@ -3890,12 +4115,16 @@ void main() {
       expect(find.text('SOURCE MISSING'), findsOneWidget);
       expect(find.text('State specification · Source missing'), findsOneWidget);
       expect(find.text('Antigravity wasn’t found'), findsOneWidget);
-      expect(find.text('The companion cannot locate a supported local Antigravity installation.'), findsOneWidget);
+      expect(
+          find.text(
+              'The companion cannot locate a supported local Antigravity installation.'),
+          findsOneWidget);
       expect(find.text('Collector is running'), findsOneWidget);
       expect(find.text('Ensure path could not be resolved'), findsOneWidget);
       expect(find.text('Setup help available'), findsOneWidget);
       expect(find.text('Check installation and sign-in'), findsOneWidget);
-      expect(find.text('Do not describe this as a permission error.'), findsOneWidget);
+      expect(find.text('Do not describe this as a permission error.'),
+          findsOneWidget);
       expect(find.text('Open setup guide'), findsOneWidget);
     });
 
@@ -3919,18 +4148,22 @@ void main() {
       expect(find.text('NO USAGE YET'), findsOneWidget);
       expect(find.text('State specification · No usage yet'), findsOneWidget);
       expect(find.text('Connected, but no usage found'), findsOneWidget);
-      expect(find.text('The collector is ready and the source is accessible.'), findsOneWidget);
+      expect(find.text('The collector is ready and the source is accessible.'),
+          findsOneWidget);
       expect(find.text('Permission granted'), findsOneWidget);
-      expect(find.text('No supported activity was logged or recorded'), findsOneWidget);
+      expect(find.text('No supported activity was logged or recorded'),
+          findsOneWidget);
       expect(find.text('Waiting for first session'), findsOneWidget);
       expect(find.text('Start using Antigravity on desktop'), findsOneWidget);
-      expect(find.text('Never show all metrics to zero before first activity.'), findsOneWidget);
+      expect(find.text('Never show all metrics to zero before first activity.'),
+          findsOneWidget);
       expect(find.text('View usage'), findsOneWidget);
     });
 
     testWidgets('renders M10 Permission denied state', (tester) async {
       final mockData = SigningInStateData.fromJson(
-        jsonDecode(desktopConnectionPermissionDeniedJson) as Map<String, dynamic>,
+        jsonDecode(desktopConnectionPermissionDeniedJson)
+            as Map<String, dynamic>,
       );
 
       await tester.pumpWidget(
@@ -3946,9 +4179,12 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Desktop connection'), findsOneWidget);
       expect(find.text('PERMISSION DENIED'), findsOneWidget);
-      expect(find.text('State specification · Permission denied'), findsOneWidget);
+      expect(
+          find.text('State specification · Permission denied'), findsOneWidget);
       expect(find.text('Usage permission is blocked'), findsOneWidget);
-      expect(find.text('The desktop companion cannot read local usage metadata.'), findsOneWidget);
+      expect(
+          find.text('The desktop companion cannot read local usage metadata.'),
+          findsOneWidget);
       expect(find.text('Collector is connected'), findsOneWidget);
       expect(find.text('Cloud account remains linked'), findsOneWidget);
       expect(find.text('User action required'), findsOneWidget);
@@ -3975,20 +4211,26 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Desktop connection'), findsOneWidget);
       expect(find.text('SESSION REVOKED'), findsOneWidget);
-      expect(find.text('State specification · Session revoked'), findsOneWidget);
+      expect(
+          find.text('State specification · Session revoked'), findsOneWidget);
       expect(find.text('Desktop session was revoked'), findsOneWidget);
-      expect(find.text('This companion can no longer upload usage for the account.'), findsOneWidget);
+      expect(
+          find.text(
+              'This companion can no longer upload usage for the account.'),
+          findsOneWidget);
       expect(find.text('New syncs are rejected'), findsOneWidget);
       expect(find.text('Past data is preserved'), findsOneWidget);
       expect(find.text('Pair again required'), findsOneWidget);
       expect(find.text('Create a new one-time code'), findsOneWidget);
-      expect(find.text('Do not auto-restore a revoked session.'), findsOneWidget);
+      expect(
+          find.text('Do not auto-restore a revoked session.'), findsOneWidget);
       expect(find.text('Pair desktop again'), findsOneWidget);
     });
 
     testWidgets('renders M10 Incompatible version state', (tester) async {
       final mockData = SigningInStateData.fromJson(
-        jsonDecode(desktopConnectionIncompatibleVersionJson) as Map<String, dynamic>,
+        jsonDecode(desktopConnectionIncompatibleVersionJson)
+            as Map<String, dynamic>,
       );
 
       await tester.pumpWidget(
@@ -4004,14 +4246,19 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Desktop connection'), findsOneWidget);
       expect(find.text('UPDATE REQUIRED'), findsOneWidget);
-      expect(find.text('State specification · Update required'), findsOneWidget);
+      expect(
+          find.text('State specification · Update required'), findsOneWidget);
       expect(find.text('Desktop app needs an update'), findsOneWidget);
-      expect(find.text('This companion version is no longer compatible with the sync service.'), findsOneWidget);
+      expect(
+          find.text(
+              'This companion version is no longer compatible with the sync service.'),
+          findsOneWidget);
       expect(find.text('Collection paused'), findsOneWidget);
       expect(find.text('Local usage is not deleted'), findsOneWidget);
       expect(find.text('Update required'), findsOneWidget);
       expect(find.text('Install the latest official version'), findsOneWidget);
-      expect(find.text('Keep the minimum supported version visible.'), findsOneWidget);
+      expect(find.text('Keep the minimum supported version visible.'),
+          findsOneWidget);
       expect(find.text('View install guide'), findsOneWidget);
     });
 
@@ -4035,12 +4282,16 @@ void main() {
       expect(find.text('SYNC FAILED'), findsOneWidget);
       expect(find.text('State specification · Sync failed'), findsOneWidget);
       expect(find.text('Latest sync failed'), findsOneWidget);
-      expect(find.text('The collector could read local usage but could not finish the upload.'), findsOneWidget);
+      expect(
+          find.text(
+              'The collector could read local usage but could not finish the upload.'),
+          findsOneWidget);
       expect(find.text('Local queue retained'), findsOneWidget);
       expect(find.text('Events will not be lost'), findsOneWidget);
       expect(find.text('Retry available'), findsOneWidget);
       expect(find.text('Network or service issue detected'), findsOneWidget);
-      expect(find.text('Separate collection success from upload failure.'), findsOneWidget);
+      expect(find.text('Separate collection success from upload failure.'),
+          findsOneWidget);
       expect(find.text('Retry sync'), findsOneWidget);
     });
 
@@ -4064,12 +4315,18 @@ void main() {
       expect(find.text('NOT SET'), findsOneWidget);
       expect(find.text('State specification · Not set'), findsOneWidget);
       expect(find.text('Set a monthly budget'), findsOneWidget);
-      expect(find.text('Choose a spending limit to track estimated AI cost against it.'), findsOneWidget);
+      expect(
+          find.text(
+              'Choose a spending limit to track estimated AI cost against it.'),
+          findsOneWidget);
       expect(find.text('Optional for tracking'), findsOneWidget);
-      expect(find.text('Usage analysis works without a budget'), findsOneWidget);
+      expect(
+          find.text('Usage analysis works without a budget'), findsOneWidget);
       expect(find.text('Alerts need a threshold'), findsOneWidget);
-      expect(find.text('Notifications can be enabled afterward'), findsOneWidget);
-      expect(find.text('Do not show a zero-dollar budget as an active limit.'), findsOneWidget);
+      expect(
+          find.text('Notifications can be enabled afterward'), findsOneWidget);
+      expect(find.text('Do not show a zero-dollar budget as an active limit.'),
+          findsOneWidget);
       expect(find.text('Set budget'), findsOneWidget);
     });
 
@@ -4093,12 +4350,17 @@ void main() {
       expect(find.text('NEAR THRESHOLD'), findsOneWidget);
       expect(find.text('State specification · Near threshold'), findsOneWidget);
       expect(find.text('Approaching your alert level'), findsOneWidget);
-      expect(find.text('Estimated cost is close to the next configured threshold.'), findsOneWidget);
+      expect(
+          find.text(
+              'Estimated cost is close to the next configured threshold.'),
+          findsOneWidget);
       expect(find.text(r'74% of $50 used'), findsOneWidget);
       expect(find.text(r'$36.82 estimated remaining'), findsOneWidget);
       expect(find.text('Largest contributor · Gemini'), findsOneWidget);
-      expect(find.text('Review usage before changing threshold'), findsOneWidget);
-      expect(find.text('Use estimated cost language consistently.'), findsOneWidget);
+      expect(
+          find.text('Review usage before changing threshold'), findsOneWidget);
+      expect(find.text('Use estimated cost language consistently.'),
+          findsOneWidget);
       expect(find.text('View budget'), findsOneWidget);
     });
 
@@ -4120,14 +4382,19 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Budget & alerts'), findsOneWidget);
       expect(find.text('ALERT TRIGGERED'), findsOneWidget);
-      expect(find.text('State specification · Alert triggered'), findsOneWidget);
+      expect(
+          find.text('State specification · Alert triggered'), findsOneWidget);
       expect(find.text('Budget alert threshold reached'), findsOneWidget);
-      expect(find.text('Estimated monthly cost crossed a configured alert level.'), findsOneWidget);
+      expect(
+          find.text('Estimated monthly cost crossed a configured alert level.'),
+          findsOneWidget);
       expect(find.text('90% threshold reached'), findsOneWidget);
-      expect(find.text('One notification created for this month'), findsOneWidget);
+      expect(
+          find.text('One notification created for this month'), findsOneWidget);
       expect(find.text('Budget is not exceeded yet'), findsOneWidget);
       expect(find.text('Tracking continues normally'), findsOneWidget);
-      expect(find.text('Deduplicate alerts per threshold and month.'), findsOneWidget);
+      expect(find.text('Deduplicate alerts per threshold and month.'),
+          findsOneWidget);
       expect(find.text('View contributing usage'), findsOneWidget);
     });
 
@@ -4149,14 +4416,18 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Budget & alerts'), findsOneWidget);
       expect(find.text('BUDGET EXCEEDED'), findsOneWidget);
-      expect(find.text('State specification · Budget exceeded'), findsOneWidget);
+      expect(
+          find.text('State specification · Budget exceeded'), findsOneWidget);
       expect(find.text('Estimated cost is over budget'), findsOneWidget);
-      expect(find.text('Current usage has exceeded the monthly spending limit.'), findsOneWidget);
+      expect(
+          find.text('Current usage has exceeded the monthly spending limit.'),
+          findsOneWidget);
       expect(find.text(r'$63.20 of $50 estimated'), findsOneWidget);
       expect(find.text('This is not a provider invoice'), findsOneWidget);
       expect(find.text('Collection continues'), findsOneWidget);
       expect(find.text('μToken does not block AI tools'), findsOneWidget);
-      expect(find.text('Never imply that model access was restricted.'), findsOneWidget);
+      expect(find.text('Never imply that model access was restricted.'),
+          findsOneWidget);
       expect(find.text('Review usage'), findsOneWidget);
     });
 
@@ -4178,14 +4449,18 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Budget & alerts'), findsOneWidget);
       expect(find.text('COST UNAVAILABLE'), findsOneWidget);
-      expect(find.text('State specification · Cost unavailable'), findsOneWidget);
+      expect(
+          find.text('State specification · Cost unavailable'), findsOneWidget);
       expect(find.text('Budget status can’t be calculated'), findsOneWidget);
-      expect(find.text('One or more models are missing a valid pricing version.'), findsOneWidget);
+      expect(
+          find.text('One or more models are missing a valid pricing version.'),
+          findsOneWidget);
       expect(find.text('Budget remains configured'), findsOneWidget);
       expect(find.text('Thresholds are not evaluated'), findsOneWidget);
       expect(find.text('Token tracking continues'), findsOneWidget);
       expect(find.text('Resolve pricing to restore alerts'), findsOneWidget);
-      expect(find.text('Suspend cost alerts instead of treating cost as zero.'), findsOneWidget);
+      expect(find.text('Suspend cost alerts instead of treating cost as zero.'),
+          findsOneWidget);
       expect(find.text('View model pricing'), findsOneWidget);
     });
 
@@ -4207,14 +4482,22 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Budget & alerts'), findsOneWidget);
       expect(find.text('NOTIFICATIONS OFF'), findsOneWidget);
-      expect(find.text('State specification · Notifications off'), findsOneWidget);
+      expect(
+          find.text('State specification · Notifications off'), findsOneWidget);
       expect(find.text('System alerts are disabled'), findsOneWidget);
-      expect(find.text('Budget thresholds still calculate, but push notifications cannot be delivered.'), findsOneWidget);
+      expect(
+          find.text(
+              'Budget thresholds still calculate, but push notifications cannot be delivered.'),
+          findsOneWidget);
       expect(find.text('In-app history remains'), findsOneWidget);
       expect(find.text('Alerts appear when the app is opened'), findsOneWidget);
       expect(find.text('OS permission required'), findsOneWidget);
-      expect(find.text('Turn on notifications in system settings'), findsOneWidget);
-      expect(find.text('Separate notification delivery from threshold calculation.'), findsOneWidget);
+      expect(find.text('Turn on notifications in system settings'),
+          findsOneWidget);
+      expect(
+          find.text(
+              'Separate notification delivery from threshold calculation.'),
+          findsOneWidget);
       expect(find.text('Review alert settings'), findsOneWidget);
     });
 
@@ -4236,13 +4519,18 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Privacy & data'), findsOneWidget);
       expect(find.text('PREPARING EXPORT'), findsOneWidget);
-      expect(find.text('State specification · Preparing export'), findsOneWidget);
+      expect(
+          find.text('State specification · Preparing export'), findsOneWidget);
       expect(find.text('Preparing your export'), findsOneWidget);
-      expect(find.text('Collecting usage summaries into machine-readable files.'), findsOneWidget);
+      expect(
+          find.text('Collecting usage summaries into machine-readable files.'),
+          findsOneWidget);
       expect(find.text('CSV and JSON requested'), findsOneWidget);
-      expect(find.text('Prompts and response content are never stored'), findsOneWidget);
+      expect(find.text('Prompts and response content are never stored'),
+          findsOneWidget);
       expect(find.text('Keep the app open'), findsOneWidget);
-      expect(find.text('Download becomes available when ready'), findsOneWidget);
+      expect(
+          find.text('Download becomes available when ready'), findsOneWidget);
       expect(find.text('Prevent duplicate export jobs.'), findsOneWidget);
       expect(find.text('Back to data settings'), findsOneWidget);
     });
@@ -4267,12 +4555,15 @@ void main() {
       expect(find.text('EXPORT READY'), findsOneWidget);
       expect(find.text('State specification · Export ready'), findsOneWidget);
       expect(find.text('Your export is ready'), findsOneWidget);
-      expect(find.text('Usage data was prepared successfully.'), findsOneWidget);
+      expect(
+          find.text('Usage data was prepared successfully.'), findsOneWidget);
       expect(find.text('12,842 usage records'), findsOneWidget);
       expect(find.text('CSV and JSON are available'), findsOneWidget);
       expect(find.text('Generated just now'), findsOneWidget);
-      expect(find.text('File download link expires for security'), findsOneWidget);
-      expect(find.text('Show scope, record count, and generation time.'), findsOneWidget);
+      expect(
+          find.text('File download link expires for security'), findsOneWidget);
+      expect(find.text('Show scope, record count, and generation time.'),
+          findsOneWidget);
       expect(find.text('Open export'), findsOneWidget);
     });
 
@@ -4296,7 +4587,8 @@ void main() {
       expect(find.text('EXPORT FAILED'), findsOneWidget);
       expect(find.text('State specification · Export failed'), findsOneWidget);
       expect(find.text('Couldn’t prepare the export'), findsOneWidget);
-      expect(find.text('The data job stopped before the files were created.'), findsOneWidget);
+      expect(find.text('The data job stopped before the files were created.'),
+          findsOneWidget);
       expect(find.text('No incomplete file downloaded'), findsOneWidget);
       expect(find.text('Your cloud data is unchanged'), findsOneWidget);
       expect(find.text('Safe to retry'), findsOneWidget);
@@ -4325,12 +4617,16 @@ void main() {
       expect(find.text('DELETING'), findsOneWidget);
       expect(find.text('State specification · Deleting'), findsOneWidget);
       expect(find.text('Deleting usage data'), findsOneWidget);
-      expect(find.text('Removing cloud usage summaries while keeping the account active.'), findsOneWidget);
+      expect(
+          find.text(
+              'Removing cloud usage summaries while keeping the account active.'),
+          findsOneWidget);
       expect(find.text('Desktop connection remains'), findsOneWidget);
       expect(find.text('New usage may arrive after delete'), findsOneWidget);
       expect(find.text('This can’t be undone'), findsOneWidget);
       expect(find.text('The operation may take a moment'), findsOneWidget);
-      expect(find.text('Disable repeated destructive actions while running.'), findsOneWidget);
+      expect(find.text('Disable repeated destructive actions while running.'),
+          findsOneWidget);
       expect(find.text('View data settings'), findsOneWidget);
     });
 
@@ -4354,12 +4650,14 @@ void main() {
       expect(find.text('DELETED'), findsOneWidget);
       expect(find.text('State specification · Deleted'), findsOneWidget);
       expect(find.text('Usage data deleted'), findsOneWidget);
-      expect(find.text('The selected cloud usage history has been removed.'), findsOneWidget);
+      expect(find.text('The selected cloud usage history has been removed.'),
+          findsOneWidget);
       expect(find.text('Account remains active'), findsOneWidget);
       expect(find.text('Google sign-in was not removed'), findsOneWidget);
       expect(find.text('Desktop may collect new usage'), findsOneWidget);
       expect(find.text('Disconnect it to stop future syncs'), findsOneWidget);
-      expect(find.text('State exactly what remains after deletion.'), findsOneWidget);
+      expect(find.text('State exactly what remains after deletion.'),
+          findsOneWidget);
       expect(find.text('Done'), findsOneWidget);
     });
 
@@ -4381,14 +4679,21 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Privacy & data'), findsOneWidget);
       expect(find.text('PARTIAL DELETION'), findsOneWidget);
-      expect(find.text('State specification · Partial deletion'), findsOneWidget);
+      expect(
+          find.text('State specification · Partial deletion'), findsOneWidget);
       expect(find.text('Some data couldn’t be deleted'), findsOneWidget);
-      expect(find.text('The deletion completed only for part of the selected scope.'), findsOneWidget);
+      expect(
+          find.text(
+              'The deletion completed only for part of the selected scope.'),
+          findsOneWidget);
       expect(find.text('Completed items are gone'), findsOneWidget);
-      expect(find.text('They will not be restored automatically'), findsOneWidget);
+      expect(
+          find.text('They will not be restored automatically'), findsOneWidget);
       expect(find.text('Remaining items need attention'), findsOneWidget);
-      expect(find.text('Retry or contact support with the job ID'), findsOneWidget);
-      expect(find.text('Expose partial completion instead of generic failure.'), findsOneWidget);
+      expect(find.text('Retry or contact support with the job ID'),
+          findsOneWidget);
+      expect(find.text('Expose partial completion instead of generic failure.'),
+          findsOneWidget);
       expect(find.text('Review remaining data'), findsOneWidget);
     });
 
@@ -4412,12 +4717,17 @@ void main() {
       expect(find.text('REAUTHENTICATE'), findsOneWidget);
       expect(find.text('State specification · Reauthenticate'), findsOneWidget);
       expect(find.text('Verify your account to continue'), findsOneWidget);
-      expect(find.text('Exporting or deleting sensitive account data requires a fresh Google sign-in.'), findsOneWidget);
+      expect(
+          find.text(
+              'Exporting or deleting sensitive account data requires a fresh Google sign-in.'),
+          findsOneWidget);
       expect(find.text('Current data is unchanged'), findsOneWidget);
       expect(find.text('No operation has started'), findsOneWidget);
       expect(find.text('Verification expires'), findsOneWidget);
-      expect(find.text('Complete the action promptly after sign-in'), findsOneWidget);
-      expect(find.text('Return to the pending action after verification.'), findsOneWidget);
+      expect(find.text('Complete the action promptly after sign-in'),
+          findsOneWidget);
+      expect(find.text('Return to the pending action after verification.'),
+          findsOneWidget);
       expect(find.text('Verify with Google'), findsOneWidget);
     });
 
@@ -4441,12 +4751,16 @@ void main() {
       expect(find.text('REAUTHENTICATE'), findsOneWidget);
       expect(find.text('State specification · Reauthenticate'), findsOneWidget);
       expect(find.text('Confirm it’s you'), findsOneWidget);
-      expect(find.text('This account action requires a recent Google authentication.'), findsOneWidget);
+      expect(
+          find.text(
+              'This account action requires a recent Google authentication.'),
+          findsOneWidget);
       expect(find.text('Profile remains signed in'), findsOneWidget);
       expect(find.text('Normal analytics is still available'), findsOneWidget);
       expect(find.text('Sensitive action paused'), findsOneWidget);
       expect(find.text('Continues after verification'), findsOneWidget);
-      expect(find.text('Do not wipe the local account prematurely.'), findsOneWidget);
+      expect(find.text('Do not wipe the local account prematurely.'),
+          findsOneWidget);
       expect(find.text('Verify account'), findsOneWidget);
     });
 
@@ -4470,12 +4784,15 @@ void main() {
       expect(find.text('SIGNING OUT'), findsOneWidget);
       expect(find.text('State specification · Signing out'), findsOneWidget);
       expect(find.text('Signing out of this phone'), findsOneWidget);
-      expect(find.text('Ending the mobile session without deleting cloud usage.'), findsOneWidget);
+      expect(
+          find.text('Ending the mobile session without deleting cloud usage.'),
+          findsOneWidget);
       expect(find.text('Cloud data is retained'), findsOneWidget);
       expect(find.text('You can sign in again later'), findsOneWidget);
       expect(find.text('Desktop remains linked'), findsOneWidget);
       expect(find.text('Revoke it separately if needed'), findsOneWidget);
-      expect(find.text('Make sign-out and account deletion visibly different.'), findsOneWidget);
+      expect(find.text('Make sign-out and account deletion visibly different.'),
+          findsOneWidget);
       expect(find.text('Return to welcome'), findsOneWidget);
     });
 
@@ -4497,14 +4814,20 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Account'), findsOneWidget);
       expect(find.text('DELETING ACCOUNT'), findsOneWidget);
-      expect(find.text('State specification · Deleting account'), findsOneWidget);
+      expect(
+          find.text('State specification · Deleting account'), findsOneWidget);
       expect(find.text('Deleting your account'), findsOneWidget);
-      expect(find.text('Revoking connected devices and removing account-owned cloud data.'), findsOneWidget);
+      expect(
+          find.text(
+              'Revoking connected devices and removing account-owned cloud data.'),
+          findsOneWidget);
       expect(find.text('Desktop access revoked'), findsOneWidget);
       expect(find.text('New syncs will be rejected'), findsOneWidget);
       expect(find.text('Deletion is permanent'), findsOneWidget);
       expect(find.text('Some backend cleanup may continue'), findsOneWidget);
-      expect(find.text('Block navigation until the backend confirms completion.'), findsOneWidget);
+      expect(
+          find.text('Block navigation until the backend confirms completion.'),
+          findsOneWidget);
       expect(find.text('View account status'), findsOneWidget);
     });
 
@@ -4526,14 +4849,19 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Account'), findsOneWidget);
       expect(find.text('DELETION FAILED'), findsOneWidget);
-      expect(find.text('State specification · Deletion failed'), findsOneWidget);
+      expect(
+          find.text('State specification · Deletion failed'), findsOneWidget);
       expect(find.text('Account deletion didn’t finish'), findsOneWidget);
-      expect(find.text('The account is still active because a required cleanup step failed.'), findsOneWidget);
+      expect(
+          find.text(
+              'The account is still active because a required cleanup step failed.'),
+          findsOneWidget);
       expect(find.text('Sign-in remains valid'), findsOneWidget);
       expect(find.text('Data is safe'), findsOneWidget);
       expect(find.text('No silent partial deletion'), findsOneWidget);
       expect(find.text('Review the error before trying again'), findsOneWidget);
-      expect(find.text('Keep the user informed of retained access.'), findsOneWidget);
+      expect(find.text('Keep the user informed of retained access.'),
+          findsOneWidget);
       expect(find.text('Retry deletion'), findsOneWidget);
     });
 
@@ -4555,14 +4883,22 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
       expect(find.text('Account'), findsOneWidget);
       expect(find.text('PARTIAL DELETION'), findsOneWidget);
-      expect(find.text('State specification · Partial deletion'), findsOneWidget);
+      expect(
+          find.text('State specification · Partial deletion'), findsOneWidget);
       expect(find.text('Account cleanup is incomplete'), findsOneWidget);
-      expect(find.text('Some account data or device sessions still require removal.'), findsOneWidget);
+      expect(
+          find.text(
+              'Some account data or device sessions still require removal.'),
+          findsOneWidget);
       expect(find.text('Completed cleanup is permanent'), findsOneWidget);
       expect(find.text('Removed items cannot be restored'), findsOneWidget);
       expect(find.text('Follow-up required'), findsOneWidget);
-      expect(find.text('A job reference is available for support'), findsOneWidget);
-      expect(find.text('List remaining resources explicitly in log/export status.'), findsOneWidget);
+      expect(find.text('A job reference is available for support'),
+          findsOneWidget);
+      expect(
+          find.text(
+              'List remaining resources explicitly in log/export status.'),
+          findsOneWidget);
       expect(find.text('Review account'), findsOneWidget);
     });
 
@@ -4586,12 +4922,18 @@ void main() {
       expect(find.text('AI NOT SET UP'), findsOneWidget);
       expect(find.text('State specification · AI not set up'), findsOneWidget);
       expect(find.text('Choose an AI model'), findsOneWidget);
-      expect(find.text('Suggestions are written by an LLM you pick. Add a provider and API key to start.'), findsOneWidget);
+      expect(
+          find.text(
+              'Suggestions are written by an LLM you pick. Add a provider and API key to start.'),
+          findsOneWidget);
       expect(find.text('No provider configured'), findsOneWidget);
       expect(find.text('Settings > AI suggestions'), findsOneWidget);
       expect(find.text('Your usage is still tracked'), findsOneWidget);
       expect(find.text('Key stays on this phone'), findsOneWidget);
-      expect(find.text('Show this instead of the feed when no API key is saved. The button opens M15.'), findsOneWidget);
+      expect(
+          find.text(
+              'Show this instead of the feed when no API key is saved. The button opens M15.'),
+          findsOneWidget);
       expect(find.text('Set up AI suggestions'), findsOneWidget);
     });
 
@@ -4613,14 +4955,20 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsNothing);
       expect(find.text('AI suggestions'), findsOneWidget);
       expect(find.text('KEY REJECTED'), findsOneWidget);
-      expect(find.text('State specification · Invalid API key'), findsOneWidget);
+      expect(
+          find.text('State specification · Invalid API key'), findsOneWidget);
       expect(find.text('The provider rejected this key'), findsOneWidget);
-      expect(find.text('Check the key or quota, then test the connection again.'), findsOneWidget);
+      expect(
+          find.text('Check the key or quota, then test the connection again.'),
+          findsOneWidget);
       expect(find.text('Provider'), findsOneWidget);
       expect(find.text('OpenAI · gpt-4.5-mini'), findsOneWidget);
       expect(find.text('Previous suggestions'), findsOneWidget);
       expect(find.text('Still present in Insights'), findsOneWidget);
-      expect(find.text('Keep old suggestions visible and show AI_PROVIDER_ERROR here after Test connection or scheduled run.'), findsOneWidget);
+      expect(
+          find.text(
+              'Keep old suggestions visible and show AI_PROVIDER_ERROR here after Test connection or scheduled run.'),
+          findsOneWidget);
       expect(find.text('Edit API key'), findsOneWidget);
     });
   });
