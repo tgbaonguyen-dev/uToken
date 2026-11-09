@@ -5,33 +5,71 @@ using Anthropic.Models.Messages;
 
 namespace UToken.Insights;
 
+/// <summary>Anthropic SDK judge adapter.</summary>
 public sealed class AnthropicJudgeModel : IJudgeModel
 {
     private readonly AnthropicClient _client;
-    public AnthropicJudgeModel(string apiKey, string model) { _client = new AnthropicClient { ApiKey = apiKey }; Model = model; }
-    public AnthropicJudgeModel(AnthropicClient client, string model) { _client = client; Model = model; }
+    public AnthropicJudgeModel(string apiKey, string model)
+    {
+        _client = new AnthropicClient { ApiKey = apiKey };
+        Model = model;
+    }
+    public AnthropicJudgeModel(AnthropicClient client, string model)
+    {
+        _client = client;
+        Model = model;
+    }
     public string Provider => JudgeProviders.Anthropic;
     public string Model { get; }
-    public async Task<InsightDoc> JudgeAsync(JudgeBrief brief, CancellationToken cancellationToken)
+    public async Task<string> CompleteAsync(
+        string systemPrompt,
+        string briefJson,
+        IReadOnlyDictionary<string, JsonElement> schema,
+        CancellationToken cancellationToken)
     {
-        if (brief.Chats < 5 || !brief.HasEvents) return Empty(brief, "insufficient_data", null);
         try
         {
-            var response = await _client.Messages.Create(new MessageCreateParams { Model = Model, MaxTokens = 16000, System = JudgePrompt.System, Messages = [new UserMessageParam { Content = JsonSerializer.Serialize(brief) }], Thinking = new ThinkingConfigAdaptive(), OutputConfig = new OutputConfig { Effort = Effort.Medium, Format = new JsonOutputFormat { Schema = ProviderSchema.Create() } } }, cancellationToken);
-            if (response.StopReason == StopReason.Refusal) return Empty(brief, "failed", "refused");
-            if (response.StopReason == StopReason.MaxTokens) return Empty(brief, "failed", "truncated");
-            var contentJson = JsonSerializer.SerializeToNode(response.Content)?.AsArray();
-            var text = contentJson?.Select(value => value?["text"]?.GetValue<string>()).FirstOrDefault(value => value is not null) ?? throw new JsonException("Anthropic response has no text.");
-            var result = JsonSerializer.Deserialize<JudgeModelOutput>(text) ?? throw new JsonException("Empty structured response.");
-            return JudgeOutputMapper.Map(result, brief, Provider, Model, DateTimeOffset.UtcNow);
+            var response = await _client.Messages.Create(new MessageCreateParams
+            {
+                Model = Model,
+                MaxTokens = 16000,
+                System = systemPrompt,
+                Messages = [new UserMessageParam { Content = briefJson }],
+                Thinking = new ThinkingConfigAdaptive(),
+                OutputConfig = new OutputConfig
+                {
+                    Effort = Effort.Medium,
+                    Format = new JsonOutputFormat { Schema = schema },
+                },
+            }, cancellationToken);
+            if (response.StopReason == StopReason.Refusal)
+                throw new JudgeModelException("refused");
+            if (response.StopReason == StopReason.MaxTokens)
+                throw new JudgeModelException("truncated");
+            var json = JsonSerializer.SerializeToNode(response.Content)?.AsArray();
+            return json?.Select(value => value?["text"]?.GetValue<string>())
+                .FirstOrDefault(value => value is not null)
+                ?? throw new JsonException("Anthropic response has no text.");
         }
-        catch (AnthropicUnauthorizedException) { return Empty(brief, "failed", "invalid_api_key"); }
-        catch (AnthropicRateLimitException) { return Empty(brief, "failed", "rate_limited"); }
-        catch (AnthropicUnexpectedStatusCodeException) { return Empty(brief, "failed", "provider_error"); }
-        catch (HttpRequestException) { return Empty(brief, "failed", "provider_error"); }
-        catch (IOException) { return Empty(brief, "failed", "provider_error"); }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { return Empty(brief, "failed", "provider_error"); }
-        catch (JsonException) { return Empty(brief, "failed", "provider_error"); }
+        catch (AnthropicUnauthorizedException)
+        {
+            throw new JudgeModelException("invalid_api_key");
+        }
+        catch (AnthropicRateLimitException)
+        {
+            throw new JudgeModelException("rate_limited");
+        }
+        catch (AnthropicUnexpectedStatusCodeException)
+        {
+            throw new JudgeModelException("provider_error");
+        }
+        catch (IOException)
+        {
+            throw new JudgeModelException("provider_error");
+        }
+        catch (HttpRequestException)
+        {
+            throw new JudgeModelException("provider_error");
+        }
     }
-    private InsightDoc Empty(JudgeBrief b, string status, string? error) => new(status, DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'"), b.PeriodStart, b.PeriodEnd, Provider, Model, b.PricingVersion, null, null, "", [], [], error);
 }

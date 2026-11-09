@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace UToken.Insights;
 
 public static class JudgeProviders
@@ -8,13 +10,19 @@ public static class JudgeProviders
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal) { Google, Anthropic, OpenAi };
 }
 
+/// <summary>Provider settings selected by the user.</summary>
 public sealed record JudgeProviderSettings(string Provider, string Model, bool Enabled, int MinHoursBetweenRuns);
 
+/// <summary>Sends a common rubric and returns the provider's raw JSON response.</summary>
 public interface IJudgeModel
 {
     string Provider { get; }
     string Model { get; }
-    Task<InsightDoc> JudgeAsync(JudgeBrief brief, CancellationToken cancellationToken);
+    Task<string> CompleteAsync(
+        string systemPrompt,
+        string briefJson,
+        IReadOnlyDictionary<string, JsonElement> schema,
+        CancellationToken cancellationToken);
 }
 
 public static class JudgeDefaults

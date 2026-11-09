@@ -19,7 +19,7 @@ public sealed class ProviderTests
         using var http = new HttpClient(handler);
         var brief = new JudgeBrief("2026-01-01", "2026-01-30", "pricing", new Dictionary<string, MetricEntry>(), 0, false);
         IJudgeModel model = provider == "google" ? new GeminiJudgeModel(http, "secret", "gemini-2.5-flash") : new OpenAiJudgeModel(http, "secret", "gpt-4.1-mini");
-        var result = await model.JudgeAsync(brief, CancellationToken.None);
+        var result = await new JudgeService().RunAsync(brief, model, CancellationToken.None);
         Assert.Equal("insufficient_data", result.Status);
         Assert.Null(handler.Request);
     }
