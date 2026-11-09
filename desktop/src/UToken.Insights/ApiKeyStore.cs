@@ -15,12 +15,15 @@ public sealed class ApiKeyStore(string directory)
         byte[] protectedPayload = OperatingSystem.IsWindows()
             ? ProtectedData.Protect(payload, null, DataProtectionScope.CurrentUser)
             : payload;
+        var temporary = _path + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
-            File.WriteAllBytes(_path, protectedPayload);
-            if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(_path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            var options = new FileStreamOptions { Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None, Options = FileOptions.WriteThrough };
+            if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+            using (var stream = new FileStream(temporary, options)) { stream.Write(protectedPayload); stream.Flush(true); }
+            File.Move(temporary, _path, true);
         }
-        finally { CryptographicOperations.ZeroMemory(payload); if (!ReferenceEquals(protectedPayload, payload)) CryptographicOperations.ZeroMemory(protectedPayload); }
+        finally { if (File.Exists(temporary)) File.Delete(temporary); CryptographicOperations.ZeroMemory(payload); if (!ReferenceEquals(protectedPayload, payload)) CryptographicOperations.ZeroMemory(protectedPayload); }
     }
 
     public IReadOnlyDictionary<string, string> Load()

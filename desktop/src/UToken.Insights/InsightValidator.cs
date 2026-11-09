@@ -7,14 +7,18 @@ public static class InsightValidator
     {
         if (candidate is null) throw new ArgumentNullException(nameof(candidate));
         if (brief is null) throw new ArgumentNullException(nameof(brief));
-        var dimensions = candidate.Dimensions.Where(d => Categories.Contains(d.Id)).Select(d => d with { Score = Clamp(d.Score) }).ToArray();
+        var dimensions = candidate.Dimensions.Where(d => Categories.Contains(d.Id)).GroupBy(d => d.Id).Select(g => g.First() with { Score = Clamp(g.First().Score) }).ToArray();
         var insights = candidate.Insights.Select(i =>
         {
             var evidence = i.Evidence.Where(e => brief.Catalog.TryGetValue(e.Metric, out _)).Select(e => { var m = brief.Catalog[e.Metric]; return e with { Label = m.Label, Value = m.Value }; }).ToArray();
             long? saving = i.EstimatedSavingMicroPerMonth is null ? null : Math.Clamp(i.EstimatedSavingMicroPerMonth.Value, 0, monthlyCostMicro);
-            return i with { Evidence = evidence, EstimatedSavingMicroPerMonth = saving };
-        }).Where(i => i.Evidence.Count > 0 && Categories.Contains(i.Category)).Take(5).ToArray();
-        return candidate with { GeneratedAt = now.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'"), Model = model, Score = Clamp(candidate.Score), Dimensions = dimensions, Insights = insights };
+            var provider = i.Provider is null or "codex" or "claude_code" or "antigravity" ? i.Provider : null;
+            return i with { Provider = provider, Evidence = evidence, EstimatedSavingMicroPerMonth = saving };
+        }).Where(i => i.Evidence.Count > 0 && Categories.Contains(i.Category) && Severities.Contains(i.Severity) && Confidences.Contains(i.Confidence)).GroupBy(i => i.Id).Select(g => g.First()).Take(5).ToArray();
+        var grade = candidate.Grade is "A" or "B" or "C" or "D" ? candidate.Grade : null;
+        return candidate with { GeneratedAt = now.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'"), Model = model, Score = Clamp(candidate.Score), Grade = grade, Dimensions = dimensions, Insights = insights };
     }
+    private static readonly HashSet<string> Severities = ["high", "medium", "low"];
+    private static readonly HashSet<string> Confidences = ["high", "medium", "low"];
     private static int? Clamp(int? value) => value is null ? null : Math.Clamp(value.Value, 0, 100);
 }

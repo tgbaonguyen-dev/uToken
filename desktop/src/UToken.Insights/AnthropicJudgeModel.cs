@@ -17,19 +17,21 @@ public sealed class AnthropicJudgeModel : IJudgeModel
         if (brief.Chats < 5 || !brief.HasEvents) return Empty(brief, "insufficient_data", null);
         try
         {
-            var response = await _client.Messages.Create(new MessageCreateParams { Model = Model, MaxTokens = 16000, System = "Đánh giá catalog, không bịa số, trả tiếng Việt.", Messages = [new UserMessageParam { Content = JsonSerializer.Serialize(brief) }], Thinking = new ThinkingConfigAdaptive(), OutputConfig = new OutputConfig { Effort = Effort.Medium, Format = new JsonOutputFormat { Schema = ProviderSchema.Create() } } }, cancellationToken);
+            var response = await _client.Messages.Create(new MessageCreateParams { Model = Model, MaxTokens = 16000, System = JudgePrompt.System, Messages = [new UserMessageParam { Content = JsonSerializer.Serialize(brief) }], Thinking = new ThinkingConfigAdaptive(), OutputConfig = new OutputConfig { Effort = Effort.Medium, Format = new JsonOutputFormat { Schema = ProviderSchema.Create() } } }, cancellationToken);
             if (response.StopReason == StopReason.Refusal) return Empty(brief, "failed", "refused");
             if (response.StopReason == StopReason.MaxTokens) return Empty(brief, "failed", "truncated");
             var contentJson = JsonSerializer.SerializeToNode(response.Content)?.AsArray();
             var text = contentJson?.Select(value => value?["text"]?.GetValue<string>()).FirstOrDefault(value => value is not null) ?? throw new JsonException("Anthropic response has no text.");
-            var result = JsonSerializer.Deserialize<InsightDoc>(text) ?? throw new JsonException("Empty structured response.");
-            return InsightValidator.Validate(result, brief, DateTimeOffset.UtcNow, Model, long.MaxValue) with { Provider = Provider };
+            var result = JsonSerializer.Deserialize<JudgeModelOutput>(text) ?? throw new JsonException("Empty structured response.");
+            return JudgeOutputMapper.Map(result, brief, Provider, Model, DateTimeOffset.UtcNow);
         }
         catch (AnthropicUnauthorizedException) { return Empty(brief, "failed", "invalid_api_key"); }
         catch (AnthropicRateLimitException) { return Empty(brief, "failed", "rate_limited"); }
         catch (AnthropicUnexpectedStatusCodeException) { return Empty(brief, "failed", "provider_error"); }
         catch (HttpRequestException) { return Empty(brief, "failed", "provider_error"); }
+        catch (IOException) { return Empty(brief, "failed", "provider_error"); }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { return Empty(brief, "failed", "provider_error"); }
         catch (JsonException) { return Empty(brief, "failed", "provider_error"); }
     }
-    private InsightDoc Empty(JudgeBrief b, string status, string? error) => new(status, DateTimeOffset.UtcNow.ToString("O"), b.PeriodStart, b.PeriodEnd, Provider, Model, b.PricingVersion, null, null, "", [], [], error);
+    private InsightDoc Empty(JudgeBrief b, string status, string? error) => new(status, DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'"), b.PeriodStart, b.PeriodEnd, Provider, Model, b.PricingVersion, null, null, "", [], [], error);
 }

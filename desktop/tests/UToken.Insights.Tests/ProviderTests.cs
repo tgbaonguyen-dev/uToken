@@ -8,7 +8,7 @@ namespace UToken.Insights.Tests;
 public sealed class ProviderTests
 {
     [Fact]
-    public void SharedSchemaIsStrictForObjects() => Assert.Equal(false, ProviderSchema.Create()["additionalProperties"].GetBoolean());
+    public void SharedSchemaIsStrictForObjects() => Assert.False(ProviderSchema.Create()["additionalProperties"].GetBoolean());
 
     [Theory]
     [InlineData("google")]

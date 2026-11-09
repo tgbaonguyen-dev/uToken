@@ -21,9 +21,9 @@ public static class JudgeDefaults
 {
     public static JudgeProviderSettings For(string provider) => provider switch
     {
-        JudgeProviders.Google => new(provider, "gemini-2.5-flash", true, 24),
+        JudgeProviders.Google => new(provider, "gemini-flash-latest", true, 24),
         JudgeProviders.Anthropic => new(provider, "claude-sonnet-5-5", true, 24),
-        JudgeProviders.OpenAi => new(provider, "gpt-4.1-mini", true, 24),
+        JudgeProviders.OpenAi => new(provider, "gpt-6-luna", true, 24),
         _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, "Unsupported judge provider."),
     };
 }
