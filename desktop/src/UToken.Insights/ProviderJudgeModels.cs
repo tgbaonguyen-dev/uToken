@@ -1,63 +1,31 @@
 using System.Net;
-using System.Net.Http.Json;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-
 namespace UToken.Insights;
-
-/// <summary>Common transport implementation used by provider adapters; handlers can be injected in tests.</summary>
+internal sealed class JudgeModelException(string code) : Exception(code) { public string Code { get; } = code; }
 public abstract class HttpJudgeModel(HttpClient http, string apiKey, string model, string provider) : IJudgeModel
 {
-    public string Provider => provider;
-    public string Model => model;
-
+    protected readonly HttpClient Http = http; protected readonly string ApiKey = apiKey; public string Provider => provider; public string Model => model;
     public async Task<InsightDoc> JudgeAsync(JudgeBrief brief, CancellationToken cancellationToken)
     {
-        if (brief.Chats < 5 || !brief.HasEvents)
-            return Empty(brief, "insufficient_data", null);
-        try
-        {
-            using var response = await SendAsync(BuildPrompt(brief), cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden) return Empty(brief, "failed", "invalid_api_key");
-            if ((int)response.StatusCode == 429) return Empty(brief, "failed", "rate_limited");
-            if (!response.IsSuccessStatusCode) return Empty(brief, "failed", "provider_error");
-            var result = Parse(body, brief);
-            return result with { Provider = Provider, Model = Model };
-        }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { return Empty(brief, "failed", "truncated"); }
-        catch (HttpRequestException) { return Empty(brief, "failed", "provider_error"); }
-        catch (JsonException) { return Empty(brief, "failed", "provider_error"); }
+        if (brief.Chats < 5 || !brief.HasEvents) return Empty(brief, "insufficient_data", null);
+        try { using var response = await SendAsync(brief, cancellationToken); var body = await response.Content.ReadAsStringAsync(cancellationToken); if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden || body.Contains("API_KEY_INVALID", StringComparison.OrdinalIgnoreCase)) return Empty(brief, "failed", "invalid_api_key"); if ((int)response.StatusCode == 429) return Empty(brief, "failed", "rate_limited"); if ((int)response.StatusCode >= 500 || !response.IsSuccessStatusCode) return Empty(brief, "failed", "provider_error"); return Parse(await ExtractTextAsync(response, body), brief); }
+        catch (JudgeModelException ex) { return Empty(brief, "failed", ex.Code); } catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { return Empty(brief, "failed", "truncated"); } catch (HttpRequestException) { return Empty(brief, "failed", "provider_error"); } catch (JsonException) { return Empty(brief, "failed", "provider_error"); }
     }
-
-    protected abstract Task<HttpResponseMessage> SendAsync(string prompt, CancellationToken cancellationToken);
-    protected abstract JsonNode? Extract(JsonNode body);
-
-    private InsightDoc Parse(string body, JudgeBrief brief)
-    {
-        var root = JsonNode.Parse(body) ?? throw new JsonException("Provider returned an empty response.");
-        var result = Extract(root)?.Deserialize<InsightDoc>() ?? throw new JsonException("Provider returned no structured result.");
-        return InsightValidator.Validate(result, brief, DateTimeOffset.UtcNow, Model, long.MaxValue);
-    }
-    private static string BuildPrompt(JudgeBrief brief) => JsonSerializer.Serialize(new { catalog = brief.Catalog, period_start = brief.PeriodStart, period_end = brief.PeriodEnd });
-    private InsightDoc Empty(JudgeBrief brief, string status, string? error) => new(status, DateTimeOffset.UtcNow.ToString("O"), brief.PeriodStart, brief.PeriodEnd, Provider, Model, brief.PricingVersion, null, null, "", [], [], error);
+    protected abstract Task<HttpResponseMessage> SendAsync(JudgeBrief brief, CancellationToken ct); protected abstract Task<string> ExtractTextAsync(HttpResponseMessage response, string body);
+    private InsightDoc Parse(string text, JudgeBrief brief) { var value = JsonSerializer.Deserialize<InsightDoc>(text) ?? throw new JsonException("Empty structured response."); return InsightValidator.Validate(value, brief, DateTimeOffset.UtcNow, Model, long.MaxValue) with { Provider = Provider }; }
+    protected InsightDoc Empty(JudgeBrief b, string status, string? error) => new(status, DateTimeOffset.UtcNow.ToString("O"), b.PeriodStart, b.PeriodEnd, Provider, Model, b.PricingVersion, null, null, "", [], [], error);
+    protected static string BriefJson(JudgeBrief b) => JsonSerializer.Serialize(new { catalog = b.Catalog, period_start = b.PeriodStart, period_end = b.PeriodEnd });
 }
-
 public sealed class GeminiJudgeModel(HttpClient http, string apiKey, string model) : HttpJudgeModel(http, apiKey, model, JudgeProviders.Google)
 {
-    protected override Task<HttpResponseMessage> SendAsync(string prompt, CancellationToken ct) =>
-        throw new NotSupportedException("Configure Gemini endpoint in the application host.");
-    protected override JsonNode? Extract(JsonNode body) => body["candidates"]?[0]?["content"]?["parts"]?[0]?["text"] is JsonValue text && text.TryGetValue<string>(out var value) ? JsonNode.Parse(value) : null;
+    protected override Task<HttpResponseMessage> SendAsync(JudgeBrief b, CancellationToken ct) { var body = new JsonObject { ["systemInstruction"] = new JsonObject { ["parts"] = new JsonArray(new JsonObject { ["text"] = "Chỉ dùng catalog, trả JSON." }) }, ["contents"] = new JsonArray(new JsonObject { ["role"] = "user", ["parts"] = new JsonArray(new JsonObject { ["text"] = BriefJson(b) }) }), ["generationConfig"] = new JsonObject { ["responseMimeType"] = "application/json", ["responseJsonSchema"] = JsonSerializer.SerializeToNode(ProviderSchema.Create()) } }; var r = new HttpRequestMessage(HttpMethod.Post, $"https://generativelanguage.googleapis.com/v1beta/models/{Uri.EscapeDataString(Model)}:generateContent") { Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json") }; r.Headers.TryAddWithoutValidation("x-goog-api-key", ApiKey); return Http.SendAsync(r, HttpCompletionOption.ResponseHeadersRead, ct); }
+    protected override Task<string> ExtractTextAsync(HttpResponseMessage response, string body) { var root = JsonNode.Parse(body)!; var finish = root["candidates"]?[0]?["finishReason"]?.GetValue<string>(); if (finish == "SAFETY") throw new JudgeModelException("refused"); if (finish == "MAX_TOKENS") throw new JudgeModelException("truncated"); return Task.FromResult(root["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.GetValue<string>() ?? throw new JsonException("Missing Gemini text.")); }
 }
-
-public sealed class AnthropicJudgeModel(HttpClient http, string apiKey, string model) : HttpJudgeModel(http, apiKey, model, JudgeProviders.Anthropic)
-{
-    protected override Task<HttpResponseMessage> SendAsync(string prompt, CancellationToken ct) => throw new NotSupportedException("Use the Anthropic SDK adapter in the application host.");
-    protected override JsonNode? Extract(JsonNode body) => body["content"]?[0]?["text"] is JsonValue text && text.TryGetValue<string>(out var value) ? JsonNode.Parse(value) : null;
-}
-
 public sealed class OpenAiJudgeModel(HttpClient http, string apiKey, string model) : HttpJudgeModel(http, apiKey, model, JudgeProviders.OpenAi)
 {
-    protected override Task<HttpResponseMessage> SendAsync(string prompt, CancellationToken ct) => throw new NotSupportedException("Configure OpenAI endpoint in the application host.");
-    protected override JsonNode? Extract(JsonNode body) => body["choices"]?[0]?["message"]?["content"] is JsonValue text && text.TryGetValue<string>(out var value) ? JsonNode.Parse(value) : null;
+    protected override Task<HttpResponseMessage> SendAsync(JudgeBrief b, CancellationToken ct) { var body = new JsonObject { ["model"] = Model, ["messages"] = new JsonArray(new JsonObject { ["role"] = "system", ["content"] = "Đánh giá catalog." }, new JsonObject { ["role"] = "user", ["content"] = BriefJson(b) }), ["response_format"] = new JsonObject { ["type"] = "json_schema", ["json_schema"] = new JsonObject { ["name"] = "insights", ["strict"] = true, ["schema"] = JsonSerializer.SerializeToNode(ProviderSchema.Create()) } } }; var r = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions") { Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json") }; r.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey); return Http.SendAsync(r, HttpCompletionOption.ResponseHeadersRead, ct); }
+    protected override Task<string> ExtractTextAsync(HttpResponseMessage response, string body) { var root = JsonNode.Parse(body)!; if (root["choices"]?[0]?["message"]?["refusal"] is not null) throw new JudgeModelException("refused"); if (root["choices"]?[0]?["finish_reason"]?.GetValue<string>() == "length") throw new JudgeModelException("truncated"); return Task.FromResult(root["choices"]?[0]?["message"]?["content"]?.GetValue<string>() ?? throw new JsonException("Missing OpenAI content.")); }
 }
