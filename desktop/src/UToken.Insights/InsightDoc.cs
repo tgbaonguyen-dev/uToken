@@ -15,7 +15,7 @@ public sealed record InsightItem(
 public sealed record InsightDoc(
     [property: JsonPropertyName("status")] string Status, [property: JsonPropertyName("generated_at")] string GeneratedAt,
     [property: JsonPropertyName("period_start")] string PeriodStart, [property: JsonPropertyName("period_end")] string PeriodEnd,
-    [property: JsonPropertyName("model")] string Model, [property: JsonPropertyName("pricing_version")] string PricingVersion,
+    [property: JsonPropertyName("provider")] string Provider, [property: JsonPropertyName("model")] string Model, [property: JsonPropertyName("pricing_version")] string PricingVersion,
     [property: JsonPropertyName("score")] int? Score, [property: JsonPropertyName("grade")] string? Grade,
     [property: JsonPropertyName("headline")] string Headline, [property: JsonPropertyName("dimensions")] IReadOnlyList<InsightDimension> Dimensions,
     [property: JsonPropertyName("insights")] IReadOnlyList<InsightItem> Insights,

@@ -2,6 +2,7 @@
   <PropertyGroup><RootNamespace>UToken.Insights</RootNamespace></PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Anthropic" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
     <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
     <ProjectReference Include="../UToken.Engine/UToken.Engine.csproj" />
   </ItemGroup>
