@@ -50,3 +50,4 @@ class AppColors {
   static const Color navActive = Color(0xFFF2F3F5);
   static const Color navInactive = Color(0xFF7B818A);
 }
+
