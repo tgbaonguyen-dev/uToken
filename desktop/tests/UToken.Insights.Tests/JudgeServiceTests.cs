@@ -26,10 +26,12 @@ public sealed class JudgeServiceTests
     public async Task MapsMetadataAndClampsUsdSaving()
     {
         var model = new FakeModel(
-            """{"score":8,"grade":"A","headline":"h","dimensions":[],"insights":[
+            """
+            {"score":8,"grade":"A","headline":"h","dimensions":[],"insights":[
             {"id":"i","title":"t","severity":"low","category":"cache","provider":null,
             "evidence":[{"metric":"usage.chats"}],"recommendation":"r","estimated_impact":null,
-            "estimated_saving_usd_per_month":1.25,"confidence":"high"}]}""",
+            "estimated_saving_usd_per_month":1.25,"confidence":"high"}]}
+            """,
             "anthropic", model: "m");
         var result = await new JudgeService().RunAsync(Brief(), model, default);
         Assert.Equal("ok", result.Status);
