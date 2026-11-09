@@ -80,6 +80,22 @@ GoRouter createAppRouter(
           builder: (_, __) => const SigningInScreen(),
         ),
         GoRoute(
+          path: '/insights/:id',
+          builder: (_, state) {
+            final uid = auth?.user?.uid;
+            if (_hasRealUser(auth, usage) && uid != null) {
+              return RealInsightDetailScreen(
+                uid: uid,
+                repository: usage!,
+                insightId: state.pathParameters['id']!,
+              );
+            }
+            return InsightDetailScreen(
+              initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
+            );
+          },
+        ),
+        GoRoute(
           path: '/insight-detail',
           builder: (_, route) {
             final real = _hasRealUser(auth, usage);

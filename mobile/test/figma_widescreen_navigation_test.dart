@@ -8,8 +8,7 @@ import 'package:utoken_mobile/features/figma/presentation/figma_pixel_screen.dar
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('bottom nav remains clickable in wide LDPlayer landscape',
-      (tester) async {
+  testWidgets('bottom nav remains clickable in wide LDPlayer landscape', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1440, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final router = GoRouter(
@@ -29,8 +28,7 @@ void main() {
       }
     });
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-    await tester
-        .runAsync(() => Future<void>.delayed(const Duration(milliseconds: 80)));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 80)));
     await tester.pumpAndSettle();
 
     for (final (index, path) in [
@@ -47,8 +45,7 @@ void main() {
       expect(bounds.right, lessThan(1050));
       await tester.tap(target);
       await tester.pump();
-      await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 70)));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 70)));
       await tester.pumpAndSettle();
       expect(router.routeInformationProvider.value.uri.path, path);
       expect(tester.takeException(), isNull);

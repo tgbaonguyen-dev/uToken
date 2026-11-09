@@ -33,7 +33,8 @@ void main() {
     auth.dispose();
     await gateway.sessions.close();
   });
-  testWidgets('View demo opens sample dashboard without calling sign-in',
+  testWidgets(
+      'View demo opens sample dashboard without calling sign-in',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(430, 950));
     addTearDown(() => tester.binding.setSurfaceSize(null));
