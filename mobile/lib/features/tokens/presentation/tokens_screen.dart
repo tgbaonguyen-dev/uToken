@@ -23,6 +23,31 @@ enum _TokenPeriod { day, week, month, total }
 
 class _TokensScreenState extends State<TokensScreen> {
   _TokenPeriod _period = _TokenPeriod.month;
+  late Stream<List<DailyDoc>> _dailyStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _dailyStream = _watchDaily();
+  }
+
+  @override
+  void didUpdateWidget(covariant TokensScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.uid != widget.uid ||
+        oldWidget.repository != widget.repository) {
+      _dailyStream = _watchDaily();
+    }
+  }
+
+  Stream<List<DailyDoc>> _watchDaily() {
+    final now = DateTime.now();
+    return widget.repository.watchDaily(
+      uid: widget.uid,
+      start: now.subtract(const Duration(days: 365)),
+      end: now,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +56,7 @@ class _TokensScreenState extends State<TokensScreen> {
       title: 'Tokens',
       selectedIndex: 0,
       body: StreamBuilder<List<DailyDoc>>(
-        stream: widget.repository.watchDaily(
-          uid: widget.uid,
-          start: now.subtract(const Duration(days: 365)),
-          end: now,
-        ),
+        stream: _dailyStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text(friendlyStreamError(snapshot.error!)));
