@@ -815,7 +815,7 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
-          ...screen.layers
+          ..._canvasLayers(screen)
               .where((layer) => !_hasBottomBar || _number(layer['y']) < 776)
               .map(_paintLayer),
           if (widget.screenId == 'M13' &&
@@ -886,6 +886,21 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
                               color: Colors.transparent,
                               child: InkWell(
                                 key: ValueKey('figma-hotspot-${spot.name}'),
+                                borderRadius: spot.radius > 0
+                                    ? BorderRadius.circular(spot.radius)
+                                    : null,
+                                hoverColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white.withValues(alpha: 0.08)
+                                    : Colors.black.withValues(alpha: 0.06),
+                                highlightColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white.withValues(alpha: 0.12)
+                                    : Colors.black.withValues(alpha: 0.08),
+                                splashColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white.withValues(alpha: 0.14)
+                                    : Colors.black.withValues(alpha: 0.10),
                                 onTap: () => _handleHotspot(spot.name),
                                 child: const SizedBox.expand(),
                               ))),
@@ -900,7 +915,9 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
                         child: IgnorePointer(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(
+                                spot.radius > 0 ? spot.radius : 10,
+                              ),
                               border: Border.all(
                                 color: Theme.of(context).colorScheme.primary,
                                 width: 2,
@@ -916,6 +933,22 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
         ],
       ),
     );
+  }
+
+  List<Map<String, dynamic>> _canvasLayers(FigmaMockScreen screen) {
+    final layers = screen.layers;
+    if (widget.screenId == 'M04' &&
+        layers.length > 8 &&
+        layers[8]['t'] == 'r') {
+      return [
+        ...layers.sublist(0, 6),
+        layers[8],
+        layers[6],
+        layers[7],
+        ...layers.sublist(9),
+      ];
+    }
+    return layers;
   }
 
   Widget _paintLayer(Map<String, dynamic> layer) {

@@ -33,10 +33,18 @@ class _UsageMockScreen {
   }
 
   void select(List<int> shapes, int selected, int originalSelected) {
+    final fallback = originalSelected == 0 ? 1 : 0;
     final active = layers[shapes[originalSelected]]['c'];
-    final inactive = layers[shapes[originalSelected == 0 ? 1 : 0]]['c'];
+    final inactive = layers[shapes[fallback]]['c'];
+    final activeText = layers[shapes[originalSelected] + 1]['c'];
+    final inactiveText = layers[shapes[fallback] + 1]['c'];
+    final activeWeight = layers[shapes[originalSelected] + 1]['fw'];
+    final inactiveWeight = layers[shapes[fallback] + 1]['fw'];
     for (var i = 0; i < shapes.length; i++) {
       layers[shapes[i]]['c'] = i == selected ? active : inactive;
+      layers[shapes[i] + 1]['c'] = i == selected ? activeText : inactiveText;
+      layers[shapes[i] + 1]['fw'] =
+          i == selected ? activeWeight : inactiveWeight;
     }
   }
 

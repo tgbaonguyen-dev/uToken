@@ -516,6 +516,7 @@ class FigmaMockHotspot {
     required this.y,
     required this.width,
     required this.height,
+    this.radius = 0,
   });
 
   factory FigmaMockHotspot.fromJson(Map<String, dynamic> data) =>
@@ -525,6 +526,7 @@ class FigmaMockHotspot {
         y: (data['y'] as num).toDouble(),
         width: (data['w'] as num).toDouble(),
         height: (data['h'] as num).toDouble(),
+        radius: (data['rad'] as num?)?.toDouble() ?? 0,
       );
 
   final String name;
@@ -532,4 +534,5 @@ class FigmaMockHotspot {
   final double y;
   final double width;
   final double height;
+  final double radius;
 }
