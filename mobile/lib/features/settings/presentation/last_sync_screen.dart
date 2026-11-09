@@ -1,0 +1,3 @@
+import 'package:flutter/material.dart';
+import '../../../core/data/usage_repository.dart';
+class LastSyncScreen extends StatelessWidget { const LastSyncScreen({super.key,required this.uid,required this.repository}); final String uid; final UsageRepository repository; @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Desktop connection')),body:StreamBuilder<DateTime?>(stream:repository.watchLastSync(uid:uid),builder:(context,s){if(!s.hasData)return const Center(child:CircularProgressIndicator());final value=s.data;return Center(child:Text(value==null?'Chưa có dữ liệu đồng bộ':'Đồng bộ gần nhất: ${value.toLocal()}'));}));}

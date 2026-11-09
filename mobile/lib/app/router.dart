@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import '../features/figma/presentation/figma_pixel_screen.dart';
 import 'figma_routes.dart';
@@ -11,6 +12,12 @@ import '../features/auth/presentation/signing_in_screen.dart';
 import '../features/auth/data/auth_mock_repository.dart';
 import '../features/auth/domain/signing_in_state_model.dart';
 import '../features/insights/presentation/insight_detail_screen.dart';
+import '../features/tokens/presentation/tokens_screen.dart';
+import '../features/analytics/presentation/analytics_screen.dart';
+import '../features/efficiency/presentation/efficiency_screen.dart';
+import '../features/insights/presentation/insights_screen.dart';
+import '../features/settings/presentation/last_sync_screen.dart';
+import '../core/data/usage_repository.dart';
 
 /// Combined UI routes: exported Figma frames, hand-built states and insight detail.
 final appRouter = createAppRouter();
@@ -74,8 +81,13 @@ GoRouter createAppRouter({MobileAuthController? auth}) =>
         ),
         GoRoute(
           path: '/insight-detail',
-          builder: (_, route) => InsightDetailScreen(
-              initialPeriod: route.uri.queryParameters['period'] ?? 'Month'),
+          builder: (_, route) {
+            final real = auth?.user != null && !auth!.demoMode && Firebase.apps.isNotEmpty;
+            final uid = auth?.user?.uid;
+            return real && uid != null
+                ? InsightsScreen(uid: uid, repository: defaultUsageRepository())
+                : InsightDetailScreen(initialPeriod: route.uri.queryParameters['period'] ?? 'Month');
+          },
         ),
         GoRoute(
           path: '/analytics/efficiency',
@@ -88,12 +100,19 @@ GoRouter createAppRouter({MobileAuthController? auth}) =>
         for (final entry in figmaRoutes.entries)
           GoRoute(
             path: entry.value,
-            builder: (context, state) => FigmaPixelScreen(
-                    screenId: entry.key,
-                    initialPeriod:
-                        state.uri.queryParameters['period'] ?? 'Month',
-                    selectedDay: state.uri.queryParameters['day'],
-                  ),
+            builder: (context, state) {
+            final real = auth?.user != null && !auth!.demoMode && Firebase.apps.isNotEmpty;
+              final uid = auth?.user?.uid;
+              if (real && uid != null) {
+                final repository = defaultUsageRepository();
+                if (entry.key == 'M04') return TokensScreen(uid: uid, repository: repository);
+                if (entry.key == 'M05') return AnalyticsScreen(uid: uid, repository: repository);
+                if (entry.key == 'M05B') return EfficiencyScreen(uid: uid, repository: repository);
+                if (entry.key == 'M07') return InsightsScreen(uid: uid, repository: repository);
+                if (entry.key == 'M10') return LastSyncScreen(uid: uid, repository: repository);
+              }
+              return FigmaPixelScreen(screenId: entry.key, initialPeriod: state.uri.queryParameters['period'] ?? 'Month', selectedDay: state.uri.queryParameters['day']);
+            },
           ),
       ],
     );
