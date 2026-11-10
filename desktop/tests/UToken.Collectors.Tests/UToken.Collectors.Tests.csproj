@@ -9,6 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/UToken.Collectors/UToken.Collectors.csproj" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
   </ItemGroup>
   <ItemGroup>
     <None Include="../../../contracts/fixtures/**/*" LinkBase="fixtures" CopyToOutputDirectory="PreserveNewest" />

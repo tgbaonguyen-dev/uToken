@@ -85,7 +85,7 @@
       {
         "number": "1",
         "title": "Open a supported AI tool",
-        "description": "Gemini, Codex, or Claude",
+        "description": "Antigravity, Codex, or Claude",
         "action": ""
       },
       {
@@ -155,7 +155,7 @@
         "color": "#9096A1"
       },
       {
-        "label": "Gemini / Claude",
+        "label": "Antigravity / Claude",
         "value": "Not found",
         "color": "#9096A1"
       }

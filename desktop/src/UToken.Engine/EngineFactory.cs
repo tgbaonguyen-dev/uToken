@@ -14,7 +14,7 @@ public static class EngineFactory
     /// </summary>
     public static IReadOnlyList<ILogCollector> Collectors(IReadOnlyCollection<string> enabled, string? codexHome = null, string? claudeHome = null)
     {
-        bool On(string name) => enabled.Count == 0 ? name != "antigravity" : enabled.Contains(name, StringComparer.OrdinalIgnoreCase);
+        bool On(string name) => enabled.Count == 0 || enabled.Contains(name, StringComparer.OrdinalIgnoreCase);
         var list = new List<ILogCollector>();
         if (On("codex")) list.Add(new CodexCollector(codexHome));
         if (On("claude_code")) list.Add(new ClaudeCodeCollector(claudeHome));

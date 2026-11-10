@@ -86,7 +86,7 @@ public sealed record SourceData(string Id, string Name, string Status, string Co
 public sealed record SourcesData(DateTimeOffset ReferenceTime, SourceData[] Sources, CoverageData[] Coverage, int? NewEvents = null);
 public sealed record SupportedSourceData(string Id, string Name, string Availability)
 {
-    public string Color => Id switch { "gemini" => "#F26039", "codex" => "#4089EF", "claude" => "#E64C9D", _ => "#9096A1" };
+    public string Color => Id switch { "antigravity" => "#F26039", "codex" => "#4089EF", "claude" => "#E64C9D", _ => "#9096A1" };
     public string Logo => $"/Assets/{Id}.svg";
 }
 public sealed record SourceUsageData(long Tokens, double Share, decimal EstimatedCost, decimal DailyCost,

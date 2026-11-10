@@ -1,15 +1,5 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Gemini logo" clip-path="url(#clip0_0_20)">
-<path id="Vector" d="M7.86465 15.7319C7.2493 11.6696 4.06097 8.48151 -0.00130008 7.86595C4.06097 7.25038 7.2493 4.06205 7.86465 -1.93715e-07C8.48021 4.06205 11.6685 7.25038 15.7306 7.86595C11.6685 8.48151 8.48021 11.6696 7.86465 15.7319Z" fill="url(#paint0_linear_0_20)"/>
-</g>
-<defs>
-<linearGradient id="paint0_linear_0_20" x1="-0.00130008" y1="-1.93715e-07" x2="15.7306" y2="15.7319" gradientUnits="userSpaceOnUse">
-<stop stop-color="#7EA7FF"/>
-<stop offset="0.48" stop-color="#8D7CFF"/>
-<stop offset="1" stop-color="#E07AD9"/>
-</linearGradient>
-<clipPath id="clip0_0_20">
-<rect width="16" height="16" fill="white"/>
-</clipPath>
-</defs>
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Biểu tượng chung cho nguồn Antigravity (không phải logo chính thức). -->
+<path d="M8 1.5 14.5 14.5H11.2L8 7.6 4.8 14.5H1.5Z" fill="#F26039"/>
+<circle cx="8" cy="12.2" r="1.6" fill="#F26039"/>
 </svg>

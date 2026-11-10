@@ -55,19 +55,29 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
     /// <summary>Vị trí log mặc định theo cấu hình appsettings.</summary>
     public static IReadOnlyList<SourceLocation> DefaultLocations(string codexHome, string claudeHome, string homeDirectory, IReadOnlyCollection<string> enabled)
     {
-        bool On(string wire) => enabled.Count == 0 ? wire != "antigravity" : enabled.Contains(wire, StringComparer.OrdinalIgnoreCase);
+        bool On(string wire) => enabled.Count == 0 || enabled.Contains(wire, StringComparer.OrdinalIgnoreCase);
         return
         [
             new(Provider.Codex, "codex", "Codex", "~/.codex/sessions", Path.Combine(codexHome, "sessions"), On("codex")),
             new(Provider.ClaudeCode, "claude", "Claude", "~/.claude/projects", Path.Combine(claudeHome, "projects"), On("claude_code")),
-            new(Provider.Antigravity, "gemini", "Gemini", "~/.gemini/antigravity", Path.Combine(homeDirectory, ".gemini", "antigravity"), On("antigravity")),
+            AntigravityLocation(homeDirectory, On("antigravity")),
         ];
+    }
+
+    /// <summary>Thư mục hội thoại Antigravity đầu tiên có thật (CLI trước, rồi IDE); không có thì hiển thị đường dẫn CLI.</summary>
+    private static SourceLocation AntigravityLocation(string home, bool enabled)
+    {
+        var app = UToken.Collectors.Antigravity.AntigravityCollector.AppDirectories
+            .FirstOrDefault(a => System.IO.Directory.Exists(Path.Combine(home, ".gemini", a, "conversations")))
+            ?? UToken.Collectors.Antigravity.AntigravityCollector.AppDirectories[0];
+        return new(Provider.Antigravity, "antigravity", "Antigravity", $"~/.gemini/{app}/conversations",
+            Path.Combine(home, ".gemini", app, "conversations"), enabled);
     }
 
     private DateTimeOffset Now => _clock.GetUtcNow();
     private IPriceBook Prices => _engine.Prices;
 
-    private static string ColorOf(string id) => id switch { "gemini" => "#F26039", "codex" => "#4089EF", "claude" => "#E64C9D", _ => "#9096A1" };
+    private static string ColorOf(string id) => id switch { "antigravity" => "#F26039", "codex" => "#4089EF", "claude" => "#E64C9D", _ => "#9096A1" };
     private SourceLocation LocationOf(Provider p) => _locations.First(l => l.Provider == p);
     private string NameOf(Provider p) => LocationOf(p).Name;
 
@@ -186,7 +196,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
 
             double rate = CacheRate(mine);
             double change = before.Count == 0 || mine.Count == 0 ? 0 : rate - CacheRate(before);
-            string parser = l.Provider == Provider.Antigravity ? "No token data in local logs (OQ-10)" : "healthy";
+            string parser = "healthy";
 
             return new SourceData(
                 Id: l.Id,
@@ -248,7 +258,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
             var location = _locations.FirstOrDefault(l => l.Id == s.Id);
             var state = location is null ? "Not supported" : CheckFolder(location) switch
             {
-                FolderState.Running => location.Provider == Provider.Antigravity ? "Found · no token data yet" : "Found",
+                FolderState.Running => "Found",
                 FolderState.NotFound => "Not installed",
                 FolderState.PermissionRequired => "Permission required",
                 _ => "Disabled in settings",
