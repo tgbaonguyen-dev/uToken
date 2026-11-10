@@ -161,6 +161,7 @@ public sealed partial class RealDesktopApi
         var location = _locations.FirstOrDefault(l => l.Id == sourceId) ?? throw new InvalidDataException("Unknown permission source.");
         if (CheckFolder(location) == FolderState.Running)
             await WithStoreAsync(() => _engine.Scan([location.Provider], ct), ct);
+            DataChanged();
         return await GetSourcePermissionAsync(ct);
     }
 }

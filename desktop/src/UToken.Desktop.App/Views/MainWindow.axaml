@@ -1,25 +1,61 @@
 <Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
  xmlns:views="using:UToken.Desktop.App.Views"
- x:Class="UToken.Desktop.App.Views.MainWindow" x:CompileBindings="False"
+ x:Class="UToken.Desktop.App.Views.MainWindow" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models"
  Title="&#x03BC;Token &#x2014; Desktop Companion" Width="1180" Height="760" MinWidth="1020" MinHeight="650">
- <Grid ColumnDefinitions="220,*">
-  <Border Background="#121315" Padding="16,28,16,20">
-   <Grid RowDefinitions="Auto,*,Auto">
-    <StackPanel Margin="12,0"><TextBlock Text="&#x03BC;Token" FontSize="23" FontWeight="SemiBold"/><TextBlock Text="DESKTOP COMPANION" Classes="muted" FontSize="9" Margin="0,8,0,0"/></StackPanel>
-    <StackPanel Grid.Row="1" Margin="0,42,0,0" Spacing="12" IsEnabled="{Binding CanNavigate}" ToolTip.Tip="Finish setup or wait for the source scan to unlock navigation.">
-     <Button Classes="nav" Classes.active="{Binding IsOverviewSection}" Command="{Binding ShowOverviewCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><Path Data="M1,1 H9 V9 H1 Z M13,1 H21 V9 H13 Z M1,13 H9 V21 H1 Z M13,13 H21 V21 H13 Z" Width="22" Height="22" Stretch="Uniform" Fill="{Binding $parent[Button].Foreground}"/><TextBlock Text="Overview" VerticalAlignment="Center"/></StackPanel></Button>
-     <Button Classes="nav" Classes.active="{Binding IsSourceSection}" Command="{Binding ShowSourcesCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><Grid Width="24" Height="24"><Border Height="3" Width="20" CornerRadius="2" Background="{Binding $parent[Button].Foreground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,5,0,0"/><Border Height="3" Width="14" CornerRadius="2" Background="{Binding $parent[Button].Foreground}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,5"/></Grid><TextBlock Text="Sources" VerticalAlignment="Center"/></StackPanel></Button>
-     <Button Classes="nav" Classes.active="{Binding IsPricingPage}" Command="{Binding ShowPricingCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="$" FontSize="22" Width="24" TextAlignment="Center"/><TextBlock Text="Pricing" VerticalAlignment="Center"/></StackPanel></Button>
-     <Button Classes="nav" Classes.active="{Binding IsSyncSection}" Command="{Binding ShowSyncCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="&#x21C4;" FontSize="22" Width="24" TextTrimming="None"/><TextBlock Text="Sync" VerticalAlignment="Center"/></StackPanel></Button>
-     <Button Classes="nav" Classes.active="{Binding IsSettingsPage}" Command="{Binding ShowSettingsCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="&#x2699;" FontSize="22" Width="24" TextTrimming="None"/><TextBlock Text="Settings" VerticalAlignment="Center"/></StackPanel></Button>
+ <Window.KeyBindings>
+  <KeyBinding Gesture="Ctrl+D1" Command="{Binding ShowOverviewCommand}"/>
+  <KeyBinding Gesture="Ctrl+D2" Command="{Binding ShowSourcesCommand}"/>
+  <KeyBinding Gesture="Ctrl+D3" Command="{Binding ShowPricingCommand}"/>
+  <KeyBinding Gesture="Ctrl+D4" Command="{Binding ShowSyncCommand}"/>
+  <KeyBinding Gesture="Ctrl+D5" Command="{Binding ShowSettingsCommand}"/>
+  <KeyBinding Gesture="F5" Command="{Binding RefreshPageCommand}"/>
+  <KeyBinding Gesture="Ctrl+R" Command="{Binding RefreshPageCommand}"/>
+ </Window.KeyBindings>
+ <Grid RowDefinitions="52,*">
+ <!-- Topbar: logo, breadcrumb, trạng thái sync và hành động chung. Trên Windows thay cho thanh tiêu đề (xem MainWindow.axaml.cs). -->
+ <Border x:Name="Topbar" Classes="topbar" PointerPressed="TopbarPointerPressed" DoubleTapped="TopbarDoubleTapped">
+  <Grid ColumnDefinitions="220,*,Auto">
+   <StackPanel Orientation="Horizontal" Spacing="10" Margin="28,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+    <Border Width="26" Height="26" CornerRadius="8" Background="{StaticResource SuccessBrush}"><TextBlock Text="&#x03BC;" FontSize="15" FontWeight="Bold" Foreground="#060708" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="None"/></Border>
+    <TextBlock Text="&#x03BC;Token" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+    <TextBlock Text="DESKTOP" Classes="muted" FontSize="9" LetterSpacing="1.2" VerticalAlignment="Center" Margin="2,2,0,0"/>
+   </StackPanel>
+   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="40,0,0,0" VerticalAlignment="Center">
+    <Button Classes="crumb" Content="{Binding SectionName}" Command="{Binding GoToSectionCommand}" IsVisible="{Binding IsSubPage}" ToolTip.Tip="Back"/>
+    <TextBlock Text="&#x203A;" Classes="muted" FontSize="14" VerticalAlignment="Center" IsVisible="{Binding IsSubPage}" TextTrimming="None"/>
+    <TextBlock Text="{Binding PageTitle}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" IsVisible="{Binding IsSubPage}"/>
+    <TextBlock Text="{Binding SectionName}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" IsVisible="{Binding !IsSubPage}"/>
+   </StackPanel>
+   <StackPanel x:Name="TopbarActions" Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,0,20,0" VerticalAlignment="Center">
+    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,6,0" IsHitTestVisible="False">
+     <Ellipse Classes="status-dot" Width="7" Height="7" Fill="{Binding SidebarStatusColor}"/>
+     <TextBlock Text="{Binding TopbarSyncLabel}" Classes="muted" FontSize="10" VerticalAlignment="Center" MaxWidth="220"/>
     </StackPanel>
-    <Border Grid.Row="2" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="13" Padding="14" Background="{StaticResource PageBrush}">
-     <StackPanel Spacing="6"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="SidebarStatusDot" Classes="status-dot" Fill="{Binding SidebarStatusColor}"/><TextBlock Text="{Binding SidebarStatusLabel}" FontSize="11"/></StackPanel><TextBlock Text="{Binding SidebarStatusCaption}" Classes="muted" FontSize="9" TextWrapping="Wrap"/></StackPanel>
+    <Button Classes="icon" Content="&#x27F3;" Command="{Binding RefreshPageCommand}" ToolTip.Tip="Refresh this page (F5)" AutomationProperties.Name="Refresh"/>
+    <Button Classes="topbar-primary" Content="Sync now" Command="{Binding SyncNowCommand}" IsEnabled="{Binding CanSyncFromTopbar}" ToolTip.Tip="Analyze local logs and upload summaries" AutomationProperties.Name="Sync now (top bar)"/>
+    <Button Classes="account" Command="{Binding ShowPairingCommand}" IsEnabled="{Binding CanNavigate}" ToolTip.Tip="Google account" AutomationProperties.Name="Account">
+     <StackPanel Orientation="Horizontal" Spacing="8"><Border Width="22" Height="22" CornerRadius="11" Background="#22262B"><TextBlock Text="{Binding AccountInitial}" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="None"/></Border><TextBlock Text="{Binding AccountLabel}" FontSize="11" VerticalAlignment="Center" MaxWidth="140"/></StackPanel>
+    </Button>
+   </StackPanel>
+  </Grid>
+ </Border>
+ <Grid Grid.Row="1" ColumnDefinitions="220,*">
+  <Border Background="#121315" Padding="16,24,16,20">
+   <Grid RowDefinitions="*,Auto">
+    <StackPanel Grid.Row="0" Spacing="10" IsEnabled="{Binding CanNavigate}" ToolTip.Tip="Finish setup or wait for the source scan to unlock navigation.">
+     <Button Classes="nav" Classes.active="{Binding IsOverviewSection}" ToolTip.Tip="Ctrl+1" Command="{Binding ShowOverviewCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><Path Data="M1,1 H9 V9 H1 Z M13,1 H21 V9 H13 Z M1,13 H9 V21 H1 Z M13,13 H21 V21 H13 Z" Width="22" Height="22" Stretch="Uniform" Fill="{Binding $parent[Button].Foreground}"/><TextBlock Text="Overview" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsSourceSection}" ToolTip.Tip="Ctrl+2" Command="{Binding ShowSourcesCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><Grid Width="24" Height="24"><Border Height="3" Width="20" CornerRadius="2" Background="{Binding $parent[Button].Foreground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,5,0,0"/><Border Height="3" Width="14" CornerRadius="2" Background="{Binding $parent[Button].Foreground}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,5"/></Grid><TextBlock Text="Sources" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsPricingPage}" ToolTip.Tip="Ctrl+3" Command="{Binding ShowPricingCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="$" FontSize="22" Width="24" TextAlignment="Center"/><TextBlock Text="Pricing" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsSyncSection}" ToolTip.Tip="Ctrl+4" Command="{Binding ShowSyncCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="&#x21C4;" FontSize="22" Width="24" TextTrimming="None"/><TextBlock Text="Sync" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsSettingsPage}" ToolTip.Tip="Ctrl+5" Command="{Binding ShowSettingsCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="&#x2699;" FontSize="22" Width="24" TextTrimming="None"/><TextBlock Text="Settings" VerticalAlignment="Center"/></StackPanel></Button>
+    </StackPanel>
+    <Border Grid.Row="1" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="13" Padding="14" Background="{StaticResource PageBrush}">
+     <StackPanel Spacing="6"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="SidebarStatusDot" Classes="status-dot" Fill="{Binding SidebarStatusColor}"/><TextBlock Text="{Binding SidebarStatusLabel}" FontSize="11"/></StackPanel><TextBlock Text="Local collector" Classes="muted" FontSize="9" TextWrapping="Wrap"/></StackPanel>
     </Border>
    </Grid>
   </Border>
-  <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,*" Margin="40,36,40,20">
+  <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,*" Margin="40,28,40,20">
    <Grid ColumnDefinitions="*,Auto">
     <StackPanel Spacing="9"><TextBlock Text="{Binding PageTitle}" TextWrapping="Wrap" FontSize="27" FontWeight="SemiBold"/><TextBlock Text="{Binding Subtitle}" Classes="muted" TextWrapping="Wrap"/></StackPanel>
     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
@@ -31,16 +67,12 @@
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSourceNotFound}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="#F26039"/><TextBlock Text="Needs setup" FontSize="11"/></StackPanel></Border>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSourcesStatePreview}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="SourceStateHeaderDot" Classes="status-dot" Fill="{Binding SectionScenario.Accent}"/><TextBlock Text="{Binding SectionScenario.Status}" FontSize="11"/></StackPanel></Border>
      <Button x:Name="RescanSourcesButton" Content="Rescan sources" IsVisible="{Binding IsSources}" Command="{Binding RescanSourcesCommand}" IsEnabled="{Binding !IsBusy}"/>
-     <Button Content="Back to Overview" IsVisible="{Binding IsActivityPage}" Command="{Binding ShowOverviewCommand}"/>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSyncStatePreview}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="{Binding ActiveSyncScenario.Accent}"/><TextBlock Text="{Binding ActiveSyncScenario.Status}" FontSize="11"/></StackPanel></Border>
-     <Button Content="Sync now" IsVisible="{Binding IsSyncNormal}" Command="{Binding SyncNowCommand}" IsEnabled="{Binding !IsBusy}"/>
-     <Button Classes="primary" Content="{Binding PairingActionLabel}" IsVisible="{Binding IsSyncNormal}" Command="{Binding ShowPairingCommand}" IsEnabled="{Binding !IsBusy}"/>
+     <Button Classes="primary" Content="{Binding PairingActionLabel}" IsVisible="{Binding ShowSyncSignIn}" Command="{Binding ShowPairingCommand}" IsEnabled="{Binding !IsBusy}"/>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsPairingStateVisible}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="PairingStateHeaderDot" Classes="status-dot" Fill="{Binding ActivePairingScenario.Accent}"/><TextBlock Text="{Binding ActivePairingScenario.Status}" FontSize="11"/></StackPanel></Border>
-     <Button Content="Back to Sync" IsVisible="{Binding IsPairingPage}" Command="{Binding ShowSyncCommand}"/>
-     <Button Content="&#x2039;  Back to sources" IsVisible="{Binding IsDetail}" Command="{Binding ShowSourcesCommand}"/>
      <Border Classes="card" BorderBrush="{Binding SelectedSource.StatusColor}" Padding="12,10" IsVisible="{Binding IsDetail}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="{Binding SelectedSource.StatusColor}"/><TextBlock Text="{Binding SelectedSource.StatusLabel}" Foreground="{Binding SelectedSource.StatusColor}" FontSize="11"/></StackPanel></Border>
      <ComboBox x:Name="PeriodSelector" ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod, Mode=TwoWay}" IsVisible="{Binding IsDetail}" IsEnabled="{Binding !IsBusy}" MinWidth="115" Height="38" AutomationProperties.Name="Usage period"/>
-     <svg:Svg Path="{Binding SelectedSource.Logo}" IsVisible="{Binding IsDetail}" Width="32" Height="32" VerticalAlignment="Center"/>
+     <Image Source="{Binding SelectedSource.Logo, Converter={x:Static views:SvgLogo.Instance}}" IsVisible="{Binding IsDetail}" Width="32" Height="32" VerticalAlignment="Center"/>
     </StackPanel>
    </Grid>
    <Grid Grid.Row="1" Margin="0,14,0,10" ColumnDefinitions="*,Auto">
@@ -50,10 +82,11 @@
    <Border Grid.Row="2" IsVisible="{Binding HasError}" BorderBrush="#F26039" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
     <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Error}" TextWrapping="Wrap" VerticalAlignment="Center"/><Button Grid.Column="1" Content="Try again" Command="{Binding LoadCommand}" IsEnabled="{Binding !IsBusy}"/></Grid>
    </Border>
-   <ScrollViewer Grid.Row="3" x:Name="PageHost" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+   <ScrollViewer Grid.Row="3" x:Name="PageHost" Margin="0,0,-14,0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
     <ScrollViewer.RenderTransform><TranslateTransform/></ScrollViewer.RenderTransform>
-    <StackPanel>
-     <views:OverviewStateView IsVisible="{Binding IsOverviewState}"/>
+    <!-- Chừa chỗ cho thanh cuộn để nó không đè lên mép phải các thẻ. -->
+    <StackPanel Margin="0,0,14,0">
+     <views:LazyView ViewType="{x:Type views:OverviewStateView}" IsVisible="{Binding IsOverviewState}"/>
      <!-- D02: Collector Dashboard -->
      <StackPanel IsVisible="{Binding IsOverviewDashboard}" Spacing="28">
       <UniformGrid Columns="4">
@@ -65,7 +98,7 @@
       <Grid ColumnDefinitions="1.9*,24,*">
        <Border Classes="card" MinHeight="430">
         <StackPanel Spacing="24"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="RECENT SYNC ACTIVITY" Classes="label" VerticalAlignment="Center"/><Button Grid.Column="1" Content="View all" Command="{Binding ShowActivityCommand}" IsEnabled="{Binding !IsBusy}" Padding="10,6"/></Grid>
-         <ItemsControl ItemsSource="{Binding Overview.Activity}"><ItemsControl.ItemTemplate><DataTemplate>
+         <ItemsControl ItemsSource="{Binding Overview.Activity}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:ActivityData">
           <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,22"><Grid ColumnDefinitions="14,70,*,70,68">
            <Ellipse Width="7" Height="7" Fill="{Binding Color}" HorizontalAlignment="Left"/><TextBlock Grid.Column="1" Text="{Binding TimeLabel}" Classes="muted" FontSize="11"/><TextBlock Grid.Column="2" Text="{Binding Provider}"/><TextBlock Grid.Column="3" Text="{Binding TokenLabel}" TextAlignment="Right"/><TextBlock Grid.Column="4" Text="{Binding Result}" TextAlignment="Right" Foreground="{StaticResource SuccessBrush}" FontSize="10"/>
           </Grid></Border>
@@ -75,25 +108,25 @@
        </Border>
        <StackPanel Grid.Column="2" Spacing="24">
         <Border Classes="card"><StackPanel Spacing="22"><TextBlock Text="SOURCES" Classes="label"/>
-         <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemTemplate><DataTemplate>
+         <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceData">
           <StackPanel Spacing="10" Margin="0,0,0,16"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Name}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding ShareLabel}" Classes="muted" FontSize="11"/></Grid><ProgressBar Value="{Binding Share}" Foreground="{Binding Color}"/></StackPanel>
          </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
         </StackPanel></Border>
         <Border Classes="card"><StackPanel Spacing="20"><TextBlock Text="PRIVACY &amp; HEALTH" Classes="label"/>
-         <ItemsControl ItemsSource="{Binding Overview.Health}"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="*,Auto" Margin="0,8"><TextBlock Text="{Binding Label}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding Value}" Foreground="{Binding Color}" FontSize="11"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+         <ItemsControl ItemsSource="{Binding Overview.Health}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:HealthData"><Grid ColumnDefinitions="*,Auto" Margin="0,8"><TextBlock Text="{Binding Label}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding Value}" Foreground="{Binding Color}" FontSize="11"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
         </StackPanel></Border>
        </StackPanel>
       </Grid>
      </StackPanel>
-     <views:SourceNotFoundView IsVisible="{Binding IsSourceNotFound}"/>
-     <views:SourceScanView IsVisible="{Binding IsScanningSources}"/>
-     <views:SourcePermissionView IsVisible="{Binding IsPermissionRequired}"/>
+     <views:LazyView ViewType="{x:Type views:SourceNotFoundView}" IsVisible="{Binding IsSourceNotFound}"/>
+     <views:LazyView ViewType="{x:Type views:SourceScanView}" IsVisible="{Binding IsScanningSources}"/>
+     <views:LazyView ViewType="{x:Type views:SourcePermissionView}" IsVisible="{Binding IsPermissionRequired}"/>
      <!-- D05: Sources -->
      <StackPanel IsVisible="{Binding IsSourcesNormal}" Spacing="24">
-      <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate>
-       <Button Classes="source" Command="{Binding $parent[Window].DataContext.OpenSourceCommand}" CommandParameter="{Binding}" IsEnabled="{Binding !$parent[Window].DataContext.IsBusy}" AutomationProperties.Name="{Binding Name}">
+      <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceData">
+       <Button Classes="source" Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).OpenSourceCommand}" CommandParameter="{Binding}" IsEnabled="{Binding !$parent[Window].((vm:MainViewModel)DataContext).IsBusy}" AutomationProperties.Name="{Binding Name}">
         <StackPanel Spacing="16">
-         <Grid ColumnDefinitions="40,*,Auto"><svg:Svg Path="{Binding Logo}" Width="32" Height="32"/><TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0"/><StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding StatusColor}"/><TextBlock Text="{Binding StatusLabel}" Foreground="{Binding StatusColor}" FontSize="10"/></StackPanel></Grid>
+         <Grid ColumnDefinitions="40,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0"/><StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding StatusColor}"/><TextBlock Text="{Binding StatusLabel}" Foreground="{Binding StatusColor}" FontSize="10"/></StackPanel></Grid>
          <Border Background="{StaticResource LineBrush}" Height="1"/>
          <Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="8"><TextBlock Text="Tokens" Classes="muted" FontSize="10"/><TextBlock Text="{Binding TokenLabel}" FontSize="24" FontWeight="SemiBold"/></StackPanel><StackPanel Grid.Column="1" Spacing="8"><TextBlock Text="Share" Classes="muted" FontSize="10" HorizontalAlignment="Right"/><TextBlock Text="{Binding ShareLabel}" FontSize="17" FontWeight="SemiBold"/></StackPanel></Grid>
          <TextBlock Text="{Binding LastEventCaption}" Classes="muted" FontSize="10"/>
@@ -105,10 +138,10 @@
       <TextBlock Text="No supported sources found. Install Codex or Claude Code, then rescan." IsVisible="{Binding IsSourceListEmpty}" Classes="muted"/>
       <Grid ColumnDefinitions="1.9*,24,*">
        <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="Collection coverage" Classes="heading"/><TextBlock Text="What the collector reads from each provider." Classes="muted" FontSize="11"/>
-        <ItemsControl ItemsSource="{Binding SourceList.Coverage}"><ItemsControl.ItemTemplate><DataTemplate><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="18,150,*,48"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Left"/><TextBlock Grid.Column="1" Text="{Binding Label}" FontSize="11"/><TextBlock Grid.Column="2" Text="{Binding Description}" Classes="muted" FontSize="10" TextWrapping="Wrap"/><TextBlock Grid.Column="3" Text="{Binding Count}" Foreground="{Binding Color}" TextAlignment="Right" FontSize="11"/></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        <ItemsControl ItemsSource="{Binding SourceList.Coverage}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:CoverageData"><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="18,150,*,48"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Left"/><TextBlock Grid.Column="1" Text="{Binding Label}" FontSize="11"/><TextBlock Grid.Column="2" Text="{Binding Description}" Classes="muted" FontSize="10" TextWrapping="Wrap"/><TextBlock Grid.Column="3" Text="{Binding Count}" Foreground="{Binding Color}" TextAlignment="Right" FontSize="11"/></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
        </StackPanel></Border>
        <Border Grid.Column="2" Classes="card"><StackPanel Spacing="22"><TextBlock Text="Collector paths" Classes="heading"/>
-        <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemTemplate><DataTemplate><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="40,*"><svg:Svg Path="{Binding Logo}" Width="32" Height="32"/><StackPanel Grid.Column="1" Margin="8,0" Spacing="8"><TextBlock Text="{Binding Name}" FontSize="11"/><TextBlock Text="{Binding Path}" Classes="muted" FontSize="10" TextWrapping="Wrap" ToolTip.Tip="{Binding Path}"/></StackPanel></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceData"><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="40,*"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><StackPanel Grid.Column="1" Margin="8,0" Spacing="8"><TextBlock Text="{Binding Name}" FontSize="11"/><TextBlock Text="{Binding Path}" Classes="muted" FontSize="10" TextWrapping="Wrap" ToolTip.Tip="{Binding Path}"/></StackPanel></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
         <Button Content="Manage permissions" Command="{Binding ShowPermissionInstructionsCommand}" CommandParameter="guide" IsEnabled="{Binding !IsBusy}"/>
         <TextBlock Text="Only token counts and metadata are read from these folders." TextWrapping="Wrap" Classes="muted" FontSize="11"/>
        </StackPanel></Border>
@@ -125,28 +158,29 @@
       </UniformGrid>
       <Grid ColumnDefinitions="1.8*,20,*">
        <Border Classes="card"><StackPanel Spacing="12"><TextBlock Text="Usage trend" Classes="heading"/><TextBlock Text="{Binding SelectedSource.TrendCaption}" Classes="muted" FontSize="11"/>
-        <ItemsControl ItemsSource="{Binding SelectedSource.ChartBars}" Height="160" VerticalAlignment="Bottom"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><Grid Margin="2,0" Width="12" HorizontalAlignment="Center" VerticalAlignment="Bottom" ToolTip.Tip="{Binding Tooltip}"><Border Height="{Binding Height}" Background="{Binding $parent[Window].DataContext.SelectedSource.Color}" CornerRadius="4"/><Border Height="{Binding CachedHeight}" Background="{StaticResource SuccessBrush}" VerticalAlignment="Top" CornerRadius="4"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        <ItemsControl ItemsSource="{Binding SelectedSource.ChartBars}" Height="160" VerticalAlignment="Bottom"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:TrendBar"><Grid Margin="2,0" Width="12" HorizontalAlignment="Center" VerticalAlignment="Bottom" ToolTip.Tip="{Binding Tooltip}"><Border Height="{Binding Height}" Background="{Binding $parent[Window].((vm:MainViewModel)DataContext).SelectedSource.Color}" CornerRadius="4"/><Border Height="{Binding CachedHeight}" Background="{StaticResource SuccessBrush}" VerticalAlignment="Top" CornerRadius="4"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
         <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding SelectedSource.TrendStart}" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedSource.TrendEnd}" Classes="muted" FontSize="10"/></Grid>
        </StackPanel></Border>
        <Border Grid.Column="2" Classes="card"><StackPanel Spacing="24"><TextBlock Text="Model breakdown" Classes="heading"/>
-        <ItemsControl ItemsSource="{Binding SelectedSource.Models}"><ItemsControl.ItemTemplate><DataTemplate><StackPanel Spacing="12" Margin="0,12,0,16"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Name}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding TokenLabel}" FontSize="11"/></Grid><Grid ColumnDefinitions="60,*"><TextBlock Text="{Binding Share, StringFormat='{}{0:0.0}%'}" Classes="muted" FontSize="10"/><ProgressBar Grid.Column="1" Value="{Binding Share}" Foreground="{Binding $parent[Window].DataContext.SelectedSource.Color}" VerticalAlignment="Center"/></Grid></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        <ItemsControl ItemsSource="{Binding SelectedSource.Models}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:ModelData"><StackPanel Spacing="12" Margin="0,12,0,16"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Name}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding TokenLabel}" FontSize="11"/></Grid><Grid ColumnDefinitions="60,*"><TextBlock Text="{Binding Share, StringFormat='{}{0:0.0}%'}" Classes="muted" FontSize="10"/><ProgressBar Grid.Column="1" Value="{Binding Share}" Foreground="{Binding $parent[Window].((vm:MainViewModel)DataContext).SelectedSource.Color}" VerticalAlignment="Center"/></Grid></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
        </StackPanel></Border>
       </Grid>
       <Border Classes="card"><StackPanel Spacing="22"><TextBlock Text="Collection health" Classes="heading"/>
-       <ItemsControl ItemsSource="{Binding SelectedSource.HealthRows}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><StackPanel Spacing="10" Margin="0,0,16,14"><TextBlock Text="{Binding Label}" Classes="muted" FontSize="11"/><TextBlock Text="{Binding Value}" Foreground="{Binding Color}" FontSize="12"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+       <ItemsControl ItemsSource="{Binding SelectedSource.HealthRows}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:HealthData"><StackPanel Spacing="10" Margin="0,0,16,14"><TextBlock Text="{Binding Label}" Classes="muted" FontSize="11"/><TextBlock Text="{Binding Value}" Foreground="{Binding Color}" FontSize="12"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
       </StackPanel></Border>
      </StackPanel>
-     <views:ActivityView IsVisible="{Binding IsActivityPage}"/>
-     <views:PricingView IsVisible="{Binding IsPricingPage}"/>
-     <views:SectionStateView IsVisible="{Binding IsSectionStatePreview}"/>
-     <views:SyncStateView IsVisible="{Binding IsSyncDetailState}"/>
-     <views:SyncView IsVisible="{Binding IsSyncNormal}"/>
-     <views:FirstRunView IsVisible="{Binding IsFirstRunPage}"/>
-     <views:SettingsView IsVisible="{Binding IsSettingsPage}"/>
-     <views:PairingStateView IsVisible="{Binding IsPairingStateVisible}"/>
-     <views:PairingView IsVisible="{Binding IsPairingFormVisible}"/>
+     <views:LazyView ViewType="{x:Type views:ActivityView}" IsVisible="{Binding IsActivityPage}"/>
+     <views:LazyView ViewType="{x:Type views:PricingView}" IsVisible="{Binding IsPricingPage}"/>
+     <views:LazyView ViewType="{x:Type views:SectionStateView}" IsVisible="{Binding IsSectionStatePreview}"/>
+     <views:LazyView ViewType="{x:Type views:SyncStateView}" IsVisible="{Binding IsSyncDetailState}"/>
+     <views:LazyView ViewType="{x:Type views:SyncView}" IsVisible="{Binding IsSyncNormal}"/>
+     <views:LazyView ViewType="{x:Type views:FirstRunView}" IsVisible="{Binding IsFirstRunPage}"/>
+     <views:LazyView ViewType="{x:Type views:SettingsView}" IsVisible="{Binding IsSettingsPage}"/>
+     <views:LazyView ViewType="{x:Type views:PairingStateView}" IsVisible="{Binding IsPairingStateVisible}"/>
+     <views:LazyView ViewType="{x:Type views:PairingView}" IsVisible="{Binding IsPairingFormVisible}"/>
     </StackPanel>
    </ScrollViewer>
   </Grid>
+ </Grid>
  </Grid>
 </Window>

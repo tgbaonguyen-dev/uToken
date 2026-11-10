@@ -243,7 +243,7 @@ public sealed partial class RealDesktopApi
     private JudgeBrief BuildJudgeBrief()
     {
         // Chưa phân tích lần nào (chạy tay trước Sync): tính daily/efficiency trước.
-        LastSnapshot ??= _engine.Run();
+        if (LastSnapshot is null) { LastSnapshot = _engine.Run(); DataChanged(); }
         var from = _engine.Today.AddDays(-(JudgePeriodDays - 1))
             .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var daily = _store.GetDailyJsonSince(from)

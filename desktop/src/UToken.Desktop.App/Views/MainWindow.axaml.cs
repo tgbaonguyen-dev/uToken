@@ -4,6 +4,7 @@ using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Styling;
+using Avalonia.VisualTree;
 using Avalonia.Controls.Notifications;
 using Avalonia.Platform.Storage;
 
@@ -66,9 +67,29 @@ public partial class MainWindow : Window
         _pageAnimation = new CancellationTokenSource();
         _ = PageEnter.RunAsync(PageHost, _pageAnimation.Token);
     }
+    /// <summary>Kéo topbar để di chuyển cửa sổ (bỏ qua khi bấm trúng nút).</summary>
+    private void TopbarPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        if (e.Source is Visual v && (v as Button ?? v.FindAncestorOfType<Button>()) is not null) return;
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && e.ClickCount == 1) BeginMoveDrag(e);
+    }
+    private void TopbarDoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+    {
+        if (e.Source is Visual v && (v as Button ?? v.FindAncestorOfType<Button>()) is not null) return;
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
     public MainWindow()
     {
         InitializeComponent();
+        // Windows: topbar thay thanh tiêu đề (nút thu nhỏ/phóng to/đóng của hệ thống vẽ ở góc phải).
+        // Linux/macOS giữ khung của hệ điều hành để không mất snap/resize; topbar nằm ngay dưới.
+        if (OperatingSystem.IsWindows())
+        {
+            ExtendClientAreaToDecorationsHint = true;
+            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.PreferSystemChrome;
+            ExtendClientAreaTitleBarHeightHint = 52;
+            TopbarActions.Margin = new Thickness(0, 0, 150, 0);
+        }
         DataContextChanged += (_, _) =>
         {
             if (_viewModel is not null)
@@ -108,6 +129,8 @@ public partial class MainWindow : Window
         {
             if (_opened) return;
             _opened = true;
+            _ = SvgLogo.WarmAsync("codex", "claude", "antigravity");
+            LazyView.WarmUpAll(this.GetVisualDescendants().OfType<LazyView>());
             if (DataContext is ViewModels.MainViewModel vm) await vm.LoadCommand.ExecuteAsync(null);
         };
     }

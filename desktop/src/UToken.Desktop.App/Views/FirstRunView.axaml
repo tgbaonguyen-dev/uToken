@@ -1,9 +1,9 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- x:Class="UToken.Desktop.App.Views.FirstRunView" x:CompileBindings="False">
+ x:Class="UToken.Desktop.App.Views.FirstRunView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
  <StackPanel Spacing="28" IsEnabled="{Binding !IsBusy}">
  <Border Classes="card" Padding="32" MinHeight="420">
  <StackPanel Spacing="28"><TextBlock Text="SETUP CHECKLIST" Classes="label"/>
- <ItemsControl ItemsSource="{Binding SetupRows}"><ItemsControl.ItemTemplate><DataTemplate>
+ <ItemsControl ItemsSource="{Binding SetupRows}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SetupRow">
  <Border Background="#191A1C" CornerRadius="16" Padding="18,15" Margin="0,0,0,22">
  <Grid ColumnDefinitions="40,20,*,Auto">
  <Border Background="{StaticResource PageBrush}" CornerRadius="12" Width="40" Height="40"><TextBlock Text="{Binding Number}" Foreground="{Binding Color}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/></Border>

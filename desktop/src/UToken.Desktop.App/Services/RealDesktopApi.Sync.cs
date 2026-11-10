@@ -113,6 +113,7 @@ public sealed partial class RealDesktopApi
         var snapshot = await WithStoreAsync(() =>
         {
             var s = _engine.Run(ct);
+            DataChanged();
             _store.PruneBefore(Now.AddDays(-retention));
             return s;
         }, ct);

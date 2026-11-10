@@ -30,10 +30,10 @@
     <Style Selector="Button.nav:disabled /template/ ContentPresenter"><Setter Property="Background" Value="Transparent"/></Style>
     <Style Selector="Button.source"><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="VerticalContentAlignment" Value="Stretch"/><Setter Property="HorizontalAlignment" Value="Stretch"/><Setter Property="Background" Value="{StaticResource PanelBrush}"/><Setter Property="CornerRadius" Value="17"/><Setter Property="Padding" Value="18"/><Setter Property="Margin" Value="0,0,14,0"/></Style>
     <!-- Tương tác: hover/nhấn/disabled đồng bộ với nền tối, đổi màu tức thì. Không dùng BrushTransition qua Setter: ở Avalonia 11.3 nó kẹt giữa chừng (HoverStyleTests). -->
-    <Style Selector="Button"><Setter Property="Cursor" Value="Hand"/></Style>
+    <!-- Transitions=null: bỏ transition RenderTransform của Fluent (nó có ưu tiên Animation và nuốt ScaleTransform của PressFeedback). -->
+    <Style Selector="Button"><Setter Property="Cursor" Value="Hand"/><Setter Property="Transitions" Value="{x:Null}"/></Style>
         <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{StaticResource HoverBrush}"/><Setter Property="BorderBrush" Value="{StaticResource LineHoverBrush}"/><Setter Property="Foreground" Value="#F3F4F7"/></Style>
     <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{StaticResource PressedBrush}"/><Setter Property="BorderBrush" Value="{StaticResource LineHoverBrush}"/><Setter Property="Foreground" Value="#F3F4F7"/></Style>
-    <Style Selector="Button:pressed"><Setter Property="RenderTransform" Value="scale(0.98)"/></Style>
     <Style Selector="Button:disabled"><Setter Property="Cursor" Value="Arrow"/></Style>
     <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#111214"/><Setter Property="BorderBrush" Value="#1E2125"/><Setter Property="Foreground" Value="#5C616A"/></Style>
     <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#FFFFFF"/><Setter Property="BorderBrush" Value="#FFFFFF"/><Setter Property="Foreground" Value="#121315"/></Style>
@@ -41,11 +41,11 @@
     <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#2A2D31"/><Setter Property="Foreground" Value="#7C818A"/></Style>
     <Style Selector="Button.nav:pointerover"><Setter Property="Foreground" Value="#F3F4F7"/></Style>
     <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#16181B"/><Setter Property="BorderBrush" Value="Transparent"/></Style>
-    <Style Selector="Button.nav.active:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#1E2024"/></Style>
-    <Style Selector="Button.nav:pressed"><Setter Property="RenderTransform" Value="none"/></Style>
+    <Style Selector="Button.nav /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="BorderThickness" Value="3,0,0,0"/><Setter Property="BorderBrush" Value="Transparent"/></Style>
+    <Style Selector="Button.nav.active /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/><Setter Property="BorderThickness" Value="3,0,0,0"/></Style>
+    <Style Selector="Button.nav.active:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#1E2024"/><Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/></Style>
     <Style Selector="Button.nav:pressed /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#1B1D20"/></Style>
     <Style Selector="Button.source:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#16181B"/><Setter Property="BorderBrush" Value="{StaticResource LineHoverBrush}"/></Style>
-    <Style Selector="Button.source:pressed"><Setter Property="RenderTransform" Value="scale(0.99)"/></Style>
     <Style Selector="Button.source:pressed /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#101113"/></Style>
     <Style Selector="Button.filter.active:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/><Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/></Style>
     <Style Selector="ComboBox:pointerover /template/ Border#Background"><Setter Property="Background" Value="{StaticResource HoverBrush}"/><Setter Property="BorderBrush" Value="{StaticResource LineHoverBrush}"/></Style>
@@ -54,6 +54,16 @@
     <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement"><Setter Property="Background" Value="#1D2024"/><Setter Property="BorderBrush" Value="{StaticResource LineHoverBrush}"/></Style>
     <Style Selector="TextBox:focus /template/ Border#PART_BorderElement"><Setter Property="Background" Value="#15171A"/><Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/><Setter Property="BorderThickness" Value="1"/></Style>
     <Style Selector="ToggleSwitch"><Setter Property="Cursor" Value="Hand"/></Style>
+    <!-- Topbar -->
+    <Style Selector="Border.topbar"><Setter Property="Background" Value="#0B0C0E"/><Setter Property="BorderBrush" Value="{StaticResource LineBrush}"/><Setter Property="BorderThickness" Value="0,0,0,1"/></Style>
+    <Style Selector="Button.crumb"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="8,4"/><Setter Property="CornerRadius" Value="7"/><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{StaticResource MutedBrush}"/></Style>
+    <Style Selector="Button.crumb:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#1A1D21"/><Setter Property="BorderBrush" Value="Transparent"/><Setter Property="Foreground" Value="#F3F4F7"/></Style>
+    <Style Selector="Button.icon"><Setter Property="Width" Value="32"/><Setter Property="Height" Value="32"/><Setter Property="Padding" Value="0"/><Setter Property="CornerRadius" Value="9"/><Setter Property="FontSize" Value="15"/><Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+    <Style Selector="Button.topbar-primary"><Setter Property="Padding" Value="14,6"/><Setter Property="Height" Value="32"/><Setter Property="CornerRadius" Value="9"/><Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Background" Value="{StaticResource SuccessBrush}"/><Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/><Setter Property="Foreground" Value="#06140E"/></Style>
+    <Style Selector="Button.topbar-primary:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#37D99F"/><Setter Property="BorderBrush" Value="#37D99F"/><Setter Property="Foreground" Value="#06140E"/></Style>
+    <Style Selector="Button.topbar-primary:pressed /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#25A879"/><Setter Property="Foreground" Value="#06140E"/></Style>
+    <Style Selector="Button.topbar-primary:disabled /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="#1C3A2F"/><Setter Property="BorderBrush" Value="#1C3A2F"/><Setter Property="Foreground" Value="#6C9A88"/></Style>
+    <Style Selector="Button.account"><Setter Property="Padding" Value="5,4,12,4"/><Setter Property="Height" Value="32"/><Setter Property="CornerRadius" Value="16"/></Style>
     <Style Selector="ProgressBar"><Setter Property="Height" Value="5"/><Setter Property="MinHeight" Value="0"/><Setter Property="Background" Value="#191A1C"/></Style>
   </Application.Styles>
 </Application>

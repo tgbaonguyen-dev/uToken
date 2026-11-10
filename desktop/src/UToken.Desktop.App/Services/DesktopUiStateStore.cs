@@ -4,7 +4,7 @@ using UToken.Desktop.App.Models;
 namespace UToken.Desktop.App.Services;
 
 public sealed record WindowPlacement(double Width = 1180, double Height = 760, int? X = null, int? Y = null, bool Maximized = false);
-public sealed record DesktopUiState(WindowPlacement Window, ActivityQuery Activity, string SourcePeriod)
+public sealed record DesktopUiState(WindowPlacement Window, ActivityQuery Activity, string SourcePeriod, bool ClickSounds = true)
 {
     public static DesktopUiState Default => new(new(), new(), "30 days");
 }
@@ -41,6 +41,11 @@ public sealed class DesktopUiStateStore
     public bool SaveFilters(ActivityQuery query, string period)
     {
         State = State with { Activity = query with { Search = query.Search[..Math.Min(query.Search.Length, 2048)] }, SourcePeriod = period };
+        return Save();
+    }
+    public bool SaveClickSounds(bool enabled)
+    {
+        State = State with { ClickSounds = enabled };
         return Save();
     }
     public bool SaveWindow(WindowPlacement placement)

@@ -17,8 +17,8 @@ public partial class MainViewModel
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasDevice)), NotifyPropertyChangedFor(nameof(HasNoDevice)), NotifyPropertyChangedFor(nameof(IsSyncHistoryEmpty)), NotifyPropertyChangedFor(nameof(IsPaired)), NotifyPropertyChangedFor(nameof(CanEnterPairing)), NotifyPropertyChangedFor(nameof(PairingActionLabel)), NotifyPropertyChangedFor(nameof(PairingMessageColor)), NotifyPropertyChangedFor(nameof(PageTitle)), NotifyPropertyChangedFor(nameof(Subtitle))] private SyncData? _sync;
     [ObservableProperty] private bool _confirmDisconnect;
     [ObservableProperty] private bool _isSyncing;
-    partial void OnIsSyncingChanged(bool value) => NotifySyncState();
-    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); OnPropertyChanged(nameof(CloudSyncLabel)); }
+    partial void OnIsSyncingChanged(bool value) { NotifySyncState(); NotifyTopbar(); }
+    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); OnPropertyChanged(nameof(CloudSyncLabel)); NotifyTopbar(); }
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasSyncMessage))] private string _syncMessage = "";
     [ObservableProperty] private string _syncMessageColor = "#2EC790";
     [ObservableProperty] private PairingData? _pairing;
@@ -145,7 +145,12 @@ public partial class MainViewModel
         PairingMessage = HasDevice ? $"Signed in as {Sync.Device!.Name}." : "";
     }
     [RelayCommand]
-    private Task ShowPairingAsync() => NavigateAsync(async () => { Page = "pairing"; await LoadPairingPageCoreAsync(); });
+    private Task ShowPairingAsync()
+    {
+        if (!CanNavigate) return Task.CompletedTask;
+        Page = "pairing";
+        return LoadPageAsync(_ => LoadPairingPageCoreAsync());
+    }
     [RelayCommand]
     private Task RestartPairingAsync() => RunAsync(async () => { if (!HasDevice) await LoadPairingPageCoreAsync(); });
     /// <summary>Mở trình duyệt đăng nhập Google; chờ tối đa 3 phút.</summary>

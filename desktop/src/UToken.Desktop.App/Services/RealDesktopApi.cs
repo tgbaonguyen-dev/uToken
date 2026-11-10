@@ -94,6 +94,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
     {
         if (_lastScanAt is not null) return;
         _lastScan = _engine.Scan();
+        DataChanged();
         _lastScanAt = Now;
         _localSettings?.Record($"Initial scan: {_lastScan.FilesRead} files read, {_lastScan.NewEvents} new events, {_lastScan.Errors.Count} errors");
     }
@@ -161,6 +162,25 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
 
     private decimal CostUsd(IEnumerable<UsageEvent> events) =>
         events.Sum(e => Prices.CostMicro(e) ?? 0) / 1_000_000m;
+
+    /// <summary>Tăng mỗi khi dữ liệu usage đổi (quét, sync, xóa, giá mới); làm mất hiệu lực cache nguồn.</summary>
+    private int _dataVersion;
+    private void DataChanged() => Interlocked.Increment(ref _dataVersion);
+    private readonly Dictionary<string, (int Version, long Minute, SourcesData Data)> _sourcesCache = [];
+
+    /// <summary>
+    /// BuildSources có cache theo kỳ (~35ms với vài nghìn event; Overview, Sources, chi tiết và lần tải đầu
+    /// đều gọi lại). Hết hạn khi dữ liệu đổi hoặc sang phút mới (nhãn "x min ago"). Chỉ gọi trong WithStoreAsync.
+    /// </summary>
+    private SourcesData Sources(string period)
+    {
+        EnsureScanned();
+        long minute = Now.ToUnixTimeSeconds() / 60;
+        if (_sourcesCache.TryGetValue(period, out var hit) && hit.Version == _dataVersion && hit.Minute == minute) return hit.Data;
+        var data = BuildSources(period);
+        _sourcesCache[period] = (_dataVersion, minute, data);
+        return data;
+    }
 
     private SourcesData BuildSources(string period)
     {
@@ -242,11 +262,11 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
     }
 
     public async Task<SourcesData> GetSourcesAsync(CancellationToken ct = default) =>
-        await WithStoreAsync(() => BuildSources("30 days"), ct);
+        await WithStoreAsync(() => Sources("30 days"), ct);
 
     public async Task<SourceData> GetSourceAsync(string id, string period = "30 days", CancellationToken ct = default)
     {
-        var data = await WithStoreAsync(() => BuildSources(period), ct);
+        var data = await WithStoreAsync(() => Sources(period), ct);
         return data.Sources.FirstOrDefault(s => s.Id == id) ?? throw new InvalidDataException($"Source not found: {id}");
     }
 
@@ -269,17 +289,28 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
 
     // ───────────────────────── Overview ─────────────────────────
 
+    private (int Version, long Minute, ActivityData[] Recent, (long Events, long Turns, long Files) Counts)? _overviewCache;
+
+    private (ActivityData[], (long Events, long Turns, long Files)) RecentAndCounts()
+    {
+        var last = _store.GetEvents(Now.AddDays(-30), Now.AddSeconds(1))
+            .Where(e => e.IsValid && !e.IsError)
+            .OrderByDescending(e => e.OccurredAt).Take(5)
+            .Select(e => new ActivityData(e.OccurredAt, NameOf(e.Provider), e.TotalTokens, ColorOf(LocationOf(e.Provider).Id), "Success"))
+            .ToArray();
+        return (last, _store.Counts());
+    }
+
     public async Task<OverviewData> GetOverviewAsync(CancellationToken ct = default)
     {
         var sources = await GetSourcesAsync(ct);
         var (recent, counts) = await WithStoreAsync(() =>
         {
-            var last = _store.GetEvents(Now.AddDays(-30), Now.AddSeconds(1))
-                .Where(e => e.IsValid && !e.IsError)
-                .OrderByDescending(e => e.OccurredAt).Take(5)
-                .Select(e => new ActivityData(e.OccurredAt, NameOf(e.Provider), e.TotalTokens, ColorOf(LocationOf(e.Provider).Id), "Success"))
-                .ToArray();
-            return (last, _store.Counts());
+            long minute = Now.ToUnixTimeSeconds() / 60;
+            if (_overviewCache is { } hit && hit.Version == _dataVersion && hit.Minute == minute) return (hit.Recent, hit.Counts);
+            var fresh = RecentAndCounts();
+            _overviewCache = (_dataVersion, minute, fresh.Item1, fresh.Item2);
+            return fresh;
         }, ct);
 
         var settings = await GetSettingsAsync(ct);
@@ -388,6 +419,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
             if (folder == FolderState.Running)
             {
                 var report = await WithStoreAsync(() => _engine.Scan([l.Provider], ct), ct);
+                DataChanged();
                 _localSettings?.Record($"Rescan {l.Id}: {report.FilesRead} files read, {report.NewEvents} new events, {report.Errors.Count} errors");
                 newEvents += report.NewEvents;
                 malformed += report.MalformedLines;
@@ -420,6 +452,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
         {
             var n = _store.Counts().Events;
             _store.ClearUsage();
+            DataChanged();
             return n;
         }, ct);
         _history.Clear();
