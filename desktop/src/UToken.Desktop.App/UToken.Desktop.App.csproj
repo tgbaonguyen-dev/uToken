@@ -29,6 +29,7 @@
     <None Remove="appsettings.Local.json" />
     <None Include="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="UiContent/*.json" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Localization/vi.json" />
     <AvaloniaResource Include="Assets/**" />
   </ItemGroup>
   <Target Name="CreateLocalSettings" BeforeTargets="PrepareForBuild"

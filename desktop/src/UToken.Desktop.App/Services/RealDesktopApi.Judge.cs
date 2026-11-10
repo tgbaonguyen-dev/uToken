@@ -185,7 +185,7 @@ public sealed partial class RealDesktopApi
         {
             var brief = await WithStoreAsync(BuildJudgeBrief, ct);
             var model = CreateJudgeModel(settings.Provider, settings.Model, key);
-            result = await new JudgeService().RunAsync(brief, model, ct);
+            result = await new JudgeService().RunAsync(brief, model, ct, Localization.Loc.AiLanguage);
         }
         catch (Exception ex) when (
             ex is not OperationCanceledException || !ct.IsCancellationRequested)

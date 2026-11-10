@@ -18,7 +18,7 @@ public static class ProviderNames
         "codex" => Provider.Codex,
         "claude_code" => Provider.ClaudeCode,
         "antigravity" => Provider.Antigravity,
-        _ => throw new ArgumentOutOfRangeException(nameof(s), s, "provider không hợp lệ"),
+        _ => throw new ArgumentOutOfRangeException(nameof(s), s, "invalid provider"),
     };
 }
 

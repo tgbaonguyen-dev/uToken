@@ -106,7 +106,9 @@ public sealed partial class RealDesktopApi
     /// Phân tích log rồi đẩy lên Firestore. State: success, no_new_usage, not_paired (chưa đăng nhập),
     /// revoked (phiên hết hiệu lực, cần đăng nhập lại), network (không tới được Firebase), failed.
     /// </summary>
-    public async Task<SyncResult> SyncNowAsync(CancellationToken ct = default)
+    public Task<SyncResult> SyncNowAsync(CancellationToken ct = default) => SyncCoreAsync(runJudge: true, ct);
+
+    private async Task<SyncResult> SyncCoreAsync(bool runJudge, CancellationToken ct)
     {
         await UpdatePricesAsync(ct); // chỉ tải khi giá đã cũ hơn ~1 ngày
         var retention = (await GetSettingsAsync(ct)).Values.RetentionDays;
@@ -142,7 +144,7 @@ public sealed partial class RealDesktopApi
             // Cột EVENTS: số lần gọi model nằm trong các bản daily vừa đẩy lên.
             _history.Insert(0, new SyncHistoryData(Now, account.Email, docs.Sum(d => d.Totals.Requests), sent, "Success"));
             var state = dirty.Count == 0 && snapshot.Scan.NewEvents == 0 ? "no_new_usage" : "success";
-            await RunJudgeAfterSyncAsync(ct);
+            if (runJudge) await RunJudgeAfterSyncAsync(ct);
             return new(state,
                 state == "success" ? $"Uploaded {dirty.Count} daily summaries and the efficiency report." : "No new usage since the last sync.",
                 await GetSyncAsync(ct));
@@ -170,23 +172,41 @@ public sealed partial class RealDesktopApi
     public async Task<SyncResult?> ServeMobileSyncRequestsAsync(CancellationToken ct = default)
     {
         if (_cloud is null || await AccountAsync(ct) is null) return null;
-        IReadOnlyList<string> ids;
-        try { ids = await _cloud.ClaimSyncRequestsAsync(ct); }
+        IReadOnlyList<UToken.Sync.MobileSyncRequest> requests;
+        try { requests = await _cloud.ClaimSyncRequestsAsync(ct); }
         catch (Exception ex) when (ex is HttpRequestException or CloudAuthException or TaskCanceledException)
         {
             _localSettings?.Record("Mobile sync request check failed: " + ex.GetType().Name);
             return null;
         }
-        if (ids.Count == 0) return null;
-        _localSettings?.Record($"Mobile requested sync ({ids.Count})");
-        var result = await SyncNowAsync(ct);
-        var error = result.State is "success" or "no_new_usage" ? null : result.State;
-        try { await _cloud.FinishSyncRequestsAsync(ids, error, ct); }
-        catch (Exception ex) when (ex is HttpRequestException or CloudAuthException or TaskCanceledException)
+        if (requests.Count == 0) return null;
+        var wantsReview = requests.Any(r => r.WantsReview);
+        _localSettings?.Record($"Mobile requested sync ({requests.Count}{(wantsReview ? ", AI review" : "")})");
+        // Khi mobile xin AI review: không chạy judge kiểu "nếu đến hạn" trong sync, mà chạy ép ngay sau đó.
+        var result = await SyncCoreAsync(runJudge: !wantsReview, ct);
+        var syncError = result.State is "success" or "no_new_usage" ? null : result.State;
+        var reviewError = syncError;
+        if (wantsReview && syncError is null)
         {
-            _localSettings?.Record("Could not mark mobile sync request finished: " + ex.GetType().Name);
+            if (JudgeDirectory is null) reviewError = "disabled";
+            else
+            {
+                var review = await RunJudgeAsync(force: true, ct);
+                reviewError = review.State == "success" ? null : review.State;
+            }
         }
+        await FinishAsync(requests.Where(r => !r.WantsReview).Select(r => r.Id).ToList(), syncError);
+        await FinishAsync(requests.Where(r => r.WantsReview).Select(r => r.Id).ToList(), reviewError);
         return result;
+
+        async Task FinishAsync(IReadOnlyList<string> ids, string? error)
+        {
+            try { await _cloud!.FinishSyncRequestsAsync(ids, error, ct); }
+            catch (Exception ex) when (ex is HttpRequestException or CloudAuthException or TaskCanceledException)
+            {
+                _localSettings?.Record("Could not mark mobile sync request finished: " + ex.GetType().Name);
+            }
+        }
     }
 
     public async Task<SyncData> DisconnectAsync(CancellationToken ct = default)

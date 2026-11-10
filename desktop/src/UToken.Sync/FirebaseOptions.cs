@@ -39,15 +39,15 @@ public sealed class FirebaseOptions
     public IReadOnlyList<string> Validate()
     {
         var errors = new List<string>();
-        if (string.IsNullOrWhiteSpace(ProjectId)) errors.Add("Firebase:ProjectId trống");
+        if (string.IsNullOrWhiteSpace(ProjectId)) errors.Add("Firebase:ProjectId is empty");
         if (!UseEmulator)
         {
-            if (IsPlaceholder(ApiKey)) errors.Add("Firebase:ApiKey chưa điền (appsettings.Local.json)");
-            if (IsPlaceholder(OAuthClientId)) errors.Add("Firebase:OAuthClientId chưa điền");
-            if (IsPlaceholder(OAuthClientSecret)) errors.Add("Firebase:OAuthClientSecret chưa điền");
+            if (IsPlaceholder(ApiKey)) errors.Add("Firebase:ApiKey is not set (appsettings.Local.json)");
+            if (IsPlaceholder(OAuthClientId)) errors.Add("Firebase:OAuthClientId is not set");
+            if (IsPlaceholder(OAuthClientSecret)) errors.Add("Firebase:OAuthClientSecret is not set");
         }
         // Đăng nhập Google luôn cần OAuth client (kể cả khi dùng emulator, vì emulator nhận ID token thật của Google).
-        if (UseEmulator && IsPlaceholder(OAuthClientId)) errors.Add("Firebase:OAuthClientId chưa điền (appsettings.Local.json)");
+        if (UseEmulator && IsPlaceholder(OAuthClientId)) errors.Add("Firebase:OAuthClientId is not set (appsettings.Local.json)");
         return errors;
     }
 

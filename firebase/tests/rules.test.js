@@ -32,6 +32,7 @@ test('sync request chỉ nhận trigger hợp lệ', async () => {
   const db = env.authenticatedContext('alice').firestore();
   await assertFails(setDoc(doc(db, 'users/alice/sync_requests/x'), { trigger: 'cron', state: 'pending' }));
   await assertSucceeds(setDoc(doc(db, 'users/alice/sync_requests/y'), { trigger: 'manual_refresh', state: 'pending' }));
+  await assertSucceeds(setDoc(doc(db, 'users/alice/sync_requests/z'), { trigger: 'ai_review', state: 'pending' }));
 });
 
 test('không ai ghi được bảng giá', async () => {

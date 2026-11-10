@@ -39,12 +39,17 @@ public partial class MainViewModel
     /// Phục vụ nút Sync/Refresh trên điện thoại: App gọi định kỳ; có yêu cầu thì quét log và đẩy lên ngay,
     /// kể cả khi Background collection tắt (người dùng chủ động yêu cầu).
     /// </summary>
+    private bool _servingMobile;
+
     public async Task ServeMobileSyncRequestsAsync()
     {
-        if (IsBusy || IsFirstRunPage || IsScanningSources) return;
+        // Sync + AI review có thể lâu hơn chu kỳ timer: không chạy chồng.
+        if (_servingMobile || IsBusy || IsFirstRunPage || IsScanningSources) return;
+        _servingMobile = true;
         Models.SyncResult? result = null;
         try { result = await api.ServeMobileSyncRequestsAsync(); }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException) { return; }
+        finally { _servingMobile = false; }
         if (result is null) return;
         await RunAsync(async () =>
         {

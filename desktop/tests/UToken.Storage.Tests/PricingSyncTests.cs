@@ -72,7 +72,7 @@ public class PricingSyncTests
 
         var error = await Assert.ThrowsAsync<InvalidDataException>(() =>
             PricingSync.RunAsync(http, store, DateTimeOffset.UnixEpoch, CancellationToken.None, NoDelay));
-        Assert.Equal("models.dev trả về bảng giá rỗng", error.Message);
+        Assert.Equal("models.dev returned an empty price list", error.Message);
         Assert.Equal(1, handler.Calls);
     }
 

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using UToken.Desktop.App.Services;
 using UToken.Insights;
+using UToken.Sync;
 using Xunit;
 
 namespace UToken.Desktop.Tests;
@@ -74,6 +75,36 @@ public sealed class JudgeSyncTests : IDisposable
         Assert.Equal(72, failed.Score); // giữ điểm cũ
         Assert.Equal(72, api.GetJudgeState().LastInsights!.Score);
         Assert.Equal("rate_limited", api.GetJudgeState().LastErrorCode);
+    }
+
+    [Fact]
+    public async Task Mobile_ai_review_request_forces_a_fresh_review()
+    {
+        using var api = Api();
+        await api.SaveJudgeSettingsAsync(JudgeDefaults.For(JudgeProviders.Google), "key-1");
+        await api.SignInAsync();
+        await api.SyncNowAsync(); // lần chạy theo lịch
+        Assert.Equal(1, _judge.Calls);
+
+        // Mới chạy xong (chưa đến hạn), nhưng điện thoại xin đánh giá lại: phải chạy ngay, đúng một lần.
+        _home.Clock.Now = _home.Clock.Now.AddMinutes(5);
+        _home.Cloud.PendingRequests.Add(new("r-review", "ai_review"));
+        _home.Cloud.PendingRequests.Add(new("r-sync", "manual_refresh"));
+        Assert.NotNull(await api.ServeMobileSyncRequestsAsync());
+
+        Assert.Equal(2, _judge.Calls);
+        Assert.Contains(("r-review", (string?)null), _home.Cloud.Finished);
+        Assert.Contains(("r-sync", (string?)null), _home.Cloud.Finished);
+    }
+
+    [Fact]
+    public async Task Mobile_ai_review_reports_missing_key()
+    {
+        using var api = Api();
+        await api.SignInAsync();
+        _home.Cloud.PendingRequests.Add(new("r-review", "ai_review"));
+        await api.ServeMobileSyncRequestsAsync();
+        Assert.Equal(("r-review", "missing_key"), Assert.Single(_home.Cloud.Finished));
     }
 
     [Fact]

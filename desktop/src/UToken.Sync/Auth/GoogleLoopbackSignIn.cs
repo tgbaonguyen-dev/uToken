@@ -29,7 +29,7 @@ public sealed class GoogleLoopbackSignIn(HttpClient http, FirebaseOptions option
     public async Task<string> GetGoogleIdTokenAsync(CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(options.OAuthClientId))
-            throw new InvalidOperationException("Firebase:OAuthClientId chưa được cấu hình trong appsettings.Local.json.");
+            throw new InvalidOperationException("Firebase:OAuthClientId is not set in appsettings.Local.json.");
 
         var verifier = Base64Url(RandomNumberGenerator.GetBytes(32));
         var challenge = Base64Url(SHA256.HashData(Encoding.ASCII.GetBytes(verifier)));
@@ -58,7 +58,7 @@ public sealed class GoogleLoopbackSignIn(HttpClient http, FirebaseOptions option
             catch (Exception ex) when (ex is HttpListenerException or ObjectDisposedException)
             {
                 ct.ThrowIfCancellationRequested();
-                throw new TimeoutException("Hết thời gian chờ đăng nhập Google.");
+                throw new TimeoutException("Google sign-in timed out. Try again.");
             }
         }
 
@@ -88,7 +88,7 @@ public sealed class GoogleLoopbackSignIn(HttpClient http, FirebaseOptions option
                     : "Google token exchange is temporarily unavailable. Try again later.");
             using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct));
             return doc.RootElement.TryGetProperty("id_token", out var idToken) && idToken.GetString() is { Length: > 0 } t
-                ? t : throw new InvalidDataException("Google không trả về id_token.");
+                ? t : throw new InvalidDataException("Google did not return an id_token.");
         }
         catch (HttpRequestException ex)
         {

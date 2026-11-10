@@ -9,14 +9,15 @@ public sealed class JudgeService
     public async Task<InsightDoc> RunAsync(
         JudgeBrief brief,
         IJudgeModel model,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string language = "English")
     {
         if (brief.Chats < 5 || !brief.HasEvents)
             return Empty(brief, model, "insufficient_data", null);
         try
         {
             var text = await model.CompleteAsync(
-                JudgePrompt.System,
+                JudgePrompt.For(language),
                 JsonSerializer.Serialize(brief),
                 ProviderSchema.Create(),
                 cancellationToken);

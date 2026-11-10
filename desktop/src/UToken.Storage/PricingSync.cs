@@ -22,7 +22,7 @@ public static class PricingSync
         Func<TimeSpan, CancellationToken, Task> delay)
     {
         var prices = await FetchWithRetryAsync(http, delay, ct);
-        if (prices.Count == 0) throw new InvalidDataException("models.dev trả về bảng giá rỗng");
+        if (prices.Count == 0) throw new InvalidDataException("models.dev returned an empty price list");
         return store.SavePrices(prices, VersionFor(now), now);
     }
 
@@ -60,7 +60,7 @@ public static class PricingSync
     {
         var wait = attempt == 1 ? TimeSpan.FromSeconds(1) : TimeSpan.FromSeconds(3);
         Trace.TraceWarning(
-            "Không tải được bảng giá models.dev; attempt={0}, next_delay_seconds={1}, error_type={2}, error={3}",
+            "Could not download models.dev prices; attempt={0}, next_delay_seconds={1}, error_type={2}, error={3}",
             attempt,
             wait.TotalSeconds,
             error.GetType().Name,

@@ -290,7 +290,7 @@ public sealed class SqliteStore : IDisposable
                 """, new { pricingVersion, mp.Vendor, mp.Model }, tx) > 0;
             if (versionExists)
                 throw new InvalidOperationException(
-                    $"Bảng giá đã tồn tại: pricing_version={pricingVersion}, provider={mp.Vendor}, model={mp.Model}.");
+                    $"Price list already exists: pricing_version={pricingVersion}, provider={mp.Vendor}, model={mp.Model}.");
 
             var latest = _db.QueryFirstOrDefault<PriceRow>("""
                 SELECT pricing_version AS PricingVersion, input_per_mtok AS Input, cached_input_per_mtok AS Cached,

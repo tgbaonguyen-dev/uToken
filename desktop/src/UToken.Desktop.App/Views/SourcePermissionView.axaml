@@ -1,41 +1,41 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:views="using:UToken.Desktop.App.Views" xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:l="using:UToken.Desktop.App.Localization" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:views="using:UToken.Desktop.App.Views" xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
  x:Class="UToken.Desktop.App.Views.SourcePermissionView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
  <StackPanel Spacing="24">
  <Border x:Name="PermissionRetryAlert" IsVisible="{Binding HasPermissionRetryFailure}" Background="#281317" BorderBrush="#F04D57" BorderThickness="1" CornerRadius="12" Padding="16">
  <Grid ColumnDefinitions="28,12,*,Auto">
  <Border Width="26" Height="26" CornerRadius="13" BorderBrush="#F04D57" BorderThickness="1" VerticalAlignment="Top"><TextBlock Text="&#x00D7;" Foreground="#F04D57" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
- <StackPanel Grid.Column="2" Spacing="7"><TextBlock Text="Could not restore access" FontWeight="SemiBold" Foreground="#FF7982" FontSize="14"/><TextBlock Text="{Binding PermissionRetryFailure}" Foreground="#F4C4C8" FontSize="12" TextWrapping="Wrap"/></StackPanel>
- <Button Grid.Column="3" Content="&#x00D7;" Command="{Binding DismissPermissionRetryFailureCommand}" AutomationProperties.Name="Dismiss permission retry error" ToolTip.Tip="Close notification" FontSize="22" Padding="10,2" Margin="16,0,0,0" VerticalAlignment="Top"/>
+ <StackPanel Grid.Column="2" Spacing="7"><TextBlock Text="{l:T 'Could not restore access'}" FontWeight="SemiBold" Foreground="#FF7982" FontSize="14"/><TextBlock Text="{Binding PermissionRetryFailure, Converter={x:Static l:Tr.Converter}}" Foreground="#F4C4C8" FontSize="12" TextWrapping="Wrap"/></StackPanel>
+ <Button Grid.Column="3" Content="&#x00D7;" Command="{Binding DismissPermissionRetryFailureCommand}" AutomationProperties.Name="Dismiss permission retry error" ToolTip.Tip="{l:T 'Close notification'}" FontSize="22" Padding="10,2" Margin="16,0,0,0" VerticalAlignment="Top"/>
  </Grid></Border>
  <Border Classes="card" Padding="28" ClipToBounds="True"><Grid>
  <Ellipse Width="340" Height="220" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-100,-40,0" Opacity="0.12" Fill="{Binding PermissionAccent}"><Ellipse.Effect><BlurEffect Radius="70"/></Ellipse.Effect></Ellipse>
  <StackPanel Spacing="24">
- <Border Background="#191C20" CornerRadius="9" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Padding="10,7" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Classes="status-dot" Fill="{Binding PermissionAccent}"/><TextBlock Text="{Binding PermissionBadgeLabel}" FontSize="10"/></StackPanel></Border>
+ <Border Background="#191C20" CornerRadius="9" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Padding="10,7" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Classes="status-dot" Fill="{Binding PermissionAccent}"/><TextBlock Text="{Binding PermissionBadgeLabel, Converter={x:Static l:Tr.Converter}}" FontSize="10"/></StackPanel></Border>
  <Grid ColumnDefinitions="64,24,*">
  <Border Background="#191C20" CornerRadius="20" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Width="64" Height="64" VerticalAlignment="Top"><Grid><Border IsVisible="{Binding !HasPermissionRetryFailure}" Width="24" Height="30" CornerRadius="6" BorderBrush="{Binding PermissionAccent}" BorderThickness="1" Background="{StaticResource PageBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"><Border Width="8" Height="12" CornerRadius="4" Background="{Binding PermissionAccent}" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="&#x00D7;" Foreground="#F04D57" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding HasPermissionRetryFailure}"/></Grid></Border>
- <StackPanel Grid.Column="2" Spacing="12"><TextBlock Text="{Binding SourcePermission.Config.Headline}" FontSize="25" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding SourcePermission.Config.Description}" Classes="muted" FontSize="12" TextWrapping="Wrap"/><TextBlock Text="{Binding PermissionSource.Name, StringFormat='Affected source: {0}'}" Classes="muted" FontSize="10"/></StackPanel>
+ <StackPanel Grid.Column="2" Spacing="12"><TextBlock Text="{Binding SourcePermission.Config.Headline, Converter={x:Static l:Tr.Converter}}" FontSize="25" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding SourcePermission.Config.Description, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="12" TextWrapping="Wrap"/><TextBlock Text="{Binding PermissionSource.Name, StringFormat='Affected source: {0}'}" Classes="muted" FontSize="10"/></StackPanel>
  </Grid>
  <WrapPanel IsEnabled="{Binding !IsBusy}">
- <Button Classes="primary" Content="Show instructions" Command="{Binding ShowPermissionInstructionsCommand}" CommandParameter="system" Margin="0,0,12,8"/>
- <Button Content="Show instructions" Command="{Binding ShowPermissionInstructionsCommand}" CommandParameter="guide" Margin="0,0,12,8"/>
- <Button Content="Retry access" Command="{Binding RetrySourcePermissionCommand}" Margin="0,0,12,8"/>
- <Border Background="#191C20" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="9" Padding="10,8" Margin="0,0,0,8" VerticalAlignment="Center"><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Classes="status-dot" Fill="{Binding PermissionAccent}"/><TextBlock Text="Not collecting" FontSize="10"/></StackPanel></Border>
+ <Button Classes="primary" Content="{l:T 'Show instructions'}" Command="{Binding ShowPermissionInstructionsCommand}" CommandParameter="system" Margin="0,0,12,8"/>
+ <Button Content="{l:T 'Show instructions'}" Command="{Binding ShowPermissionInstructionsCommand}" CommandParameter="guide" Margin="0,0,12,8"/>
+ <Button Content="{l:T 'Retry access'}" Command="{Binding RetrySourcePermissionCommand}" Margin="0,0,12,8"/>
+ <Border Background="#191C20" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="9" Padding="10,8" Margin="0,0,0,8" VerticalAlignment="Center"><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Classes="status-dot" Fill="{Binding PermissionAccent}"/><TextBlock Text="{l:T 'Not collecting'}" FontSize="10"/></StackPanel></Border>
  </WrapPanel>
  </StackPanel></Grid></Border>
  <Grid ColumnDefinitions="1.8*,20,*">
- <Border Classes="card"><StackPanel Spacing="18"><TextBlock Text="Restore access" Classes="heading"/>
+ <Border Classes="card"><StackPanel Spacing="18"><TextBlock Text="{l:T 'Restore access'}" Classes="heading"/>
  <ItemsControl ItemsSource="{Binding SourcePermission.Config.Instructions}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SetupStep">
  <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="32,16,*">
- <Border Background="#191C20" CornerRadius="9" Width="32" Height="32"><TextBlock Text="{Binding Number}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11"/></Border>
- <StackPanel Grid.Column="2" Spacing="8"><TextBlock Text="{Binding Title}" FontSize="12" TextWrapping="Wrap"/><TextBlock Text="{Binding Description}" Classes="muted" FontSize="10" TextWrapping="Wrap"/></StackPanel>
+ <Border Background="#191C20" CornerRadius="9" Width="32" Height="32"><TextBlock Text="{Binding Number, Converter={x:Static l:Tr.Converter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11"/></Border>
+ <StackPanel Grid.Column="2" Spacing="8"><TextBlock Text="{Binding Title, Converter={x:Static l:Tr.Converter}}" FontSize="12" TextWrapping="Wrap"/><TextBlock Text="{Binding Description, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10" TextWrapping="Wrap"/></StackPanel>
  </Grid></Border>
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  </StackPanel></Border>
- <Border Grid.Column="2" Classes="card"><StackPanel Spacing="18"><TextBlock Text="Provider status" Classes="heading"/>
+ <Border Grid.Column="2" Classes="card"><StackPanel Spacing="18"><TextBlock Text="{l:T 'Provider status'}" Classes="heading"/>
  <ItemsControl ItemsSource="{Binding PermissionProviders}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:PermissionProvider">
- <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="32,12,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Spacing="6" Margin="10,0,0,0" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Right"/><TextBlock Text="{Binding Status}" Foreground="{Binding Color}" FontSize="9" TextAlignment="Right"/></StackPanel></Grid></Border>
+ <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="32,12,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name, Converter={x:Static l:Tr.Converter}}" FontSize="12" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Spacing="6" Margin="10,0,0,0" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Right"/><TextBlock Text="{Binding Status, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding Color}" FontSize="9" TextAlignment="Right"/></StackPanel></Grid></Border>
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
- <TextBlock Text="Previously collected data remains available. uToken does not change system permissions." Classes="muted" FontSize="10" TextWrapping="Wrap"/>
+ <TextBlock Text="{l:T 'Previously collected data remains available. uToken does not change system permissions.'}" Classes="muted" FontSize="10" TextWrapping="Wrap"/>
  </StackPanel></Border>
  </Grid>
  </StackPanel>

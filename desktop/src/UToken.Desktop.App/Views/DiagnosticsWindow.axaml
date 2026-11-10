@@ -1,11 +1,11 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window xmlns="https://github.com/avaloniaui" xmlns:l="using:UToken.Desktop.App.Localization" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:views="using:UToken.Desktop.App.Views"
  x:Class="UToken.Desktop.App.Views.DiagnosticsWindow" x:CompileBindings="True" x:DataType="x:String"
- Title="uToken - Diagnostics" Width="760" Height="500" MinWidth="480" MinHeight="320"
+ Title="{l:T 'uToken - Diagnostics'}" Width="760" Height="500" MinWidth="480" MinHeight="320"
  WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
  <Border Padding="24"><Grid RowDefinitions="Auto,*,Auto">
- <StackPanel Spacing="8" Margin="0,0,0,20"><TextBlock x:Name="HeadingText" Text="Collector diagnostics" FontSize="22" FontWeight="SemiBold"/><TextBlock x:Name="SubtitleText" Text="Application environment and recent log entries" Classes="muted" FontSize="11"/></StackPanel>
+ <StackPanel Spacing="8" Margin="0,0,0,20"><TextBlock x:Name="HeadingText" Text="{l:T 'Collector diagnostics'}" FontSize="22" FontWeight="SemiBold"/><TextBlock x:Name="SubtitleText" Text="{l:T 'Application environment and recent log entries'}" Classes="muted" FontSize="11"/></StackPanel>
  <Border Grid.Row="1" Classes="card" Padding="16"><ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"><SelectableTextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12"/></ScrollViewer></Border>
- <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,18,0,0"><views:ReportActions Report="{Binding}"/><Button Grid.Column="1" Classes="primary" Content="Close" Click="CloseClicked" HorizontalAlignment="Right" VerticalAlignment="Top" MinWidth="100"/></Grid>
+ <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,18,0,0"><views:ReportActions Report="{Binding}"/><Button Grid.Column="1" Classes="primary" Content="{l:T 'Close'}" Click="CloseClicked" HorizontalAlignment="Right" VerticalAlignment="Top" MinWidth="100"/></Grid>
  </Grid></Border>
 </Window>

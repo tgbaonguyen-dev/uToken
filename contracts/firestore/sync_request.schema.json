@@ -11,7 +11,8 @@
     "trigger": {
       "enum": [
         "screen_open",
-        "manual_refresh"
+        "manual_refresh",
+        "ai_review"
       ]
     },
     "state": {

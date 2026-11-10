@@ -37,13 +37,13 @@ internal static class CliScan
                 http.DefaultRequestHeaders.UserAgent.ParseAdd("uToken-desktop");
                 var maxAge = args.Contains("--update-prices") ? TimeSpan.Zero : (TimeSpan?)null;
                 var changed = engine.UpdatePricesAsync(http, maxAge).GetAwaiter().GetResult();
-                Console.WriteLine(changed is null ? "Giá: còn mới, không tải lại" : $"Giá: đã tải models.dev, {changed} model đổi giá");
+                Console.WriteLine(changed is null ? "Prices: up to date, not downloaded" : $"Prices: downloaded models.dev, {changed} models changed");
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or InvalidDataException)
             {
-                Console.WriteLine($"Giá: không tải được models.dev ({ex.GetType().Name}), dùng giá đã lưu");
+                Console.WriteLine($"Prices: could not download models.dev ({ex.GetType().Name}), using saved prices");
             }
-            Console.WriteLine($"Bảng giá: {engine.Prices.Version}");
+            Console.WriteLine($"Price list: {engine.Prices.Version}");
 
             var started = DateTime.UtcNow;
             var snap = engine.Run();
@@ -51,11 +51,11 @@ internal static class CliScan
             var counts = store.Counts();
 
             Console.WriteLine($"SQLite: {db}");
-            Console.WriteLine($"Quét: {s.FilesRead} file đọc, {s.FilesUnchanged} file không đổi, {s.NewEvents} event mới, " +
-                              $"{s.TurnsUpdated} turn cập nhật, {s.MalformedLines} dòng lỗi, {(DateTime.UtcNow - started).TotalMilliseconds:F0} ms");
-            Console.WriteLine($"Tổng trong SQLite: {counts.Events} event, {counts.Turns} turn, {counts.Files} file");
-            foreach (var e in s.Errors) Console.WriteLine($"  lỗi: {e}");
-            Console.WriteLine($"Daily thay đổi: {string.Join(", ", snap.ChangedDaily.Select(d => d.Date))}");
+            Console.WriteLine($"Scan: {s.FilesRead} files read, {s.FilesUnchanged} unchanged, {s.NewEvents} new events, " +
+                              $"{s.TurnsUpdated} turns updated, {s.MalformedLines} malformed lines, {(DateTime.UtcNow - started).TotalMilliseconds:F0} ms");
+            Console.WriteLine($"SQLite totals: {counts.Events} events, {counts.Turns} turns, {counts.Files} files");
+            foreach (var e in s.Errors) Console.WriteLine($"  error: {e}");
+            Console.WriteLine($"Changed daily: {string.Join(", ", snap.ChangedDaily.Select(d => d.Date))}");
 
             var today = engine.BuildDaily(engine.Today);
             Console.WriteLine();
@@ -71,7 +71,7 @@ internal static class CliScan
                 foreach (var d in snap.ChangedDaily.Append(today).DistinctBy(d => d.Date))
                     File.WriteAllText(Path.Combine(outDir, $"daily-{d.Date}.json"), UsageEngine.ToJson(d, indented: true));
                 File.WriteAllText(Path.Combine(outDir, "efficiency-current.json"), UsageEngine.ToJson(snap.Efficiency, indented: true));
-                Console.WriteLine($"Đã ghi JSON vào {Path.GetFullPath(outDir)}");
+                Console.WriteLine($"Wrote JSON to {Path.GetFullPath(outDir)}");
             }
             if (args.Contains("--judge"))
                 return RunJudge(args, engine, store, snap.Efficiency);
@@ -97,8 +97,8 @@ internal static class CliScan
         {
             Console.WriteLine();
             Console.WriteLine("== System prompt");
-            Console.WriteLine(JudgePrompt.System);
-            Console.WriteLine("== Brief JSON (dữ liệu sẽ gửi đi)");
+            Console.WriteLine(JudgePrompt.For(UToken.Desktop.App.Localization.Loc.AiLanguage));
+            Console.WriteLine("== Brief JSON (data that will be sent)");
             Console.WriteLine(JsonSerializer.Serialize(brief, pretty));
             return 0;
         }
@@ -109,7 +109,7 @@ internal static class CliScan
         if (string.IsNullOrEmpty(key))
         {
             Console.WriteLine(
-                $"Chưa có API key cho {settings.Provider}: thêm trong Settings → AI review.");
+                $"No API key for {settings.Provider}: add one in Settings → AI review.");
             return 2;
         }
         using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
