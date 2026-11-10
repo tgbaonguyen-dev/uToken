@@ -159,4 +159,21 @@ public sealed class FakeCloud : ICloudSync
         InsightUploads.Add(insights);
         return Task.FromResult(500L);
     }
+
+    /// <summary>Yêu cầu mobile đang chờ; Finished ghi lại (id, error_code) khi desktop trả lời.</summary>
+    public List<MobileSyncRequest> PendingRequests { get; } = [];
+    public List<(string Id, string? Error)> Finished { get; } = [];
+
+    public Task<IReadOnlyList<MobileSyncRequest>> ClaimSyncRequestsAsync(CancellationToken ct = default)
+    {
+        var claimed = PendingRequests.ToList();
+        PendingRequests.Clear();
+        return Task.FromResult<IReadOnlyList<MobileSyncRequest>>(claimed);
+    }
+
+    public Task FinishSyncRequestsAsync(IReadOnlyList<string> ids, string? errorCode, CancellationToken ct = default)
+    {
+        foreach (var id in ids) Finished.Add((id, errorCode));
+        return Task.CompletedTask;
+    }
 }

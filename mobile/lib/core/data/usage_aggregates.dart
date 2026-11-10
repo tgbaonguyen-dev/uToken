@@ -1,14 +1,15 @@
 import '../models/daily_doc.dart';
+import '../i18n/tr.dart';
 
 /// Time windows offered by the Tokens and Analytics period selector.
 enum UsagePeriod { day, week, month, total }
 
 extension UsagePeriodLabel on UsagePeriod {
   String get label => switch (this) {
-        UsagePeriod.day => 'Day',
-        UsagePeriod.week => 'Week',
-        UsagePeriod.month => 'Month',
-        UsagePeriod.total => 'Total',
+        UsagePeriod.day => tr('Day'),
+        UsagePeriod.week => tr('Week'),
+        UsagePeriod.month => tr('Month'),
+        UsagePeriod.total => tr('Total'),
       };
 
   static UsagePeriod parse(String? value) => UsagePeriod.values.firstWhere(
@@ -49,9 +50,9 @@ List<DailyDoc> filterMonth(List<DailyDoc> docs, DateTime month) {
 
 /// Human provider names for collector ids.
 String providerName(String id) => switch (id) {
-      'codex' => 'Codex',
-      'claude_code' => 'Claude',
-      'antigravity' => 'Gemini',
+      'codex' => tr('Codex'),
+      'claude_code' => tr('Claude'),
+      'antigravity' => tr('Gemini'),
       _ => id,
     };
 
@@ -181,9 +182,9 @@ String shortDate(String key) {
 
 String relativeTime(DateTime value, DateTime now) {
   final minutes = now.difference(value).inMinutes;
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return '${minutes}m ago';
+  if (minutes < 1) return tr('just now');
+  if (minutes < 60) return tr('{n}m ago', {'n': minutes});
   final hours = minutes ~/ 60;
-  if (hours < 24) return '${hours}h ago';
-  return '${hours ~/ 24}d ago';
+  if (hours < 24) return tr('{n}h ago', {'n': hours});
+  return tr('{n}d ago', {'n': hours ~/ 24});
 }

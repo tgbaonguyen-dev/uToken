@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,12 +9,15 @@ import 'app/router.dart';
 import 'core/widgets/ui_preview_scope.dart';
 import 'core/data/local_prefs.dart';
 import 'core/data/usage_repository.dart';
+import 'core/firebase/crash_reporter.dart';
+import 'features/ai_review/phone_judge.dart';
 import 'features/auth/data/firebase_mobile_auth.dart';
 import 'features/auth/domain/mobile_auth.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   LocalPrefs.instance = LocalPrefs(const SecurePrefsStore())..load();
+  PhoneJudge.instance = PhoneJudge(const SecurePrefsStore())..load();
   runApp(const ProviderScope(child: UTokenApp()));
 }
 
@@ -39,6 +43,7 @@ class _UTokenAppState extends State<UTokenApp> {
     try {
       // Android options come from google-services.json generated resources.
       await Firebase.initializeApp();
+      await CrashReporter.install();
       if (!mounted) return;
       final auth = MobileAuthController(FirebaseMobileAuth());
       setState(() {
@@ -67,7 +72,14 @@ class _UTokenAppState extends State<UTokenApp> {
     final theme = ThemeData(
         fontFamily: 'BeVietnamPro',
         brightness: Brightness.dark,
-        useMaterial3: true);
+        useMaterial3: true,
+        // Detail screens slide in from the right with swipe-back, the same
+        // on every platform; tabs use their own cross-fade (see router).
+        pageTransitionsTheme: const PageTransitionsTheme(builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        }),
+        splashFactory: InkSparkle.splashFactory);
     if (_router == null) {
       return MaterialApp(
           theme: theme,

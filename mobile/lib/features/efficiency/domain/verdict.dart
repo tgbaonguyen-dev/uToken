@@ -19,11 +19,11 @@ Verdict verdictFromJson(String v) => switch (v) {
 
 extension VerdictLabel on Verdict {
   String get label => switch (this) {
-        Verdict.better => 'Tốt hơn',
-        Verdict.cheaperNotWorse => 'Rẻ hơn, chưa thấy kém',
-        Verdict.tradeoff => 'Đánh đổi',
-        Verdict.worse => 'Kém hơn',
-        Verdict.noClearDifference => 'Chưa thấy khác biệt',
-        Verdict.insufficient => 'Chưa đủ dữ liệu',
+        Verdict.better => 'Better',
+        Verdict.cheaperNotWorse => 'Cheaper, no worse',
+        Verdict.tradeoff => 'Trade-off',
+        Verdict.worse => 'Worse',
+        Verdict.noClearDifference => 'No clear difference',
+        Verdict.insufficient => 'Not enough data',
       };
 }

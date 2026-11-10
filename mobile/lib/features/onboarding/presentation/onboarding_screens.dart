@@ -6,6 +6,7 @@ import '../../../core/ui/ut_kit.dart';
 import '../../auth/domain/mobile_auth.dart';
 import '../../auth/presentation/mobile_auth_status.dart';
 import '../../../core/widgets/ui_preview_scope.dart';
+import '../../../core/i18n/tr.dart';
 
 void _back(BuildContext context, String fallback) {
   if (context.canPop()) {
@@ -39,26 +40,26 @@ class WelcomeScreen extends StatelessWidget {
       child: UtPage(
         actions: [
           UtButton(
-              label: 'Continue with Google',
+              label: tr('Continue with Google'),
               onPressed: () => _continue(context)),
           // Sample data is only offered in preview builds.
           if (UiPreviewScope.enabledOf(context))
             UtButton(
-                label: 'View demo',
+                label: tr('View demo'),
                 style: UtButtonStyle.secondary,
                 onPressed: () => _demo(context)),
         ],
-        footer: const Text('Your prompts stay on your devices.',
+        footer: Text(tr('Your prompts stay on your devices.'),
             textAlign: TextAlign.center, style: UtText.caption),
-        children: const [
-          SizedBox(height: 32),
-          Text('Track your\nAI usage.', style: UtText.hero),
-          SizedBox(height: 12),
+        children: [
+          const SizedBox(height: 32),
+          const Text('Track your\nAI usage.', style: UtText.hero),
+          const SizedBox(height: 12),
           Text(
-              'Automatic token and cost tracking for the tools you already use.',
+              tr('Automatic token and cost tracking for the tools you already use.'),
               style: UtText.body),
-          SizedBox(height: 44),
-          _FeatureCard(),
+          const SizedBox(height: 44),
+          const _FeatureCard(),
         ],
       ),
     );
@@ -98,7 +99,7 @@ class _FeatureCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('What you get', style: UtText.label),
+          Text(tr('What you get'), style: UtText.label),
           const SizedBox(height: 8),
           for (final r in _rows)
             Padding(
@@ -153,7 +154,7 @@ class ConnectDesktopScreen extends StatelessWidget {
     await Clipboard.setData(const ClipboardData(text: _sampleCode));
     if (context.mounted) {
       utShowNotice(context,
-          'Đã sao chép mã ghép nối mẫu. Mã này chỉ dùng để xem giao diện.');
+          tr('Sample pairing code copied. It only works in the UI preview.'));
     }
   }
 
@@ -166,12 +167,12 @@ class ConnectDesktopScreen extends StatelessWidget {
           if (!didPop) _leave(context, paired: false);
         },
         child: UtPage(
-          title: 'Connect desktop',
-          subtitle: 'Pair the collector running on your computer.',
+          title: tr('Connect desktop'),
+          subtitle: tr('Pair the collector running on your computer.'),
           onBack: () => _leave(context, paired: false),
           actions: [
             UtButton(
-                label: 'I’ve paired my device',
+                label: tr('I’ve paired my device'),
                 onPressed: () => _leave(context, paired: true)),
           ],
           children: [
@@ -180,29 +181,29 @@ class ConnectDesktopScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 4),
-                  const Text('Pairing code', style: UtText.label),
+                  Text(tr('Pairing code'), style: UtText.label),
                   const SizedBox(height: 20),
                   const Text(_sampleCode,
                       textAlign: TextAlign.center, style: UtText.code),
                   const SizedBox(height: 8),
-                  Text('Expires in 08:42',
+                  Text(tr('Expires in 08:42'),
                       textAlign: TextAlign.center,
                       style: UtText.caption.copyWith(color: UtColors.orange)),
                   const SizedBox(height: 20),
                   UtChipButton(
-                      label: 'Copy code', onPressed: () => _copy(context)),
+                      label: tr('Copy code'), onPressed: () => _copy(context)),
                   const SizedBox(height: 32),
                   const UtDivider(),
                   const SizedBox(height: 24),
-                  const Text('What is shared', style: UtText.label),
+                  Text(tr('What is shared'), style: UtText.label),
                   const SizedBox(height: 18),
-                  const _SharedRow(
-                      title: 'Usage totals',
+                  _SharedRow(
+                      title: tr('Usage totals'),
                       detail: 'Tokens, model, cost, and time',
                       shared: true),
                   const SizedBox(height: 20),
-                  const _SharedRow(
-                      title: 'Prompt content',
+                  _SharedRow(
+                      title: tr('Prompt content'),
                       detail: 'Never uploaded',
                       shared: false),
                 ],
@@ -210,8 +211,9 @@ class ConnectDesktopScreen extends StatelessWidget {
             ),
             const SizedBox(height: 94),
             Row(children: [
-              const Expanded(
-                  child: Text('Need the desktop app?', style: UtText.caption)),
+              Expanded(
+                  child:
+                      Text(tr('Need the desktop app?'), style: UtText.caption)),
               InkWell(
                 key: utActionKey('Open install guide'),
                 onTap: () => context.push('/install-guide'),
@@ -219,7 +221,7 @@ class ConnectDesktopScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Text('Install guide',
+                    Text(tr('Install guide'),
                         style: UtText.caption.copyWith(color: UtColors.text)),
                     const SizedBox(width: 6),
                     const Icon(Icons.arrow_forward,
@@ -261,9 +263,9 @@ class _SharedRow extends StatelessWidget {
         child: shared
             ? const Icon(Icons.check,
                 size: 16, color: UtColors.green, semanticLabel: 'Shared')
-            : const Text('—',
+            : Text('—',
                 textAlign: TextAlign.center,
-                semanticsLabel: 'Not shared',
+                semanticsLabel: tr('Not shared'),
                 style: UtText.bodyStrong),
       ),
     ]);
@@ -284,27 +286,26 @@ class InstallGuideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UtPage(
-      title: 'Install μToken Companion',
-      subtitle: 'Set up automatic tracking on your computer.',
+      title: tr('Install μToken Companion'),
+      subtitle: tr('Set up automatic tracking on your computer.'),
       onBack: () => _back(context, '/connect-desktop'),
       actions: [
         UtButton(
-            label: 'Download desktop app',
+            label: tr('Download desktop app'),
             onPressed: () => showDialog<void>(
                 context: context,
                 builder: (dialog) => AlertDialog(
-                      title: const Text('Install on your computer'),
-                      content: const Text(
-                          'Install μToken Companion on Linux, macOS or Windows, open it and choose Sign in with Google. '
-                          'Use the same account as this phone, then press Sync now.'),
+                      title: Text(tr('Install on your computer')),
+                      content: Text(tr(
+                          'Install μToken Companion on Linux, macOS or Windows, open it and choose Sign in with Google. Use the same account as this phone, then press Sync now.')),
                       actions: [
                         TextButton(
                             onPressed: () => Navigator.pop(dialog),
-                            child: const Text('OK')),
+                            child: Text(tr('OK'))),
                       ],
                     ))),
         UtButton(
-            label: 'I already installed it',
+            label: tr('I already installed it'),
             actionName: 'Already installed',
             style: UtButtonStyle.secondary,
             onPressed: () => _back(context, '/connect-desktop')),

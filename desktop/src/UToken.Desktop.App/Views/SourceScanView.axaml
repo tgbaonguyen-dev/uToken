@@ -1,21 +1,21 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:views="using:UToken.Desktop.App.Views"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:l="using:UToken.Desktop.App.Localization" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:views="using:UToken.Desktop.App.Views"
  xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
  x:Class="UToken.Desktop.App.Views.SourceScanView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
  <Border Classes="card" Padding="32">
  <StackPanel Spacing="28">
  <Grid ColumnDefinitions="64,24,*"><Border Width="64" Height="64" CornerRadius="20" Background="#191C20" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" VerticalAlignment="Top"><TextBlock Text="07" FontSize="25" Foreground="#4089EF" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border>
  <StackPanel Grid.Column="2" Spacing="12"><TextBlock Text="{Binding SourceScan.Config.Heading, FallbackValue='Scanning local usage'}" FontSize="25" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding SourceScan.Config.Description, FallbackValue='Preparing supported sources...'}" Classes="muted" FontSize="12" TextWrapping="Wrap"/></StackPanel></Grid>
- <Button Content="Cancel scan" Command="{Binding CancelSourceScanCommand}" HorizontalAlignment="Left" MinWidth="160"/>
- <StackPanel Spacing="12"><TextBlock Text="DETAILS" Classes="label"/>
+ <Button Content="{l:T 'Cancel scan'}" Command="{Binding CancelSourceScanCommand}" HorizontalAlignment="Left" MinWidth="160"/>
+ <StackPanel Spacing="12"><TextBlock Text="{l:T 'DETAILS'}" Classes="label"/>
  <Border Background="#191A1C" CornerRadius="14" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Padding="20,4"><StackPanel>
- <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,18"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="Sources checked" FontSize="12"/><TextBlock Grid.Column="1" Text="{Binding SourceScan.CountLabel, FallbackValue='Preparing...'}" Classes="muted" FontSize="12"/></Grid></Border>
- <Grid ColumnDefinitions="*,Auto" Margin="0,18"><TextBlock Text="Current source" FontSize="12"/><TextBlock Grid.Column="1" Text="{Binding SourceScan.CurrentSource, FallbackValue='Loading...'}" Classes="muted" FontSize="12"/></Grid>
+ <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,18"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T 'Sources checked'}" FontSize="12"/><TextBlock Grid.Column="1" Text="{Binding SourceScan.CountLabel, FallbackValue='Preparing...'}" Classes="muted" FontSize="12"/></Grid></Border>
+ <Grid ColumnDefinitions="*,Auto" Margin="0,18"><TextBlock Text="{l:T 'Current source'}" FontSize="12"/><TextBlock Grid.Column="1" Text="{Binding SourceScan.CurrentSource, FallbackValue='Loading...'}" Classes="muted" FontSize="12"/></Grid>
  </StackPanel></Border>
  <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsPreparingSourceScan}" Foreground="#4089EF"/>
  <ProgressBar Value="{Binding SourceScan.Percent}" IsVisible="{Binding !IsPreparingSourceScan}" Foreground="#4089EF"/>
  </StackPanel>
  <ItemsControl ItemsSource="{Binding SourceScan.Providers}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceScanItem">
- <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,13"><Grid ColumnDefinitions="32,14,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}"/><TextBlock Text="{Binding Label}" Foreground="{Binding Color}" FontSize="11"/></StackPanel></Grid></Border>
+ <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,13"><Grid ColumnDefinitions="32,14,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name, Converter={x:Static l:Tr.Converter}}" FontSize="13" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}"/><TextBlock Text="{Binding Label, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding Color}" FontSize="11"/></StackPanel></Grid></Border>
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  <TextBlock Text="{Binding SourceScan.Config.PrivacyNote, FallbackValue='Only token counts and metadata are read.'}" Classes="muted" FontSize="11" TextWrapping="Wrap"/>
  </StackPanel>

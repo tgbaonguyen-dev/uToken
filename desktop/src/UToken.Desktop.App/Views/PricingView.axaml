@@ -1,48 +1,48 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:l="using:UToken.Desktop.App.Localization" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  x:Class="UToken.Desktop.App.Views.PricingView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
  <StackPanel Spacing="20">
   <UniformGrid Columns="3">
-   <Border Classes="card" Margin="0,0,14,0"><StackPanel Spacing="10"><TextBlock Text="CATALOG" Classes="label"/><TextBlock Text="models.dev" Classes="value"/><TextBlock Text="Automatically refreshed when stale" Classes="muted" FontSize="10"/></StackPanel></Border>
-   <Border Classes="card" Margin="0,0,14,0"><StackPanel Spacing="10"><TextBlock Text="MODELS" Classes="label"/><TextBlock Text="{Binding Pricing.ModelCountLabel}" Classes="value"/><TextBlock Text="Anthropic, OpenAI, and Google" Classes="muted" FontSize="10"/></StackPanel></Border>
-   <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="CATALOG UPDATED" Classes="label"/><TextBlock Text="{Binding Pricing.UpdatedLabel}" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="{Binding Pricing.Version}" Classes="muted" FontSize="10" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Pricing.Version}"/></StackPanel></Border>
+   <Border Classes="card" Margin="0,0,14,0"><StackPanel Spacing="10"><TextBlock Text="{l:T 'CATALOG'}" Classes="label"/><TextBlock Text="{l:T 'models.dev'}" Classes="value"/><TextBlock Text="{l:T 'Automatically refreshed when stale'}" Classes="muted" FontSize="10"/></StackPanel></Border>
+   <Border Classes="card" Margin="0,0,14,0"><StackPanel Spacing="10"><TextBlock Text="{l:T 'MODELS'}" Classes="label"/><TextBlock Text="{Binding Pricing.ModelCountLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><TextBlock Text="{l:T 'Anthropic, OpenAI, and Google'}" Classes="muted" FontSize="10"/></StackPanel></Border>
+   <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{l:T 'CATALOG UPDATED'}" Classes="label"/><TextBlock Text="{Binding Pricing.UpdatedLabel, Converter={x:Static l:Tr.Converter}}" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="{Binding Pricing.Version, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Pricing.Version, Converter={x:Static l:Tr.Converter}}"/></StackPanel></Border>
   </UniformGrid>
 
   <Border Classes="card" Padding="16">
    <Grid ColumnDefinitions="*,Auto">
-    <TextBox Text="{Binding PricingSearch, Mode=TwoWay}" Watermark="Search vendor, model, or rate" AutomationProperties.Name="Search pricing"/>
-    <TextBlock Grid.Column="1" Text="USD per 1M tokens" Classes="muted" FontSize="11" VerticalAlignment="Center" Margin="18,0,0,0"/>
+    <TextBox Text="{Binding PricingSearch, Mode=TwoWay}" Watermark="{l:T 'Search vendor, model, or rate'}" AutomationProperties.Name="Search pricing"/>
+    <TextBlock Grid.Column="1" Text="{l:T 'USD per 1M tokens'}" Classes="muted" FontSize="11" VerticalAlignment="Center" Margin="18,0,0,0"/>
    </Grid>
   </Border>
 
   <Border Classes="card" Padding="12,18" MinHeight="390">
    <StackPanel Spacing="12">
     <Grid ColumnDefinitions="90,*,115,90,90,90,90" Margin="8,0">
-     <TextBlock Text="VENDOR" Classes="label" FontSize="9"/>
-     <TextBlock Grid.Column="1" Text="MODEL" Classes="label" FontSize="9"/>
-     <TextBlock Grid.Column="2" Text="RATE" Classes="label" FontSize="9"/>
-     <TextBlock Grid.Column="3" Text="INPUT" Classes="label" FontSize="9" TextAlignment="Right"/>
-     <TextBlock Grid.Column="4" Text="CACHED" Classes="label" FontSize="9" TextAlignment="Right"/>
-     <TextBlock Grid.Column="5" Text="CACHE WRITE" Classes="label" FontSize="9" TextAlignment="Right"/>
-     <TextBlock Grid.Column="6" Text="OUTPUT" Classes="label" FontSize="9" TextAlignment="Right"/>
+     <TextBlock Text="{l:T 'VENDOR'}" Classes="label" FontSize="9"/>
+     <TextBlock Grid.Column="1" Text="{l:T 'MODEL'}" Classes="label" FontSize="9"/>
+     <TextBlock Grid.Column="2" Text="{l:T 'RATE'}" Classes="label" FontSize="9"/>
+     <TextBlock Grid.Column="3" Text="{l:T 'INPUT'}" Classes="label" FontSize="9" TextAlignment="Right"/>
+     <TextBlock Grid.Column="4" Text="{l:T 'CACHED'}" Classes="label" FontSize="9" TextAlignment="Right"/>
+     <TextBlock Grid.Column="5" Text="{l:T 'CACHE WRITE'}" Classes="label" FontSize="9" TextAlignment="Right"/>
+     <TextBlock Grid.Column="6" Text="{l:T 'OUTPUT'}" Classes="label" FontSize="9" TextAlignment="Right"/>
     </Grid>
     <ItemsControl ItemsSource="{Binding FilteredPricingRows}" AutomationProperties.AutomationId="PricingTable">
      <ItemsControl.ItemTemplate><DataTemplate x:DataType="m:PricingRow">
       <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="8,13">
        <Grid ColumnDefinitions="90,*,115,90,90,90,90">
-        <StackPanel Orientation="Horizontal" Spacing="7"><Ellipse Classes="status-dot" Fill="{Binding VendorColor}"/><TextBlock Text="{Binding VendorLabel}" FontSize="10" VerticalAlignment="Center"/></StackPanel>
-        <TextBlock Grid.Column="1" Text="{Binding Model}" FontSize="10" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Model}"/>
-        <TextBlock Grid.Column="2" Text="{Binding Rate}" Classes="muted" FontSize="10"/>
-        <TextBlock Grid.Column="3" Text="{Binding InputLabel}" FontSize="11" TextAlignment="Right"/>
-        <TextBlock Grid.Column="4" Text="{Binding CachedInputLabel}" FontSize="11" TextAlignment="Right"/>
-        <TextBlock Grid.Column="5" Text="{Binding CacheWriteLabel}" FontSize="10" TextAlignment="Right"/>
-        <TextBlock Grid.Column="6" Text="{Binding OutputLabel}" FontSize="11" TextAlignment="Right"/>
+        <StackPanel Orientation="Horizontal" Spacing="7"><Ellipse Classes="status-dot" Fill="{Binding VendorColor}"/><TextBlock Text="{Binding VendorLabel, Converter={x:Static l:Tr.Converter}}" FontSize="10" VerticalAlignment="Center"/></StackPanel>
+        <TextBlock Grid.Column="1" Text="{Binding Model, Converter={x:Static l:Tr.Converter}}" FontSize="10" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Model, Converter={x:Static l:Tr.Converter}}"/>
+        <TextBlock Grid.Column="2" Text="{Binding Rate, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10"/>
+        <TextBlock Grid.Column="3" Text="{Binding InputLabel, Converter={x:Static l:Tr.Converter}}" FontSize="11" TextAlignment="Right"/>
+        <TextBlock Grid.Column="4" Text="{Binding CachedInputLabel, Converter={x:Static l:Tr.Converter}}" FontSize="11" TextAlignment="Right"/>
+        <TextBlock Grid.Column="5" Text="{Binding CacheWriteLabel, Converter={x:Static l:Tr.Converter}}" FontSize="10" TextAlignment="Right"/>
+        <TextBlock Grid.Column="6" Text="{Binding OutputLabel, Converter={x:Static l:Tr.Converter}}" FontSize="11" TextAlignment="Right"/>
        </Grid>
       </Border>
      </DataTemplate></ItemsControl.ItemTemplate>
     </ItemsControl>
-    <TextBlock Text="No cached model prices match this search. Connect to the internet and reopen Pricing to download the catalog." IsVisible="{Binding IsPricingEmpty}" Classes="muted" Margin="12,24" TextWrapping="Wrap"/>
+    <TextBlock Text="{l:T 'No cached model prices match this search. Connect to the internet and reopen Pricing to download the catalog.'}" IsVisible="{Binding IsPricingEmpty}" Classes="muted" Margin="12,24" TextWrapping="Wrap"/>
    </StackPanel>
   </Border>
-  <TextBlock Text="These public API rates are used only to estimate cost. Your plan, subscription, or provider discounts may differ." Classes="muted" FontSize="10" TextWrapping="Wrap"/>
+  <TextBlock Text="{l:T 'These public API rates are used only to estimate cost. Your plan, subscription, or provider discounts may differ.'}" Classes="muted" FontSize="10" TextWrapping="Wrap"/>
  </StackPanel>
 </UserControl>

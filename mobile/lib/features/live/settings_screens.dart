@@ -9,8 +9,12 @@ import '../../core/data/usage_aggregates.dart';
 import '../../core/data/usage_repository.dart';
 import '../../core/format/token_format.dart';
 import '../../core/models/daily_doc.dart';
-import '../../core/models/usage_docs.dart';
+import '../../core/data/stream_status.dart';
 import '../../core/ui/ut_kit.dart';
+import '../../core/firebase/crash_reporter.dart';
+import '../../core/i18n/tr.dart';
+import '../ai_review/judge.dart';
+import '../ai_review/phone_judge.dart';
 import '../auth/domain/mobile_auth.dart';
 import 'insights_screens.dart';
 import 'live_common.dart';
@@ -32,8 +36,8 @@ class LiveSettingsScreen extends StatelessWidget {
             ListTile(
               title: Text(
                   f == TokenFormat.compact
-                      ? 'Compact · 6.83M'
-                      : 'Full · 6,830,736',
+                      ? tr('Compact · 6.83M')
+                      : tr('Full · 6,830,736'),
                   style: UtText.bodyStrong),
               trailing: f == LocalPrefs.instance.tokenFormat
                   ? const Icon(Icons.check, color: UtColors.green)
@@ -46,13 +50,37 @@ class LiveSettingsScreen extends StatelessWidget {
     if (picked != null) await LocalPrefs.instance.setTokenFormat(picked);
   }
 
+  Future<void> _pickLanguage(BuildContext context) async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: UtColors.card,
+      builder: (sheet) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          for (final (code, name) in const [
+            ('en', 'English'),
+            ('vi', 'Tiếng Việt')
+          ])
+            ListTile(
+              key: ValueKey('language-$code'),
+              title: Text(name, style: UtText.bodyStrong),
+              trailing: code == LocalPrefs.instance.language
+                  ? const Icon(Icons.check, color: UtColors.green)
+                  : null,
+              onTap: () => Navigator.pop(sheet, code),
+            ),
+        ]),
+      ),
+    );
+    if (picked != null) await LocalPrefs.instance.setLanguage(picked);
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = MobileAuthScope.maybeOf(context)?.user;
     final prefs = LocalPrefs.instance;
     return UtTabPage(
-      title: 'Settings',
-      subtitle: 'Account, display, and sync preferences',
+      title: tr('Settings'),
+      subtitle: tr('Account, display, and sync preferences'),
       tabIndex: 3,
       body: ListenableBuilder(
         listenable: prefs,
@@ -62,67 +90,74 @@ class LiveSettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const UtSectionLabel('General'),
+                UtSectionLabel(tr('General')),
                 UtRowGroup(children: [
                   StreamBuilder<DateTime?>(
                     stream: args.repository.watchLastSync(uid: args.uid),
                     builder: (context, s) => UtRow(
-                      title: 'μToken Companion',
+                      title: tr('μToken Companion'),
                       actionName: 'Desktop connection',
                       subtitle: s.data == null
-                          ? 'Not synced yet'
-                          : 'Connected · ${relativeTime(s.data!, DateTime.now())}',
+                          ? tr('Not synced yet')
+                          : tr('Connected · {when}',
+                              {'when': relativeTime(s.data!, DateTime.now())}),
                       onTap: () => context.push('/desktop-connection'),
                     ),
                   ),
-                  StreamBuilder<InsightsDoc?>(
-                    stream: args.repository.watchInsights(uid: args.uid),
-                    builder: (context, s) => UtRow(
-                      title: 'AI suggestions',
-                      subtitle: s.data == null
-                          ? 'Set up in the desktop app'
-                          : '${aiProviderName(s.data!.provider)}${s.data!.model == null ? '' : ' · ${s.data!.model}'}',
+                  ListenableBuilder(
+                    listenable: PhoneJudge.instance,
+                    builder: (context, _) => UtRow(
+                      title: tr('AI review'),
+                      actionName: 'AI suggestions',
+                      subtitle: PhoneJudge.instance.hasKey
+                          ? '${aiProviderName(PhoneJudge.instance.provider)} · ${PhoneJudge.instance.model}'
+                          : tr('Not set up · add an API key'),
                       onTap: () => context.push('/ai-suggestions'),
                     ),
                   ),
-                  const UtRow(title: 'Language', subtitle: 'System'),
                   UtRow(
-                    title: 'Budget & alerts',
+                    title: tr('Language'),
+                    subtitle: prefs.vietnamese ? tr('Tiếng Việt') : 'English',
+                    onTap: () => _pickLanguage(context),
+                  ),
+                  UtRow(
+                    title: tr('Budget & alerts'),
                     subtitle: prefs.monthlyBudgetUsd == null
-                        ? 'No monthly limit'
-                        : '${usd(prefs.monthlyBudgetUsd)} monthly',
+                        ? tr('No monthly limit')
+                        : tr('{amount} monthly',
+                            {'amount': usd(prefs.monthlyBudgetUsd)}),
                     onTap: () => context.push('/budget'),
                   ),
                 ]),
                 const UtDivider(),
                 const SizedBox(height: 22),
-                const UtSectionLabel('Usage'),
+                UtSectionLabel(tr('Usage')),
                 UtRowGroup(children: [
                   UtRow(
-                    title: 'Token numbers',
+                    title: tr('Token numbers'),
                     subtitle: prefs.tokenFormat == TokenFormat.compact
-                        ? 'Compact'
-                        : 'Full',
+                        ? tr('Compact')
+                        : tr('Full'),
                     onTap: () => _pickFormat(context),
                   ),
                   UtRow(
-                    title: 'Model pricing',
-                    subtitle: 'Effective rates from your usage',
+                    title: tr('Model pricing'),
+                    subtitle: tr('Effective rates from your usage'),
                     onTap: () => context.push('/model-pricing'),
                   ),
                   UtRow(
-                    title: 'Privacy',
-                    subtitle: 'Usage data only',
+                    title: tr('Privacy'),
+                    subtitle: tr('Usage data only'),
                     onTap: () => context.push('/privacy'),
                   ),
                 ]),
                 const UtDivider(),
                 const SizedBox(height: 22),
-                const UtSectionLabel('Account'),
+                UtSectionLabel(tr('Account')),
                 UtRow(
                   title: user?.email ?? 'Signed in',
                   actionName: 'Account',
-                  subtitle: 'Google account',
+                  subtitle: tr('Google account'),
                   onTap: () => context.push('/account'),
                 ),
               ],
@@ -142,8 +177,8 @@ class LiveDesktopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UtPage(
-      title: 'Desktop',
-      subtitle: 'Collector and source status.',
+      title: tr('Desktop'),
+      subtitle: tr('Collector and source status.'),
       onBack: () => liveBack(context, '/settings'),
       children: [
         _DesktopStatus(args: args),
@@ -156,15 +191,15 @@ class LiveDesktopScreen extends StatelessWidget {
             return UtCard(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
               child: Column(children: [
-                const Row(children: [
-                  Expanded(child: Text('Source', style: UtText.label)),
-                  Text('Tokens · 30 days', style: UtText.label),
+                Row(children: [
+                  Expanded(child: Text(tr('Source'), style: UtText.label)),
+                  Text(tr('Tokens · 30 days'), style: UtText.label),
                 ]),
                 const SizedBox(height: 6),
                 if (providers.isEmpty)
-                  const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('No uploads in the last 30 days.',
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(tr('No uploads in the last 30 days.'),
                           style: UtText.body)),
                 for (final p in providers)
                   UtRow(
@@ -175,18 +210,18 @@ class LiveDesktopScreen extends StatelessWidget {
           },
         ),
         const SizedBox(height: 28),
-        const UtSectionLabel('Collector'),
-        const UtCard(
-          padding: EdgeInsets.fromLTRB(16, 6, 16, 6),
+        UtSectionLabel(tr('Collector')),
+        UtCard(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
           child: UtRowGroup(children: [
             UtRow(
-                title: 'Account link',
-                subtitle:
-                    'Desktop and phone sign in with the same Google account'),
+                title: tr('Account link'),
+                subtitle: tr(
+                    'Desktop and phone sign in with the same Google account')),
             UtRow(
-                title: 'Prompt content',
-                subtitle: 'Never collected',
-                trailing: UtPill('Off')),
+                title: tr('Prompt content'),
+                subtitle: tr('Never collected'),
+                trailing: UtPill(tr('Off'))),
           ]),
         ),
       ],
@@ -221,22 +256,24 @@ class _DesktopStatusState extends State<_DesktopStatus> {
             .watchSyncRequest(uid: widget.args.uid, id: id));
       }
     } catch (_) {
-      if (mounted) utShowNotice(context, 'Couldn’t reach Firebase. Try again.');
+      if (mounted) {
+        utShowNotice(context, tr('Couldn’t reach Firebase. Try again.'));
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
   }
 
   String _requestText(SyncRequestStatus? r) => switch (r?.state) {
-        'running' => 'Desktop is syncing…',
-        'done' => 'Desktop finished syncing',
+        'running' => tr('Desktop is syncing…'),
+        'done' => tr('Desktop finished syncing'),
         'failed' => switch (r!.errorCode) {
-            'network' => 'Desktop couldn’t reach Firebase',
-            'revoked' => 'Desktop needs to sign in again',
-            'not_paired' => 'Desktop is signed out',
-            _ => 'Desktop sync failed',
+            'network' => tr('Desktop couldn’t reach Firebase'),
+            'revoked' => tr('Desktop needs to sign in again'),
+            'not_paired' => tr('Desktop is signed out'),
+            _ => tr('Desktop sync failed'),
           },
-        _ => 'Waiting for the desktop to pick this up…',
+        _ => tr('Waiting for the desktop to pick this up…'),
       };
 
   @override
@@ -272,21 +309,25 @@ class _DesktopStatusState extends State<_DesktopStatus> {
                       children: [
                         Text(
                             last == null
-                                ? 'Not synced yet'
+                                ? tr('Not synced yet')
                                 : fresh
-                                    ? 'Connected'
-                                    : 'Sync is behind',
+                                    ? tr('Connected')
+                                    : tr('Sync is behind'),
                             style: UtText.bodyStrong),
                         Text(
                             last == null
-                                ? 'Sign in on desktop with this Google account'
-                                : '$device · synced ${relativeTime(last, now)}',
+                                ? tr(
+                                    'Sign in on desktop with this Google account')
+                                : tr('{device} · synced {when}', {
+                                    'device': device,
+                                    'when': relativeTime(last, now)
+                                  }),
                             style: UtText.caption),
                       ],
                     ),
                   ),
                   UtChipButtonSmall(
-                      label: _sending ? 'Sending…' : 'Sync now',
+                      label: _sending ? tr('Sending…') : 'Sync now',
                       onPressed: _syncNow),
                 ]),
                 if (_request != null)
@@ -410,8 +451,8 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
       utShowNotice(
           context,
           value == null
-              ? 'Monthly limit removed.'
-              : 'Monthly limit saved on this phone.');
+              ? tr('Monthly limit removed.')
+              : tr('Monthly limit saved on this phone.'));
     }
   }
 
@@ -419,10 +460,10 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     return UtPage(
-      title: 'Budget',
-      subtitle: 'Monthly spending limit and alerts.',
+      title: tr('Budget'),
+      subtitle: tr('Monthly spending limit and alerts.'),
       onBack: () => liveBack(context, '/settings'),
-      actions: [UtButton(label: 'Save', onPressed: _save)],
+      actions: [UtButton(label: tr('Save'), onPressed: _save)],
       children: [
         ListenableBuilder(
           listenable: LocalPrefs.instance,
@@ -451,7 +492,7 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
                                 padding: const EdgeInsets.only(bottom: 6),
                                 child: Text(
                                     b.limit == null
-                                        ? 'no limit set'
+                                        ? tr('no limit set')
                                         : 'of ${usd(b.limit)}',
                                     style: UtText.body),
                               ),
@@ -473,14 +514,14 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
                         Row(children: [
                           Text(
                               used == null
-                                  ? 'Set a limit below'
-                                  : '${pct(used)} used',
+                                  ? tr('Set a limit below')
+                                  : tr('{p} used', {'p': pct(used)}),
                               style: UtText.caption.copyWith(
                                   color: (used ?? 0) >= 0.7
                                       ? UtColors.orange
                                       : UtColors.muted)),
                           const Spacer(),
-                          Text('${b.daysLeft} days left',
+                          Text(tr('{n} days left', {'n': b.daysLeft}),
                               style: UtText.caption),
                         ]),
                       ],
@@ -493,15 +534,15 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
                       child: UtRow(
                         leading: const Icon(Icons.warning_amber_rounded,
                             color: UtColors.orange),
-                        title: 'Budget alert',
-                        subtitle:
-                            '${pct(used, digits: 0)} of your monthly limit used',
+                        title: tr('Budget alert'),
+                        subtitle: tr('{p} of your monthly limit used',
+                            {'p': pct(used, digits: 0)}),
                         onTap: () => context.push('/budget-alert'),
                       ),
                     ),
                   ],
                   const SizedBox(height: 28),
-                  const UtSectionLabel('Alerts'),
+                  UtSectionLabel(tr('Alerts')),
                   UtCard(
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                     child: UtRowGroup(children: [
@@ -509,11 +550,11 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
                         UtRow(
                           title: pct(t, digits: 0),
                           subtitle: b.reachedOn(t) == null
-                              ? 'Not reached this month'
-                              : 'Reached ${b.reachedOn(t)}',
+                              ? tr('Not reached this month')
+                              : tr('Reached {d}', {'d': b.reachedOn(t)}),
                           trailing: b.reachedOn(t) == null
-                              ? const UtPill('Watching')
-                              : const UtPill('Reached', tone: UtTone.review),
+                              ? UtPill(tr('Watching'))
+                              : UtPill(tr('Reached'), tone: UtTone.review),
                         ),
                     ]),
                   ),
@@ -523,7 +564,7 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
           ),
         ),
         const SizedBox(height: 28),
-        const UtSectionLabel('Monthly limit'),
+        UtSectionLabel(tr('Monthly limit')),
         UtCard(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
           child: TextField(
@@ -532,18 +573,18 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: UtText.bodyStrong,
             cursorColor: UtColors.text,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
               prefixText: '\$ ',
               prefixStyle: UtText.bodyStrong,
-              hintText: 'e.g. 50.00',
+              hintText: tr('e.g. 50.00'),
               hintStyle: UtText.body,
             ),
             onSubmitted: (_) => _save(),
           ),
         ),
         const SizedBox(height: 10),
-        const Text('Stored on this phone. Leave empty to remove the limit.',
+        Text(tr('Stored on this phone. Leave empty to remove the limit.'),
             style: UtText.caption),
       ],
     );
@@ -559,14 +600,14 @@ class LiveBudgetAlertScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     return UtPage(
-      title: 'Budget alert',
-      subtitle: 'Monthly usage compared with your limit.',
+      title: tr('Budget alert'),
+      subtitle: tr('Monthly usage compared with your limit.'),
       onBack: () => liveBack(context, '/budget'),
       actions: [
         UtButton(
-            label: 'View usage', onPressed: () => context.go('/analytics')),
+            label: tr('View usage'), onPressed: () => context.go('/analytics')),
         UtButton(
-            label: 'Dismiss',
+            label: tr('Dismiss'),
             style: UtButtonStyle.secondary,
             onPressed: () => liveBack(context, '/tokens')),
       ],
@@ -578,10 +619,10 @@ class LiveBudgetAlertScreen extends StatelessWidget {
                 BudgetStatus(all, LocalPrefs.instance.monthlyBudgetUsd, now);
             if (b.limit == null) {
               return UtMessage(
-                  title: 'No monthly limit',
-                  message: 'Set a limit to get budget alerts.',
+                  title: tr('No monthly limit'),
+                  message: tr('Set a limit to get budget alerts.'),
                   action: UtButton(
-                      label: 'Set limit',
+                      label: tr('Set limit'),
                       onPressed: () => context.push('/budget')));
             }
             final week = byModel(filterLastDays(all, 7, now))
@@ -593,7 +634,7 @@ class LiveBudgetAlertScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${pct(b.used!, digits: 0)} used',
+                      Text(tr('{p} used', {'p': pct(b.used!, digits: 0)}),
                           style: UtText.code.copyWith(
                               color: b.used! >= 0.9
                                   ? UtColors.orange
@@ -604,27 +645,29 @@ class LiveBudgetAlertScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                           b.spent >= b.limit!
-                              ? '${usd(b.spent - b.limit!)} over the limit'
-                              : '${usd(b.limit! - b.spent)} remaining',
+                              ? tr('{amount} over the limit',
+                                  {'amount': usd(b.spent - b.limit!)})
+                              : tr('{amount} remaining',
+                                  {'amount': usd(b.limit! - b.spent)}),
                           style: UtText.bodyStrong),
                     ],
                   ),
                 ),
                 const SizedBox(height: 28),
-                const UtSectionLabel('Top contributor · last 7 days'),
+                UtSectionLabel(tr('Top contributor · last 7 days')),
                 UtCard(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                   child: week.isEmpty
-                      ? const UtRow(title: 'No usage this week')
+                      ? UtRow(title: tr('No usage this week'))
                       : UtRow(
                           title: week.first.key,
                           trailing: UtValue(
-                              '+${usd(week.first.value.costUsd)} this week',
+                              tr('+{amount} this week',
+                                  {'amount': usd(week.first.value.costUsd)}),
                               color: UtColors.orange)),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                    'View the model breakdown before changing your tools.',
+                Text(tr('View the model breakdown before changing your tools.'),
                     style: UtText.caption),
               ],
             );
@@ -645,46 +688,46 @@ class LivePrivacyScreen extends StatelessWidget {
         ? const Icon(Icons.check, size: 16, color: UtColors.green)
         : const Text('—', style: UtText.bodyStrong);
     return UtPage(
-      title: 'Privacy',
-      subtitle: 'What is stored on your account.',
+      title: tr('Privacy'),
+      subtitle: tr('What is stored on your account.'),
       onBack: () => liveBack(context, '/settings'),
       children: [
-        const UtSectionLabel('Collected'),
+        UtSectionLabel(tr('Collected')),
         UtCard(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
           child: UtRowGroup(children: [
             UtRow(
-                title: 'Token counts',
-                subtitle: 'Input, output, and cache',
+                title: tr('Token counts'),
+                subtitle: tr('Input, output, and cache'),
                 trailing: tick(true)),
             UtRow(
-                title: 'Model and provider',
-                subtitle: 'Used for breakdowns',
+                title: tr('Model and provider'),
+                subtitle: tr('Used for breakdowns'),
                 trailing: tick(true)),
             UtRow(
-                title: 'Time and latency',
-                subtitle: 'Used for trends',
+                title: tr('Time and latency'),
+                subtitle: tr('Used for trends'),
                 trailing: tick(true)),
           ]),
         ),
         const SizedBox(height: 28),
-        const UtSectionLabel('Not collected'),
+        UtSectionLabel(tr('Not collected')),
         UtCard(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
           child: UtRowGroup(children: [
             UtRow(
-                title: 'Prompt text',
-                subtitle: 'Stays on your device',
+                title: tr('Prompt text'),
+                subtitle: tr('Stays on your device'),
                 trailing: tick(false)),
             UtRow(
-                title: 'AI responses',
-                subtitle: 'Stays on your device',
+                title: tr('AI responses'),
+                subtitle: tr('Stays on your device'),
                 trailing: tick(false)),
           ]),
         ),
         const SizedBox(height: 16),
-        const Text(
-            'Usage is stored as daily totals under your Google account in Firebase.',
+        Text(
+            tr('Usage is stored as daily totals under your Google account in Firebase.'),
             style: UtText.caption),
       ],
     );
@@ -700,19 +743,40 @@ class LiveAccountScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialog) => AlertDialog(
-              title: const Text('Sign out?'),
+              title: Text(tr('Sign out?')),
               content:
-                  const Text('You can sign in again with your Google account.'),
+                  Text(tr('You can sign in again with your Google account.')),
               actions: [
                 TextButton(
                     onPressed: () => Navigator.pop(dialog, false),
-                    child: const Text('Cancel')),
+                    child: Text(tr('Cancel'))),
                 FilledButton(
                     onPressed: () => Navigator.pop(dialog, true),
-                    child: const Text('Sign out')),
+                    child: Text(tr('Sign out'))),
               ],
             ));
     if (confirmed == true) await auth.signOut();
+  }
+
+  Future<void> _testCrash(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialog) => AlertDialog(
+              title: Text(tr('Crash the app?')),
+              content: Text(tr(
+                  'The app will close immediately. The crash is reported to Firebase Crashlytics and logged in Firestore.')),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(dialog, false),
+                    child: Text(tr('Cancel'))),
+                FilledButton(
+                    onPressed: () => Navigator.pop(dialog, true),
+                    child: Text(tr('Crash'))),
+              ],
+            ));
+    if (confirmed != true) return;
+    await CrashReporter.triggerTestCrash(
+        uid: args.uid, appVersion: appVersion, screen: 'account');
   }
 
   @override
@@ -721,13 +785,13 @@ class LiveAccountScreen extends StatelessWidget {
     final user = auth?.user;
     final name = user?.displayName ?? 'Signed in';
     return UtPage(
-      title: 'Account',
-      subtitle: 'Profile, data, and connected devices.',
+      title: tr('Account'),
+      subtitle: tr('Profile, data, and connected devices.'),
       onBack: () => liveBack(context, '/settings'),
       actions: [
         if (auth != null)
           UtButton(
-              label: 'Sign out',
+              label: tr('Sign out'),
               style: UtButtonStyle.secondary,
               onPressed: () => _signOut(context, auth)),
       ],
@@ -759,34 +823,50 @@ class LiveAccountScreen extends StatelessWidget {
           ]),
         ),
         const SizedBox(height: 28),
-        const UtSectionLabel('Data'),
+        UtSectionLabel(tr('Data')),
         UtCard(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
           child: UtRowGroup(children: [
             StreamBuilder<DateTime?>(
               stream: args.repository.watchLastSync(uid: args.uid),
               builder: (context, s) => UtRow(
-                title: 'Cloud sync',
-                subtitle: 'Daily totals only',
+                title: tr('Cloud sync'),
+                subtitle: tr('Daily totals only'),
                 trailing: s.data == null
-                    ? const UtPill('Waiting')
-                    : const UtPill('Active', tone: UtTone.good),
+                    ? UtPill(tr('Waiting'))
+                    : UtPill(tr('Active'), tone: UtTone.good),
               ),
             ),
             UtRow(
-              title: 'Export',
-              subtitle: 'CSV or JSON',
+              title: tr('Export'),
+              subtitle: tr('CSV or JSON'),
               onTap: () => context.push('/confirmations'),
             ),
           ]),
         ),
         const SizedBox(height: 28),
-        const UtSectionLabel('Account'),
-        const UtCard(
-          padding: EdgeInsets.fromLTRB(16, 6, 16, 6),
+        UtSectionLabel(tr('Account')),
+        UtCard(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
           child: UtRowGroup(children: [
-            UtRow(title: 'Google account', subtitle: 'Signed in with Google'),
-            UtRow(title: 'App version', subtitle: 'Version $appVersion'),
+            UtRow(
+                title: tr('Google account'),
+                subtitle: tr('Signed in with Google')),
+            UtRow(
+                title: tr('App version'),
+                subtitle: tr('Version {v}', {'v': appVersion})),
+          ]),
+        ),
+        const SizedBox(height: 28),
+        UtSectionLabel(tr('Diagnostics')),
+        UtCard(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+          child: UtRowGroup(children: [
+            UtRow(
+              title: tr('Test crash'),
+              subtitle: tr('Crash the app and report it to Firebase'),
+              onTap: () => _testCrash(context),
+            ),
           ]),
         ),
       ],
@@ -816,8 +896,8 @@ class LiveModelPricingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UtPage(
-      title: 'Model pricing',
-      subtitle: 'Effective cost per million tokens from your usage',
+      title: tr('Model pricing'),
+      subtitle: tr('Effective cost per million tokens from your usage'),
       onBack: () => liveBack(context, '/settings'),
       children: [
         UtStream<List<DailyDoc>>(
@@ -831,17 +911,17 @@ class LiveModelPricingScreen extends StatelessWidget {
               ..sort();
             final providers = byProvider(all);
             if (providers.isEmpty) {
-              return const UtMessage(
-                  title: 'No priced usage yet',
-                  message: 'Rates appear after the desktop uploads usage.');
+              return UtMessage(
+                  title: tr('No priced usage yet'),
+                  message: tr('Rates appear after the desktop uploads usage.'));
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                     versions.isEmpty
-                        ? 'Price catalog version not reported'
-                        : 'Price catalog · ${versions.last}',
+                        ? tr('Price catalog version not reported')
+                        : tr('Price catalog · {v}', {'v': versions.last}),
                     style: UtText.caption),
                 const SizedBox(height: 20),
                 for (final p in providers) ...[
@@ -864,8 +944,8 @@ class LiveModelPricingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                 ],
-                const Text(
-                    'Effective rate = estimated cost ÷ tokens, so it blends input, cached and output prices. The desktop app prices each request from its saved catalog.',
+                Text(
+                    tr('Effective rate = estimated cost ÷ tokens, so it blends input, cached and output prices. The desktop app prices each request from its saved catalog.'),
                     style: UtText.caption),
               ],
             );
@@ -877,79 +957,248 @@ class LiveModelPricingScreen extends StatelessWidget {
 }
 
 /// M15 — AI suggestions provider (configured on desktop).
-class LiveAiSuggestionsScreen extends StatelessWidget {
+class LiveAiSuggestionsScreen extends StatefulWidget {
   const LiveAiSuggestionsScreen({super.key, required this.args});
   final LiveArgs args;
+  @override
+  State<LiveAiSuggestionsScreen> createState() =>
+      _LiveAiSuggestionsScreenState();
+}
+
+/// M15 — AI review on this phone: provider, model, API key, test (FR-AIKEY-001).
+class _LiveAiSuggestionsScreenState extends State<LiveAiSuggestionsScreen> {
+  final _judge = PhoneJudge.instance;
+  late String _provider = _judge.provider;
+  late final _model = TextEditingController(text: _judge.model);
+  final _key = TextEditingController();
+  bool _showKey = false, _testing = false, _saving = false;
+  String? _testResult; // null = not tested, '' = ok, else error code
+
+  @override
+  void dispose() {
+    _model.dispose();
+    _key.dispose();
+    super.dispose();
+  }
+
+  void _pickProvider(String p) {
+    if (p == _provider) return;
+    setState(() {
+      _provider = p;
+      _model.text = defaultJudgeModel(p);
+      _key.clear();
+      _testResult = null;
+    });
+  }
+
+  bool get _keyIsSaved => _provider == _judge.provider && _judge.hasKey;
+
+  Future<void> _test() async {
+    final key = _key.text.trim();
+    if (key.isEmpty && !_keyIsSaved) {
+      setState(() => _testResult = 'missing_key');
+      return;
+    }
+    setState(() {
+      _testing = true;
+      _testResult = null;
+    });
+    String? code;
+    if (key.isEmpty) {
+      // Test the saved key: save model/provider first, then run the check.
+      code = await _judge.testSaved(provider: _provider, model: _model.text);
+    } else {
+      code = await _judge.test(
+          provider: _provider, model: _model.text.trim(), apiKey: key);
+    }
+    if (mounted) {
+      setState(() {
+        _testing = false;
+        _testResult = code ?? '';
+      });
+    }
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    final key = _key.text.trim();
+    await _judge.save(
+        provider: _provider,
+        model: _model.text,
+        apiKey: key.isEmpty ? null : key);
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      _key.clear();
+    });
+    HapticFeedback.lightImpact();
+    utShowNotice(context, tr('AI settings saved on this phone.'));
+  }
+
+  Future<void> _remove() async {
+    await _judge.removeKey();
+    if (mounted) setState(() => _testResult = null);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return UtPage(
-      title: 'AI suggestions',
-      subtitle: 'Model used to write your suggestions.',
-      onBack: () => liveBack(context, '/settings'),
-      children: [
-        UtStream<InsightsDoc?>(
-          stream: args.repository.watchInsights(uid: args.uid),
-          builder: (context, doc) {
-            final status = switch (doc?.status) {
-              'ok' => ('Working', UtTone.good),
-              'insufficient_data' => ('Needs more usage', UtTone.neutral),
-              'failed' => ('Failed', UtTone.danger),
-              null => ('Not run yet', UtTone.neutral),
-              final other => (other, UtTone.neutral),
-            };
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const UtSectionLabel('Provider'),
-                UtCard(
-                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                  child: UtRowGroup(children: [
-                    for (final id in const ['openai', 'anthropic', 'google'])
-                      UtRow(
-                        title: aiProviderName(id),
-                        subtitle: switch (id) {
-                          'openai' => 'GPT models',
-                          'anthropic' => 'Claude models',
-                          _ => 'Gemini models',
-                        },
-                        trailing: doc?.provider == id
-                            ? const Icon(Icons.check,
-                                size: 16, color: UtColors.green)
-                            : null,
-                      ),
-                  ]),
-                ),
-                const SizedBox(height: 28),
-                const UtSectionLabel('Latest review'),
-                UtCard(
-                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                  child: UtRowGroup(children: [
-                    UtRow(title: 'Model', subtitle: doc?.model ?? '—'),
-                    UtRow(
-                        title: 'Status',
-                        subtitle: doc?.generatedAt.isNotEmpty == true
-                            ? 'Generated ${doc!.generatedAt.replaceFirst('T', ' ').split('.').first}'
-                            : 'No review uploaded',
-                        trailing: UtPill(status.$1, tone: status.$2)),
-                    if (doc?.score != null)
-                      UtRow(
-                          title: 'Review score',
-                          trailing: UtValue(
-                              '${doc!.score!.toStringAsFixed(0)}${doc.grade == null ? '' : ' · ${doc.grade}'}')),
-                  ]),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                    'Change the provider, model and API key in Settings › AI review on the desktop app. The API key stays on your computer, not in Firebase.',
-                    style: UtText.caption),
-              ],
-            );
-          },
-        ),
-      ],
+    final status = switch (_testResult) {
+      null => null,
+      '' => (tr('Connected'), UtTone.good),
+      'invalid_api_key' => (tr('Invalid API key'), UtTone.danger),
+      'invalid_model' => (tr('Model not found'), UtTone.danger),
+      'missing_key' => (tr('Enter an API key first'), UtTone.review),
+      final code => (friendlyAiError(code), UtTone.danger),
+    };
+    return ListenableBuilder(
+      listenable: _judge,
+      builder: (context, _) => UtPage(
+        title: tr('AI review'),
+        subtitle: tr('Runs on this phone with your own API key.'),
+        onBack: () => liveBack(context, '/settings'),
+        children: [
+          UtSectionLabel(tr('Provider')),
+          UtSegmented<String>(
+            values: judgeProviders,
+            selected: _provider,
+            label: (p) => switch (p) {
+              'google' => tr('Gemini'),
+              'anthropic' => tr('Claude'),
+              _ => tr('OpenAI'),
+            },
+            onChanged: _pickProvider,
+          ),
+          const SizedBox(height: 8),
+          Text(
+              switch (_provider) {
+                'google' => tr(
+                    'Key from Google AI Studio (aistudio.google.com). Has a free tier.'),
+                'anthropic' =>
+                  tr('Key from the Claude Console (platform.claude.com).'),
+                _ => tr('Key from the OpenAI platform (platform.openai.com).'),
+              },
+              style: UtText.caption),
+          const SizedBox(height: 24),
+          UtSectionLabel(tr('Model')),
+          _Field(
+            fieldKey: const ValueKey('ai-model-field'),
+            controller: _model,
+            hint: defaultJudgeModel(_provider),
+          ),
+          const SizedBox(height: 6),
+          Text(tr('Any model name your provider supports.'),
+              style: UtText.caption),
+          const SizedBox(height: 24),
+          UtSectionLabel(tr('API key'),
+              trailing: _keyIsSaved
+                  ? UtPill(
+                      tr('Saved ••••{hint}', {'hint': _judge.keyHint ?? ''}),
+                      tone: UtTone.good)
+                  : null),
+          _Field(
+            fieldKey: const ValueKey('ai-key-field'),
+            controller: _key,
+            hint: _keyIsSaved
+                ? tr('Leave empty to keep the saved key')
+                : tr('Paste your API key'),
+            obscure: !_showKey,
+            suffix: IconButton(
+              tooltip: _showKey ? tr('Hide key') : tr('Show key'),
+              icon: Icon(
+                  _showKey
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 18,
+                  color: UtColors.muted),
+              onPressed: () => setState(() => _showKey = !_showKey),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+              tr('Stored only in this phone’s secure storage (Android Keystore). Never sent to Firebase or your computer.'),
+              style: UtText.caption),
+          if (status != null) ...[
+            const SizedBox(height: 16),
+            Align(
+                alignment: Alignment.centerLeft,
+                child: UtPill(status.$1, tone: status.$2)),
+          ],
+          const SizedBox(height: 24),
+          Row(children: [
+            Expanded(
+              child: UtButton(
+                label: _testing ? tr('Testing…') : tr('Test connection'),
+                actionName: 'Test connection',
+                style: UtButtonStyle.secondary,
+                onPressed: _testing ? null : _test,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: UtButton(
+                label: _saving ? tr('Saving…') : tr('Save'),
+                actionName: 'Save AI settings',
+                onPressed: _saving ? null : _save,
+              ),
+            ),
+          ]),
+          if (_keyIsSaved) ...[
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton(
+                onPressed: _remove,
+                child: Text(tr('Remove saved key'),
+                    style: UtText.caption.copyWith(color: UtColors.orange)),
+              ),
+            ),
+          ],
+          const SizedBox(height: 20),
+          Text(
+              tr('A review sends about 6,000 tokens of usage totals and costs a few cents with most models. No prompts or code are sent.'),
+              style: UtText.caption),
+        ],
+      ),
     );
   }
+}
+
+class _Field extends StatelessWidget {
+  const _Field(
+      {required this.fieldKey,
+      required this.controller,
+      required this.hint,
+      this.obscure = false,
+      this.suffix});
+  final Key fieldKey;
+  final TextEditingController controller;
+  final String hint;
+  final bool obscure;
+  final Widget? suffix;
+
+  @override
+  Widget build(BuildContext context) => TextField(
+        key: fieldKey,
+        controller: controller,
+        obscureText: obscure,
+        autocorrect: false,
+        enableSuggestions: false,
+        style: UtText.body.copyWith(color: UtColors.text),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: UtText.body,
+          filled: true,
+          fillColor: UtColors.card,
+          suffixIcon: suffix,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: UtColors.cardBorder)),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: UtColors.muted)),
+        ),
+      );
 }
 
 /// O01 — Export this month's daily records.
@@ -1014,22 +1263,24 @@ class LiveExportScreen extends StatelessWidget {
           await Clipboard.setData(ClipboardData(text: text));
           if (context.mounted) {
             utShowNotice(
-                context, 'Copied ${docs.length} daily records as $kind.');
+                context,
+                tr('Copied {n} daily records as {kind}.',
+                    {'n': docs.length, 'kind': kind}));
           }
         }
 
         return UtPage(
-          title: 'Export',
-          subtitle: 'Copy your usage data for this month.',
+          title: tr('Export'),
+          subtitle: tr('Copy your usage data for this month.'),
           onBack: () => liveBack(context, '/account'),
           actions: [
             UtButton(
-                label: 'Copy CSV',
+                label: tr('Copy CSV'),
                 actionName: 'Download CSV',
                 onPressed:
                     docs.isEmpty ? null : () => copy('CSV', toCsv(docs))),
             UtButton(
-                label: 'Copy JSON',
+                label: tr('Copy JSON'),
                 actionName: 'Download JSON',
                 style: UtButtonStyle.secondary,
                 onPressed:
@@ -1041,7 +1292,7 @@ class LiveExportScreen extends StatelessWidget {
                 child: Icon(Icons.file_download_outlined,
                     size: 40, color: UtColors.muted)),
             const SizedBox(height: 20),
-            Text(docs.isEmpty ? 'Nothing to export' : 'Ready to export',
+            Text(docs.isEmpty ? tr('Nothing to export') : 'Ready to export',
                 textAlign: TextAlign.center, style: UtText.title),
             const SizedBox(height: 6),
             Text(
@@ -1053,19 +1304,21 @@ class LiveExportScreen extends StatelessWidget {
               child: Column(children: [
                 Row(children: [
                   Expanded(
+                      child: MiniStat(
+                          value: compact(t.tokens), label: tr('Tokens'))),
+                  Expanded(
                       child:
-                          MiniStat(value: compact(t.tokens), label: 'Tokens')),
+                          MiniStat(value: usd(t.costUsd), label: tr('Cost'))),
                   Expanded(
-                      child: MiniStat(value: usd(t.costUsd), label: 'Cost')),
-                  Expanded(
-                      child: MiniStat(value: '${docs.length}', label: 'Days')),
+                      child:
+                          MiniStat(value: '${docs.length}', label: tr('Days'))),
                 ]),
                 const SizedBox(height: 18),
                 const UtDivider(),
                 const SizedBox(height: 14),
-                const Align(
+                Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Provider mix', style: UtText.label)),
+                    child: Text(tr('Provider mix'), style: UtText.label)),
                 const SizedBox(height: 10),
                 ShareBar(parts: [
                   for (var i = 0; i < providers.length; i++)
@@ -1101,12 +1354,12 @@ class LiveCostBreakdownScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UtPage(
-      title: 'Estimated cost',
+      title: tr('Estimated cost'),
       subtitle: '${period.label} · by model',
       onBack: () => liveBack(context, '/tokens'),
       actions: [
         UtButton(
-            label: 'View model pricing',
+            label: tr('View model pricing'),
             style: UtButtonStyle.secondary,
             onPressed: () => context.push('/model-pricing')),
       ],
@@ -1125,10 +1378,11 @@ class LiveCostBreakdownScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Estimated cost', style: UtText.label),
+                      Text(tr('Estimated cost'), style: UtText.label),
                       const SizedBox(height: 8),
                       Text(usdSmart(t.costUsd), style: UtText.code),
-                      Text('${tok(t.tokens)} tokens', style: UtText.caption),
+                      Text(tr('{n} tokens', {'n': tok(t.tokens)}),
+                          style: UtText.caption),
                     ],
                   ),
                 ),
@@ -1137,7 +1391,7 @@ class LiveCostBreakdownScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                   child: UtRowGroup(children: [
                     if (models.isEmpty)
-                      const UtRow(title: 'No usage in this period'),
+                      UtRow(title: tr('No usage in this period')),
                     for (final m in models)
                       UtRow(
                         title: m.key,
@@ -1148,14 +1402,14 @@ class LiveCostBreakdownScreen extends StatelessWidget {
                     if (models.isNotEmpty) ...[
                       const UtDivider(),
                       UtRow(
-                          title: 'Total estimated',
+                          title: tr('Total estimated'),
                           trailing: UtValue(usdSmart(t.costUsd))),
                     ],
                   ]),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                    'Based on the price catalog saved on your desktop. Final bills from providers may differ.',
+                Text(
+                    tr('Based on the price catalog saved on your desktop. Final bills from providers may differ.'),
                     style: UtText.caption),
               ],
             );

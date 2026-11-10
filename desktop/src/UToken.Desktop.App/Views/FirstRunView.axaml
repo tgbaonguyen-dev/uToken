@@ -1,19 +1,19 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:l="using:UToken.Desktop.App.Localization" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  x:Class="UToken.Desktop.App.Views.FirstRunView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
  <StackPanel Spacing="28" IsEnabled="{Binding !IsBusy}">
  <Border Classes="card" Padding="32" MinHeight="420">
- <StackPanel Spacing="28"><TextBlock Text="SETUP CHECKLIST" Classes="label"/>
+ <StackPanel Spacing="28"><TextBlock Text="{l:T 'SETUP CHECKLIST'}" Classes="label"/>
  <ItemsControl ItemsSource="{Binding SetupRows}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SetupRow">
  <Border Background="#191A1C" CornerRadius="16" Padding="18,15" Margin="0,0,0,22">
  <Grid ColumnDefinitions="40,20,*,Auto">
- <Border Background="{StaticResource PageBrush}" CornerRadius="12" Width="40" Height="40"><TextBlock Text="{Binding Number}" Foreground="{Binding Color}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/></Border>
- <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center"><TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold"/><TextBlock Text="{Binding Description}" Classes="muted" FontSize="11" TextWrapping="Wrap"/></StackPanel>
- <TextBlock Grid.Column="3" Text="{Binding Status}" Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center" FontSize="10" Margin="12,0,0,0"/>
+ <Border Background="{StaticResource PageBrush}" CornerRadius="12" Width="40" Height="40"><TextBlock Text="{Binding Number, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding Color}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/></Border>
+ <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center"><TextBlock Text="{Binding Title, Converter={x:Static l:Tr.Converter}}" FontSize="15" FontWeight="SemiBold"/><TextBlock Text="{Binding Description, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="11" TextWrapping="Wrap"/></StackPanel>
+ <TextBlock Grid.Column="3" Text="{Binding Status, Converter={x:Static l:Tr.Converter}}" Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center" FontSize="10" Margin="12,0,0,0"/>
  </Grid></Border>
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  </StackPanel></Border>
- <WrapPanel><Button Classes="primary" Content="{Binding SetupAction}" Command="{Binding ContinueSetupCommand}" MinWidth="270" Margin="0,0,16,12"/><TextBlock Text="Takes about 2 minutes" Classes="muted" FontSize="10" VerticalAlignment="Center" Margin="0,0,16,12"/><Button Content="Skip setup" IsVisible="{Binding CanSkipSetup}" Command="{Binding SkipSetupCommand}" Margin="0,0,0,12"/></WrapPanel>
- <TextBlock Text="{Binding SetupMessage}" IsVisible="{Binding HasSetupMessage}" Foreground="{Binding SetupMessageColor}" TextWrapping="Wrap"/>
- <TextBlock Text="Usage is read from local logs on this computer. Only daily summaries are uploaded after you sign in; prompts and code never leave this computer." Classes="muted" FontSize="11" TextWrapping="Wrap"/>
+ <WrapPanel><Button Classes="primary" Content="{Binding SetupAction, Converter={x:Static l:Tr.Converter}}" Command="{Binding ContinueSetupCommand}" MinWidth="270" Margin="0,0,16,12"/><TextBlock Text="{l:T 'Takes about 2 minutes'}" Classes="muted" FontSize="10" VerticalAlignment="Center" Margin="0,0,16,12"/><Button Content="{l:T 'Skip setup'}" IsVisible="{Binding CanSkipSetup}" Command="{Binding SkipSetupCommand}" Margin="0,0,0,12"/></WrapPanel>
+ <TextBlock Text="{Binding SetupMessage, Converter={x:Static l:Tr.Converter}}" IsVisible="{Binding HasSetupMessage}" Foreground="{Binding SetupMessageColor}" TextWrapping="Wrap"/>
+ <TextBlock Text="{l:T 'Usage is read from local logs on this computer. Only daily summaries are uploaded after you sign in; prompts and code never leave this computer.'}" Classes="muted" FontSize="11" TextWrapping="Wrap"/>
  </StackPanel>
 </UserControl>

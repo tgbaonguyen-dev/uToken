@@ -82,7 +82,7 @@ public sealed class FirebaseAuthClient(HttpClient http, FirebaseOptions options,
     }
 
     private static string Str(JsonElement e, string name) =>
-        e.TryGetProperty(name, out var v) && v.GetString() is { } s ? s : throw new InvalidDataException($"Thiếu trường {name} trong phản hồi Firebase.");
+        e.TryGetProperty(name, out var v) && v.GetString() is { } s ? s : throw new InvalidDataException($"Firebase response is missing field {name}.");
 
     private static double Seconds(JsonElement e, string name) =>
         e.TryGetProperty(name, out var v) && double.TryParse(v.ValueKind == JsonValueKind.String ? v.GetString() : v.GetRawText(),

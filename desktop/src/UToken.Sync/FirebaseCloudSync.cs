@@ -32,10 +32,10 @@ public interface ICloudSync
 
     /// <summary>
     /// Lấy các yêu cầu sync mobile tạo (users/{uid}/sync_requests, state = pending) và chuyển chúng sang running.
-    /// Trả về ID đã nhận. Mặc định không có yêu cầu nào (bản giả lập/offline).
+    /// Trả về các yêu cầu đã nhận. Mặc định không có yêu cầu nào (bản giả lập/offline).
     /// </summary>
-    Task<IReadOnlyList<string>> ClaimSyncRequestsAsync(CancellationToken ct = default) =>
-        Task.FromResult<IReadOnlyList<string>>([]);
+    Task<IReadOnlyList<MobileSyncRequest>> ClaimSyncRequestsAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<MobileSyncRequest>>([]);
 
     /// <summary>Đánh dấu yêu cầu đã nhận là done hoặc failed (kèm error_code).</summary>
     Task FinishSyncRequestsAsync(IReadOnlyList<string> ids, string? errorCode, CancellationToken ct = default) =>
@@ -171,7 +171,7 @@ public sealed class FirebaseCloudSync : ICloudSync
         finally { _tokenLock.Release(); }
     }
 
-    public async Task<IReadOnlyList<string>> ClaimSyncRequestsAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<MobileSyncRequest>> ClaimSyncRequestsAsync(CancellationToken ct = default)
     {
         await _tokenLock.WaitAsync(ct);
         try
@@ -192,9 +192,12 @@ public sealed class FirebaseCloudSync : ICloudSync
                 ["limit"] = 20,
             };
             var docs = await _firestore.RunQueryAsync($"users/{session.Uid}", query, ct);
-            var ids = docs.Select(d => d["name"]!.GetValue<string>().Split('/')[^1]).ToList();
-            if (ids.Count > 0) await SetRequestStateAsync(session.Uid, ids, "running", null, finished: false, ct);
-            return ids;
+            var requests = docs.Select(d => new MobileSyncRequest(
+                d["name"]!.GetValue<string>().Split('/')[^1],
+                d["fields"]?["trigger"]?["stringValue"]?.GetValue<string>() ?? "manual_refresh")).ToList();
+            if (requests.Count > 0)
+                await SetRequestStateAsync(session.Uid, requests.Select(r => r.Id).ToList(), "running", null, finished: false, ct);
+            return requests;
         }
         catch (CloudAuthException) { ClearSession(); throw; }
         finally { _tokenLock.Release(); }
@@ -317,4 +320,10 @@ public sealed class FirebaseCloudSync : ICloudSync
             return null;
         }
     }
+}
+
+/// <summary>Yêu cầu từ mobile: trigger = screen_open, manual_refresh hoặc ai_review (sync rồi chạy AI review ngay).</summary>
+public sealed record MobileSyncRequest(string Id, string Trigger)
+{
+    public bool WantsReview => Trigger == "ai_review";
 }

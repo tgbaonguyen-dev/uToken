@@ -63,7 +63,7 @@ public sealed class UsageEngine(
     /// <summary>Lưu bảng giá đã tải (phần ghi SQLite, tách khỏi phần gọi mạng) rồi dùng ngay. Trả về số model đổi giá.</summary>
     public int ApplyPriceCatalog(IReadOnlyList<ModelPrice> catalog)
     {
-        if (catalog.Count == 0) throw new InvalidDataException("models.dev trả về bảng giá rỗng");
+        if (catalog.Count == 0) throw new InvalidDataException("models.dev returned an empty price list");
         var now = Now;
         int changed = store.SavePrices(catalog, PricingSync.VersionFor(now), now);
         RefreshPrices();

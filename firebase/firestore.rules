@@ -25,7 +25,7 @@ service cloud.firestore {
       match /sync_requests/{id} {
         allow read, delete: if isOwner(uid);
         allow create: if isOwner(uid)
-          && request.resource.data.trigger in ['screen_open', 'manual_refresh']
+          && request.resource.data.trigger in ['screen_open', 'manual_refresh', 'ai_review']
           && request.resource.data.state == 'pending';
         allow update: if isOwner(uid);
       }

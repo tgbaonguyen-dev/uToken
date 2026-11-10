@@ -12,7 +12,7 @@ public sealed class PriceSchedule : IEquatable<PriceSchedule>
     public PriceSchedule(Price @base, IReadOnlyList<PriceTier> tiers)
     {
         if (tiers.Select(tier => tier.ContextAbove).Distinct().Count() != tiers.Count)
-            throw new ArgumentException("Các bậc giá không được trùng ngưỡng context.", nameof(tiers));
+            throw new ArgumentException("Price tiers must not share a context threshold.", nameof(tiers));
 
         Base = @base;
         _tiers = tiers.OrderBy(tier => tier.ContextAbove).ToArray();

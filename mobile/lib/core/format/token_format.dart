@@ -15,4 +15,4 @@ String formatTokens(int value, TokenFormat format) {
 
 /// Mẫu số bằng 0 hoặc nguồn không cung cấp → "Không có dữ liệu" (SRS §3.4), không hiển thị 0.
 String formatRateOrNoData(double? rate) =>
-    rate == null ? 'Không có dữ liệu' : '${(rate * 100).toStringAsFixed(1)}%';
+    rate == null ? 'No data' : '${(rate * 100).toStringAsFixed(1)}%';
