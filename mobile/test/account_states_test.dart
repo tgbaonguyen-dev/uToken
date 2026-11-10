@@ -120,11 +120,7 @@ void main() {
       await tapKey('reviewed-state-action');
       if (state == AuthScreenState.accountSigningOut) {
         expect(appRouter.routeInformationProvider.value.uri.path, '/welcome');
-        expect(
-            tester
-                .widget<FigmaPixelScreen>(find.byType(FigmaPixelScreen))
-                .screenId,
-            'M01');
+        expect(find.text('Track your\nAI usage.'), findsOneWidget);
         continue;
       }
       if (state == AuthScreenState.accountReauthentication ||

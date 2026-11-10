@@ -17,6 +17,7 @@ import '../features/efficiency/presentation/efficiency_screen.dart';
 import '../features/insights/presentation/insights_screen.dart';
 import '../features/settings/presentation/last_sync_screen.dart';
 import '../core/data/usage_repository.dart';
+import '../features/onboarding/presentation/onboarding_screens.dart';
 
 /// Combined UI routes: exported Figma frames, hand-built states and insight detail.
 final appRouter = createAppRouter();
@@ -149,6 +150,8 @@ GoRouter createAppRouter(
                   return LastSyncScreen(uid: uid, repository: repository);
                 }
               }
+              final widgetScreen = _widgetScreens[entry.key];
+              if (widgetScreen != null) return widgetScreen;
               return FigmaPixelScreen(
                   screenId: entry.key,
                   initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
@@ -157,6 +160,14 @@ GoRouter createAppRouter(
           ),
       ],
     );
+
+/// Figma frames rebuilt with layout widgets; the rest still use the
+/// coordinate-based FigmaPixelScreen.
+const Map<String, Widget> _widgetScreens = {
+  'M01': WelcomeScreen(),
+  'M02': ConnectDesktopScreen(),
+  'M03': InstallGuideScreen(),
+};
 
 bool _hasRealUser(MobileAuthController? auth, UsageRepository? usage) =>
     auth?.user != null && !auth!.demoMode && usage != null;
