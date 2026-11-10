@@ -18,6 +18,7 @@ class InsightsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RealScreenScaffold(
         title: 'Insights',
+        onRefresh: () => repository.refresh(uid: uid),
         selectedIndex: 2,
         body: StreamBuilder<InsightsDoc?>(
           stream: repository.watchInsights(uid: uid),

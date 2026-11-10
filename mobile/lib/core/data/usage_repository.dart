@@ -7,9 +7,11 @@ import '../models/usage_docs.dart';
 
 /// Read-only contract for usage documents owned by a signed-in user.
 abstract interface class UsageRepository {
+  /// Explicitly read the server; offline/cache-only reads must not report success.
+  Future<void> refresh({required String uid});
   Stream<List<DailyDoc>> watchDaily({
     required String uid,
-    required DateTime start,
+    DateTime? start,
     required DateTime end,
   });
 
@@ -28,15 +30,28 @@ class FirestoreUsageRepository implements UsageRepository {
       firestore.collection('users').doc(uid);
 
   @override
+  Future<void> refresh({required String uid}) async {
+    final user = _user(uid);
+    const server = GetOptions(source: Source.server);
+    await Future.wait([
+      user.get(server),
+      user.collection('daily').orderBy(FieldPath.documentId).get(server),
+      user.collection('efficiency').doc('current').get(server),
+      user.collection('insights').doc('current').get(server),
+    ]);
+  }
+
+  @override
   Stream<List<DailyDoc>> watchDaily({
     required String uid,
-    required DateTime start,
+    DateTime? start,
     required DateTime end,
   }) {
-    final query = _user(uid)
+    var query = _user(uid)
         .collection('daily')
         .orderBy(FieldPath.documentId)
-        .startAt([_day(start)]).endAt([_day(end)]);
+        .endAt([_day(end)]);
+    if (start != null) query = query.startAt([_day(start)]);
     return query.snapshots().map((snapshot) {
       final documents = <DailyDoc>[];
       for (final document in snapshot.docs) {

@@ -1,8 +1,17 @@
 import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 /// Returns a user-facing message for a failed Firestore stream.
 String friendlyStreamError(Object error) {
   debugPrint('Firestore stream error: $error');
+  if (error is FirebaseException) {
+    if (error.code == 'permission-denied') {
+      return 'Firebase denied access. Check the signed-in account, project and Firestore Rules.';
+    }
+    if (error.code == 'unauthenticated') {
+      return 'Session expired. Sign in with Google again.';
+    }
+  }
   return 'Không đọc được dữ liệu. Kiểm tra kết nối mạng.';
 }
 

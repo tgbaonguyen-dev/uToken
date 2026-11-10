@@ -35,6 +35,16 @@ GoRouter createAppRouter(
         if (auth.user == null && !auth.demoMode) {
           return path == '/welcome' ? null : '/welcome';
         }
+        // Account UID links both apps; code-pairing screens are preview-only.
+        if (auth.user != null && !auth.demoMode) {
+          if (path == '/connect-desktop' ||
+              path == '/desktop-not-connected' ||
+              path == '/waiting-first-usage' ||
+              path == '/syncing-usage' ||
+              path == '/sync-failed') {
+            return '/tokens';
+          }
+        }
         if (path == '/state-preview' ||
             path.startsWith('/ui-state/') ||
             path == '/auth/signing-in') {

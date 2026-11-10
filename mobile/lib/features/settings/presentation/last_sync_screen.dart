@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/data/usage_repository.dart';
+import '../../../core/data/stream_status.dart';
 import '../../../core/widgets/real_screen_scaffold.dart';
 
 /// M10 desktop synchronization status.
@@ -13,10 +14,14 @@ class LastSyncScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RealScreenScaffold(
         title: 'Desktop connection',
+        onRefresh: () => repository.refresh(uid: uid),
         selectedIndex: 3,
         body: StreamBuilder<DateTime?>(
           stream: repository.watchLastSync(uid: uid),
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(child: Text(friendlyStreamError(snapshot.error!)));
+            }
             if (snapshot.connectionState == ConnectionState.waiting &&
                 !snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());

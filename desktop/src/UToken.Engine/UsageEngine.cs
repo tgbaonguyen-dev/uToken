@@ -185,6 +185,11 @@ public sealed class UsageEngine(
     {
         var scan = Scan(ct);
         var dates = new SortedSet<DateOnly>(scan.TouchedDates) { Today };
+        // Sources/Rescan can consume log changes before Run; reconcile all retained days,
+        // including summaries missed by an earlier app process. SaveDailyLocal is idempotent.
+        if (store.GetFirstEventAt() is { } first)
+            for (var date = DailyAggregator.LocalDate(first, TimeZone); date <= Today; date = date.AddDays(1))
+                dates.Add(date);
         // Task của hôm qua có thể vừa đóng (quá 2 phút không có turn mới) nên tính lại luôn.
         dates.Add(Today.AddDays(-1));
 

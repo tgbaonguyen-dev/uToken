@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import '../data/stream_status.dart';
 
 /// Shared dark frame and tab navigation for Firestore-backed screens.
 class RealScreenScaffold extends StatelessWidget {
@@ -11,11 +12,13 @@ class RealScreenScaffold extends StatelessWidget {
     required this.title,
     required this.selectedIndex,
     required this.body,
+    this.onRefresh,
   });
 
   final String title;
   final int selectedIndex;
   final Widget body;
+  final Future<void> Function()? onRefresh;
 
   static const _routes = ['/tokens', '/analytics', '/insights', '/settings'];
 
@@ -25,6 +28,9 @@ class RealScreenScaffold extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: AppColors.background,
           title: Text(title, style: AppTypography.screenTitle),
+          actions: [
+            if (onRefresh != null) _RefreshButton(onRefresh: onRefresh!),
+          ],
         ),
         body: body,
         bottomNavigationBar: NavigationBar(
@@ -51,6 +57,50 @@ class RealScreenScaffold extends StatelessWidget {
             ),
           ],
         ),
+      );
+}
+
+class _RefreshButton extends StatefulWidget {
+  const _RefreshButton({required this.onRefresh});
+  final Future<void> Function() onRefresh;
+  @override
+  State<_RefreshButton> createState() => _RefreshButtonState();
+}
+
+class _RefreshButtonState extends State<_RefreshButton> {
+  bool _busy = false;
+  Future<void> _refresh() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onRefresh();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Read latest data from Firebase. New usage requires a desktop upload.'),
+        ));
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(friendlyStreamError(error)),
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+        tooltip: 'Refresh from Firebase',
+        onPressed: _busy ? null : _refresh,
+        icon: _busy
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(Icons.refresh),
       );
 }
 

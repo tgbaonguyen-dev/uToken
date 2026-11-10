@@ -8,7 +8,6 @@ import 'package:utoken_mobile/app/router.dart';
 import 'package:utoken_mobile/core/mock/figma_mock_repository.dart';
 import 'package:utoken_mobile/core/widgets/ui_preview_scope.dart';
 import 'package:utoken_mobile/features/auth/domain/mobile_auth.dart';
-import 'package:utoken_mobile/features/figma/presentation/figma_pixel_screen.dart';
 
 import 'account_states_test.dart' show settle;
 
@@ -75,7 +74,7 @@ void main() {
     result.complete(signedInUser);
     await operation;
     expect(auth.user?.email, signedInUser.email);
-    expect(auth.signedInDestination, '/connect-desktop');
+    expect(auth.signedInDestination, '/tokens');
     expect(auth.busy, isFalse);
   });
 
@@ -199,22 +198,18 @@ void main() {
     expect(find.text('Network unavailable.'), findsOneWidget);
     gateway.signInHandler = null;
     await tapKey('figma-hotspot-Continue with Google');
-    expect(router.routeInformationProvider.value.uri.path, '/connect-desktop');
-    await tapKey('figma-hotspot-Back');
     expect(router.routeInformationProvider.value.uri.path, '/tokens');
-    router.go('/connect-desktop');
-    await settle(tester);
-    await tapKey('figma-hotspot-I’ve paired my device');
-    expect(
-        router.routeInformationProvider.value.uri.path, '/waiting-first-usage');
-    await tapKey('figma-hotspot-Refresh usage');
-    expect(
-        tester
-            .widget<FigmaPixelScreen>(find.byType(FigmaPixelScreen).last)
-            .screenId,
-        'S03');
-    await tapKey('mock-complete-sync');
-    expect(router.routeInformationProvider.value.uri.path, '/tokens');
+    for (final path in [
+      '/connect-desktop',
+      '/desktop-not-connected',
+      '/waiting-first-usage',
+      '/syncing-usage',
+      '/sync-failed'
+    ]) {
+      router.go(path);
+      await settle(tester);
+      expect(router.routeInformationProvider.value.uri.path, '/tokens');
+    }
     await tapKey('figma-hotspot-Refresh');
     expect(router.routeInformationProvider.value.uri.path, '/tokens');
     await tapKey('figma-hotspot-Refresh');
