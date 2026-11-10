@@ -48,6 +48,18 @@ class LocalPrefs extends ChangeNotifier {
 
   double? get monthlyBudgetUsd => _budgetUsd;
   TokenFormat get tokenFormat => _tokenFormat;
+
+  /// App language: 'en' or 'vi'. Stored on this phone only.
+  String _language = 'en';
+  String get language => _language;
+  bool get vietnamese => _language == 'vi';
+
+  Future<void> setLanguage(String code) async {
+    _language = code == 'vi' ? 'vi' : 'en';
+    notifyListeners();
+    await _store.write('language', _language);
+  }
+
   bool isReviewed(String insightId) => _reviewed.contains(insightId);
 
   StreamSubscription<Map<String, dynamic>?>? _remote;
@@ -131,6 +143,7 @@ class LocalPrefs extends ChangeNotifier {
     _loaded = true;
     try {
       _cachedFor = await _store.read('prefs_uid');
+      _language = (await _store.read('language')) == 'vi' ? 'vi' : 'en';
       _budgetUsd = double.tryParse(await _store.read('budget_usd') ?? '');
       _tokenFormat = (await _store.read('token_format')) == 'full'
           ? TokenFormat.full

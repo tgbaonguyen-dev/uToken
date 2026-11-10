@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/stream_status.dart';
+import '../i18n/tr.dart';
 
 /// Dark design tokens taken from the Figma "07 - Final UI Dark" exports
 /// (lib/core/mock/data/figma_dark_*.json).
@@ -277,7 +279,7 @@ class _Header extends StatelessWidget {
               child: onBack == null
                   ? null
                   : Semantics(
-                      label: 'Back',
+                      label: tr('Back'),
                       button: true,
                       child: InkResponse(
                         key: utActionKey('Back'),
@@ -391,7 +393,14 @@ class UtTabPage extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
               child: UtDivider(),
             ),
-            Expanded(child: body),
+            Expanded(
+                child: onRefresh == null
+                    ? body
+                    : RefreshIndicator(
+                        color: UtColors.text,
+                        backgroundColor: UtColors.card,
+                        onRefresh: () => utRunRefresh(context, onRefresh!),
+                        child: body)),
           ],
         ),
       ),
@@ -435,12 +444,17 @@ class _DockTab extends StatelessWidget {
     final (label, icon, route) = UtTabPage.tabs[index];
     final color = selected ? UtColors.text : UtTabColors.inactive;
     return Semantics(
-      label: label,
+      label: tr(label),
       button: true,
       selected: selected,
       child: InkWell(
         key: ValueKey('utoken-tab-$index'),
-        onTap: selected ? null : () => context.go(route),
+        onTap: selected
+            ? null
+            : () {
+                HapticFeedback.selectionClick();
+                context.go(route);
+              },
         child: Stack(alignment: Alignment.topCenter, children: [
           if (selected)
             Container(
@@ -455,7 +469,7 @@ class _DockTab extends StatelessWidget {
               Icon(icon, size: 18, color: color),
               const SizedBox(height: 8),
               ExcludeSemantics(
-                child: Text(label,
+                child: Text(tr(label),
                     style: TextStyle(
                         fontFamily: 'BeVietnamPro',
                         fontSize: selected ? 11 : 10.5,
@@ -472,7 +486,26 @@ class _DockTab extends StatelessWidget {
   }
 }
 
-/// 32px square refresh button (Figma "↻" in a bordered box).
+/// 40px square refresh button (Figma "↻" in a bordered box).
+/// Runs a refresh and reports the result in a snackbar. Shared by the header
+/// button and pull-to-refresh so both behave the same.
+Future<void> utRunRefresh(
+    BuildContext context, Future<void> Function() onRefresh) async {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  void notice(String text) => messenger
+    ?..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(
+        content: Text(text),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16)));
+  try {
+    await onRefresh();
+    notice('Up to date. Your desktop was asked to upload new usage.');
+  } catch (error) {
+    notice(friendlyStreamError(error));
+  }
+}
+
 class UtRefreshButton extends StatefulWidget {
   const UtRefreshButton({super.key, required this.onRefresh});
   final Future<void> Function() onRefresh;
@@ -486,15 +519,10 @@ class _UtRefreshButtonState extends State<UtRefreshButton> {
 
   Future<void> _run() async {
     if (_busy) return;
+    HapticFeedback.lightImpact();
     setState(() => _busy = true);
     try {
-      await widget.onRefresh();
-      if (mounted) {
-        utShowNotice(context,
-            'Read latest data from Firebase and asked your desktop to sync.');
-      }
-    } catch (error) {
-      if (mounted) utShowNotice(context, friendlyStreamError(error));
+      await utRunRefresh(context, widget.onRefresh);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -502,7 +530,7 @@ class _UtRefreshButtonState extends State<UtRefreshButton> {
 
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: 'Refresh from Firebase',
+        message: tr('Refresh from Firebase'),
         child: Material(
           color: UtColors.background,
           shape: RoundedRectangleBorder(
@@ -513,8 +541,8 @@ class _UtRefreshButtonState extends State<UtRefreshButton> {
             key: utActionKey('Refresh'),
             onTap: _busy ? null : _run,
             child: SizedBox(
-              width: 32,
-              height: 32,
+              width: 40,
+              height: 40,
               child: Center(
                 child: _busy
                     ? const SizedBox(
@@ -561,7 +589,11 @@ class UtSegmented<T> extends StatelessWidget {
               child: GestureDetector(
                 key: utActionKey(label(v)),
                 behavior: HitTestBehavior.opaque,
-                onTap: () => onChanged(v),
+                onTap: () {
+                  if (v == selected) return;
+                  HapticFeedback.selectionClick();
+                  onChanged(v);
+                },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
@@ -736,12 +768,15 @@ class UtStream<T> extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               child: UtMessage(
                   icon: Icons.cloud_off_outlined,
-                  title: 'Couldn’t load data',
+                  title: tr('Couldn’t load data'),
                   message: friendlyStreamError(snapshot.error!)),
             );
           }
+          // A null value (e.g. a document that doesn't exist yet) is real
+          // data once the stream has emitted; only wait for the first event.
           if (!snapshot.hasData &&
-              snapshot.connectionState != ConnectionState.done) {
+              (snapshot.connectionState == ConnectionState.waiting ||
+                  snapshot.connectionState == ConnectionState.none)) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 48),
               child: Center(
@@ -759,6 +794,8 @@ class UtList extends StatelessWidget {
   final List<Widget> children;
   @override
   Widget build(BuildContext context) => ListView(
+        // Always scrollable so pull-to-refresh works on short pages too.
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
         children: children,
       );

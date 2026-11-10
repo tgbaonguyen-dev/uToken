@@ -131,22 +131,51 @@ GoRouter createAppRouter(
         for (final entry in figmaRoutes.entries)
           GoRoute(
             path: entry.value,
-            builder: (context, state) {
-              final args = _liveArgs(auth, usage);
-              if (args != null) {
-                final live = _liveScreen(entry.key, args, state);
-                if (live != null) return _live(live);
+            pageBuilder: (context, state) {
+              Widget screen() {
+                final args = _liveArgs(auth, usage);
+                if (args != null) {
+                  final live = _liveScreen(entry.key, args, state);
+                  if (live != null) return _live(live);
+                }
+                final widgetScreen = _widgetScreens[entry.key];
+                if (widgetScreen != null) return widgetScreen;
+                return FigmaPixelScreen(
+                    screenId: entry.key,
+                    initialPeriod:
+                        state.uri.queryParameters['period'] ?? 'Month',
+                    selectedDay: state.uri.queryParameters['day']);
               }
-              final widgetScreen = _widgetScreens[entry.key];
-              if (widgetScreen != null) return widgetScreen;
-              return FigmaPixelScreen(
-                  screenId: entry.key,
-                  initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
-                  selectedDay: state.uri.queryParameters['day']);
+
+              return _tabScreens.contains(entry.key)
+                  ? _TabPage(key: state.pageKey, child: screen())
+                  : MaterialPage(key: state.pageKey, child: screen());
             },
           ),
       ],
     );
+
+/// Bottom-bar tabs: switching between them cross-fades in place instead of
+/// sliding, so the tab bar stays still like a native app.
+const _tabScreens = {'M04', 'M05', 'M07', 'M09'};
+
+class _TabPage extends CustomTransitionPage<void> {
+  _TabPage({super.key, required super.child})
+      : super(
+          transitionDuration: const Duration(milliseconds: 220),
+          reverseTransitionDuration: const Duration(milliseconds: 160),
+          transitionsBuilder: (context, animation, _, child) => FadeTransition(
+            opacity:
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.985, end: 1).animate(
+                  CurvedAnimation(
+                      parent: animation, curve: Curves.easeOutCubic)),
+              child: child,
+            ),
+          ),
+        );
+}
 
 /// Figma frames rebuilt with layout widgets; the rest still use the
 /// coordinate-based FigmaPixelScreen.
@@ -168,13 +197,18 @@ LiveArgs? _liveArgs(MobileAuthController? auth, UsageRepository? usage) {
 }
 
 /// Rebuilds live screens when phone-only preferences change.
+/// Remounts the page when the app language changes so every string updates.
 Widget _live(Widget child) => ListenableBuilder(
-    listenable: LocalPrefs.instance, builder: (_, __) => child);
+    listenable: LocalPrefs.instance,
+    builder: (_, __) => KeyedSubtree(
+        key: ValueKey('lang-${LocalPrefs.instance.language}'), child: child));
 
 /// Live (Firestore) screen for a Figma frame. Onboarding frames and the
 /// S01–S04 states are handled by the router redirect and Tokens screen.
 Widget? _liveScreen(String id, LiveArgs args, GoRouterState state) {
-  final period = UsagePeriodLabel.parse(state.uri.queryParameters['period']);
+  final query = state.uri.queryParameters['period'];
+  final period =
+      query == null ? lastUsagePeriod : UsagePeriodLabel.parse(query);
   return switch (id) {
     'M04' => LiveTokensScreen(args: args, initialPeriod: period),
     'M04B' => LiveUsageDetailsScreen(args: args, period: period),

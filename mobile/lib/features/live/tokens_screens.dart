@@ -6,6 +6,7 @@ import '../../core/format/token_format.dart';
 import '../../core/models/daily_doc.dart';
 import '../../core/ui/ut_kit.dart';
 import 'live_common.dart';
+import '../../core/i18n/tr.dart';
 
 /// M04 — Tokens overview, including the S01/S02/S04 states.
 class LiveTokensScreen extends StatefulWidget {
@@ -27,7 +28,7 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
   @override
   Widget build(BuildContext context) {
     return UtTabPage(
-      title: 'Tokens',
+      title: tr('Tokens'),
       largeTitle: false,
       tabIndex: 0,
       onRefresh: () async {
@@ -60,8 +61,8 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
       UtSegmented<UsagePeriod>(
         values: UsagePeriod.values,
         selected: _period,
-        label: (p) => p.label,
-        onChanged: (p) => setState(() => _period = p),
+        label: (p) => tr(p.label),
+        onChanged: (p) => setState(() => _period = lastUsagePeriod = p),
       ),
       const SizedBox(height: 22),
       UtCard(
@@ -69,7 +70,7 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Total tokens', style: UtText.label),
+            Text(tr('Total tokens'), style: UtText.label),
             const SizedBox(height: 10),
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -81,7 +82,8 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
             InkWell(
               key: utActionKey('Estimated cost'),
               onTap: () => context.push(withPeriod('/cost-breakdown', _period)),
-              child: Text('${usd(totals.costUsd)} estimated',
+              child: Text(
+                  tr('{amount} estimated', {'amount': usd(totals.costUsd)}),
                   textAlign: TextAlign.center,
                   style: UtText.title
                       .copyWith(fontSize: 16, color: UtColors.green)),
@@ -103,18 +105,18 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
         ),
       ),
       if (docs.isEmpty)
-        const Padding(
-          padding: EdgeInsets.only(top: 16),
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
           child: Text(
-              'No uploaded usage in this period. Run Sync now on desktop, then refresh here.',
+              tr('No uploaded usage in this period. Run Sync now on desktop, then refresh here.'),
               style: UtText.body),
         ),
       const SizedBox(height: 28),
-      UtSectionLabel('Sources',
+      UtSectionLabel(tr('Sources'),
           trailing: InkWell(
             key: utActionKey('Full report'),
             onTap: () => context.push(withPeriod('/usage-details', _period)),
-            child: Text('Full report  ›',
+            child: Text(tr('Full report  ›'),
                 style: UtText.caption.copyWith(color: UtColors.text)),
           )),
       _ProviderCards(providers: providers, total: totals.tokens),
@@ -124,8 +126,8 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            UtSectionLabel('Usage trend',
-                trailing: Text(_trendLabel(docs), style: UtText.caption)),
+            UtSectionLabel(tr('Usage trend'),
+                trailing: Text(_trendLabel(docs, now), style: UtText.caption)),
             _Trend(docs: docs, period: _period, now: now),
           ],
         ),
@@ -136,10 +138,18 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
     ]);
   }
 
-  String _trendLabel(List<DailyDoc> docs) {
-    final now = DateTime.now();
-    return '${monthName(now.month)} ${now.year}';
-  }
+  /// Range the chart covers, e.g. "Today", "Last 7 days", "Since 02 Aug".
+  String _trendLabel(List<DailyDoc> docs, DateTime now) => switch (_period) {
+        UsagePeriod.day => tr('Today'),
+        UsagePeriod.week => tr('Last 7 days'),
+        UsagePeriod.month => tr('Last 30 days'),
+        UsagePeriod.total => docs.isEmpty
+            ? tr('All time')
+            // The chart shows at most 90 days (see _Trend).
+            : now.difference(DateTime.parse(docs.first.date)).inDays >= 90
+                ? tr('Last 90 days')
+                : tr('Since {d}', {'d': shortDate(docs.first.date)}),
+      };
 
   String _coverage(List<DailyDoc> docs, DateTime now) {
     final dates = docs.map((d) => d.date).toList()..sort();
@@ -194,7 +204,7 @@ class _ProviderCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (providers.isEmpty) {
-      return const UtCard(child: Text('No sources yet.', style: UtText.body));
+      return UtCard(child: Text(tr('No sources yet.'), style: UtText.body));
     }
     return Row(children: [
       for (var i = 0; i < providers.length && i < 3; i++) ...[
@@ -299,7 +309,7 @@ class _StaleBanner extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Couldn’t sync latest usage',
+                  Text(tr('Couldn’t sync latest usage'),
                       style: UtText.bodyStrong),
                   Text(
                       'Last successful sync ${relativeTime(lastSync, DateTime.now())}. Open μToken on your computer to upload new usage.',
@@ -322,32 +332,32 @@ class _NotConnected extends StatelessWidget {
         children: [
           UtMessage(
             icon: Icons.desktop_windows_outlined,
-            title: 'Connect your desktop',
-            message:
-                'Install μToken on your computer and sign in with this Google account. Usage appears here after its first sync.',
+            title: tr('Connect your desktop'),
+            message: tr(
+                'Install μToken on your computer and sign in with this Google account. Usage appears here after its first sync.'),
             action: UtButton(
-                label: 'Connect desktop',
+                label: tr('Connect desktop'),
                 onPressed: () => context.push('/install-guide')),
           ),
-          const UtCard(
+          UtCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UtSectionLabel('Once connected'),
+                UtSectionLabel(tr('Once connected')),
                 UtRow(
-                    title: 'Token totals',
-                    subtitle: 'Across Codex, Gemini and Claude'),
+                    title: tr('Token totals'),
+                    subtitle: tr('Across Codex, Gemini and Claude')),
                 UtRow(
-                    title: 'Provider breakdown',
-                    subtitle: 'See which tools use the most'),
+                    title: tr('Provider breakdown'),
+                    subtitle: tr('See which tools use the most')),
                 UtRow(
-                    title: 'Cost estimates',
-                    subtitle: 'Calculated from saved model pricing'),
+                    title: tr('Cost estimates'),
+                    subtitle: tr('Calculated from saved model pricing')),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Prompts stay on your devices.',
+          Text(tr('Prompts stay on your devices.'),
               textAlign: TextAlign.center, style: UtText.caption),
         ],
       );
@@ -358,11 +368,11 @@ class _WaitingForUsage extends StatelessWidget {
   const _WaitingForUsage();
 
   @override
-  Widget build(BuildContext context) => const UtMessage(
+  Widget build(BuildContext context) => UtMessage(
         icon: Icons.hourglass_empty_rounded,
-        title: 'Waiting for first activity',
-        message:
-            'Your desktop is connected. Start a session in Codex, Gemini or Claude, then refresh.',
+        title: tr('Waiting for first activity'),
+        message: tr(
+            'Your desktop is connected. Start a session in Codex, Gemini or Claude, then refresh.'),
       );
 }
 
@@ -376,7 +386,7 @@ class LiveUsageDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UtPage(
-      title: 'Usage details',
+      title: tr('Usage details'),
       onBack: () => liveBack(context, '/tokens'),
       children: [
         UtStream<List<DailyDoc>>(
@@ -390,13 +400,12 @@ class LiveUsageDetailsScreen extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                UtSectionLabel('Top models',
+                UtSectionLabel(tr('Top models'),
                     trailing: Text(period.label, style: UtText.caption)),
                 UtCard(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                   child: models.isEmpty
-                      ? const Text('No usage in this period.',
-                          style: UtText.body)
+                      ? Text(tr('No usage in this period.'), style: UtText.body)
                       : UtRowGroup(children: [
                           for (var i = 0; i < models.length && i < 6; i++)
                             UtRow(
@@ -418,22 +427,22 @@ class LiveUsageDetailsScreen extends StatelessWidget {
                         ]),
                 ),
                 const SizedBox(height: 28),
-                const UtSectionLabel('Activity',
-                    trailing: Text('119 days', style: UtText.caption)),
+                UtSectionLabel(tr('Activity'),
+                    trailing: Text(tr('119 days'), style: UtText.caption)),
                 UtCard(child: _Heatmap(docs: all, now: now)),
                 const SizedBox(height: 28),
-                const UtSectionLabel('Recent days'),
+                UtSectionLabel(tr('Recent days')),
                 UtCard(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                   child: UtRowGroup(children: [
                     for (final d in recent.take(3))
                       UtRow(
                         title: shortDate(d.date),
-                        subtitle: '${d.totals.chats} chats',
+                        subtitle: tr('{n} chats', {'n': d.totals.chats}),
                         trailing: UtValue(tok(d.totals.total)),
                       ),
                     UtRow(
-                        title: 'See all days',
+                        title: tr('See all days'),
                         onTap: () => context.push('/daily-usage')),
                   ]),
                 ),
@@ -469,15 +478,15 @@ class _Heatmap extends StatelessWidget {
 
     return Column(children: [
       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(
+        SizedBox(
           width: 18,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('M', style: UtText.caption),
-            SizedBox(height: 20),
-            Text('W', style: UtText.caption),
-            SizedBox(height: 20),
-            Text('F', style: UtText.caption),
+            Text(tr('M'), style: UtText.caption),
+            const SizedBox(height: 20),
+            Text(tr('W'), style: UtText.caption),
+            const SizedBox(height: 20),
+            Text(tr('F'), style: UtText.caption),
           ]),
         ),
         for (var w = 0; w < weeks; w++)
@@ -499,7 +508,7 @@ class _Heatmap extends StatelessWidget {
       ]),
       const SizedBox(height: 12),
       Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-        const Text('Less', style: UtText.caption),
+        Text(tr('Less'), style: UtText.caption),
         for (final a in [0.0, 0.4, 0.6, 0.8, 1.0])
           Container(
             width: 10,
@@ -512,7 +521,7 @@ class _Heatmap extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2)),
           ),
         const SizedBox(width: 6),
-        const Text('More', style: UtText.caption),
+        Text(tr('More'), style: UtText.caption),
       ]),
     ]);
   }
@@ -545,14 +554,14 @@ class _LiveDailyUsageScreenState extends State<LiveDailyUsageScreen> {
   @override
   Widget build(BuildContext context) {
     return UtPage(
-      title: 'Daily usage',
-      subtitle: 'Usage uploaded by your desktop.',
+      title: tr('Daily usage'),
+      subtitle: tr('Usage uploaded by your desktop.'),
       onBack: () => liveBack(context, '/usage-details'),
       children: [
         UtSegmented<_Group>(
           values: _Group.values,
           selected: _group,
-          label: (g) => g == _Group.daily ? 'Daily' : 'Project',
+          label: (g) => g == _Group.daily ? tr('Daily') : 'Project',
           onChanged: (g) => setState(() {
             _group = g;
             _sort = _Sort.name;
@@ -590,19 +599,19 @@ class _LiveDailyUsageScreenState extends State<LiveDailyUsageScreen> {
               child: Column(children: [
                 Row(children: [
                   _Header(
-                      label: _group == _Group.daily ? 'Date' : 'Project',
+                      label: _group == _Group.daily ? tr('Date') : 'Project',
                       action: 'Sort date',
                       flex: 3,
                       active: _sort == _Sort.name,
                       onTap: () => _sortBy(_Sort.name)),
                   _Header(
-                      label: 'Total',
+                      label: tr('Total'),
                       action: 'Sort tokens',
                       flex: 2,
                       active: _sort == _Sort.tokens,
                       onTap: () => _sortBy(_Sort.tokens)),
                   _Header(
-                      label: 'Chats',
+                      label: tr('Chats'),
                       action: 'Sort chats',
                       flex: 2,
                       active: _sort == _Sort.chats,
@@ -610,9 +619,10 @@ class _LiveDailyUsageScreenState extends State<LiveDailyUsageScreen> {
                 ]),
                 const UtDivider(),
                 if (rows.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text('No usage uploaded yet.', style: UtText.body),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child:
+                        Text(tr('No usage uploaded yet.'), style: UtText.body),
                   ),
                 for (final r in rows)
                   SizedBox(

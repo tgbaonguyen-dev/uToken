@@ -12,7 +12,7 @@ abstract interface class UsageRepository {
   Stream<List<DailyDoc>> watchDaily({
     required String uid,
     DateTime? start,
-    required DateTime end,
+    DateTime? end,
   });
 
   Stream<EfficiencyDoc?> watchEfficiency({required String uid});
@@ -23,11 +23,19 @@ abstract interface class UsageRepository {
   Stream<String?> watchDesktopName({required String uid});
 
   /// Asks the signed-in desktop to scan and upload now; returns the request id.
-  Future<String> requestSync({required String uid});
+  /// [trigger] `ai_review` also makes the desktop run a fresh AI review.
+  Future<String> requestSync(
+      {required String uid, String trigger = 'manual_refresh'});
 
   /// State of a sync request: pending, running, done or failed.
   Stream<SyncRequestStatus?> watchSyncRequest(
       {required String uid, required String id});
+
+  /// Writes users/{uid}/insights/current (phone AI review, FR-RECO-001).
+  Future<void> saveInsights(
+      {required String uid,
+      required Map<String, dynamic> values,
+      bool merge = false});
 
   /// Account preferences shared by every phone (users/{uid}/preferences/mobile).
   Stream<Map<String, dynamic>?> watchPreferences({required String uid});
@@ -42,7 +50,8 @@ class SyncRequestStatus {
   bool get finished => state == 'done' || state == 'failed';
 }
 
-/// Firestore implementation of [UsageRepository]. It never writes documents.
+/// Firestore implementation of [UsageRepository]. Writes only sync requests,
+/// preferences and the phone's AI review.
 class FirestoreUsageRepository implements UsageRepository {
   FirestoreUsageRepository({required this.firestore});
 
@@ -67,12 +76,11 @@ class FirestoreUsageRepository implements UsageRepository {
   Stream<List<DailyDoc>> watchDaily({
     required String uid,
     DateTime? start,
-    required DateTime end,
+    DateTime? end,
   }) {
-    var query = _user(uid)
-        .collection('daily')
-        .orderBy(FieldPath.documentId)
-        .endAt([_day(end)]);
+    Query<JsonMap> query =
+        _user(uid).collection('daily').orderBy(FieldPath.documentId);
+    if (end != null) query = query.endAt([_day(end)]);
     if (start != null) query = query.startAt([_day(start)]);
     return query.snapshots().map((snapshot) {
       final documents = <DailyDoc>[];
@@ -128,9 +136,10 @@ class FirestoreUsageRepository implements UsageRepository {
       .map((snapshot) => snapshot.data()?['desktop_name'] as String?);
 
   @override
-  Future<String> requestSync({required String uid}) async {
+  Future<String> requestSync(
+      {required String uid, String trigger = 'manual_refresh'}) async {
     final doc = await _user(uid).collection('sync_requests').add({
-      'trigger': 'manual_refresh',
+      'trigger': trigger,
       'state': 'pending',
       'created_at': DateTime.now().toUtc().toIso8601String(),
     });
@@ -147,6 +156,16 @@ class FirestoreUsageRepository implements UsageRepository {
             state: data['state'] as String? ?? 'pending',
             errorCode: data['error_code'] as String?);
       });
+
+  @override
+  Future<void> saveInsights(
+          {required String uid,
+          required Map<String, dynamic> values,
+          bool merge = false}) =>
+      _user(uid)
+          .collection('insights')
+          .doc('current')
+          .set(values, SetOptions(merge: merge));
 
   DocumentReference<JsonMap> _prefs(String uid) =>
       _user(uid).collection('preferences').doc('mobile');

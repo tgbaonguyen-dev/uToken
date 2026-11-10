@@ -31,7 +31,7 @@ class FakeUsageRepository implements UsageRepository {
 
   @override
   Stream<List<DailyDoc>> watchDaily(
-          {required String uid, DateTime? start, required DateTime end}) =>
+          {required String uid, DateTime? start, DateTime? end}) =>
       dailyStream ??
       (dailyError == null
           ? Stream.value(dailyValues)
@@ -52,10 +52,23 @@ class FakeUsageRepository implements UsageRepository {
 
   @override
   Stream<String?> watchDesktopName({required String uid}) => desktopName.stream;
+  final List<Map<String, dynamic>> savedInsights = [];
   @override
-  Future<String> requestSync({required String uid}) async {
+  Future<void> saveInsights(
+      {required String uid,
+      required Map<String, dynamic> values,
+      bool merge = false}) async {
+    savedInsights.add(values);
+    if (!merge) insights.add(InsightsDoc.fromMap(values));
+  }
+
+  final List<String> triggers = [];
+  @override
+  Future<String> requestSync(
+      {required String uid, String trigger = 'manual_refresh'}) async {
     final id = 'req-${requests.length + 1}';
     requests.add(id);
+    triggers.add(trigger);
     requestStates[id] = StreamController<SyncRequestStatus?>.broadcast();
     return id;
   }
@@ -200,7 +213,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(exactTotal(tester), '2,400');
     expect(find.text('\$5.00 estimated'), findsOneWidget);
-    expect(find.textContaining('Read latest data'), findsOneWidget);
+    expect(find.textContaining('Up to date'), findsOneWidget);
     expect(repository.requests, ['req-1']);
   });
 
@@ -216,7 +229,7 @@ void main() {
     await tester.tap(button);
     await tester.pumpAndSettle();
     expect(exactTotal(tester), '1,200');
-    expect(find.textContaining('Read latest data'), findsNothing);
+    expect(find.textContaining('Up to date'), findsNothing);
     expect(tester.widget<InkWell>(button).onTap, isNotNull);
     repository.refreshHandler = null;
     await tester.tap(button);
@@ -294,7 +307,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text('BEST FOR MEDIUM TASKS'), findsOneWidget);
-    expect(find.text('7 of 20 chats needed to rank'), findsOneWidget);
+    expect(find.text('13 more chats needed for a verdict'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -447,7 +460,7 @@ void main() {
     await tester.pumpWidget(app(LiveTokensScreen(args: argsFor(repository))));
     await tester.pump();
     await tester.pump();
-    expect(find.text('Không đọc được dữ liệu. Kiểm tra kết nối mạng.'),
+    expect(find.text('Couldn’t load data. Check your internet connection.'),
         findsOneWidget);
   });
 }

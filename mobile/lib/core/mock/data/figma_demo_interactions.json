@@ -1,6 +1,6 @@
 {
   "description": "UI-only interaction targets, entirely separate from the original exported Figma layers and proto hotspots.",
-  "fallbackMessage": "Nút này chưa có chức năng backend trong bản UI Preview. Bạn vẫn có thể xem các màn hình qua thanh điều hướng.",
+  "fallbackMessage": "This button has no backend in the UI preview. You can still browse screens with the tab bar.",
   "areas": {
     "M02": [
       {
@@ -328,7 +328,7 @@
       "Copy code": {
         "type": "copy",
         "value": "8K4 — M2P",
-        "message": "Đã sao chép mã ghép nối mẫu. Mã này chỉ dùng để xem giao diện."
+        "message": "Sample pairing code copied. It only works in the UI preview."
       },
       "I’ve paired my device": {
         "type": "route",
@@ -422,7 +422,7 @@
       },
       "Enable prompt caching": {
         "type": "notice",
-        "message": "Gợi ý mẫu: kiểm tra khả năng dùng prompt caching trong phiên dài. Chưa có kết nối dữ liệu thực."
+        "message": "Sample suggestion: check whether long sessions can use prompt caching. Not connected to real data."
       }
     },
     "M09": {},
@@ -445,7 +445,7 @@
     "M03": {
       "Download desktop app": {
         "type": "notice",
-        "message": "UI Preview: cần bản cài Desktop Companion do nhóm cung cấp."
+        "message": "UI preview: requires the Desktop Companion installer from the team."
       }
     },
     "O01": {},

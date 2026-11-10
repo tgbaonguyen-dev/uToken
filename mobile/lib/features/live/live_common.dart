@@ -25,10 +25,13 @@ class LiveArgs {
     }
   }
 
-  /// All daily summaries up to today.
-  Stream<List<DailyDoc>> daily() =>
-      repository.watchDaily(uid: uid, end: DateTime.now());
+  /// All daily summaries. No end bound: screens filter by the current date,
+  /// so a listener left open past midnight still receives the new day.
+  Stream<List<DailyDoc>> daily() => repository.watchDaily(uid: uid);
 }
+
+/// Period last picked on Tokens or Analytics, so switching tabs keeps it.
+UsagePeriod lastUsagePeriod = UsagePeriod.month;
 
 /// Token count using the user's Compact/Full preference.
 String tok(int value) => formatTokens(value, LocalPrefs.instance.tokenFormat);
@@ -73,17 +76,18 @@ class ShareBar extends StatelessWidget {
   }
 }
 
-const _claudePink = Color(0xFFD65B9E);
+/// Provider colours taken from each logo badge, so bars match the icons.
+const _claudeClay = Color(0xFFD97757);
+const _geminiViolet = Color(0xFF8D7CFF);
 
-/// Figma provider colours: Gemini orange, Codex blue, Claude pink.
 Color providerColorOf(String provider) => switch (provider) {
-      'antigravity' => UtColors.orange,
+      'antigravity' => _geminiViolet,
       'codex' => UtColors.blue,
-      'claude_code' => _claudePink,
+      'claude_code' => _claudeClay,
       _ => UtColors.green,
     };
 
-const providerColors = [UtColors.orange, UtColors.blue, _claudePink];
+const providerColors = [_geminiViolet, UtColors.blue, _claudeClay];
 
 Color providerColor(int index) => providerColors[index % providerColors.length];
 
