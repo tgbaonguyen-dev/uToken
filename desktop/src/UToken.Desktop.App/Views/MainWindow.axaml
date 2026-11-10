@@ -45,12 +45,13 @@
    </Grid>
    <Grid Grid.Row="1" Margin="0,14,0,10" ColumnDefinitions="*,Auto">
     <TextBlock Text="{Binding Notice}" Classes="muted" FontSize="10"/>
-    <TextBlock Grid.Column="1" Text="Loading..." IsVisible="{Binding IsBusy}" Foreground="{StaticResource SuccessBrush}" FontSize="11"/>
+    <ProgressBar Grid.Column="1" x:Name="PageProgress" IsIndeterminate="True" Width="120" Height="2" VerticalAlignment="Center" Foreground="{StaticResource SuccessBrush}" Background="Transparent" IsVisible="{Binding ShowProgress}" AutomationProperties.Name="Loading"/>
    </Grid>
    <Border Grid.Row="2" IsVisible="{Binding HasError}" BorderBrush="#F26039" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
     <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Error}" TextWrapping="Wrap" VerticalAlignment="Center"/><Button Grid.Column="1" Content="Try again" Command="{Binding LoadCommand}" IsEnabled="{Binding !IsBusy}"/></Grid>
    </Border>
-   <ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+   <ScrollViewer Grid.Row="3" x:Name="PageHost" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer.RenderTransform><TranslateTransform/></ScrollViewer.RenderTransform>
     <StackPanel>
      <views:OverviewStateView IsVisible="{Binding IsOverviewState}"/>
      <!-- D02: Collector Dashboard -->

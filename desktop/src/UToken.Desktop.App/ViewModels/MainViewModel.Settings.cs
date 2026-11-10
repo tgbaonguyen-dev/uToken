@@ -36,12 +36,18 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(SelectedRetention));
     }
 
-    [RelayCommand] private Task ShowSettingsAsync() => NavigateAsync(async () =>
+    [RelayCommand] private Task ShowSettingsAsync()
     {
+        if (!CanNavigate) return Task.CompletedTask;
         Page = "settings"; SettingsMessage = null; ConfirmClearData = false; JudgeMessage = null;
-        ApplySettings(await api.GetSettingsAsync());
-        ApplyJudge(await api.GetJudgeSettingsAsync());
-    });
+        return LoadPageAsync(async version =>
+        {
+            var settings = await api.GetSettingsAsync();
+            var judge = await api.GetJudgeSettingsAsync();
+            if (!IsCurrentLoad(version)) return;
+            ApplySettings(settings); ApplyJudge(judge);
+        });
+    }
     [RelayCommand] private Task SaveSettingsAsync() => RunAsync(async () =>
     {
         ApplySettings(await api.SaveSettingsAsync(new(LaunchAtStartup, BackgroundCollection,

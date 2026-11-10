@@ -66,12 +66,17 @@ public partial class MainViewModel
         SaveUiPreferences();
     }
     [RelayCommand]
-    private Task ShowActivityAsync() => NavigateAsync(async () => { Page = "activity"; await LoadActivityCoreAsync(); });
-    [RelayCommand] private Task RefreshActivityAsync() => RunAsync(LoadActivityCoreAsync);
+    private Task ShowActivityAsync()
+    {
+        if (!CanNavigate) return Task.CompletedTask;
+        Page = "activity";
+        return LoadPageAsync(_ => LoadActivityCoreAsync());
+    }
+    [RelayCommand] private Task RefreshActivityAsync() => LoadPageAsync(_ => LoadActivityCoreAsync());
     [RelayCommand]
-    private Task ShowCollectedAsync() => RunAsync(async () => { WarningsOnly = false; await LoadActivityCoreAsync(); });
+    private Task ShowCollectedAsync() { WarningsOnly = false; return LoadPageAsync(_ => LoadActivityCoreAsync()); }
     [RelayCommand]
-    private Task ShowWarningsAsync() => RunAsync(async () => { WarningsOnly = true; await LoadActivityCoreAsync(); });
+    private Task ShowWarningsAsync() { WarningsOnly = true; return LoadPageAsync(_ => LoadActivityCoreAsync()); }
     public async Task<string?> ExportActivityCsvAsync()
     {
         string? csv = null;
@@ -85,7 +90,16 @@ public partial class MainViewModel
     public void ReportExportResult(bool success) => Notice = success ? "Activity exported successfully." : "Could not save the export. Choose another location and try again.";
 
     [RelayCommand]
-    private Task ShowSyncAsync() => NavigateAsync(async () => { ResetSectionPreview(); Page = "sync"; ConfirmDisconnect = false; Sync = await api.GetSyncAsync(); });
+    private Task ShowSyncAsync()
+    {
+        if (!CanNavigate) return Task.CompletedTask;
+        ResetSectionPreview(); Page = "sync"; ConfirmDisconnect = false;
+        return LoadPageAsync(async version =>
+        {
+            var sync = await api.GetSyncAsync();
+            if (IsCurrentLoad(version)) Sync = sync;
+        });
+    }
     [RelayCommand]
     private Task SyncNowAsync() => RunAsync(async () =>
     {

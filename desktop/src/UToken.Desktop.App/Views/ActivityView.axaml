@@ -7,7 +7,7 @@
  </UserControl.Styles>
  <StackPanel Spacing="20">
   <Border Classes="card" Padding="16">
-   <StackPanel Spacing="12" IsEnabled="{Binding !IsBusy}">
+   <StackPanel Spacing="12">
     <WrapPanel><ComboBox ItemsSource="{Binding ActivityProviders}" SelectedItem="{Binding ActivityProvider, Mode=TwoWay}" MinWidth="140" Margin="0,0,10,6" AutomationProperties.Name="Activity source"><ComboBox.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Classes="status-dot"/><TextBlock Text="{Binding}"/></StackPanel></DataTemplate></ComboBox.ItemTemplate></ComboBox><ComboBox ItemsSource="{Binding ActivityModels}" SelectedItem="{Binding ActivityModel, Mode=TwoWay}" MinWidth="175" Margin="0,0,10,6" AutomationProperties.Name="Activity model"/><ComboBox ItemsSource="{Binding ActivityPeriods}" SelectedItem="{Binding ActivityPeriod, Mode=TwoWay}" MinWidth="140" Margin="0,0,10,6" AutomationProperties.Name="Activity time range"/></WrapPanel>
     <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
      <TextBox Background="#191C20" BorderBrush="{StaticResource LineBrush}" CornerRadius="8" Text="{Binding ActivitySearch, Mode=TwoWay}" Watermark="Search model, provider, or event ID" Margin="0,0,10,0" AutomationProperties.Name="Search activity"><TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding RefreshActivityCommand}"/></TextBox.KeyBindings></TextBox>
@@ -21,7 +21,7 @@
   <Grid ColumnDefinitions="2.8*,20,*">
    <Border Classes="card" Padding="12,18" MinHeight="440"><StackPanel Spacing="12">
     <Grid ColumnDefinitions="14,65,70,*,65,60,60" Margin="8,0"><TextBlock Grid.Column="1" Text="TIME" Classes="label" FontSize="9"/><TextBlock Grid.Column="2" Text="SOURCE" Classes="label" FontSize="9"/><TextBlock Grid.Column="3" Text="MODEL" Classes="label" FontSize="9"/><TextBlock Grid.Column="4" Text="TOKENS" Classes="label" FontSize="9" TextAlignment="Right"/><TextBlock Grid.Column="5" Text="COST" Classes="label" FontSize="9" TextAlignment="Right"/><TextBlock Grid.Column="6" Text="STATUS" Classes="label" FontSize="9" TextAlignment="Right"/></Grid>
-    <ListBox x:Name="ActivityList" Background="Transparent" BorderThickness="0" ItemsSource="{Binding ActivityPage.Events}" SelectedItem="{Binding SelectedActivity, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}"><ListBox.ItemTemplate><DataTemplate>
+    <ListBox x:Name="ActivityList" Background="Transparent" BorderThickness="0" ItemsSource="{Binding ActivityPage.Events}" SelectedItem="{Binding SelectedActivity, Mode=TwoWay}" Height="520" ScrollViewer.HorizontalScrollBarVisibility="Disabled"><ListBox.ItemTemplate><DataTemplate>
      <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,13"><Grid ColumnDefinitions="14,65,70,*,65,60,60">
       <Ellipse Width="7" Height="7" Fill="{Binding Color}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
       <TextBlock Grid.Column="1" Text="{Binding TimeLabel}" Classes="muted" FontSize="10" ToolTip.Tip="{Binding TimestampLabel}"/><TextBlock Grid.Column="2" Text="{Binding Provider}" FontSize="10"/><TextBlock Grid.Column="3" Text="{Binding Model}" Classes="muted" FontSize="10" ToolTip.Tip="{Binding Model}"/><TextBlock Grid.Column="4" Text="{Binding TokenLabel}" TextAlignment="Right" FontSize="11"/><TextBlock Grid.Column="5" Text="{Binding CostLabel}" TextAlignment="Right" FontSize="11"/><TextBlock Grid.Column="6" Text="{Binding Status}" Foreground="{Binding StatusColor}" TextAlignment="Right" FontSize="10"/>

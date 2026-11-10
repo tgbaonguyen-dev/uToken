@@ -23,7 +23,7 @@ public sealed partial class RealDesktopApi
 
     public async Task<PricingData> GetPricingAsync(CancellationToken ct)
     {
-        await UpdatePricesAsync(ct);
+        // Không chờ mạng: App đã cập nhật giá nền lúc khởi động và trước mỗi Sync.
         return await WithStoreAsync(() =>
         {
             var latest = _store.LoadAllPrices()

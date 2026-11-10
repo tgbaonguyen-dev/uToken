@@ -131,6 +131,8 @@ public sealed class JudgeSettingsViewModelTests : IDisposable
         {
             await TestApp.WaitIdle(vm);
             await vm.ShowSettingsCommand.ExecuteAsync(null);
+            // Trang Settings vừa hiện lần đầu: ép một lượt layout để template của nó được dựng.
+            window.UpdateLayout();
             var keyBox = window.GetVisualDescendants().OfType<TextBox>().Single(t =>
                 Avalonia.Automation.AutomationProperties.GetName(t) == "AI review API key");
             Assert.NotEqual('\0', keyBox.PasswordChar);

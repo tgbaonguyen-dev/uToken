@@ -10,7 +10,11 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     [ObservableProperty, NotifyPropertyChangedFor(nameof(DiscoveryProviders))] private Models.SupportedSourceData[] _supportedSources = [];
     [ObservableProperty, NotifyPropertyChangedFor(nameof(PageTitle))] private Models.SourceData? _selectedSource;
     [ObservableProperty] private string _page = "overview";
-    [ObservableProperty] private bool _isBusy;
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(ShowProgress))] private bool _isBusy;
+    /// <summary>Trang đang tải dữ liệu nền; khác IsBusy, không khóa điều hướng hay nút.</summary>
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(ShowProgress))] private bool _isLoading;
+    public bool ShowProgress => IsBusy || IsLoading;
+    private int _pageVersion;
     [ObservableProperty] private string? _error;
     [ObservableProperty] private string _notice = "Local data · usage metadata only";
     [ObservableProperty] private string _selectedPeriod = "30 days";
@@ -53,15 +57,29 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
         NotifyVisualStatus();
         SkipSetupCommand.NotifyCanExecuteChanged();
     }
+    private static bool IsDataError(Exception ex) => ex is System.IO.IOException or System.IO.InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException;
+    private string DataErrorMessage => IsSettingsPage ? "Could not read or save settings. Check folder permissions. For invalid settings JSON, Restore defaults resets your preferences." : "Could not read local usage data. Check Settings → Open diagnostics.";
     private async Task RunAsync(Func<Task> action)
     {
         if (IsBusy) return;
         IsBusy = true; Error = null;
         try { await action(); }
-        catch (Exception ex) when (ex is System.IO.IOException or System.IO.InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException)
-        { Error = IsSettingsPage ? "Could not read or save settings. Check folder permissions. For invalid settings JSON, Restore defaults resets your preferences." : "Could not read local usage data. Check Settings → Open diagnostics."; }
+        catch (Exception ex) when (IsDataError(ex)) { Error = DataErrorMessage; }
         finally { IsBusy = false; }
     }
+    /// <summary>
+    /// Chuyển trang ngay (caller đổi Page trước), rồi tải dữ liệu nền. Không đặt IsBusy nên các nút
+    /// vẫn bấm được; bấm trang khác giữa chừng thì kết quả cũ bị bỏ qua (xem <see cref="IsCurrentLoad"/>).
+    /// </summary>
+    private async Task LoadPageAsync(Func<int, Task> load)
+    {
+        var version = ++_pageVersion;
+        IsLoading = true; Error = null;
+        try { await load(version); }
+        catch (Exception ex) when (IsDataError(ex)) { if (IsCurrentLoad(version)) Error = DataErrorMessage; }
+        finally { if (IsCurrentLoad(version)) IsLoading = false; }
+    }
+    private bool IsCurrentLoad(int version) => version == _pageVersion;
     [RelayCommand]
     private Task LoadAsync() => RunAsync(async () =>
     {
@@ -95,16 +113,24 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
             _loadedPeriod = SelectedPeriod;
         }
     });
-    [RelayCommand] private void ShowOverview() { if (!IsBusy && CanNavigate) Page = "overview"; }
-    [RelayCommand] private void ShowSources() { if (!IsBusy && CanNavigate) { ResetSectionPreview(); if (SourcePermission is not null) ApplySourcePermission(SourcePermission); Page = "sources"; } }
+    [RelayCommand] private void ShowOverview() { if (CanNavigate) { _pageVersion++; IsLoading = false; Page = "overview"; } }
+    [RelayCommand] private void ShowSources() { if (CanNavigate) { _pageVersion++; IsLoading = false; ResetSectionPreview(); if (SourcePermission is not null) ApplySourcePermission(SourcePermission); Page = "sources"; } }
     [RelayCommand]
-    private Task OpenSourceAsync(Models.SourceData source) => NavigateAsync(async () =>
+    private Task OpenSourceAsync(Models.SourceData source)
     {
+        if (!CanNavigate) return Task.CompletedTask;
         RestoreUiPreferences();
-        SelectedSource = await api.GetSourceAsync(source.Id, SelectedPeriod);
-        _loadedPeriod = SelectedPeriod;
+        // Hiện ngay số liệu 30 ngày đã có trong danh sách, rồi tải kỳ đang chọn ở nền.
+        SelectedSource = source;
         Page = "detail";
-    });
+        return LoadPageAsync(async version =>
+        {
+            var period = SelectedPeriod;
+            var detail = await api.GetSourceAsync(source.Id, period);
+            if (!IsCurrentLoad(version)) return;
+            SelectedSource = detail; _loadedPeriod = period;
+        });
+    }
     [RelayCommand]
     private async Task ChangePeriodAsync()
     {
