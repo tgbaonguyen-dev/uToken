@@ -18,7 +18,7 @@ part 'extra_mock_actions.dart';
 
 /// Draws the actual Figma elements, without replacing screens with screenshots.
 ///
-/// The design is 390 × 844. Shapes and SVGs come from Figma, visible copy comes
+/// The design is 390 Ă— 844. Shapes and SVGs come from Figma, visible copy comes
 /// exclusively from mock JSON, and tap targets are exported from PROTO frames.
 class FigmaPixelScreen extends StatefulWidget {
   const FigmaPixelScreen(
@@ -382,7 +382,7 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
       if (widget.screenId == 'M02' &&
           (name == 'Back' ||
               name == 'Pair complete' ||
-              name == 'I’ve paired my device' ||
+              name == 'Iâ€™ve paired my device' ||
               name == 'I?ve paired my device')) {
         auth.leaveDesktopSetup();
         if (name == 'Back') {
@@ -874,11 +874,8 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
               return Stack(
                 children: [
                   for (final spot in spots)
-                    Positioned(
-                      left: spot.x,
-                      top: spot.y,
-                      width: spot.width,
-                      height: spot.height,
+                    Positioned.fromRect(
+                      rect: _hotspotRect(spot, screen),
                       child: Semantics(
                           label: spot.name,
                           button: true,
@@ -907,11 +904,8 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
                     ),
                   for (final spot in spots)
                     if (_selectedHotspot == spot.name)
-                      Positioned(
-                        left: spot.x,
-                        top: spot.y,
-                        width: spot.width,
-                        height: spot.height,
+                      Positioned.fromRect(
+                        rect: _hotspotRect(spot, screen),
                         child: IgnorePointer(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
@@ -932,6 +926,111 @@ class _FigmaPixelScreenState extends State<FigmaPixelScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // Hover/tap bounds for text controls are measured from the rendered text,
+  // not from the larger Figma text-frame. A small, balanced inset keeps the
+  // hover surface comfortable without making it look detached from the text.
+  Rect _hotspotRect(FigmaMockHotspot spot, FigmaMockScreen screen) {
+    final bool isEstimatedCost =
+        widget.screenId == 'M04' && spot.name == 'Open cost breakdown';
+    final bool isBackControl = spot.name.trim().toLowerCase() == 'back';
+    if (!isEstimatedCost && !isBackControl) {
+      return Rect.fromLTWH(spot.x, spot.y, spot.width, spot.height);
+    }
+
+    final textLayers = screen.layers
+        .where((item) => item['t'] == 't')
+        .cast<Map<String, dynamic>>()
+        .toList(growable: false);
+    final layer = isEstimatedCost
+        ? textLayers.firstWhere(
+            (item) => (item['v']?.toString() ?? '')
+                .toLowerCase()
+                .contains('estimated'),
+            orElse: () => <String, dynamic>{},
+          )
+        : textLayers.where((item) {
+              final x = _number(item['x']);
+              final y = _number(item['y']);
+              final w = _number(item['w']);
+              final h = _number(item['h']);
+              final centerX = x + w / 2;
+              final centerY = y + h / 2;
+              // Back chevrons live in the leading edge of the page header.
+              // Limit candidates to the header and the leading 64 logical px.
+              return centerX >= 0 &&
+                  centerX <= 64 &&
+                  centerY >= 20 &&
+                  centerY <= 110 &&
+                  w > 0 &&
+                  h > 0;
+            }).fold<Map<String, dynamic>?>(null, (best, candidate) {
+              if (best == null) return candidate;
+              double distance(Map<String, dynamic> item) {
+                final cx = _number(item['x']) + _number(item['w']) / 2;
+                final cy = _number(item['y']) + _number(item['h']) / 2;
+                final targetX = spot.x + spot.width / 2;
+                final targetY = spot.y + spot.height / 2;
+                return (cx - targetX) * (cx - targetX) +
+                    (cy - targetY) * (cy - targetY);
+              }
+
+              return distance(candidate) < distance(best) ? candidate : best;
+            }) ??
+            <String, dynamic>{};
+    if (layer.isEmpty) {
+      return Rect.fromLTWH(spot.x, spot.y, spot.width, spot.height);
+    }
+
+    final value = layer['v']?.toString() ?? '';
+    final fontSize = _number(layer['sz'], fallback: 13);
+    final weightName = layer['fw']?.toString() ?? 'Regular';
+    final weight = switch (weightName) {
+      'Medium' => FontWeight.w500,
+      'SemiBold' || 'Semi Bold' => FontWeight.w600,
+      'Bold' => FontWeight.w700,
+      _ => FontWeight.w400,
+    };
+    final painter = TextPainter(
+      text: TextSpan(
+        text: value,
+        style: TextStyle(
+          fontFamily: 'BeVietnamPro',
+          fontFamilyFallback: const ['Arial', 'Roboto', 'Segoe UI Symbol'],
+          fontSize: fontSize,
+          fontWeight: weight,
+          letterSpacing: _number(layer['sp']),
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+
+    // 5 px horizontally and 4 px vertically (10 ? 8 total) gives a close,
+    // even breathing space around the glyphs while remaining easy to target.
+    const horizontalPadding = 10.0;
+    const verticalPadding = 4.0;
+    final layerX = _number(layer['x']);
+    final layerY = _number(layer['y']);
+    final layerWidth = _number(layer['w']);
+    final layerHeight = _number(layer['h']);
+    final alignment = layer['al']?.toString() ?? 'LEFT';
+    final textLeft = switch (alignment) {
+      'CENTER' => layerX + (layerWidth - painter.width) / 2,
+      'RIGHT' => layerX + layerWidth - painter.width,
+      _ => layerX,
+    };
+    final textTop =
+        layerY + (layerHeight - painter.height).clamp(0, layerHeight) / 2;
+    final width = painter.width + horizontalPadding * 2;
+    final height = painter.height + verticalPadding * 2;
+    return Rect.fromLTWH(
+      textLeft - horizontalPadding,
+      textTop - verticalPadding,
+      width,
+      height,
     );
   }
 

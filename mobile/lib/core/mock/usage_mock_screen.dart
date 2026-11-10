@@ -6,8 +6,25 @@ class _UsageMockScreen {
   _UsageMockScreen(this.original, this.fixtures, this.tokens, this.period,
       {this.fullNumbers = false, this.selectedDay})
       : layers =
-            original.layers.map((l) => Map<String, dynamic>.from(l)).toList();
+            original.layers.map((l) => Map<String, dynamic>.from(l)).toList() {
+    for (var index = 0; index < original.layers.length; index++) {
+      final layer = original.layers[index];
+      if (layer['t'] != 't') continue;
+      final sourceText = layer['v']?.toString() ?? '';
+      final occurrence = original.layers
+          .take(index)
+          .where((candidate) =>
+              candidate['t'] == 't' && candidate['v']?.toString() == sourceText)
+          .length;
+      _textBindings[index] = FigmaLayerBindings.textIndex(
+        layers,
+        sourceText,
+        occurrence: occurrence,
+      );
+    }
+  }
 
+  final Map<int, int> _textBindings = {};
   final FigmaMockScreen original;
   final Map<String, dynamic> fixtures;
   final Map tokens;
@@ -25,35 +42,50 @@ class _UsageMockScreen {
           : n >= 1000
               ? '${(n / 1000).toStringAsFixed(1)}K'
               : '$n';
-  void text(int index, Object value) {
-    layers[index]['v'] = value.toString();
+
+  void text(int sourceIndex, Object value) {
+    final targetIndex = _textBindings[sourceIndex];
+    if (targetIndex == null) {
+      throw StateError(
+          'Missing semantic text binding for source layer $sourceIndex');
+    }
+    layers[targetIndex]['v'] = value.toString();
     if (fullNumbers && RegExp(r'^[\d,]+$').hasMatch(value.toString())) {
-      layers[index]['fit'] = 'scaleDown';
+      layers[targetIndex]['fit'] = 'scaleDown';
     }
   }
 
-  void select(List<int> shapes, int selected, int originalSelected) {
+  void selectOptions(
+    List<String> options,
+    int selected,
+    int originalSelected,
+  ) {
+    final textIndices = [
+      for (final option in options)
+        FigmaLayerBindings.textIndex(original.layers, option),
+    ];
+    final backgrounds = [
+      for (final index in textIndices)
+        FigmaLayerBindings.backgroundForText(layers, index),
+    ];
     final fallback = originalSelected == 0 ? 1 : 0;
-    final active = layers[shapes[originalSelected]]['c'];
-    final inactive = layers[shapes[fallback]]['c'];
-    final activeText = layers[shapes[originalSelected] + 1]['c'];
-    final inactiveText = layers[shapes[fallback] + 1]['c'];
-    final activeWeight = layers[shapes[originalSelected] + 1]['fw'];
-    final inactiveWeight = layers[shapes[fallback] + 1]['fw'];
-    for (var i = 0; i < shapes.length; i++) {
-      layers[shapes[i]]['c'] = i == selected ? active : inactive;
-      layers[shapes[i] + 1]['c'] = i == selected ? activeText : inactiveText;
-      layers[shapes[i] + 1]['fw'] =
+    final activeBackground = layers[backgrounds[originalSelected]]['c'];
+    final inactiveBackground = layers[backgrounds[fallback]]['c'];
+    final activeText = layers[textIndices[originalSelected]]['c'];
+    final inactiveText = layers[textIndices[fallback]]['c'];
+    final activeWeight = layers[textIndices[originalSelected]]['fw'];
+    final inactiveWeight = layers[textIndices[fallback]]['fw'];
+    for (var i = 0; i < options.length; i++) {
+      layers[backgrounds[i]]['c'] =
+          i == selected ? activeBackground : inactiveBackground;
+      layers[textIndices[i]]['c'] = i == selected ? activeText : inactiveText;
+      layers[textIndices[i]]['fw'] =
           i == selected ? activeWeight : inactiveWeight;
     }
   }
 
-  List<Map> get models {
-    final rows =
-        (data['models'] as List).map((m) => Map.from(m as Map)).toList();
-    rows.sort((a, b) => (b['tokens'] as num).compareTo(a['tokens'] as num));
-    return rows;
-  }
+  List<Map<String, dynamic>> get models =>
+      MockUsageAggregator.rankedModels(data);
 
   String share(Map row) =>
       '${((row['tokens'] as num) / (tokens['totalTokens'] as num) * 100).toStringAsFixed(1)}%';
@@ -95,6 +127,9 @@ class _UsageMockScreen {
     }
   }
 
+  List<int> _activityLevelsFromRecords(List records) =>
+      MockUsageAggregator.activityLevels(records);
+
   void details() {
     text(4, period == 'Month' ? 'Top models' : 'Top models / $period');
     // Keep row icons tied to the model identity when the ranking changes.
@@ -109,11 +144,25 @@ class _UsageMockScreen {
               (l) => l['t'] == 'a' && l['y'] == [157, 211, 265, 319][i])['id'] =
           icons[models[i]['name']];
     }
-    final levels = (fixtures['activityLevels'] as List).cast<int>();
-    text(26, '${fixtures['activityDays']} days');
+
+    // Real daily activity records take precedence over the static preview levels.
+    // Expected record shape: { date: ..., tokens: ... } (or totalTokens).
+    final activity = fixtures['activity'];
+    final levels = activity is List
+        ? _activityLevelsFromRecords(activity)
+        : (fixtures['activityLevels'] as List).cast<int>();
+    text(26,
+        '${activity is List ? activity.length : fixtures['activityDays']} days');
     final palette = [for (var i = 171; i <= 175; i++) layers[i]['c']];
-    for (var i = 0; i < levels.length; i++) {
-      layers[27 + i]['c'] = palette[levels[i]];
+    const heatmapCells = 119;
+    final visibleLevels = levels.length > heatmapCells
+        ? levels.sublist(levels.length - heatmapCells)
+        : levels;
+    final leadingEmptyCells = heatmapCells - visibleLevels.length;
+    for (var i = 0; i < heatmapCells; i++) {
+      final level =
+          i < leadingEmptyCells ? 0 : visibleLevels[i - leadingEmptyCells];
+      layers[27 + i]['c'] = palette[level.clamp(0, palette.length - 1).toInt()];
     }
     final days = fixtures['daily'] as List;
     for (var i = 0; i < 3; i++) {
@@ -125,7 +174,8 @@ class _UsageMockScreen {
   }
 
   void analytics() {
-    select([4, 6, 8, 10], ['Day', 'Week', 'Month', 'Total'].indexOf(period), 2);
+    selectOptions(['Day', 'Week', 'Month', 'Total'],
+        ['Day', 'Week', 'Month', 'Total'].indexOf(period), 2);
     text(13, compact(tokens['totalTokens'] as num));
     text(14, money(tokens['estimatedCost'] as num));
     final input = data['inputPercent'] as num;
@@ -146,21 +196,23 @@ class _UsageMockScreen {
     text(53, money(tokens['estimatedCost'] as num));
     text(54, '+${data['costChangePercent']}%');
     text(78, '${data['efficiency']['successRate']}% success');
-    final values = (data['costBars'] as List).cast<num>();
-    final max = values.reduce((a, b) => a > b ? a : b);
+    final values = (data['costBars'] as List).whereType<num>().toList();
+    final maxValue = values.fold<num>(
+        0, (current, value) => value > current ? value : current);
+    final scaleMax = maxValue <= 0 ? 1 : maxValue;
     final template = layers[41];
     final emphasisColor = layers[50]['c'];
     final bars = [
       for (var i = 0; i < values.length; i++)
         {
           ...template,
-          'x': 145 + i * 187 / (values.length - 1),
-          'w': (197 / values.length - 2).clamp(1, 10),
+          'x': 145 + i * 187 / (values.length > 1 ? values.length - 1 : 1),
+          'w': (197 / (values.isEmpty ? 1 : values.length) - 2).clamp(1, 10),
           'c': i >= values.length - (data['costEmphasisBars'] as int)
               ? emphasisColor
               : template['c'],
-          'h': values[i] / max * 70,
-          'y': 676 - values[i] / max * 70,
+          'h': values[i] / scaleMax * 70,
+          'y': 676 - values[i] / scaleMax * 70,
         }
     ];
     layers.replaceRange(41, 53, bars);
@@ -192,7 +244,8 @@ class _UsageMockScreen {
     final c = fixtures['comparison'][size] as Map;
     final ranked = c['models'] as List;
     final best = ranked.first as Map;
-    select([5, 7, 9], ['Small', 'Medium', 'Large'].indexOf(size), 1);
+    selectOptions(['Small', 'Medium', 'Large'],
+        ['Small', 'Medium', 'Large'].indexOf(size), 1);
     text(11, c['description']);
     // This Figma label needs more room for the large-task range.
     layers[11].addAll({'x': 224, 'w': 146});
@@ -238,14 +291,12 @@ class _UsageMockScreen {
         .map((r) => Map.from(r as Map))
         .toList();
     final key = sortBy == 'date' ? (project ? 'label' : 'date') : sortBy;
-    rows.sort((a, b) {
-      final left = a[key], right = b[key];
-      final result = left is num
-          ? left.compareTo(right as num)
-          : left.toString().compareTo(right.toString());
-      return ascending ? result : -result;
-    });
-    select([5, 7], project ? 1 : 0, 0);
+    final sortedRows = MockUsageAggregator.sortedRows(
+      rows,
+      key: key,
+      ascending: ascending,
+    );
+    selectOptions(['Daily', 'Project'], project ? 1 : 0, 0);
     text(2, project ? 'Project usage' : 'Daily usage');
     for (final header in {
       9: project ? 'Project' : 'Date',
@@ -257,12 +308,12 @@ class _UsageMockScreen {
       text(header.key,
           '${header.value}${selected ? (ascending ? ' \u2191' : ' \u2193') : ''}');
     }
-    for (var i = 0; i < rows.length; i++) {
-      text(13 + i * 4, rows[i]['label']);
+    for (var i = 0; i < sortedRows.length; i++) {
+      text(13 + i * 4, sortedRows[i]['label']);
       layers[13 + i * 4]['w'] = 130;
-      text(14 + i * 4, compact(rows[i]['tokens'] as num));
-      text(15 + i * 4, rows[i]['chats']);
-      if (!project && rows[i]['date'] == selectedDay) {
+      text(14 + i * 4, compact(sortedRows[i]['tokens'] as num));
+      text(15 + i * 4, sortedRows[i]['chats']);
+      if (!project && sortedRows[i]['date'] == selectedDay) {
         for (final index in [13 + i * 4, 14 + i * 4, 15 + i * 4]) {
           layers[index]['c'] = '#ff38d39f';
         }

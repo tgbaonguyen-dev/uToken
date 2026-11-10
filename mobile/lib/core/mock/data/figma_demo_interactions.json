@@ -62,10 +62,26 @@
         "rad": 11
       },
       {
-        "n": "Open sources",
+        "n": "Open Gemini source",
         "x": 20,
         "y": 430,
-        "w": 352,
+        "w": 112,
+        "h": 92,
+        "rad": 16
+      },
+      {
+        "n": "Open Codex source",
+        "x": 140,
+        "y": 430,
+        "w": 112,
+        "h": 92,
+        "rad": 16
+      },
+      {
+        "n": "Open Claude source",
+        "x": 260,
+        "y": 430,
+        "w": 112,
         "h": 92,
         "rad": 16
       },
@@ -384,7 +400,15 @@
         "type": "select",
         "message": ""
       },
-      "Open sources": {
+      "Open Gemini source": {
+        "type": "route",
+        "target": "M04B"
+      },
+      "Open Codex source": {
+        "type": "route",
+        "target": "M04B"
+      },
+      "Open Claude source": {
         "type": "route",
         "target": "M04B"
       },

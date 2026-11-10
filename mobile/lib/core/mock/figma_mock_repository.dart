@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import 'presentation/mock_usage_aggregator.dart';
+import 'presentation/figma_layer_bindings.dart';
+
 part 'usage_mock_screen.dart';
 part 'settings_mock_screen.dart';
 part 'extra_mock_screen.dart';
@@ -216,18 +219,63 @@ class FigmaMockRepository {
         original.layers.map((l) => Map<String, dynamic>.from(l)).toList();
     if (id == 'S02') {
       final providers = data['providers'] as List;
+      const providerNameTemplates = ['Gemini', 'Codex', 'Claude'];
+      const providerStatusTemplates = ['Ready', 'Ready', 'Ready'];
       for (var i = 0; i < providers.length; i++) {
-        layers[[14, 20, 26][i]]['v'] = providers[i]['name'];
-        layers[[17, 23, 29][i]]['v'] = providers[i]['status'];
+        FigmaLayerBindings.setText(
+          layers,
+          providerNameTemplates[i],
+          providers[i]['name'],
+        );
+        FigmaLayerBindings.setText(
+          layers,
+          providerStatusTemplates[i],
+          providers[i]['status'],
+          occurrence: i,
+        );
       }
     } else if (id == 'S03') {
       final progress = (data['progress'] as num).toDouble();
-      layers[6].addAll({'t': 'p', 'progress': progress});
-      layers[7]['v'] = '${(progress * 100).round()}%';
-      layers[26]['w'] = 270 * progress;
+      FigmaLayerBindings.setText(
+        layers,
+        '64%',
+        '${(progress * 100).round()}%',
+      );
+      final progressIndicator = FigmaLayerBindings.layerAt(
+        layers,
+        type: 'e',
+        x: 143,
+        y: 119,
+        width: 104,
+        height: 104,
+        occurrence: 1,
+      );
+      layers[progressIndicator].addAll({'t': 'p', 'progress': progress});
+      final progressTrack = FigmaLayerBindings.rectangleAt(
+        layers,
+        x: 60,
+        y: 670,
+        width: 270,
+      );
+      layers[progressTrack]['w'] = 270;
+      final progressFill = FigmaLayerBindings.rectangleAt(
+        layers,
+        x: 60,
+        y: 670,
+        width: 173,
+      );
+      layers[progressFill]['w'] = 270 * progress;
     } else if (id == 'S04') {
-      layers[17]['v'] = data['lastSuccessfulSync'];
-      layers[20]['v'] = '${data['queuedEvents']} events';
+      FigmaLayerBindings.setText(
+        layers,
+        'Today, 10:42',
+        data['lastSuccessfulSync'],
+      );
+      FigmaLayerBindings.setText(
+        layers,
+        '128 events',
+        '${data['queuedEvents']} events',
+      );
     }
     // Exported horizontal SVG strokes have zero layout height.
     for (final layer in layers) {
@@ -247,28 +295,11 @@ class FigmaMockRepository {
   static Future<Map<String, dynamic>> exportData() async {
     final usage = await _loadFile('lib/core/mock/data/usage_explorer.json');
     final tokens = await _loadFile('lib/core/mock/data/tokens_periods.json');
-    final month = tokens['Month'] as Map;
-    final rows = <Map<String, dynamic>>[];
-    for (final day in usage['daily'] as List) {
-      final total = day['tokens'] as num;
-      final gemini = (total * (month['shares'][0] as num) / 100).round();
-      final codex = (total * (month['shares'][1] as num) / 100).round();
-      final cents = (total /
-              (month['totalTokens'] as num) *
-              (month['estimatedCost'] as num) *
-              100)
-          .round();
-      rows.add({
-        'date': day['date'],
-        'tokens': total,
-        'chats': day['chats'],
-        'estimated_cost_usd': cents / 100,
-        'gemini_tokens': gemini,
-        'codex_tokens': codex,
-        'claude_tokens': total - gemini - codex
-      });
-    }
-    return {'sample': true, 'records': rows};
+    final records = MockUsageAggregator.exportRecords(
+      usage['daily'] as List,
+      tokens['Month'] as Map,
+    );
+    return {'sample': true, 'records': records};
   }
 
   static Future<String> exportPreview(String format) async {
@@ -392,67 +423,152 @@ class FigmaMockRepository {
         ? NumberFormat.decimalPattern('en_US')
         : NumberFormat.compact(locale: 'en_US');
     if (fullNumbers) {
-      for (final i in [19, 22, 25, 28]) {
-        layers[i]['sz'] = 10;
+      for (final source in ['2.0M', '6.8M', '244K', '33.4K']) {
+        layers[FigmaLayerBindings.textIndex(layers, source)]['sz'] = 10;
       }
     }
-    final active = layers[9]['c'];
-    final inactive = layers[6]['c'];
     final periods = ['Day', 'Week', 'Month', 'Total'];
-    final labels = [6, 7, 9, 10];
-    // Layer bindings refer to the matching M04 light/dark Figma exports.
-    layers[8]['x'] = layers[labels[periods.indexOf(period)]]['x'];
-    for (var i = 0; i < labels.length; i++) {
-      layers[labels[i]]['c'] = periods[i] == period ? active : inactive;
+    final labels = {
+      for (final label in periods)
+        label: FigmaLayerBindings.textIndex(layers, label),
+    };
+    final active = layers[labels['Month']!]['c'];
+    final inactive = layers[labels['Day']!]['c'];
+    final selectedLabel = labels[period];
+    if (selectedLabel == null) throw ArgumentError.value(period, 'period');
+    final selectedX = (layers[selectedLabel]['x'] as num).toDouble();
+    final selectedWidth = (layers[selectedLabel]['w'] as num).toDouble();
+    final selector = FigmaLayerBindings.rectangleAt(
+      layers,
+      x: 197,
+      y: 118,
+    );
+    layers[selector]['x'] = selectedX;
+    layers[selector]['w'] = selectedWidth;
+    for (final label in periods) {
+      layers[labels[label]!]['c'] = label == period ? active : inactive;
     }
-    void text(int index, String value) => layers[index]['v'] = value;
-    text(13, NumberFormat.decimalPattern('en_US').format(data['totalTokens']));
-    text(
-        14, '\$${(data['estimatedCost'] as num).toStringAsFixed(2)} estimated');
+    int textIndex(String source) =>
+        FigmaLayerBindings.textIndex(layers, source);
+    void text(String source, String value) =>
+        layers[textIndex(source)]['v'] = value;
+    text('6,830,736',
+        NumberFormat.decimalPattern('en_US').format(data['totalTokens']));
+    text('\$42.18 estimated',
+        '\$${(data['estimatedCost'] as num).toStringAsFixed(2)} estimated');
     String summary(num value) => !fullNumbers && value >= 1000000
         ? '${(value / 1000000).toStringAsFixed(1)}M'
         : compact.format(value);
-    text(19, summary(data['sevenDayTokens'] as num));
-    text(22, summary(data['thirtyDayTokens'] as num));
-    text(25, compact.format(data['dailyAverage']));
-    text(28, compact.format(data['cachedTokens']));
+    text('2.0M', summary(data['sevenDayTokens'] as num));
+    text('6.8M', summary(data['thirtyDayTokens'] as num));
+    text('244K', compact.format(data['dailyAverage']));
+    text('33.4K', compact.format(data['cachedTokens']));
     var x = 40.0;
     for (var i = 0; i < 3; i++) {
       final share = (data['shares'][i] as num).toDouble();
       layers[15 + i].addAll({'x': x, 'w': 304 * share / 100});
       x += 304 * share / 100;
-      text([33, 37, 41][i], '${share.toStringAsFixed(1)}%');
+      const shareLabels = ['62.4%', '28.8%', '8.8%'];
+      const countLabels = ['3 models', '2 models', '1 model'];
+      text(shareLabels[i], '${share.toStringAsFixed(1)}%');
       final count = data['modelCounts'][i] as int;
-      text([34, 38, 42][i], '$count ${count == 1 ? 'model' : 'models'}');
+      text(countLabels[i], '$count ${count == 1 ? 'model' : 'models'}');
     }
-    text(45, data['trendLabel'] as String);
-    text(84, data['trendStart'] as String);
-    text(85, data['trendEnd'] as String);
-    final values = (data['trend'] as List).cast<num>();
-    final max = values.reduce((a, b) => a > b ? a : b);
-    final template = layers[46];
-    final cacheColor = layers[47]['c'];
-    final otherColor = layers[48]['c'];
+    text('Usage trend', data['trendLabel'] as String);
+    text('Nov 2026', data['trendStart'] as String);
+    text('11-30', data['trendEnd'] as String);
+    final values = (data['trend'] as List).whereType<num>().toList();
+    final maxValue = values.fold<num>(
+        0, (current, value) => value > current ? value : current);
+    final scaleMax = maxValue <= 0 ? 1 : maxValue;
+    final cachedValues = data['trendCached'] is List
+        ? (data['trendCached'] as List).whereType<num>().toList()
+        : const <num>[];
+    final otherValues = data['trendOther'] is List
+        ? (data['trendOther'] as List).whereType<num>().toList()
+        : const <num>[];
+    final templateIndex = FigmaLayerBindings.rectangleAt(
+      layers,
+      x: 36,
+      y: 698,
+      width: 7,
+      height: 12,
+    );
+    final cacheIndex = FigmaLayerBindings.rectangleAt(
+      layers,
+      x: 36,
+      y: 698,
+      width: 7,
+      height: 12,
+      occurrence: 1,
+    );
+    final otherIndex = FigmaLayerBindings.rectangleAt(
+      layers,
+      x: 36,
+      y: 698,
+      width: 7,
+      height: 7,
+    );
+    final template = layers[templateIndex];
+    final cacheColor = layers[cacheIndex]['c'];
+    final otherColor = layers[otherIndex]['c'];
     final chart = <Map<String, dynamic>>[];
     for (var i = 0; i < values.length; i++) {
-      final height = values[i] / max * 110;
+      final total = values[i] < 0 ? 0 : values[i];
+      final cached = (i < cachedValues.length ? cachedValues[i] : 0)
+          .clamp(0, total)
+          .toDouble();
+      final other = (i < otherValues.length ? otherValues[i] : 0)
+          .clamp(0, total - cached)
+          .toDouble();
+      final totalHeight = total / scaleMax * 110;
+      final cachedHeight = cached / scaleMax * 110;
+      final otherHeight = other / scaleMax * 110;
       final bar = {
         ...template,
         'x': 36 + i * 308 / values.length,
-        'y': 710 - height,
-        'w': 308 / values.length - 4,
-        'h': height
+        'y': 710 - totalHeight,
+        'w': (308 / values.length - 4).clamp(1, 24),
+        'h': totalHeight
       };
+
+      // Paint the total first, then stack its cached/other portions from the
+      // baseline so updated records change both bar height and segment size.
       chart.add(bar);
-      for (final segment
-          in {'trendCached': cacheColor, 'trendOther': otherColor}.entries) {
-        final cap = data[segment.key][i] as num;
-        if (cap > 0) {
-          chart.add({...bar, 'c': segment.value, 'h': cap / max * 110});
-        }
+      if (cachedHeight > 0) {
+        chart.add({
+          ...bar,
+          'c': cacheColor,
+          'y': 710 - cachedHeight,
+          'h': cachedHeight,
+        });
+      }
+      if (otherHeight > 0) {
+        chart.add({
+          ...bar,
+          'c': otherColor,
+          'y': 710 - cachedHeight - otherHeight,
+          'h': otherHeight,
+        });
       }
     }
-    layers.replaceRange(46, 84, chart);
+    final chartIndices = [
+      for (var i = 0; i < layers.length; i++)
+        if (layers[i]['t'] == 'r' &&
+            ((layers[i]['x'] as num?)?.toDouble() ?? -1) >= 36 &&
+            ((layers[i]['x'] as num?)?.toDouble() ?? -1) <= 340 &&
+            ((layers[i]['y'] as num?)?.toDouble() ?? -1) >= 600 &&
+            ((layers[i]['y'] as num?)?.toDouble() ?? -1) <= 710 &&
+            ((layers[i]['w'] as num?)?.toDouble() ?? 999) <= 7)
+          i,
+    ];
+    if (chartIndices.isNotEmpty) {
+      final insertionIndex = chartIndices.first;
+      for (final index in chartIndices.reversed) {
+        layers.removeAt(index);
+      }
+      layers.insertAll(insertionIndex, chart);
+    }
     return FigmaMockScreen(
         nodeId: original.nodeId,
         name: original.name,
