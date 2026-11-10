@@ -82,8 +82,8 @@
   ],
   "queue": [
     {
-      "id": "gemini",
-      "name": "Gemini",
+      "id": "antigravity",
+      "name": "Antigravity",
       "events": 9,
       "bytes": 412000
     },

@@ -54,7 +54,7 @@ void main() {
     final auth = MobileAuthController(gateway);
     gateway.sessions.add(null);
     await auth.signIn();
-    expect(auth.signedInDestination, '/connect-desktop');
+    expect(auth.signedInDestination, '/tokens');
     final router = createAppRouter(auth: auth);
     addTearDown(router.dispose);
     addTearDown(auth.dispose);

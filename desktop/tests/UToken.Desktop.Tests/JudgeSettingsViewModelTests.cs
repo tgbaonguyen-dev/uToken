@@ -37,6 +37,23 @@ public sealed class JudgeSettingsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Save_changes_also_saves_ai_review()
+    {
+        using var scope = Open();
+        var vm = scope.Vm;
+        await vm.ShowSettingsCommand.ExecuteAsync(null);
+        vm.SelectedJudgeProvider = MainViewModel.JudgeProviderOptions.Single(o => o.Id == JudgeProviders.OpenAi);
+        vm.JudgeApiKey = "sk-openai-secret";
+        await vm.SaveSettingsCommand.ExecuteAsync(null);
+
+        var saved = await scope.Api.GetJudgeSettingsAsync();
+        Assert.Equal(JudgeProviders.OpenAi, saved.Settings.Provider);
+        Assert.True(saved.HasKey);
+        Assert.Equal("", vm.JudgeApiKey);
+        Assert.StartsWith("Settings saved.", vm.SettingsMessage);
+    }
+
+    [AvaloniaFact]
     public async Task Save_switches_provider_and_keeps_key_secret()
     {
         using var scope = Open();
@@ -131,6 +148,8 @@ public sealed class JudgeSettingsViewModelTests : IDisposable
         {
             await TestApp.WaitIdle(vm);
             await vm.ShowSettingsCommand.ExecuteAsync(null);
+            // Trang Settings vừa hiện lần đầu: ép một lượt layout để template của nó được dựng.
+            window.UpdateLayout();
             var keyBox = window.GetVisualDescendants().OfType<TextBox>().Single(t =>
                 Avalonia.Automation.AutomationProperties.GetName(t) == "AI review API key");
             Assert.NotEqual('\0', keyBox.PasswordChar);

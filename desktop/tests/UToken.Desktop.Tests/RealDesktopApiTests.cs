@@ -15,13 +15,13 @@ public sealed class RealDesktopApiTests : IDisposable
         var sources = await api.GetSourcesAsync();
         var codex = sources.Sources.Single(s => s.Id == "codex");
         var claude = sources.Sources.Single(s => s.Id == "claude");
-        var gemini = sources.Sources.Single(s => s.Id == "gemini");
+        var antigravity = sources.Sources.Single(s => s.Id == "antigravity");
 
         Assert.Equal(20_500 + 30_300 + 40_100 + 50_200, codex.Tokens); // 3 lượt gọi phiên chính + 1 guardian
         Assert.Equal("running", codex.CollectorState);
         Assert.Contains(codex.Models, m => m.Name == "codex-auto-review");
         Assert.True(claude.Tokens > 0);
-        Assert.Equal("paused", gemini.CollectorState); // không bật trong cấu hình
+        Assert.Equal("paused", antigravity.CollectorState); // home giả chỉ bật codex + claude_code
         Assert.Equal(100, sources.Sources.Sum(s => s.Share), 1);
 
         var overview = await api.GetOverviewAsync();
@@ -216,7 +216,7 @@ public sealed class RealDesktopApiTests : IDisposable
         using var empty = new RealHome(withLogs: false);
         using var api = empty.Api();
         var sources = await api.GetSourcesAsync();
-        Assert.All(sources.Sources.Where(s => s.Id != "gemini"), s => Assert.Equal("not_found", s.CollectorState));
+        Assert.All(sources.Sources.Where(s => s.Id != "antigravity"), s => Assert.Equal("not_found", s.CollectorState));
         Assert.Equal("stopped", (await api.GetOverviewAsync()).Collector.State);
         Assert.EndsWith(Path.Combine(".codex", "sessions"), api.GetSourceFolder("codex"));
     }

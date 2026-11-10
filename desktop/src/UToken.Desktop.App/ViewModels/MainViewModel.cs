@@ -10,7 +10,11 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     [ObservableProperty, NotifyPropertyChangedFor(nameof(DiscoveryProviders))] private Models.SupportedSourceData[] _supportedSources = [];
     [ObservableProperty, NotifyPropertyChangedFor(nameof(PageTitle))] private Models.SourceData? _selectedSource;
     [ObservableProperty] private string _page = "overview";
-    [ObservableProperty] private bool _isBusy;
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(ShowProgress)), NotifyPropertyChangedFor(nameof(CanSyncFromTopbar))] private bool _isBusy;
+    /// <summary>Trang đang tải dữ liệu nền; khác IsBusy, không khóa điều hướng hay nút.</summary>
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(ShowProgress))] private bool _isLoading;
+    public bool ShowProgress => IsBusy || IsLoading;
+    private int _pageVersion;
     [ObservableProperty] private string? _error;
     [ObservableProperty] private string _notice = "Local data · usage metadata only";
     [ObservableProperty] private string _selectedPeriod = "30 days";
@@ -18,6 +22,8 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     private string _loadedPeriod = "30 days";
     private bool _restoringPeriod;
     public string[] Periods { get; } = ["1 day", "Week", "30 days", "Total"];
+    /// <summary>Kỳ của SourceList (GetSourcesAsync luôn tính 30 ngày).</summary>
+    private const string ListPeriod = "30 days";
     partial void OnSelectedPeriodChanged(string value)
     {
         if (IsDetail && !IsBusy && !_restoringPeriod) _ = ChangePeriodCommand.ExecuteAsync(null);
@@ -51,19 +57,53 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     {
         foreach (var name in new[] { nameof(IsOverview), nameof(IsSources), nameof(IsDetail), nameof(IsSourceSection), nameof(PageTitle), nameof(Subtitle), nameof(IsActivityPage), nameof(IsPricingPage), nameof(IsSyncPage), nameof(IsPairingPage), nameof(IsOverviewSection), nameof(IsSyncSection), nameof(IsSettingsPage), nameof(IsFirstRunPage), nameof(CanNavigate), nameof(CanSkipSetup), nameof(IsOverviewDashboard), nameof(IsOverviewState), nameof(DisplayedCollector), nameof(IsPermissionRequired), nameof(IsSourcesNormal), nameof(IsSourceNotFound), nameof(IsSourcesStatePreview), nameof(IsSyncStatePreview), nameof(IsSectionStatePreview), nameof(IsSyncNormal), nameof(ActiveSyncScenario), nameof(IsSyncDetailState), nameof(IsSyncFailure), nameof(IsSyncProgress), nameof(SyncStateDetails), nameof(ActivePairingScenario), nameof(IsPairingStateVisible), nameof(IsPairingFormVisible), nameof(IsPairingVerifying), nameof(OverviewStateId) }) OnPropertyChanged(name);
         NotifyVisualStatus();
+        NotifyTopbar();
         SkipSetupCommand.NotifyCanExecuteChanged();
     }
+    private static bool IsDataError(Exception ex) => ex is System.IO.IOException or System.IO.InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException;
+    private string DataErrorMessage => IsSettingsPage ? "Could not read or save settings. Check folder permissions. For invalid settings JSON, Restore defaults resets your preferences." : "Could not read local usage data. Check Settings → Open diagnostics.";
     private async Task RunAsync(Func<Task> action)
     {
         if (IsBusy) return;
         IsBusy = true; Error = null;
         try { await action(); }
-        catch (Exception ex) when (ex is System.IO.IOException or System.IO.InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException)
-        { Error = IsSettingsPage ? "Could not read or save settings. Check folder permissions. For invalid settings JSON, Restore defaults resets your preferences." : "Could not read local usage data. Check Settings → Open diagnostics."; }
+        catch (Exception ex) when (IsDataError(ex)) { Error = DataErrorMessage; }
         finally { IsBusy = false; }
     }
+    /// <summary>
+    /// Chuyển trang ngay (caller đổi Page trước), rồi tải dữ liệu nền. Không đặt IsBusy nên các nút
+    /// vẫn bấm được; bấm trang khác giữa chừng thì kết quả cũ bị bỏ qua (xem <see cref="IsCurrentLoad"/>).
+    /// </summary>
+    private async Task LoadPageAsync(Func<int, Task> load)
+    {
+        var version = ++_pageVersion;
+        _pageLoading = true; UpdateLoading(); Error = null;
+        try { await load(version); }
+        catch (Exception ex) when (IsDataError(ex)) { if (IsCurrentLoad(version)) Error = DataErrorMessage; }
+        finally { if (IsCurrentLoad(version)) { _pageLoading = false; UpdateLoading(); } }
+    }
+    /// <summary>Trang mới không cần tải: bỏ lượt tải của trang trước (kết quả của nó sẽ bị bỏ qua).</summary>
+    private void CancelPageLoad() { _pageVersion++; _pageLoading = false; UpdateLoading(); }
+    private bool _pageLoading;
+    private int _backgroundLoads;
+    private void UpdateLoading() => IsLoading = _pageLoading || _backgroundLoads > 0;
+    /// <summary>Tải nền không gắn với trang (lần tải đầu, F5): không khóa nút, không bị hủy khi đổi trang.</summary>
+    private async Task BackgroundLoadAsync(Func<Task> load)
+    {
+        _backgroundLoads++; UpdateLoading(); Error = null;
+        try { await load(); }
+        catch (Exception ex) when (IsDataError(ex)) { Error = DataErrorMessage; }
+        finally { _backgroundLoads--; UpdateLoading(); }
+    }
+    private bool IsCurrentLoad(int version) => version == _pageVersion;
+    private bool _loadingAll;
     [RelayCommand]
-    private Task LoadAsync() => RunAsync(async () =>
+    private Task LoadAsync() => _loadingAll ? Task.CompletedTask : BackgroundLoadAsync(async () =>
+    {
+        _loadingAll = true;
+        try { await LoadAllCoreAsync(); } finally { _loadingAll = false; }
+    });
+    private async Task LoadAllCoreAsync()
     {
         RestoreUiPreferences();
         var overview = await api.GetOverviewAsync();
@@ -94,17 +134,43 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
             SelectedSource = await api.GetSourceAsync(SelectedSource.Id, SelectedPeriod);
             _loadedPeriod = SelectedPeriod;
         }
-    });
-    [RelayCommand] private void ShowOverview() { if (!IsBusy && CanNavigate) Page = "overview"; }
-    [RelayCommand] private void ShowSources() { if (!IsBusy && CanNavigate) { ResetSectionPreview(); if (SourcePermission is not null) ApplySourcePermission(SourcePermission); Page = "sources"; } }
+    }
+    [RelayCommand] private void ShowOverview() { if (CanNavigate) { CancelPageLoad(); Page = "overview"; } }
+    [RelayCommand] private void ShowSources() { if (CanNavigate) { CancelPageLoad(); ResetSectionPreview(); if (SourcePermission is not null) ApplySourcePermission(SourcePermission); Page = "sources"; } }
     [RelayCommand]
-    private Task OpenSourceAsync(Models.SourceData source) => NavigateAsync(async () =>
+    private Task OpenSourceAsync(Models.SourceData source)
     {
+        if (!CanNavigate) return Task.CompletedTask;
         RestoreUiPreferences();
-        SelectedSource = await api.GetSourceAsync(source.Id, SelectedPeriod);
-        _loadedPeriod = SelectedPeriod;
+        // Hiện ngay số liệu 30 ngày đã có trong danh sách; chỉ tải lại (và dựng lại biểu đồ) khi đang chọn kỳ khác.
+        SelectedSource = source;
         Page = "detail";
-    });
+        if (SelectedPeriod == ListPeriod) { _loadedPeriod = ListPeriod; CancelPageLoad(); return Task.CompletedTask; }
+        return LoadPageAsync(async version =>
+        {
+            var period = SelectedPeriod;
+            var detail = await api.GetSourceAsync(source.Id, period);
+            if (!IsCurrentLoad(version)) return;
+            SelectedSource = detail; _loadedPeriod = period;
+        });
+    }
+    /// <summary>F5: tải lại trang đang xem.</summary>
+    [RelayCommand]
+    private Task RefreshPageAsync() => Page switch
+    {
+        "pricing" => ShowPricingAsync(),
+        "settings" => ShowSettingsAsync(),
+        "activity" => RefreshActivityAsync(),
+        "sync" => ShowSyncAsync(),
+        "detail" when SelectedSource is { } source && CanNavigate => LoadPageAsync(async version =>
+        {
+            var period = SelectedPeriod;
+            var detail = await api.GetSourceAsync(source.Id, period);
+            if (IsCurrentLoad(version)) { SelectedSource = detail; _loadedPeriod = period; }
+        }),
+        "overview" or "sources" => LoadAsync(),
+        _ => Task.CompletedTask,
+    };
     [RelayCommand]
     private async Task ChangePeriodAsync()
     {

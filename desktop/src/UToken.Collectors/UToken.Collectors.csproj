@@ -2,5 +2,6 @@
   <ItemGroup>
     <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
     <PackageReference Include="ZstdSharp.Port" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
   </ItemGroup>
 </Project>

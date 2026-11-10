@@ -16,10 +16,12 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        PressFeedback.Install();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var store = new LocalSettingsStore(LocalSettingsStore.DefaultDirectory);
             var uiState = new DesktopUiStateStore(store);
+            ClickSound.Enabled = uiState.State.ClickSounds; // chỉ app thật; test headless không vào nhánh này
             var settings = AppSettings.Load();
             var api = CreateApi(store, settings);
             desktop.Exit += (_, _) => api.Dispose();

@@ -1,6 +1,6 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:views="using:UToken.Desktop.App.Views"
  xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
- x:Class="UToken.Desktop.App.Views.SourceScanView" x:CompileBindings="False">
+ x:Class="UToken.Desktop.App.Views.SourceScanView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
  <Border Classes="card" Padding="32">
  <StackPanel Spacing="28">
  <Grid ColumnDefinitions="64,24,*"><Border Width="64" Height="64" CornerRadius="20" Background="#191C20" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" VerticalAlignment="Top"><TextBlock Text="07" FontSize="25" Foreground="#4089EF" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border>
@@ -14,8 +14,8 @@
  <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsPreparingSourceScan}" Foreground="#4089EF"/>
  <ProgressBar Value="{Binding SourceScan.Percent}" IsVisible="{Binding !IsPreparingSourceScan}" Foreground="#4089EF"/>
  </StackPanel>
- <ItemsControl ItemsSource="{Binding SourceScan.Providers}"><ItemsControl.ItemTemplate><DataTemplate>
- <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,13"><Grid ColumnDefinitions="32,14,*,Auto"><svg:Svg Path="{Binding Logo}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}"/><TextBlock Text="{Binding Label}" Foreground="{Binding Color}" FontSize="11"/></StackPanel></Grid></Border>
+ <ItemsControl ItemsSource="{Binding SourceScan.Providers}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceScanItem">
+ <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,13"><Grid ColumnDefinitions="32,14,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}"/><TextBlock Text="{Binding Label}" Foreground="{Binding Color}" FontSize="11"/></StackPanel></Grid></Border>
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  <TextBlock Text="{Binding SourceScan.Config.PrivacyNote, FallbackValue='Only token counts and metadata are read.'}" Classes="muted" FontSize="11" TextWrapping="Wrap"/>
  </StackPanel>

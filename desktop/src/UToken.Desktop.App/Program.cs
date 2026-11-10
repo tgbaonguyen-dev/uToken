@@ -16,5 +16,7 @@ internal static class Program
         AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .LogToTrace();
+            // Binding đã được kiểm tra lúc build (compiled bindings); mức Warning chỉ còn "Value is null"
+            // của view đang ẩn, ghi hàng nghìn dòng mỗi lần chuyển trang. Chỉ giữ lỗi thật.
+            .LogToTrace(Avalonia.Logging.LogEventLevel.Error);
 }

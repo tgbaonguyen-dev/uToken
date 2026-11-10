@@ -1,4 +1,10 @@
+using Avalonia;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
 using Avalonia.Controls;
+using Avalonia.Media;
+using Avalonia.Styling;
+using Avalonia.VisualTree;
 using Avalonia.Controls.Notifications;
 using Avalonia.Platform.Storage;
 
@@ -40,9 +46,50 @@ public partial class MainWindow : Window
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         { ShowNotification("Cannot open folder", path, true); }
     }
+    /// <summary>Hiệu ứng vào trang: mờ dần + trượt nhẹ 8px, 180ms. Chỉ đổi Opacity/RenderTransform nên không đo lại layout.</summary>
+    private static readonly Animation PageEnter = new()
+    {
+        Duration = TimeSpan.FromMilliseconds(180),
+        Easing = new CubicEaseOut(),
+        FillMode = FillMode.Forward,
+        Children =
+        {
+            new KeyFrame { Cue = new Cue(0), Setters = { new Setter(OpacityProperty, 0d), new Setter(TranslateTransform.YProperty, 8d) } },
+            new KeyFrame { Cue = new Cue(1), Setters = { new Setter(OpacityProperty, 1d), new Setter(TranslateTransform.YProperty, 0d) } },
+        },
+    };
+    private CancellationTokenSource? _pageAnimation;
+    private void OnViewModelChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ViewModels.MainViewModel.Page)) return;
+        PageHost.Offset = default; // trang mới luôn bắt đầu từ đầu
+        _pageAnimation?.Cancel();
+        _pageAnimation = new CancellationTokenSource();
+        _ = PageEnter.RunAsync(PageHost, _pageAnimation.Token);
+    }
+    /// <summary>Kéo topbar để di chuyển cửa sổ (bỏ qua khi bấm trúng nút).</summary>
+    private void TopbarPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        if (e.Source is Visual v && (v as Button ?? v.FindAncestorOfType<Button>()) is not null) return;
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && e.ClickCount == 1) BeginMoveDrag(e);
+    }
+    private void TopbarDoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+    {
+        if (e.Source is Visual v && (v as Button ?? v.FindAncestorOfType<Button>()) is not null) return;
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
     public MainWindow()
     {
         InitializeComponent();
+        // Windows: topbar thay thanh tiêu đề (nút thu nhỏ/phóng to/đóng của hệ thống vẽ ở góc phải).
+        // Linux/macOS giữ khung của hệ điều hành để không mất snap/resize; topbar nằm ngay dưới.
+        if (OperatingSystem.IsWindows())
+        {
+            ExtendClientAreaToDecorationsHint = true;
+            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.PreferSystemChrome;
+            ExtendClientAreaTitleBarHeightHint = 52;
+            TopbarActions.Margin = new Thickness(0, 0, 150, 0);
+        }
         DataContextChanged += (_, _) =>
         {
             if (_viewModel is not null)
@@ -52,6 +99,7 @@ public partial class MainWindow : Window
                 _viewModel.SourceSetupGuideRequested -= ShowSourceSetupGuide;
                 _viewModel.NotificationRequested -= ShowNotification;
                 _viewModel.OpenFolderRequested -= OpenFolder;
+                _viewModel.PropertyChanged -= OnViewModelChanged;
             }
             _viewModel = DataContext as ViewModels.MainViewModel;
             if (_viewModel is not null)
@@ -61,6 +109,7 @@ public partial class MainWindow : Window
                 _viewModel.SourceSetupGuideRequested += ShowSourceSetupGuide;
                 _viewModel.NotificationRequested += ShowNotification;
                 _viewModel.OpenFolderRequested += OpenFolder;
+                _viewModel.PropertyChanged += OnViewModelChanged;
             }
         };
         Closed += (_, _) =>
@@ -72,12 +121,16 @@ public partial class MainWindow : Window
                 _viewModel.OverviewDiagnosticsRequested -= ShowOverviewDiagnostics;
                 _viewModel.PermissionInstructionsRequested -= ShowPermissionInstructions;
                 _viewModel.SourceSetupGuideRequested -= ShowSourceSetupGuide;
+                _viewModel.PropertyChanged -= OnViewModelChanged;
             }
+            _pageAnimation?.Cancel();
         };
         Opened += async (_, _) =>
         {
             if (_opened) return;
             _opened = true;
+            _ = SvgLogo.WarmAsync("codex", "claude", "antigravity");
+            LazyView.WarmUpAll(this.GetVisualDescendants().OfType<LazyView>());
             if (DataContext is ViewModels.MainViewModel vm) await vm.LoadCommand.ExecuteAsync(null);
         };
     }

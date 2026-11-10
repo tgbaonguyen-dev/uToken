@@ -23,7 +23,7 @@ public sealed partial class RealDesktopApi
 
     public async Task<PricingData> GetPricingAsync(CancellationToken ct)
     {
-        await UpdatePricesAsync(ct);
+        // Không chờ mạng: App đã cập nhật giá nền lúc khởi động và trước mỗi Sync.
         return await WithStoreAsync(() =>
         {
             var latest = _store.LoadAllPrices()
@@ -62,6 +62,7 @@ public sealed partial class RealDesktopApi
             // Gọi mạng ngoài khóa SQLite; chỉ phần lưu đi qua khóa.
             var catalog = await ModelsDevCatalog.FetchAsync(PriceHttpClient ?? Http.Value, ct);
             int changed = await WithStoreAsync(() => _engine.ApplyPriceCatalog(catalog), ct);
+            DataChanged();
             _localSettings?.Record($"Prices updated from models.dev: {catalog.Count} models, {changed} changed");
             return true;
         }

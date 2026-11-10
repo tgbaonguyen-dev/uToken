@@ -17,8 +17,8 @@ public partial class MainViewModel
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasDevice)), NotifyPropertyChangedFor(nameof(HasNoDevice)), NotifyPropertyChangedFor(nameof(IsSyncHistoryEmpty)), NotifyPropertyChangedFor(nameof(IsPaired)), NotifyPropertyChangedFor(nameof(CanEnterPairing)), NotifyPropertyChangedFor(nameof(PairingActionLabel)), NotifyPropertyChangedFor(nameof(PairingMessageColor)), NotifyPropertyChangedFor(nameof(PageTitle)), NotifyPropertyChangedFor(nameof(Subtitle))] private SyncData? _sync;
     [ObservableProperty] private bool _confirmDisconnect;
     [ObservableProperty] private bool _isSyncing;
-    partial void OnIsSyncingChanged(bool value) => NotifySyncState();
-    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); OnPropertyChanged(nameof(CloudSyncLabel)); }
+    partial void OnIsSyncingChanged(bool value) { NotifySyncState(); NotifyTopbar(); }
+    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); OnPropertyChanged(nameof(CloudSyncLabel)); NotifyTopbar(); }
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasSyncMessage))] private string _syncMessage = "";
     [ObservableProperty] private string _syncMessageColor = "#2EC790";
     [ObservableProperty] private PairingData? _pairing;
@@ -66,12 +66,17 @@ public partial class MainViewModel
         SaveUiPreferences();
     }
     [RelayCommand]
-    private Task ShowActivityAsync() => NavigateAsync(async () => { Page = "activity"; await LoadActivityCoreAsync(); });
-    [RelayCommand] private Task RefreshActivityAsync() => RunAsync(LoadActivityCoreAsync);
+    private Task ShowActivityAsync()
+    {
+        if (!CanNavigate) return Task.CompletedTask;
+        Page = "activity";
+        return LoadPageAsync(_ => LoadActivityCoreAsync());
+    }
+    [RelayCommand] private Task RefreshActivityAsync() => LoadPageAsync(_ => LoadActivityCoreAsync());
     [RelayCommand]
-    private Task ShowCollectedAsync() => RunAsync(async () => { WarningsOnly = false; await LoadActivityCoreAsync(); });
+    private Task ShowCollectedAsync() { WarningsOnly = false; return LoadPageAsync(_ => LoadActivityCoreAsync()); }
     [RelayCommand]
-    private Task ShowWarningsAsync() => RunAsync(async () => { WarningsOnly = true; await LoadActivityCoreAsync(); });
+    private Task ShowWarningsAsync() { WarningsOnly = true; return LoadPageAsync(_ => LoadActivityCoreAsync()); }
     public async Task<string?> ExportActivityCsvAsync()
     {
         string? csv = null;
@@ -85,7 +90,16 @@ public partial class MainViewModel
     public void ReportExportResult(bool success) => Notice = success ? "Activity exported successfully." : "Could not save the export. Choose another location and try again.";
 
     [RelayCommand]
-    private Task ShowSyncAsync() => NavigateAsync(async () => { ResetSectionPreview(); Page = "sync"; ConfirmDisconnect = false; Sync = await api.GetSyncAsync(); });
+    private Task ShowSyncAsync()
+    {
+        if (!CanNavigate) return Task.CompletedTask;
+        ResetSectionPreview(); Page = "sync"; ConfirmDisconnect = false;
+        return LoadPageAsync(async version =>
+        {
+            var sync = await api.GetSyncAsync();
+            if (IsCurrentLoad(version)) Sync = sync;
+        });
+    }
     [RelayCommand]
     private Task SyncNowAsync() => RunAsync(async () =>
     {
@@ -132,7 +146,12 @@ public partial class MainViewModel
         PairingMessage = HasDevice ? $"Signed in as {Sync.Device!.Name}." : "";
     }
     [RelayCommand]
-    private Task ShowPairingAsync() => NavigateAsync(async () => { Page = "pairing"; await LoadPairingPageCoreAsync(); });
+    private Task ShowPairingAsync()
+    {
+        if (!CanNavigate) return Task.CompletedTask;
+        Page = "pairing";
+        return LoadPageAsync(_ => LoadPairingPageCoreAsync());
+    }
     [RelayCommand]
     private Task RestartPairingAsync() => RunAsync(async () => { if (!HasDevice) await LoadPairingPageCoreAsync(); });
     /// <summary>Mở trình duyệt đăng nhập Google; chờ tối đa 3 phút.</summary>

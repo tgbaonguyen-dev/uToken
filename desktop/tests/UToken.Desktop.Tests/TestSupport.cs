@@ -39,7 +39,7 @@ public static class TestApp
     internal static async Task WaitIdle(UToken.Desktop.App.ViewModels.MainViewModel vm)
     {
         var deadline = DateTime.UtcNow.AddSeconds(10);
-        while (vm.IsBusy && DateTime.UtcNow < deadline) await Task.Delay(20);
+        while ((vm.IsBusy || vm.IsLoading) && DateTime.UtcNow < deadline) await Task.Delay(20);
     }
 }
 

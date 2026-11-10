@@ -36,16 +36,29 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(SelectedRetention));
     }
 
-    [RelayCommand] private Task ShowSettingsAsync() => NavigateAsync(async () =>
+    [RelayCommand] private Task ShowSettingsAsync()
     {
+        if (!CanNavigate) return Task.CompletedTask;
         Page = "settings"; SettingsMessage = null; ConfirmClearData = false; JudgeMessage = null;
-        ApplySettings(await api.GetSettingsAsync());
-        ApplyJudge(await api.GetJudgeSettingsAsync());
-    });
+        return LoadPageAsync(async version =>
+        {
+            var settings = await api.GetSettingsAsync();
+            var judge = await api.GetJudgeSettingsAsync();
+            if (!IsCurrentLoad(version)) return;
+            ApplySettings(settings); ApplyJudge(judge);
+        });
+    }
     [RelayCommand] private Task SaveSettingsAsync() => RunAsync(async () =>
     {
         ApplySettings(await api.SaveSettingsAsync(new(LaunchAtStartup, BackgroundCollection,
             AutomaticUpdates, UsageNotifications, RetentionDays)));
+        // Một nút lưu cho cả trang: cấu hình AI review đi cùng (chỉ khi đã tải, để không ghi đè bằng mặc định).
+        if (Judge is not null)
+        {
+            ApplyJudge(await api.SaveJudgeSettingsAsync(CurrentJudgeSettings(),
+                string.IsNullOrWhiteSpace(JudgeApiKey) ? null : JudgeApiKey));
+            JudgeMessage = null;
+        }
         SettingsMessage = "Settings saved." + (LaunchAtStartup ? " uToken starts when you sign in to this computer." : "")
             + (BackgroundCollection ? " Usage is collected and synced in the background." : "");
     });

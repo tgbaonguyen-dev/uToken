@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:views="using:UToken.Desktop.App.Views"
- x:Class="UToken.Desktop.App.Views.DiagnosticsWindow" x:CompileBindings="False"
+ x:Class="UToken.Desktop.App.Views.DiagnosticsWindow" x:CompileBindings="True" x:DataType="x:String"
  Title="uToken - Diagnostics" Width="760" Height="500" MinWidth="480" MinHeight="320"
  WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
  <Border Padding="24"><Grid RowDefinitions="Auto,*,Auto">

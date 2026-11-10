@@ -1,7 +1,7 @@
 {
   "headline": "Log access needs attention",
   "description": "The collector cannot read the selected provider's local usage logs.",
-  "sourceId": "gemini",
+  "sourceId": "antigravity",
   "instructions": [
     {
       "number": "1",

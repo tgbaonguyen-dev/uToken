@@ -30,9 +30,14 @@ public partial class MainViewModel
     public bool IsPricingEmpty => FilteredPricingRows.Length == 0;
 
     [RelayCommand]
-    private Task ShowPricingAsync() => NavigateAsync(async () =>
+    private Task ShowPricingAsync()
     {
-        Pricing = await api.GetPricingAsync(CancellationToken.None);
+        if (!CanNavigate) return Task.CompletedTask;
         Page = "pricing";
-    });
+        return LoadPageAsync(async version =>
+        {
+            var pricing = await api.GetPricingAsync(CancellationToken.None);
+            if (IsCurrentLoad(version)) Pricing = pricing;
+        });
+    }
 }

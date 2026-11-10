@@ -1,5 +1,5 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
- x:Class="UToken.Desktop.App.Views.SourcePermissionView" x:CompileBindings="False">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:views="using:UToken.Desktop.App.Views" xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+ x:Class="UToken.Desktop.App.Views.SourcePermissionView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
  <StackPanel Spacing="24">
  <Border x:Name="PermissionRetryAlert" IsVisible="{Binding HasPermissionRetryFailure}" Background="#281317" BorderBrush="#F04D57" BorderThickness="1" CornerRadius="12" Padding="16">
  <Grid ColumnDefinitions="28,12,*,Auto">
@@ -24,7 +24,7 @@
  </StackPanel></Grid></Border>
  <Grid ColumnDefinitions="1.8*,20,*">
  <Border Classes="card"><StackPanel Spacing="18"><TextBlock Text="Restore access" Classes="heading"/>
- <ItemsControl ItemsSource="{Binding SourcePermission.Config.Instructions}"><ItemsControl.ItemTemplate><DataTemplate>
+ <ItemsControl ItemsSource="{Binding SourcePermission.Config.Instructions}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SetupStep">
  <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="32,16,*">
  <Border Background="#191C20" CornerRadius="9" Width="32" Height="32"><TextBlock Text="{Binding Number}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11"/></Border>
  <StackPanel Grid.Column="2" Spacing="8"><TextBlock Text="{Binding Title}" FontSize="12" TextWrapping="Wrap"/><TextBlock Text="{Binding Description}" Classes="muted" FontSize="10" TextWrapping="Wrap"/></StackPanel>
@@ -32,8 +32,8 @@
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  </StackPanel></Border>
  <Border Grid.Column="2" Classes="card"><StackPanel Spacing="18"><TextBlock Text="Provider status" Classes="heading"/>
- <ItemsControl ItemsSource="{Binding PermissionProviders}"><ItemsControl.ItemTemplate><DataTemplate>
- <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="32,12,*,Auto"><svg:Svg Path="{Binding Logo}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Spacing="6" Margin="10,0,0,0" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Right"/><TextBlock Text="{Binding Status}" Foreground="{Binding Color}" FontSize="9" TextAlignment="Right"/></StackPanel></Grid></Border>
+ <ItemsControl ItemsSource="{Binding PermissionProviders}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:PermissionProvider">
+ <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="32,12,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Spacing="6" Margin="10,0,0,0" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Right"/><TextBlock Text="{Binding Status}" Foreground="{Binding Color}" FontSize="9" TextAlignment="Right"/></StackPanel></Grid></Border>
  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
  <TextBlock Text="Previously collected data remains available. uToken does not change system permissions." Classes="muted" FontSize="10" TextWrapping="Wrap"/>
  </StackPanel></Border>

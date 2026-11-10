@@ -18,6 +18,20 @@ public partial class MainViewModel
         SelectedPeriod = saved.SourcePeriod;
         _uiPreferencesLoaded = true;
     }
+    /// <summary>Tiếng click khi bấm nút (Settings). Lưu ngay vào ui-state.json, không cần Save changes.</summary>
+    public bool ClickSounds
+    {
+        get => uiStateStore?.State.ClickSounds ?? Services.ClickSound.Enabled;
+        set
+        {
+            if (value == ClickSounds) return;
+            Services.ClickSound.Enabled = value;
+            if (uiStateStore is not null && !uiStateStore.SaveClickSounds(value))
+                Notice = "Could not save UI preferences. Your usage data is unchanged.";
+            OnPropertyChanged();
+            if (value) Services.ClickSound.Play();
+        }
+    }
     public void SaveUiPreferences()
     {
         if (_uiPreferencesLoaded && uiStateStore is not null && !uiStateStore.SaveFilters(CurrentActivityQuery, SelectedPeriod))

@@ -26,6 +26,8 @@ Không cần secret để chạy CI (test dùng emulator và fixtures). Chỉ th
    dotnet run --project desktop/src/UToken.Desktop.App
    ```
 
+   For everyday use, run the Release build (`dotnet run -c Release --project desktop/src/UToken.Desktop.App`), which is noticeably smoother than Debug. A self-contained build that starts faster: `dotnet publish desktop/src/UToken.Desktop.App -c Release -r linux-x64` (or `win-x64`); ReadyToRun is enabled for publish.
+
    `UTOKEN_` environment variables override JSON (for example `UTOKEN_Firebase__UseEmulator`). Remove stale overrides if the app still uses an emulator.
 9. Choose Google sign-in, complete consent in the browser, and return to the app. Verify the account appears both in the app and Firebase Authentication > Users. Restart to check session restore, then sign out and restart to verify the account stays signed out. Use Sync now to check Firestore separately; a permission error is a rules/configuration failure, not proof that Google sign-in failed.
 
