@@ -93,7 +93,7 @@ class MobileAuthController extends ChangeNotifier {
     demoMode = false;
     busy = true;
     message = null;
-    signedInDestination = '/connect-desktop';
+    signedInDestination = '/tokens';
     notifyListeners();
     try {
       final result = await gateway.signInWithGoogle();

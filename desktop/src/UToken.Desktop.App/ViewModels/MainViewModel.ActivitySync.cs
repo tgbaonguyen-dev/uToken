@@ -94,6 +94,7 @@ public partial class MainViewModel
         {
             var result = await api.SyncNowAsync();
             ApplySyncResult(result);
+            Notice = result.Message;
             Overview = await api.GetOverviewAsync();
         }
         catch { SetSyncResultState("failed"); SyncMessage = "Sync did not complete. Please try again."; SyncMessageColor = "#F26039"; throw; }

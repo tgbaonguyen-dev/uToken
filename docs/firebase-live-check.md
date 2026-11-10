@@ -1,5 +1,42 @@
 # Real Firebase verification on Windows
 
+## Mobile does not update after desktop Sync
+
+The current backend uses `desktop/src/UToken.Desktop.App/appsettings.Local.json`
+(nested `Firebase` settings), not the older `firebase.desktop.json` file. Confirm
+`Firebase:ProjectId` matches Android's `google-services.json` and
+`Firebase:UseEmulator` is `false`. Environment variables prefixed `UTOKEN_` override
+these files. Do not share OAuth secrets or session files when diagnosing this.
+
+1. Sign in with the same Google account in both current builds.
+2. On desktop, press Sync now. Check for a successful upload, not just a completed
+   local analysis. Pending summaries must not remain queued due to an upload error.
+3. Check Firestore Console under that account's `users/{uid}`: daily documents,
+   `efficiency/current` and `last_sync_at` should be present/updated. A successful
+   sync with no collected logs can legitimately have no daily usage documents.
+4. Mobile listens to those documents automatically. The refresh icon on Tokens,
+   Analytics, Efficiency, Insights and Desktop connection explicitly reads Firebase
+   **server** data. It reports offline/permission failures instead of treating a
+   cached response as success. It does not remotely trigger desktop collection.
+5. If desktop reports permission denied, reconcile the deployed Rules with
+   `firebase/firestore.rules`. The local daily write rule was corrected on
+   2026-11-10 to remove invalid `request.resource.size()`. Firestore enforces its
+   own document-size limit. This local fix has not been deployed by this change.
+
+Tokens now reads all available daily history for Total; Day/Week/Month use
+calendar dates. Exact token totals are shown so rounding does not hide small
+updates. After updating desktop, Sync now also rebuilds retained historical
+summaries already scanned by Sources before uploading changed daily documents.
+
+Local diagnosis on 2026-11-10: SQLite daily_local contained only 2026-11-06
+(55,926,191 tokens) and 2026-11-07 (89,964,091 tokens), both marked clean. Their
+sum, 145,890,282, matched the reported mobile total. Recent diagnostics showed
+Initial scan/Rescan, with no Analysis/Sync run after 2026-11-07. This is evidence
+of stale local summaries, not a live Firestore verification. Sources now offers
+Sync now directly and shows its result. Mobile displays the received daily date
+range. Week/Month/Total can match when all documents fall in the same week;
+changing a filter cannot create missing history.
+
 Run from the repository root after signing in to the current desktop app and clicking **Sync now**:
 
 ```powershell

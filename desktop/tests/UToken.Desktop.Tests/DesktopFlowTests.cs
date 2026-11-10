@@ -163,6 +163,7 @@ public sealed class DesktopFlowTests : IDisposable
             await vm.SyncNowCommand.ExecuteAsync(null);
             Assert.Equal("not-paired", vm.ActiveSyncScenario!.Id);
             Assert.Contains("Sign in with Google", vm.SyncMessage);
+            Assert.Equal(vm.SyncMessage, vm.Notice);
             TestApp.Render(window, "real-sync-signed-out");
 
             await vm.ShowPairingCommand.ExecuteAsync(null);

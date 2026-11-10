@@ -44,7 +44,6 @@ class _TokensScreenState extends State<TokensScreen> {
     final now = DateTime.now();
     return widget.repository.watchDaily(
       uid: widget.uid,
-      start: now.subtract(const Duration(days: 365)),
       end: now,
     );
   }
@@ -54,6 +53,10 @@ class _TokensScreenState extends State<TokensScreen> {
     final now = DateTime.now();
     return RealScreenScaffold(
       title: 'Tokens',
+      onRefresh: () async {
+        await widget.repository.refresh(uid: widget.uid);
+        if (mounted) setState(() => _dailyStream = _watchDaily());
+      },
       selectedIndex: 0,
       body: StreamBuilder<List<DailyDoc>>(
         stream: _dailyStream,
@@ -65,7 +68,7 @@ class _TokensScreenState extends State<TokensScreen> {
               !snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final docs = _filter(snapshot.data!, now);
+          final docs = _filter(snapshot.data ?? [], now);
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
             children: [
@@ -82,8 +85,27 @@ class _TokensScreenState extends State<TokensScreen> {
                 onSelectionChanged: (value) =>
                     setState(() => _period = value.first),
               ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  _cloudCoverage(snapshot.data ?? []),
+                  key: const ValueKey('cloud-data-coverage'),
+                ),
+              ),
+              if (docs.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                      'No uploaded usage in this period. Run Sync now on desktop, then refresh here.'),
+                ),
               const SizedBox(height: 12),
               _Summary(docs: docs),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                    '${formatTokens(docs.fold<int>(0, (sum, doc) => sum + doc.totals.total), TokenFormat.full)} tokens',
+                    key: const ValueKey('exact-token-total')),
+              ),
               const SizedBox(height: 12),
               _ProviderShares(docs: docs),
               const SizedBox(height: 12),
@@ -98,15 +120,22 @@ class _TokensScreenState extends State<TokensScreen> {
   }
 
   List<DailyDoc> _filter(List<DailyDoc> docs, DateTime now) {
+    if (_period == _TokenPeriod.total) return docs;
     final days = switch (_period) {
       _TokenPeriod.day => 1,
       _TokenPeriod.week => 7,
       _TokenPeriod.month => 30,
       _TokenPeriod.total => 3650,
     };
-    final cutoff = now.subtract(Duration(days: days));
+    final cutoff = DateTime(now.year, now.month, now.day - days + 1);
     final cutoffText = cutoff.toIso8601String().substring(0, 10);
     return docs.where((doc) => doc.date.compareTo(cutoffText) >= 0).toList();
+  }
+
+  String _cloudCoverage(List<DailyDoc> docs) {
+    if (docs.isEmpty) return 'No daily summaries received from Firebase.';
+    final dates = docs.map((doc) => doc.date).toList()..sort();
+    return 'Cloud data: ${dates.first} to ${dates.last} (${dates.toSet().length} days). Dates use this phone: ${DateTime.now().toIso8601String().substring(0, 10)}.';
   }
 }
 

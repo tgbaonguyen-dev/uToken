@@ -30,7 +30,8 @@
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsScanningSources}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="#4089EF"/><TextBlock Text="Scanning" FontSize="11"/></StackPanel></Border>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSourceNotFound}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="#F26039"/><TextBlock Text="Needs setup" FontSize="11"/></StackPanel></Border>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSourcesStatePreview}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="SourceStateHeaderDot" Classes="status-dot" Fill="{Binding SectionScenario.Accent}"/><TextBlock Text="{Binding SectionScenario.Status}" FontSize="11"/></StackPanel></Border>
-     <Button x:Name="RescanSourcesButton" Content="Rescan sources" IsVisible="{Binding IsSources}" Command="{Binding RescanSourcesCommand}" IsEnabled="{Binding !IsBusy}"/>
+     <Button x:Name="RescanSourcesButton" Content="Rescan sources" IsVisible="{Binding IsSources}" Command="{Binding RescanSourcesCommand}" IsEnabled="{Binding !IsBusy}" ToolTip.Tip="Read local logs. Use Sync now to upload summaries to Firebase."/>
+     <Button Content="Sync now" IsVisible="{Binding IsSources}" Command="{Binding SyncNowCommand}" IsEnabled="{Binding !IsBusy}"/>
      <Button Content="Back to Overview" IsVisible="{Binding IsActivityPage}" Command="{Binding ShowOverviewCommand}"/>
      <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSyncStatePreview}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="{Binding ActiveSyncScenario.Accent}"/><TextBlock Text="{Binding ActiveSyncScenario.Status}" FontSize="11"/></StackPanel></Border>
      <Button Content="Sync now" IsVisible="{Binding IsSyncNormal}" Command="{Binding SyncNowCommand}" IsEnabled="{Binding !IsBusy}"/>

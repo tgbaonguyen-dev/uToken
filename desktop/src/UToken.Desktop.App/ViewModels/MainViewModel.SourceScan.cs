@@ -38,7 +38,7 @@ public partial class MainViewModel
             var overview = await api.GetOverviewAsync(cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
             ApplySourcePermission(permission with { Sources = sources }); Overview = overview;
-            Notice = $"Scan complete - {sources.Sources.Length} sources checked, {sources.NewEvents ?? 0} new events."
+            Notice = $"Scan complete - {sources.Sources.Length} sources checked, {sources.NewEvents ?? 0} new events. Local scan only; use Sync now to upload to mobile."
                 + (HasNoSupportedSources ? " No supported source found." : HasPermissionIssue ? " Some sources still require permission." : "");
             // D22: quét xong, nguồn bình thường nhưng không có usage mới.
             if (sources.NewEvents == 0 && !HasNoSupportedSources && !HasPermissionIssue)

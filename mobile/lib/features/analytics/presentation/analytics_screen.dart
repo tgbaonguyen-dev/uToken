@@ -17,6 +17,7 @@ class AnalyticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RealScreenScaffold(
         title: 'Analytics',
+        onRefresh: () => repository.refresh(uid: uid),
         selectedIndex: 1,
         body: StreamBuilder<EfficiencyDoc?>(
           stream: repository.watchEfficiency(uid: uid),

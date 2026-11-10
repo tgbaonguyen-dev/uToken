@@ -61,6 +61,23 @@ public sealed class EngineTests : IDisposable
     }
 
     [Fact]
+    public void Sync_after_sources_scan_and_restart_builds_historical_summaries()
+    {
+        var (scanner, scannedStore) = NewEngine();
+        using (scannedStore) Assert.Equal(9, scanner.Scan().NewEvents);
+        _clock.Advance(TimeSpan.FromDays(7));
+        var (engine, store) = NewEngine();
+        using (store)
+        {
+            var result = engine.Run();
+            Assert.Equal(0, result.Scan.NewEvents);
+            Assert.Contains(store.GetDirtyDaily(), d => d.Date == "2026-11-05");
+            Assert.Contains(store.GetDirtyDaily(), d => d.Date == "2026-11-06");
+            Assert.Empty(engine.Run().ChangedDaily);
+        }
+    }
+
+    [Fact]
     public void Daily_documents_follow_local_dates()
     {
         var (engine, store) = NewEngine();
@@ -166,6 +183,7 @@ public sealed class EngineTests : IDisposable
 
     private sealed class FakeClock(DateTimeOffset now) : TimeProvider
     {
+        public void Advance(TimeSpan duration) => now += duration;
         public override DateTimeOffset GetUtcNow() => now;
     }
 }
