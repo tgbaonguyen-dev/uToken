@@ -70,3 +70,17 @@ lần). Mặc định chạy tối đa một lần mỗi ngày, nên khoảng 30
   desktop; không có key nào đi qua Firestore. Người dùng chọn được 3 nhà cung cấp thay vì một.
 - Firestore Rules: chỉ chủ tài khoản đọc/ghi `users/{uid}/insights/*`
   (test trong `firebase/tests/rules.test.js`).
+
+## Rubric cho model chấm (`contracts/judge/`)
+
+- `rubric.md`: system prompt viết cho model chấm (luật, cách chấm, định dạng văn bản cho mobile/desktop).
+  Đổi nội dung thì tăng `rubric_version` ở dòng đầu.
+- `examples.md`: ví dụ few-shot (catalog → output đúng, các output sai), gửi kèm sau rubric.
+- Căn cứ: SRS v0.10 FR-ANLY-003/004, FR-RECO-001; báo cáo nghiên cứu §4.5–4.6. Ngưỡng là giả định của SRS.
+- Chưa nối vào code: `JudgePrompt.System` vẫn là bản 4 dòng. Khi nối, nên nhúng hai file làm
+  resource, kiểm độ dài các trường khi validate (sai thì gọi lại, tối đa 3 lần), và tốt nhất tự tính
+  mức Good/Watch/Review, điểm gốc và điểm tổng trong code rồi gửi kèm catalog.
+- Model chấm không bao giờ nhận log trò chuyện. Nguồn gốc số liệu, xem `contracts/fixtures/`:
+  `usage.*` → token theo loại (cache, thinking, chi phí); lệnh test/build + exit code sau khi sửa
+  file → `TaskOutcome` (chỉ lưu đúng/sai); `isSidechain` / `thread_source=guardian_review` →
+  phiên phụ (chi phí ngầm). Nội dung tin nhắn, `cwd`, tên lệnh không được gửi.
