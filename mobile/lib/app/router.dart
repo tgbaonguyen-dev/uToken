@@ -11,12 +11,15 @@ import '../features/auth/presentation/signing_in_screen.dart';
 import '../features/auth/data/auth_mock_repository.dart';
 import '../features/auth/domain/signing_in_state_model.dart';
 import '../features/insights/presentation/insight_detail_screen.dart';
-import '../features/tokens/presentation/tokens_screen.dart';
-import '../features/analytics/presentation/analytics_screen.dart';
-import '../features/efficiency/presentation/efficiency_screen.dart';
-import '../features/insights/presentation/insights_screen.dart';
-import '../features/settings/presentation/last_sync_screen.dart';
 import '../core/data/usage_repository.dart';
+import '../features/onboarding/presentation/onboarding_screens.dart';
+import '../core/data/local_prefs.dart';
+import '../core/data/usage_aggregates.dart';
+import '../features/live/analytics_screens.dart';
+import '../features/live/insights_screens.dart';
+import '../features/live/live_common.dart';
+import '../features/live/settings_screens.dart';
+import '../features/live/tokens_screens.dart';
 
 /// Combined UI routes: exported Figma frames, hand-built states and insight detail.
 final appRouter = createAppRouter();
@@ -32,6 +35,7 @@ GoRouter createAppRouter(
         if (!auth.ready) {
           return path == '/auth/loading' ? null : '/auth/loading';
         }
+        if (auth.user == null) LocalPrefs.instance.unbindAccount();
         if (auth.user == null && !auth.demoMode) {
           return path == '/welcome' ? null : '/welcome';
         }
@@ -92,13 +96,10 @@ GoRouter createAppRouter(
         GoRoute(
           path: '/insights/:id',
           builder: (_, state) {
-            final uid = auth?.user?.uid;
-            if (_hasRealUser(auth, usage) && uid != null) {
-              return RealInsightDetailScreen(
-                uid: uid,
-                repository: usage!,
-                insightId: state.pathParameters['id']!,
-              );
+            final args = _liveArgs(auth, usage);
+            if (args != null) {
+              return _live(LiveInsightDetailScreen(
+                  args: args, insightId: state.pathParameters['id']!));
             }
             return InsightDetailScreen(
               initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
@@ -108,13 +109,15 @@ GoRouter createAppRouter(
         GoRoute(
           path: '/insight-detail',
           builder: (_, route) {
-            final real = _hasRealUser(auth, usage);
-            final uid = auth?.user?.uid;
-            return real && uid != null
-                ? InsightsScreen(uid: uid, repository: usage!)
-                : InsightDetailScreen(
-                    initialPeriod:
-                        route.uri.queryParameters['period'] ?? 'Month');
+            final args = _liveArgs(auth, usage);
+            final id = route.uri.queryParameters['id'];
+            if (args != null) {
+              return _live(id == null
+                  ? LiveInsightsScreen(args: args)
+                  : LiveInsightDetailScreen(args: args, insightId: id));
+            }
+            return InsightDetailScreen(
+                initialPeriod: route.uri.queryParameters['period'] ?? 'Month');
           },
         ),
         GoRoute(
@@ -129,26 +132,13 @@ GoRouter createAppRouter(
           GoRoute(
             path: entry.value,
             builder: (context, state) {
-              final real = _hasRealUser(auth, usage);
-              final uid = auth?.user?.uid;
-              if (real && uid != null) {
-                final repository = usage!;
-                if (entry.key == 'M04') {
-                  return TokensScreen(uid: uid, repository: repository);
-                }
-                if (entry.key == 'M05') {
-                  return AnalyticsScreen(uid: uid, repository: repository);
-                }
-                if (entry.key == 'M05B') {
-                  return EfficiencyScreen(uid: uid, repository: repository);
-                }
-                if (entry.key == 'M07') {
-                  return InsightsScreen(uid: uid, repository: repository);
-                }
-                if (entry.key == 'M10') {
-                  return LastSyncScreen(uid: uid, repository: repository);
-                }
+              final args = _liveArgs(auth, usage);
+              if (args != null) {
+                final live = _liveScreen(entry.key, args, state);
+                if (live != null) return _live(live);
               }
+              final widgetScreen = _widgetScreens[entry.key];
+              if (widgetScreen != null) return widgetScreen;
               return FigmaPixelScreen(
                   screenId: entry.key,
                   initialPeriod: state.uri.queryParameters['period'] ?? 'Month',
@@ -158,5 +148,51 @@ GoRouter createAppRouter(
       ],
     );
 
+/// Figma frames rebuilt with layout widgets; the rest still use the
+/// coordinate-based FigmaPixelScreen.
+const Map<String, Widget> _widgetScreens = {
+  'M01': WelcomeScreen(),
+  'M02': ConnectDesktopScreen(),
+  'M03': InstallGuideScreen(),
+};
+
 bool _hasRealUser(MobileAuthController? auth, UsageRepository? usage) =>
     auth?.user != null && !auth!.demoMode && usage != null;
+
+/// Firestore reader for a signed-in, non-demo user; null in demo/preview.
+LiveArgs? _liveArgs(MobileAuthController? auth, UsageRepository? usage) {
+  if (!_hasRealUser(auth, usage)) return null;
+  final uid = auth!.user!.uid;
+  LocalPrefs.instance.bindAccount(uid, usage!);
+  return LiveArgs(uid: uid, repository: usage);
+}
+
+/// Rebuilds live screens when phone-only preferences change.
+Widget _live(Widget child) => ListenableBuilder(
+    listenable: LocalPrefs.instance, builder: (_, __) => child);
+
+/// Live (Firestore) screen for a Figma frame. Onboarding frames and the
+/// S01–S04 states are handled by the router redirect and Tokens screen.
+Widget? _liveScreen(String id, LiveArgs args, GoRouterState state) {
+  final period = UsagePeriodLabel.parse(state.uri.queryParameters['period']);
+  return switch (id) {
+    'M04' => LiveTokensScreen(args: args, initialPeriod: period),
+    'M04B' => LiveUsageDetailsScreen(args: args, period: period),
+    'M05' => LiveAnalyticsScreen(args: args, initialPeriod: period),
+    'M05B' => LiveEfficiencyScreen(args: args),
+    'M05C' => LiveModelComparisonScreen(args: args),
+    'M06' => LiveDailyUsageScreen(args: args),
+    'M07' => LiveInsightsScreen(args: args),
+    'M09' => LiveSettingsScreen(args: args),
+    'M10' => LiveDesktopScreen(args: args),
+    'M11' => LiveBudgetScreen(args: args),
+    'M12' => const LivePrivacyScreen(),
+    'M13' => LiveAccountScreen(args: args),
+    'M14' => LiveModelPricingScreen(args: args),
+    'M15' => LiveAiSuggestionsScreen(args: args),
+    'O01' => LiveExportScreen(args: args),
+    'O02' => LiveBudgetAlertScreen(args: args),
+    'O03' => LiveCostBreakdownScreen(args: args, period: period),
+    _ => null,
+  };
+}

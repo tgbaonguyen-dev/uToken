@@ -29,6 +29,17 @@ public interface ICloudSync
     Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default);
 
     Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default);
+
+    /// <summary>
+    /// Lấy các yêu cầu sync mobile tạo (users/{uid}/sync_requests, state = pending) và chuyển chúng sang running.
+    /// Trả về ID đã nhận. Mặc định không có yêu cầu nào (bản giả lập/offline).
+    /// </summary>
+    Task<IReadOnlyList<string>> ClaimSyncRequestsAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<string>>([]);
+
+    /// <summary>Đánh dấu yêu cầu đã nhận là done hoặc failed (kèm error_code).</summary>
+    Task FinishSyncRequestsAsync(IReadOnlyList<string> ids, string? errorCode, CancellationToken ct = default) =>
+        Task.CompletedTask;
 }
 
 /// <summary>
@@ -121,8 +132,12 @@ public sealed class FirebaseCloudSync : ICloudSync
                 writes.Add(Update($"users/{uid}/daily/{d.Date}", FirestoreValues.Fields(d)));
             writes.Add(Update($"users/{uid}/efficiency/current", FirestoreValues.Fields(efficiency)));
             // Chỉ cập nhật đúng một trường ở users/{uid}, không ghi đè dữ liệu mobile đặt ở đó.
-            var profile = Update($"users/{uid}", new JsonObject { ["last_sync_at"] = FirestoreValues.Value(_clock.GetUtcNow()) });
-            profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at") };
+            var profile = Update($"users/{uid}", new JsonObject
+            {
+                ["last_sync_at"] = FirestoreValues.Value(_clock.GetUtcNow()),
+                ["desktop_name"] = FirestoreValues.Value(Environment.MachineName),
+            });
+            profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at", "desktop_name") };
             writes.Add(profile);
 
             long bytes = 0;
@@ -154,6 +169,70 @@ public sealed class FirebaseCloudSync : ICloudSync
         }
         catch (CloudAuthException) { ClearSession(); throw; }
         finally { _tokenLock.Release(); }
+    }
+
+    public async Task<IReadOnlyList<string>> ClaimSyncRequestsAsync(CancellationToken ct = default)
+    {
+        await _tokenLock.WaitAsync(ct);
+        try
+        {
+            if (_session is not { } session) return [];
+            var query = new JsonObject
+            {
+                ["from"] = new JsonArray(new JsonObject { ["collectionId"] = "sync_requests" }),
+                ["where"] = new JsonObject
+                {
+                    ["fieldFilter"] = new JsonObject
+                    {
+                        ["field"] = new JsonObject { ["fieldPath"] = "state" },
+                        ["op"] = "EQUAL",
+                        ["value"] = FirestoreValues.Value("pending"),
+                    },
+                },
+                ["limit"] = 20,
+            };
+            var docs = await _firestore.RunQueryAsync($"users/{session.Uid}", query, ct);
+            var ids = docs.Select(d => d["name"]!.GetValue<string>().Split('/')[^1]).ToList();
+            if (ids.Count > 0) await SetRequestStateAsync(session.Uid, ids, "running", null, finished: false, ct);
+            return ids;
+        }
+        catch (CloudAuthException) { ClearSession(); throw; }
+        finally { _tokenLock.Release(); }
+    }
+
+    public async Task FinishSyncRequestsAsync(IReadOnlyList<string> ids, string? errorCode, CancellationToken ct = default)
+    {
+        if (ids.Count == 0) return;
+        await _tokenLock.WaitAsync(ct);
+        try
+        {
+            if (_session is not { } session) return;
+            await SetRequestStateAsync(session.Uid, ids, errorCode is null ? "done" : "failed", errorCode, finished: true, ct);
+        }
+        catch (CloudAuthException) { ClearSession(); throw; }
+        finally { _tokenLock.Release(); }
+    }
+
+    private async Task SetRequestStateAsync(string uid, IReadOnlyList<string> ids, string state, string? errorCode, bool finished, CancellationToken ct)
+    {
+        var writes = new JsonArray();
+        foreach (var id in ids)
+        {
+            var fields = new JsonObject { ["state"] = FirestoreValues.Value(state) };
+            var mask = new JsonArray("state");
+            if (finished)
+            {
+                fields["finished_at"] = FirestoreValues.Value(_clock.GetUtcNow().ToString("O"));
+                fields["error_code"] = FirestoreValues.Value(errorCode);
+                mask.Add("finished_at");
+                mask.Add("error_code");
+            }
+            var write = Update($"users/{uid}/sync_requests/{id}", fields);
+            write["updateMask"] = new JsonObject { ["fieldPaths"] = mask };
+            write["currentDocument"] = new JsonObject { ["exists"] = true };
+            writes.Add(write);
+        }
+        await _firestore.CommitAsync(new JsonObject { ["writes"] = writes }.ToJsonString(), ct);
     }
 
     private JsonObject Update(string path, JsonObject fields) => new()

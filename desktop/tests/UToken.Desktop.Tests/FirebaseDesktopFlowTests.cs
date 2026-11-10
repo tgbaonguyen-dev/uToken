@@ -144,6 +144,42 @@ public sealed class FirebaseDesktopFlowTests : IDisposable
         }
     }
 
+    [Fact]
+    public async Task Mobile_sync_request_runs_sync_and_marks_the_request_done()
+    {
+        using var app = _home.Api(cloudSync: NewCloud());
+        await app.SignInAsync();
+        Assert.Null(await app.ServeMobileSyncRequestsAsync());
+        Assert.Contains("\"state\"", _server.Queries[^1].Body);
+        Assert.EndsWith("/users/uid-1:runQuery", _server.Queries[^1].Path);
+        Assert.Empty(_server.Commits);
+
+        _server.PendingRequests.Add("req-1");
+        var result = await app.ServeMobileSyncRequestsAsync();
+        Assert.Equal("success", result!.State);
+        Assert.Equal(3, _server.Commits.Count); // running, upload, done
+
+        static IEnumerable<JsonNode> Writes(string body) => JsonNode.Parse(body)!["writes"]!.AsArray()!;
+        var running = Assert.Single(Writes(_server.Commits[0].Body));
+        Assert.EndsWith("users/uid-1/sync_requests/req-1", running["update"]!["name"]!.GetValue<string>());
+        Assert.Equal("running", running["update"]!["fields"]!["state"]!["stringValue"]!.GetValue<string>());
+        Assert.Contains(Writes(_server.Commits[1].Body), w => w["update"]!["name"]!.GetValue<string>().Contains("/daily/"));
+        var profile = Writes(_server.Commits[1].Body).Last();
+        Assert.Contains("desktop_name", profile["updateMask"]!["fieldPaths"]!.AsArray().Select(f => f!.GetValue<string>()));
+        var done = Assert.Single(Writes(_server.Commits[2].Body));
+        Assert.Equal("done", done["update"]!["fields"]!["state"]!["stringValue"]!.GetValue<string>());
+        Assert.True(done["update"]!["fields"]!["error_code"]!.AsObject().ContainsKey("nullValue"));
+    }
+
+    [Fact]
+    public async Task Mobile_sync_request_is_ignored_when_signed_out()
+    {
+        using var app = _home.Api(cloudSync: NewCloud());
+        _server.PendingRequests.Add("req-1");
+        Assert.Null(await app.ServeMobileSyncRequestsAsync());
+        Assert.Empty(_server.Queries);
+    }
+
     private sealed class FirebaseServer : HttpMessageHandler
     {
         public string SignInUid = "uid-1";
@@ -151,6 +187,8 @@ public sealed class FirebaseDesktopFlowTests : IDisposable
         public int Refreshes;
         public HttpStatusCode CommitStatus = HttpStatusCode.OK;
         public List<(string Auth, string Body)> Commits { get; } = [];
+        public List<string> PendingRequests { get; } = [];
+        public List<(string Path, string Body)> Queries { get; } = [];
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
@@ -165,6 +203,16 @@ public sealed class FirebaseDesktopFlowTests : IDisposable
                 string uid = token["refresh-".Length..];
                 Refreshes++;
                 return Json(new { id_token = "token-" + uid, refresh_token = token, expires_in = "3600", user_id = uid });
+            }
+            if (path.EndsWith(":runQuery"))
+            {
+                Queries.Add((path, await request.Content!.ReadAsStringAsync(ct)));
+                var rows = PendingRequests.Select(id => new
+                {
+                    document = new { name = $"projects/utoken-test/databases/(default)/documents/users/{SignInUid}/sync_requests/{id}" },
+                }).ToArray();
+                PendingRequests.Clear();
+                return Json(rows.Length == 0 ? new object[] { new { readTime = "2026-11-10T00:00:00Z" } } : rows);
             }
             if (path.EndsWith(":commit"))
             {

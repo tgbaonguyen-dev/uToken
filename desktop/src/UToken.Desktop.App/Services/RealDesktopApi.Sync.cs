@@ -167,6 +167,28 @@ public sealed partial class RealDesktopApi
         }
     }
 
+    public async Task<SyncResult?> ServeMobileSyncRequestsAsync(CancellationToken ct = default)
+    {
+        if (_cloud is null || await AccountAsync(ct) is null) return null;
+        IReadOnlyList<string> ids;
+        try { ids = await _cloud.ClaimSyncRequestsAsync(ct); }
+        catch (Exception ex) when (ex is HttpRequestException or CloudAuthException or TaskCanceledException)
+        {
+            _localSettings?.Record("Mobile sync request check failed: " + ex.GetType().Name);
+            return null;
+        }
+        if (ids.Count == 0) return null;
+        _localSettings?.Record($"Mobile requested sync ({ids.Count})");
+        var result = await SyncNowAsync(ct);
+        var error = result.State is "success" or "no_new_usage" ? null : result.State;
+        try { await _cloud.FinishSyncRequestsAsync(ids, error, ct); }
+        catch (Exception ex) when (ex is HttpRequestException or CloudAuthException or TaskCanceledException)
+        {
+            _localSettings?.Record("Could not mark mobile sync request finished: " + ex.GetType().Name);
+        }
+        return result;
+    }
+
     public async Task<SyncData> DisconnectAsync(CancellationToken ct = default)
     {
         if (_cloud is not null) await _cloud.SignOutAsync(ct);

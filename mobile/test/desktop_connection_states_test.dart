@@ -9,7 +9,7 @@ import 'package:utoken_mobile/core/mock/figma_mock_repository.dart';
 import 'package:utoken_mobile/features/auth/data/auth_mock_repository.dart';
 import 'package:utoken_mobile/features/auth/presentation/reviewed_state_navigation.dart';
 import 'package:utoken_mobile/features/auth/presentation/reviewed_state_view.dart';
-import 'package:utoken_mobile/features/figma/presentation/figma_pixel_screen.dart';
+import 'support/screen_finder.dart';
 
 import 'dark_main_review_test.dart' as capture;
 
@@ -160,11 +160,7 @@ void main() {
         'desktopConnectionNoUsage' => 'S02',
         _ => 'M10',
       };
-      expect(
-          tester
-              .widget<FigmaPixelScreen>(find.byType(FigmaPixelScreen).last)
-              .screenId,
-          expected);
+      expect(topScreenId(tester), expected);
       if (expected == 'S02') {
         expect(find.text('Waiting for first activity'), findsOneWidget);
         expect(find.text('Total tokens'), findsNothing);

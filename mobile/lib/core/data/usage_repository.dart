@@ -18,6 +18,28 @@ abstract interface class UsageRepository {
   Stream<EfficiencyDoc?> watchEfficiency({required String uid});
   Stream<InsightsDoc?> watchInsights({required String uid});
   Stream<DateTime?> watchLastSync({required String uid});
+
+  /// Name the desktop reported on its last upload (users/{uid}.desktop_name).
+  Stream<String?> watchDesktopName({required String uid});
+
+  /// Asks the signed-in desktop to scan and upload now; returns the request id.
+  Future<String> requestSync({required String uid});
+
+  /// State of a sync request: pending, running, done or failed.
+  Stream<SyncRequestStatus?> watchSyncRequest(
+      {required String uid, required String id});
+
+  /// Account preferences shared by every phone (users/{uid}/preferences/mobile).
+  Stream<Map<String, dynamic>?> watchPreferences({required String uid});
+  Future<void> savePreferences(
+      {required String uid, required Map<String, dynamic> values});
+}
+
+class SyncRequestStatus {
+  const SyncRequestStatus({required this.state, this.errorCode});
+  final String state;
+  final String? errorCode;
+  bool get finished => state == 'done' || state == 'failed';
 }
 
 /// Firestore implementation of [UsageRepository]. It never writes documents.
@@ -99,6 +121,44 @@ class FirestoreUsageRepository implements UsageRepository {
                 ? DateTime.tryParse(value)
                 : null;
       });
+
+  @override
+  Stream<String?> watchDesktopName({required String uid}) => _user(uid)
+      .snapshots()
+      .map((snapshot) => snapshot.data()?['desktop_name'] as String?);
+
+  @override
+  Future<String> requestSync({required String uid}) async {
+    final doc = await _user(uid).collection('sync_requests').add({
+      'trigger': 'manual_refresh',
+      'state': 'pending',
+      'created_at': DateTime.now().toUtc().toIso8601String(),
+    });
+    return doc.id;
+  }
+
+  @override
+  Stream<SyncRequestStatus?> watchSyncRequest(
+          {required String uid, required String id}) =>
+      _user(uid).collection('sync_requests').doc(id).snapshots().map((s) {
+        final data = s.data();
+        if (data == null) return null;
+        return SyncRequestStatus(
+            state: data['state'] as String? ?? 'pending',
+            errorCode: data['error_code'] as String?);
+      });
+
+  DocumentReference<JsonMap> _prefs(String uid) =>
+      _user(uid).collection('preferences').doc('mobile');
+
+  @override
+  Stream<Map<String, dynamic>?> watchPreferences({required String uid}) =>
+      _prefs(uid).snapshots().map((s) => s.data());
+
+  @override
+  Future<void> savePreferences(
+          {required String uid, required Map<String, dynamic> values}) =>
+      _prefs(uid).set(values, SetOptions(merge: true));
 
   String _day(DateTime value) => value.toIso8601String().substring(0, 10);
 }

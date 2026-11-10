@@ -9,7 +9,7 @@ import 'package:utoken_mobile/core/mock/figma_mock_repository.dart';
 import 'package:utoken_mobile/features/auth/data/auth_mock_repository.dart';
 import 'package:utoken_mobile/features/auth/presentation/reviewed_state_navigation.dart';
 import 'package:utoken_mobile/features/auth/presentation/reviewed_state_view.dart';
-import 'package:utoken_mobile/features/figma/presentation/figma_pixel_screen.dart';
+import 'support/screen_finder.dart';
 
 import 'dark_main_review_test.dart' as capture;
 
@@ -124,11 +124,7 @@ void main() {
       await tester.runAsync(() =>
           tester.tap(find.byKey(const ValueKey('reviewed-state-action'))));
       await settle(tester);
-      expect(
-          tester
-              .widget<FigmaPixelScreen>(find.byType(FigmaPixelScreen).last)
-              .screenId,
-          destinations[index]);
+      expect(topScreenId(tester), destinations[index]);
       await tester.runAsync(() =>
           tester.tap(find.byKey(const ValueKey('figma-hotspot-Back')).last));
       await settle(tester);

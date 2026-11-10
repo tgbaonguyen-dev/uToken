@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
 using UToken.Sync.Auth;
 
 namespace UToken.Sync;
@@ -32,5 +33,23 @@ public sealed class FirestoreRestClient(HttpClient http, FirebaseOptions options
         throw new HttpRequestException($"Firestore commit failed: {detail}", null, res.StatusCode);
     }
 
-    // TODO(ADR-0003): ListPendingSyncRequestsAsync — poll hoặc gRPC Listen sau khi có kết quả spike.
+    /// <summary>
+    /// Chạy structured query dưới <paramref name="parentPath"/> (ví dụ users/abc) và trả về các document tìm được.
+    /// Mobile ghi users/{uid}/sync_requests; desktop poll bằng hàm này (ADR-0003).
+    /// </summary>
+    public async Task<IReadOnlyList<JsonObject>> RunQueryAsync(string parentPath, JsonObject structuredQuery, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{DocumentsBase}/{parentPath}:runQuery")
+        {
+            Content = new StringContent(new JsonObject { ["structuredQuery"] = structuredQuery }.ToJsonString(), Encoding.UTF8, "application/json"),
+        };
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await getIdToken(ct));
+        using var res = await http.SendAsync(req, ct);
+        if (res.StatusCode == HttpStatusCode.Unauthorized)
+            throw new CloudAuthException("Firestore rejected the session (401).");
+        if (!res.IsSuccessStatusCode)
+            throw new HttpRequestException($"Firestore query failed: {res.StatusCode}", null, res.StatusCode);
+        var rows = JsonNode.Parse(await res.Content.ReadAsStringAsync(ct)) as JsonArray ?? [];
+        return rows.Select(r => r?["document"] as JsonObject).Where(d => d is not null).Select(d => d!).ToList();
+    }
 }
