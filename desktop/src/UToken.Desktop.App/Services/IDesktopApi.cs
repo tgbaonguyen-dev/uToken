@@ -43,6 +43,10 @@ public interface IDesktopApi
     Task<SyncStateConfig> GetSyncStateConfigAsync(CancellationToken ct = default);
     Task<SyncData> GetSyncAsync(CancellationToken ct = default);
     Task<SyncResult> SyncNowAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Chạy sync nếu mobile đã yêu cầu (users/{uid}/sync_requests). Null khi không có yêu cầu nào.
+    /// </summary>
+    Task<SyncResult?> ServeMobileSyncRequestsAsync(CancellationToken ct = default);
     /// <summary>Đăng xuất Google trên máy này. Dữ liệu trên máy và trên cloud giữ nguyên.</summary>
     Task<SyncData> DisconnectAsync(CancellationToken ct = default);
     Task<OverviewScenario[]> GetPairingScenariosAsync(CancellationToken ct = default);

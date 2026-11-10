@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/ui/ut_kit.dart';
 import '../../auth/domain/mobile_auth.dart';
 import '../../auth/presentation/mobile_auth_status.dart';
+import '../../../core/widgets/ui_preview_scope.dart';
 
 void _back(BuildContext context, String fallback) {
   if (context.canPop()) {
@@ -40,10 +41,12 @@ class WelcomeScreen extends StatelessWidget {
           UtButton(
               label: 'Continue with Google',
               onPressed: () => _continue(context)),
-          UtButton(
-              label: 'View demo',
-              style: UtButtonStyle.secondary,
-              onPressed: () => _demo(context)),
+          // Sample data is only offered in preview builds.
+          if (UiPreviewScope.enabledOf(context))
+            UtButton(
+                label: 'View demo',
+                style: UtButtonStyle.secondary,
+                onPressed: () => _demo(context)),
         ],
         footer: const Text('Your prompts stay on your devices.',
             textAlign: TextAlign.center, style: UtText.caption),
@@ -55,21 +58,38 @@ class WelcomeScreen extends StatelessWidget {
               'Automatic token and cost tracking for the tools you already use.',
               style: UtText.body),
           SizedBox(height: 44),
-          _SampleMonthCard(),
+          _FeatureCard(),
         ],
       ),
     );
   }
 }
 
-/// Sample "This month" card shown on the welcome screen.
-class _SampleMonthCard extends StatelessWidget {
-  const _SampleMonthCard();
+/// What the app shows once the desktop uploads usage (no sample numbers).
+class _FeatureCard extends StatelessWidget {
+  const _FeatureCard();
 
-  static const _providers = [
-    ('Gemini', 62.4, UtColors.orange),
-    ('Codex', 28.8, UtColors.blue),
-    ('Claude', 8.8, UtColors.green),
+  static const _rows = [
+    (
+      Icons.data_usage_rounded,
+      'Token totals',
+      'Codex, Gemini and Claude in one place'
+    ),
+    (
+      Icons.attach_money_rounded,
+      'Estimated cost',
+      'Priced from the desktop’s model catalog'
+    ),
+    (
+      Icons.lightbulb_outline_rounded,
+      'Suggestions',
+      'AI review of your usage patterns'
+    ),
+    (
+      Icons.sync_rounded,
+      'Synced with your computer',
+      'Same Google account on both devices'
+    ),
   ];
 
   @override
@@ -78,56 +98,32 @@ class _SampleMonthCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('This month', style: UtText.label),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('6.83M', style: UtText.hero),
-                    Text('tokens', style: UtText.body),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text('\$42.18',
-                    style: UtText.title.copyWith(color: UtColors.green)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: SizedBox(
-              height: 6,
-              child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final p in _providers)
-                      Expanded(
-                          flex: (p.$2 * 10).round(),
-                          child: ColoredBox(color: p.$3)),
-                  ]),
-            ),
-          ),
-          const SizedBox(height: 26),
-          for (final p in _providers)
+          const Text('What you get', style: UtText.label),
+          const SizedBox(height: 8),
+          for (final r in _rows)
             Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: SizedBox(
-                height: 20,
-                child: Row(children: [
-                  Expanded(
-                      child: Text(p.$1,
-                          style:
-                              UtText.caption.copyWith(color: UtColors.text))),
-                  Text('${p.$2}%', style: UtText.caption),
-                ]),
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                      color: UtColors.chip,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: UtColors.cardBorder)),
+                  child: Icon(r.$1, size: 16, color: UtColors.text),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(r.$2, style: UtText.bodyStrong),
+                      Text(r.$3, style: UtText.caption),
+                    ],
+                  ),
+                ),
+              ]),
             ),
         ],
       ),
@@ -281,7 +277,7 @@ class InstallGuideScreen extends StatelessWidget {
   static const _steps = [
     ('Download desktop app', 'Linux, macOS and Windows'),
     ('Sign in with Google', 'Use the same account as mobile'),
-    ('Pair this phone', 'Enter the code shown in the app'),
+    ('Sign in on this phone', 'Continue with the same Google account'),
     ('Leave it running', 'Usage syncs in the background'),
   ];
 
@@ -294,8 +290,19 @@ class InstallGuideScreen extends StatelessWidget {
       actions: [
         UtButton(
             label: 'Download desktop app',
-            onPressed: () => utShowNotice(context,
-                'UI Preview: cần bản cài Desktop Companion do nhóm cung cấp.')),
+            onPressed: () => showDialog<void>(
+                context: context,
+                builder: (dialog) => AlertDialog(
+                      title: const Text('Install on your computer'),
+                      content: const Text(
+                          'Install μToken Companion on Linux, macOS or Windows, open it and choose Sign in with Google. '
+                          'Use the same account as this phone, then press Sync now.'),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.pop(dialog),
+                            child: const Text('OK')),
+                      ],
+                    ))),
         UtButton(
             label: 'I already installed it',
             actionName: 'Already installed',

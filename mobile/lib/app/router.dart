@@ -35,6 +35,7 @@ GoRouter createAppRouter(
         if (!auth.ready) {
           return path == '/auth/loading' ? null : '/auth/loading';
         }
+        if (auth.user == null) LocalPrefs.instance.unbindAccount();
         if (auth.user == null && !auth.demoMode) {
           return path == '/welcome' ? null : '/welcome';
         }
@@ -159,10 +160,12 @@ bool _hasRealUser(MobileAuthController? auth, UsageRepository? usage) =>
     auth?.user != null && !auth!.demoMode && usage != null;
 
 /// Firestore reader for a signed-in, non-demo user; null in demo/preview.
-LiveArgs? _liveArgs(MobileAuthController? auth, UsageRepository? usage) =>
-    _hasRealUser(auth, usage)
-        ? LiveArgs(uid: auth!.user!.uid, repository: usage!)
-        : null;
+LiveArgs? _liveArgs(MobileAuthController? auth, UsageRepository? usage) {
+  if (!_hasRealUser(auth, usage)) return null;
+  final uid = auth!.user!.uid;
+  LocalPrefs.instance.bindAccount(uid, usage!);
+  return LiveArgs(uid: uid, repository: usage);
+}
 
 /// Rebuilds live screens when phone-only preferences change.
 Widget _live(Widget child) => ListenableBuilder(

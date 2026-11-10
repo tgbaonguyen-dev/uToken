@@ -15,7 +15,15 @@ class LiveArgs {
   final String uid;
   final UsageRepository repository;
 
-  Future<void> refresh() => repository.refresh(uid: uid);
+  /// Reads the server copy and asks the desktop to upload new usage.
+  Future<void> refresh() async {
+    await repository.refresh(uid: uid);
+    try {
+      await repository.requestSync(uid: uid);
+    } catch (error) {
+      debugPrint('Could not ask the desktop to sync: $error');
+    }
+  }
 
   /// All daily summaries up to today.
   Stream<List<DailyDoc>> daily() =>

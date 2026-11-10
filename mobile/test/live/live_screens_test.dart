@@ -6,6 +6,7 @@ import 'package:utoken_mobile/core/data/usage_repository.dart';
 import 'package:utoken_mobile/core/models/daily_doc.dart';
 import 'package:utoken_mobile/core/models/usage_docs.dart';
 import 'package:utoken_mobile/core/data/local_prefs.dart';
+import 'package:utoken_mobile/core/format/token_format.dart';
 import 'package:utoken_mobile/features/live/analytics_screens.dart';
 import 'package:utoken_mobile/features/live/insights_screens.dart';
 import 'package:utoken_mobile/features/live/live_common.dart';
@@ -43,10 +44,44 @@ class FakeUsageRepository implements UsageRepository {
   @override
   Stream<DateTime?> watchLastSync({required String uid}) => sync.stream;
 
+  final desktopName = StreamController<String?>.broadcast();
+  final requests = <String>[];
+  final requestStates = <String, StreamController<SyncRequestStatus?>>{};
+  final prefs = StreamController<Map<String, dynamic>?>.broadcast();
+  final savedPrefs = <Map<String, dynamic>>[];
+
+  @override
+  Stream<String?> watchDesktopName({required String uid}) => desktopName.stream;
+  @override
+  Future<String> requestSync({required String uid}) async {
+    final id = 'req-${requests.length + 1}';
+    requests.add(id);
+    requestStates[id] = StreamController<SyncRequestStatus?>.broadcast();
+    return id;
+  }
+
+  @override
+  Stream<SyncRequestStatus?> watchSyncRequest(
+          {required String uid, required String id}) =>
+      requestStates[id]!.stream;
+  @override
+  Stream<Map<String, dynamic>?> watchPreferences({required String uid}) =>
+      prefs.stream;
+  @override
+  Future<void> savePreferences(
+      {required String uid, required Map<String, dynamic> values}) async {
+    savedPrefs.add(values);
+  }
+
   Future<void> close() async {
     await efficiency.close();
     await insights.close();
     await sync.close();
+    await desktopName.close();
+    await prefs.close();
+    for (final c in requestStates.values) {
+      await c.close();
+    }
   }
 }
 
@@ -166,6 +201,7 @@ void main() {
     expect(exactTotal(tester), '2,400');
     expect(find.text('\$5.00 estimated'), findsOneWidget);
     expect(find.textContaining('Read latest data'), findsOneWidget);
+    expect(repository.requests, ['req-1']);
   });
 
   testWidgets('failed manual refresh retains data and allows retry',
@@ -271,7 +307,7 @@ void main() {
     expect(find.text('Not synced yet'), findsOneWidget);
     repository.sync.add(DateTime.now().subtract(const Duration(minutes: 3)));
     await tester.pumpAndSettle();
-    expect(find.text('Synced 3m ago'), findsOneWidget);
+    expect(find.text('Desktop · synced 3m ago'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -332,6 +368,76 @@ void main() {
       'date,input,cached,cache_write,output,chats,requests,cost_usd',
       '2026-11-01,10,0,0,0,0,0,2.500000',
     ]);
+  });
+
+  testWidgets('Sync now asks the desktop and shows the request state',
+      (tester) async {
+    final repository = FakeUsageRepository();
+    addTearDown(repository.close);
+    await tester.pumpWidget(app(LiveDesktopScreen(args: argsFor(repository))));
+    repository.desktopName.add('CAMELLYA-PC');
+    repository.sync.add(DateTime.now().subtract(const Duration(minutes: 2)));
+    await tester.pumpAndSettle();
+    expect(find.text('CAMELLYA-PC · synced 2m ago'), findsOneWidget);
+    await tester.tap(find.text('Sync now'));
+    await tester.pump();
+    await tester.pump();
+    expect(repository.requests, ['req-1']);
+    String status() => tester
+        .widget<Text>(find.byKey(const ValueKey('sync-request-status')))
+        .data!;
+    expect(status(), 'Waiting for the desktop to pick this up…');
+    repository.requestStates['req-1']!
+        .add(const SyncRequestStatus(state: 'running'));
+    await tester.pump();
+    expect(status(), 'Desktop is syncing…');
+    repository.requestStates['req-1']!
+        .add(const SyncRequestStatus(state: 'failed', errorCode: 'network'));
+    await tester.pump();
+    expect(status(), 'Desktop couldn’t reach Firebase');
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  test('preferences follow the account and are written back', () async {
+    final repository = FakeUsageRepository();
+    final store = MemoryPrefsStore();
+    final prefs = LocalPrefs(store);
+    await prefs.load();
+    prefs.bindAccount('u', repository);
+    repository.prefs.add({
+      'budget_usd': 80,
+      'token_format': 'full',
+      'reviewed_insights': ['a'],
+    });
+    await Future<void>.delayed(Duration.zero);
+    expect(prefs.monthlyBudgetUsd, 80);
+    expect(prefs.tokenFormat, TokenFormat.full);
+    expect(prefs.isReviewed('a'), isTrue);
+    expect(store.values['prefs_uid'], 'u');
+
+    await prefs.setMonthlyBudget(60);
+    expect(repository.savedPrefs.last['budget_usd'], 60);
+    await prefs.markReviewed('b');
+    expect(repository.savedPrefs.last['reviewed_insights'], ['a', 'b']);
+    prefs.unbindAccount();
+    await repository.close();
+  });
+
+  test('another account does not inherit cached preferences', () async {
+    final store = MemoryPrefsStore()
+      ..values.addAll({'prefs_uid': 'old', 'budget_usd': '99'});
+    final prefs = LocalPrefs(store);
+    await prefs.load();
+    expect(prefs.monthlyBudgetUsd, 99);
+    final repository = FakeUsageRepository();
+    prefs.bindAccount('new', repository);
+    repository.prefs.add(null);
+    await Future<void>.delayed(Duration.zero);
+    expect(prefs.monthlyBudgetUsd, isNull);
+    expect(repository.savedPrefs, isEmpty);
+    expect(store.values['prefs_uid'], 'new');
+    prefs.unbindAccount();
+    await repository.close();
   });
 
   testWidgets('stream errors show friendly text', (tester) async {

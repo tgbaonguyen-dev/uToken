@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/data/local_prefs.dart';
 import '../../core/data/usage_aggregates.dart';
+import '../../core/data/usage_repository.dart';
 import '../../core/format/token_format.dart';
 import '../../core/models/daily_doc.dart';
 import '../../core/models/usage_docs.dart';
@@ -145,64 +146,7 @@ class LiveDesktopScreen extends StatelessWidget {
       subtitle: 'Collector and source status.',
       onBack: () => liveBack(context, '/settings'),
       children: [
-        StreamBuilder<DateTime?>(
-          stream: args.repository.watchLastSync(uid: args.uid),
-          builder: (context, s) {
-            final last = s.data;
-            final now = DateTime.now();
-            final fresh = last != null && now.difference(last).inHours < 24;
-            return UtCard(
-              child: Row(children: [
-                Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                        color: last == null
-                            ? UtColors.muted
-                            : fresh
-                                ? UtColors.green
-                                : UtColors.orange,
-                        shape: BoxShape.circle)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          last == null
-                              ? 'Not synced yet'
-                              : fresh
-                                  ? 'Connected'
-                                  : 'Sync is behind',
-                          style: UtText.bodyStrong),
-                      Text(
-                          last == null
-                              ? 'Sign in on desktop with this Google account'
-                              : 'Synced ${relativeTime(last, now)}',
-                          style: UtText.caption),
-                    ],
-                  ),
-                ),
-                UtChipButtonSmall(
-                    label: 'Refresh',
-                    onPressed: () async {
-                      try {
-                        await args.refresh();
-                        if (context.mounted) {
-                          utShowNotice(
-                              context, 'Read latest data from Firebase.');
-                        }
-                      } catch (_) {
-                        if (context.mounted) {
-                          utShowNotice(
-                              context, 'Couldn’t reach Firebase. Try again.');
-                        }
-                      }
-                    }),
-              ]),
-            );
-          },
-        ),
+        _DesktopStatus(args: args),
         const SizedBox(height: 16),
         UtStream<List<DailyDoc>>(
           stream: args.daily(),
@@ -246,6 +190,138 @@ class LiveDesktopScreen extends StatelessWidget {
           ]),
         ),
       ],
+    );
+  }
+}
+
+/// Connection card with a real "Sync now" that asks the desktop to upload.
+class _DesktopStatus extends StatefulWidget {
+  const _DesktopStatus({required this.args});
+  final LiveArgs args;
+
+  @override
+  State<_DesktopStatus> createState() => _DesktopStatusState();
+}
+
+class _DesktopStatusState extends State<_DesktopStatus> {
+  late final Stream<DateTime?> _lastSync =
+      widget.args.repository.watchLastSync(uid: widget.args.uid);
+  late final Stream<String?> _name =
+      widget.args.repository.watchDesktopName(uid: widget.args.uid);
+  Stream<SyncRequestStatus?>? _request;
+  bool _sending = false;
+
+  Future<void> _syncNow() async {
+    if (_sending) return;
+    setState(() => _sending = true);
+    try {
+      final id = await widget.args.repository.requestSync(uid: widget.args.uid);
+      if (mounted) {
+        setState(() => _request = widget.args.repository
+            .watchSyncRequest(uid: widget.args.uid, id: id));
+      }
+    } catch (_) {
+      if (mounted) utShowNotice(context, 'Couldn’t reach Firebase. Try again.');
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  String _requestText(SyncRequestStatus? r) => switch (r?.state) {
+        'running' => 'Desktop is syncing…',
+        'done' => 'Desktop finished syncing',
+        'failed' => switch (r!.errorCode) {
+            'network' => 'Desktop couldn’t reach Firebase',
+            'revoked' => 'Desktop needs to sign in again',
+            'not_paired' => 'Desktop is signed out',
+            _ => 'Desktop sync failed',
+          },
+        _ => 'Waiting for the desktop to pick this up…',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<String?>(
+      stream: _name,
+      builder: (context, name) => StreamBuilder<DateTime?>(
+        stream: _lastSync,
+        builder: (context, s) {
+          final last = s.data;
+          final now = DateTime.now();
+          final fresh = last != null && now.difference(last).inHours < 24;
+          final device = name.data ?? 'Desktop';
+          return UtCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(children: [
+                  Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                          color: last == null
+                              ? UtColors.muted
+                              : fresh
+                                  ? UtColors.green
+                                  : UtColors.orange,
+                          shape: BoxShape.circle)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            last == null
+                                ? 'Not synced yet'
+                                : fresh
+                                    ? 'Connected'
+                                    : 'Sync is behind',
+                            style: UtText.bodyStrong),
+                        Text(
+                            last == null
+                                ? 'Sign in on desktop with this Google account'
+                                : '$device · synced ${relativeTime(last, now)}',
+                            style: UtText.caption),
+                      ],
+                    ),
+                  ),
+                  UtChipButtonSmall(
+                      label: _sending ? 'Sending…' : 'Sync now',
+                      onPressed: _syncNow),
+                ]),
+                if (_request != null)
+                  StreamBuilder<SyncRequestStatus?>(
+                    stream: _request,
+                    builder: (context, r) => Padding(
+                      padding: const EdgeInsets.only(top: 14),
+                      child: Row(children: [
+                        if (r.data?.finished != true)
+                          const Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: UtColors.muted)),
+                          ),
+                        Expanded(
+                          child: Text(_requestText(r.data),
+                              key: const ValueKey('sync-request-status'),
+                              style: UtText.caption.copyWith(
+                                  color: r.data?.state == 'failed'
+                                      ? UtColors.orange
+                                      : r.data?.state == 'done'
+                                          ? UtColors.green
+                                          : UtColors.muted)),
+                        ),
+                      ]),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

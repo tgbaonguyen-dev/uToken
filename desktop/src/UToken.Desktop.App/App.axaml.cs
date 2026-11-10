@@ -41,7 +41,11 @@ public partial class App : Application
             };
             backgroundTimer.Tick += async (_, _) => await vm.BackgroundSyncAsync();
             backgroundTimer.Start();
-            desktop.Exit += (_, _) => backgroundTimer.Stop();
+            // Yêu cầu sync từ điện thoại (users/{uid}/sync_requests): kiểm tra mỗi 30 giây.
+            var mobileRequestTimer = new Avalonia.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+            mobileRequestTimer.Tick += async (_, _) => await vm.ServeMobileSyncRequestsAsync();
+            mobileRequestTimer.Start();
+            desktop.Exit += (_, _) => { backgroundTimer.Stop(); mobileRequestTimer.Stop(); };
             TrayIcon? tray = null;
             // Only hide windows on platforms where the app installs a native tray.
             if (OperatingSystem.IsWindows())

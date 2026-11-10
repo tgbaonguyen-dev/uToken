@@ -109,11 +109,10 @@ class UtDivider extends StatelessWidget {
   const UtDivider({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      const SizedBox(
-          height: 1,
-          width: double.infinity,
-          child: ColoredBox(color: UtColors.cardBorder));
+  Widget build(BuildContext context) => const SizedBox(
+      height: 1,
+      width: double.infinity,
+      child: ColoredBox(color: UtColors.cardBorder));
 }
 
 enum UtButtonStyle { primary, secondary }
@@ -492,7 +491,7 @@ class _UtRefreshButtonState extends State<UtRefreshButton> {
       await widget.onRefresh();
       if (mounted) {
         utShowNotice(context,
-            'Read latest data from Firebase. New usage requires a desktop upload.');
+            'Read latest data from Firebase and asked your desktop to sync.');
       }
     } catch (error) {
       if (mounted) utShowNotice(context, friendlyStreamError(error));
