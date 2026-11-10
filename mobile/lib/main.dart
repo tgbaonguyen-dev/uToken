@@ -6,12 +6,14 @@ import 'package:go_router/go_router.dart';
 
 import 'app/router.dart';
 import 'core/widgets/ui_preview_scope.dart';
+import 'core/data/local_prefs.dart';
 import 'core/data/usage_repository.dart';
 import 'features/auth/data/firebase_mobile_auth.dart';
 import 'features/auth/domain/mobile_auth.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  LocalPrefs.instance = LocalPrefs(const SecurePrefsStore())..load();
   runApp(const ProviderScope(child: UTokenApp()));
 }
 

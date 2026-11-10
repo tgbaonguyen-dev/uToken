@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../data/stream_status.dart';
 
 /// Dark design tokens taken from the Figma "07 - Final UI Dark" exports
 /// (lib/core/mock/data/figma_dark_*.json).
@@ -107,7 +110,10 @@ class UtDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      const SizedBox(height: 1, child: ColoredBox(color: UtColors.cardBorder));
+      const SizedBox(
+          height: 1,
+          width: double.infinity,
+          child: ColoredBox(color: UtColors.cardBorder));
 }
 
 enum UtButtonStyle { primary, secondary }
@@ -314,4 +320,460 @@ void utShowNotice(BuildContext context, String message) {
         content: Text(message),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16)));
+}
+
+// ---------------------------------------------------------------------------
+// Tab screens, lists and data states.
+
+class UtTabColors {
+  UtTabColors._();
+  static const dock = Color(0xFF0C0F13);
+  static const dockDivider = Color(0xFF252A31);
+  static const inactive = Color(0xFF7B818A);
+  static const segmentSelected = Color(0xFF20252B);
+}
+
+/// Top-level screen with title, optional refresh and the Figma bottom dock.
+class UtTabPage extends StatelessWidget {
+  const UtTabPage({
+    super.key,
+    required this.title,
+    required this.tabIndex,
+    required this.body,
+    this.subtitle,
+    this.onRefresh,
+    this.largeTitle = true,
+  });
+
+  final String title;
+  final String? subtitle;
+  final bool largeTitle;
+  final int tabIndex;
+  final Widget body;
+  final Future<void> Function()? onRefresh;
+
+  static const tabs = [
+    ('Tokens', Icons.data_usage_rounded, '/tokens'),
+    ('Analytics', Icons.show_chart_rounded, '/analytics'),
+    ('Insights', Icons.lightbulb_outline_rounded, '/insights'),
+    ('Settings', Icons.tune_rounded, '/settings'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final insets = MediaQuery.viewPaddingOf(context);
+    return Scaffold(
+      backgroundColor: UtColors.background,
+      body: Padding(
+        padding: EdgeInsets.only(top: insets.top > 38 ? insets.top : 38),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: Row(children: [
+                Expanded(
+                    child: Text(title,
+                        style: largeTitle
+                            ? UtText.title.copyWith(
+                                fontSize: 30,
+                                height: 38 / 30,
+                                fontWeight: FontWeight.w700)
+                            : UtText.title)),
+                if (onRefresh != null) UtRefreshButton(onRefresh: onRefresh!),
+              ]),
+            ),
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                child: Text(subtitle!, style: UtText.body),
+              ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: UtDivider(),
+            ),
+            Expanded(child: body),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _Dock(selected: tabIndex),
+    );
+  }
+}
+
+class _Dock extends StatelessWidget {
+  const _Dock({required this.selected});
+  final int selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.viewPaddingOf(context).bottom;
+    return Container(
+      color: UtTabColors.dock,
+      padding: EdgeInsets.only(bottom: bottom),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const SizedBox(
+            height: 1, child: ColoredBox(color: UtTabColors.dockDivider)),
+        SizedBox(
+          height: 67,
+          child: Row(children: [
+            for (var i = 0; i < UtTabPage.tabs.length; i++)
+              Expanded(child: _DockTab(index: i, selected: i == selected)),
+          ]),
+        ),
+      ]),
+    );
+  }
+}
+
+class _DockTab extends StatelessWidget {
+  const _DockTab({required this.index, required this.selected});
+  final int index;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, icon, route) = UtTabPage.tabs[index];
+    final color = selected ? UtColors.text : UtTabColors.inactive;
+    return Semantics(
+      label: label,
+      button: true,
+      selected: selected,
+      child: InkWell(
+        key: ValueKey('utoken-tab-$index'),
+        onTap: selected ? null : () => context.go(route),
+        child: Stack(alignment: Alignment.topCenter, children: [
+          if (selected)
+            Container(
+                width: 56,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: UtColors.text,
+                    borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(height: 8),
+              ExcludeSemantics(
+                child: Text(label,
+                    style: TextStyle(
+                        fontFamily: 'BeVietnamPro',
+                        fontSize: selected ? 11 : 10.5,
+                        height: 18 / 11,
+                        fontWeight:
+                            selected ? FontWeight.w600 : FontWeight.w500,
+                        color: color)),
+              ),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// 32px square refresh button (Figma "↻" in a bordered box).
+class UtRefreshButton extends StatefulWidget {
+  const UtRefreshButton({super.key, required this.onRefresh});
+  final Future<void> Function() onRefresh;
+
+  @override
+  State<UtRefreshButton> createState() => _UtRefreshButtonState();
+}
+
+class _UtRefreshButtonState extends State<UtRefreshButton> {
+  bool _busy = false;
+
+  Future<void> _run() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onRefresh();
+      if (mounted) {
+        utShowNotice(context,
+            'Read latest data from Firebase. New usage requires a desktop upload.');
+      }
+    } catch (error) {
+      if (mounted) utShowNotice(context, friendlyStreamError(error));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: 'Refresh from Firebase',
+        child: Material(
+          color: UtColors.background,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(11),
+              side: const BorderSide(color: UtColors.cardBorder)),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            key: utActionKey('Refresh'),
+            onTap: _busy ? null : _run,
+            child: SizedBox(
+              width: 32,
+              height: 32,
+              child: Center(
+                child: _busy
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: UtColors.text))
+                    : const Icon(Icons.refresh_rounded,
+                        size: 18, color: UtColors.text),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Pill segmented control (Figma: 40px track #111418 r14, thumb #20252B r11).
+class UtSegmented<T> extends StatelessWidget {
+  const UtSegmented(
+      {super.key,
+      required this.values,
+      required this.selected,
+      required this.label,
+      required this.onChanged});
+
+  final List<T> values;
+  final T selected;
+  final String Function(T) label;
+  final ValueChanged<T> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+          color: UtColors.card, borderRadius: BorderRadius.circular(14)),
+      child: Row(children: [
+        for (final v in values)
+          Expanded(
+            child: Semantics(
+              button: true,
+              selected: v == selected,
+              child: GestureDetector(
+                key: utActionKey(label(v)),
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onChanged(v),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  decoration: BoxDecoration(
+                      color: v == selected
+                          ? UtTabColors.segmentSelected
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(11)),
+                  alignment: Alignment.center,
+                  child: Text(label(v),
+                      style: UtText.bodyStrong.copyWith(
+                          color:
+                              v == selected ? UtColors.text : UtColors.muted)),
+                ),
+              ),
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+class UtSectionLabel extends StatelessWidget {
+  const UtSectionLabel(this.text, {super.key, this.trailing});
+  final String text;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(children: [
+          Expanded(child: Text(text, style: UtText.label)),
+          if (trailing != null) trailing!,
+        ]),
+      );
+}
+
+/// Two-line row with optional trailing value and chevron.
+class UtRow extends StatelessWidget {
+  const UtRow(
+      {super.key,
+      required this.title,
+      this.subtitle,
+      this.trailing,
+      this.onTap,
+      this.leading,
+      this.actionName});
+
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final Widget? leading;
+  final VoidCallback? onTap;
+  final String? actionName;
+
+  @override
+  Widget build(BuildContext context) {
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(children: [
+        if (leading != null) ...[leading!, const SizedBox(width: 12)],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: UtText.bodyStrong),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(subtitle!, style: UtText.caption),
+              ],
+            ],
+          ),
+        ),
+        if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+        if (onTap != null) ...[
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right_rounded,
+              size: 18, color: UtColors.muted),
+        ],
+      ]),
+    );
+    if (onTap == null) return row;
+    return InkWell(
+        key: utActionKey(actionName ?? title), onTap: onTap, child: row);
+  }
+}
+
+class UtValue extends StatelessWidget {
+  const UtValue(this.text, {super.key, this.color = UtColors.text});
+  final String text;
+  final Color color;
+  @override
+  Widget build(BuildContext context) => Text(text,
+      style: UtText.bodyStrong
+          .copyWith(fontWeight: FontWeight.w600, color: color));
+}
+
+enum UtTone { good, review, neutral, danger }
+
+class UtPill extends StatelessWidget {
+  const UtPill(this.text, {super.key, this.tone = UtTone.neutral});
+  final String text;
+  final UtTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (tone) {
+      UtTone.good => UtColors.green,
+      UtTone.review => UtColors.orange,
+      UtTone.danger => const Color(0xFFE0525B),
+      UtTone.neutral => UtColors.muted,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999)),
+      child: Text(text,
+          style: UtText.caption
+              .copyWith(color: color, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+/// Centered message for empty or failed data.
+class UtMessage extends StatelessWidget {
+  const UtMessage(
+      {super.key,
+      required this.title,
+      required this.message,
+      this.icon = Icons.inbox_outlined,
+      this.action});
+  final String title, message;
+  final IconData icon;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+                color: UtColors.card,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: UtColors.cardBorder)),
+            child: Icon(icon, color: UtColors.muted),
+          ),
+          const SizedBox(height: 20),
+          Text(title,
+              textAlign: TextAlign.center,
+              style: UtText.title.copyWith(fontSize: 18)),
+          const SizedBox(height: 8),
+          Text(message, textAlign: TextAlign.center, style: UtText.body),
+          if (action != null) ...[const SizedBox(height: 24), action!],
+        ]),
+      );
+}
+
+/// StreamBuilder with the shared loading and error states.
+class UtStream<T> extends StatelessWidget {
+  const UtStream({super.key, required this.stream, required this.builder});
+  final Stream<T> stream;
+  final Widget Function(BuildContext context, T data) builder;
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<T>(
+        stream: stream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: UtMessage(
+                  icon: Icons.cloud_off_outlined,
+                  title: 'Couldn’t load data',
+                  message: friendlyStreamError(snapshot.error!)),
+            );
+          }
+          if (!snapshot.hasData &&
+              snapshot.connectionState != ConnectionState.done) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(
+                  child: CircularProgressIndicator(color: UtColors.muted)),
+            );
+          }
+          return builder(context, snapshot.data as T);
+        },
+      );
+}
+
+/// Scrollable column with the 20px Figma gutters.
+class UtList extends StatelessWidget {
+  const UtList({super.key, required this.children});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        children: children,
+      );
+}
+
+/// Rows separated by 1px dividers, as in the Figma list cards.
+class UtRowGroup extends StatelessWidget {
+  const UtRowGroup({super.key, required this.children});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) const UtDivider(),
+          children[i],
+        ],
+      ]);
 }
