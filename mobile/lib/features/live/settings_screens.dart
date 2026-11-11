@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/data/local_prefs.dart';
 import '../../core/data/usage_aggregates.dart';
-import '../../core/data/usage_repository.dart';
 import '../../core/format/token_format.dart';
 import '../../core/models/daily_doc.dart';
 import '../../core/data/stream_status.dart';
@@ -155,7 +154,7 @@ class LiveSettingsScreen extends StatelessWidget {
                 const SizedBox(height: 22),
                 UtSectionLabel(tr('Account')),
                 UtRow(
-                  title: user?.email ?? 'Signed in',
+                  title: user?.email ?? tr('Signed in'),
                   actionName: 'Account',
                   subtitle: tr('Google account'),
                   onTap: () => context.push('/account'),
@@ -243,153 +242,116 @@ class _DesktopStatusState extends State<_DesktopStatus> {
       widget.args.repository.watchLastSync(uid: widget.args.uid);
   late final Stream<String?> _name =
       widget.args.repository.watchDesktopName(uid: widget.args.uid);
-  Stream<SyncRequestStatus?>? _request;
-  bool _sending = false;
+  late final SyncCenter _sync = widget.args.sync;
+  bool _touched = false;
 
   Future<void> _syncNow() async {
-    if (_sending) return;
-    setState(() => _sending = true);
-    try {
-      final id = await widget.args.repository.requestSync(uid: widget.args.uid);
-      if (mounted) {
-        setState(() => _request = widget.args.repository
-            .watchSyncRequest(uid: widget.args.uid, id: id));
-      }
-    } catch (_) {
-      if (mounted) {
-        utShowNotice(context, tr('Couldn’t reach Firebase. Try again.'));
-      }
-    } finally {
-      if (mounted) setState(() => _sending = false);
-    }
+    setState(() => _touched = true);
+    await _sync.start();
   }
 
-  String _requestText(SyncRequestStatus? r) => switch (r?.state) {
-        'running' => tr('Desktop is syncing…'),
-        'done' => tr('Desktop finished syncing'),
-        'failed' => switch (r!.errorCode) {
-            'network' => tr('Desktop couldn’t reach Firebase'),
-            'revoked' => tr('Desktop needs to sign in again'),
-            'not_paired' => tr('Desktop is signed out'),
-            _ => tr('Desktop sync failed'),
-          },
-        _ => tr('Waiting for the desktop to pick this up…'),
+  String _requestText() => switch (_sync.phase) {
+        SyncPhase.failed => syncErrorText(_sync.errorCode),
+        SyncPhase.idle => tr('Desktop finished syncing'),
+        SyncPhase.syncing => _sync.requestState == 'running'
+            ? tr('Desktop is syncing…')
+            : tr('Waiting for the desktop to pick this up…'),
       };
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<String?>(
-      stream: _name,
-      builder: (context, name) => StreamBuilder<DateTime?>(
-        stream: _lastSync,
-        builder: (context, s) {
-          final last = s.data;
-          final now = DateTime.now();
-          final fresh = last != null && now.difference(last).inHours < 24;
-          final device = name.data ?? 'Desktop';
-          return UtCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(children: [
-                  Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                          color: last == null
-                              ? UtColors.muted
-                              : fresh
-                                  ? UtColors.green
-                                  : UtColors.orange,
-                          shape: BoxShape.circle)),
-                  const SizedBox(width: 12),
-                  Expanded(
+    return ListenableBuilder(
+        listenable: _sync,
+        builder: (context, _) => StreamBuilder<String?>(
+              stream: _name,
+              builder: (context, name) => StreamBuilder<DateTime?>(
+                stream: _lastSync,
+                builder: (context, s) {
+                  final last = s.data;
+                  final now = DateTime.now();
+                  final fresh =
+                      last != null && now.difference(last).inHours < 24;
+                  final device = name.data ?? 'Desktop';
+                  return UtCard(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                            last == null
-                                ? tr('Not synced yet')
-                                : fresh
-                                    ? tr('Connected')
-                                    : tr('Sync is behind'),
-                            style: UtText.bodyStrong),
-                        Text(
-                            last == null
-                                ? tr(
-                                    'Sign in on desktop with this Google account')
-                                : tr('{device} · synced {when}', {
-                                    'device': device,
-                                    'when': relativeTime(last, now)
-                                  }),
-                            style: UtText.caption),
+                        Row(children: [
+                          Container(
+                              width: 9,
+                              height: 9,
+                              decoration: BoxDecoration(
+                                  color: last == null
+                                      ? UtColors.muted
+                                      : fresh
+                                          ? UtColors.green
+                                          : UtColors.orange,
+                                  shape: BoxShape.circle)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    last == null
+                                        ? tr('Not synced yet')
+                                        : fresh
+                                            ? tr('Connected')
+                                            : tr('Sync is behind'),
+                                    style: UtText.bodyStrong),
+                                Text(
+                                    last == null
+                                        ? tr(
+                                            'Sign in on desktop with this Google account')
+                                        : tr('{device} · synced {when}', {
+                                            'device': device,
+                                            'when': relativeTime(last, now)
+                                          }),
+                                    style: UtText.caption),
+                              ],
+                            ),
+                          ),
+                          UtChipButtonSmall(
+                              label:
+                                  _sync.busy ? tr('Syncing…') : tr('Sync now'),
+                              onPressed: _syncNow),
+                        ]),
+                        if (_touched || _sync.phase != SyncPhase.idle)
+                          Builder(
+                            builder: (context) => Padding(
+                              padding: const EdgeInsets.only(top: 14),
+                              child: Row(children: [
+                                if (_sync.busy)
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 10),
+                                    child: SizedBox(
+                                        width: 12,
+                                        height: 12,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: UtColors.muted)),
+                                  ),
+                                Expanded(
+                                  child: Text(_requestText(),
+                                      key:
+                                          const ValueKey('sync-request-status'),
+                                      style: UtText.caption.copyWith(
+                                          color: _sync.phase == SyncPhase.failed
+                                              ? UtColors.orange
+                                              : _sync.phase == SyncPhase.idle
+                                                  ? UtColors.green
+                                                  : UtColors.muted)),
+                                ),
+                              ]),
+                            ),
+                          ),
                       ],
                     ),
-                  ),
-                  UtChipButtonSmall(
-                      label: _sending ? tr('Sending…') : 'Sync now',
-                      onPressed: _syncNow),
-                ]),
-                if (_request != null)
-                  StreamBuilder<SyncRequestStatus?>(
-                    stream: _request,
-                    builder: (context, r) => Padding(
-                      padding: const EdgeInsets.only(top: 14),
-                      child: Row(children: [
-                        if (r.data?.finished != true)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: UtColors.muted)),
-                          ),
-                        Expanded(
-                          child: Text(_requestText(r.data),
-                              key: const ValueKey('sync-request-status'),
-                              style: UtText.caption.copyWith(
-                                  color: r.data?.state == 'failed'
-                                      ? UtColors.orange
-                                      : r.data?.state == 'done'
-                                          ? UtColors.green
-                                          : UtColors.muted)),
-                        ),
-                      ]),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+                  );
+                },
+              ),
+            ));
   }
-}
-
-/// Compact bordered button (Figma "Sync now": 88×34, r11).
-class UtChipButtonSmall extends StatelessWidget {
-  const UtChipButtonSmall(
-      {super.key, required this.label, required this.onPressed});
-  final String label;
-  final VoidCallback onPressed;
-  @override
-  Widget build(BuildContext context) => Material(
-        color: UtColors.chip,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(11),
-            side: const BorderSide(color: UtColors.cardBorder)),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          key: utActionKey(label),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-            child: Text(label,
-                style: UtText.caption.copyWith(color: UtColors.text)),
-          ),
-        ),
-      );
 }
 
 /// Spending this calendar month, shared by Budget and Budget alert.
@@ -442,7 +404,7 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
     final text = _controller.text.trim().replaceAll('\$', '');
     final value = text.isEmpty ? null : double.tryParse(text);
     if (text.isNotEmpty && (value == null || value <= 0)) {
-      utShowNotice(context, 'Enter a monthly limit above \$0.');
+      utShowNotice(context, tr('Enter a monthly limit above \$0.'));
       return;
     }
     FocusManager.instance.primaryFocus?.unfocus();
@@ -480,8 +442,7 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('${monthName(now.month)} ${now.year}',
-                            style: UtText.label),
+                        Text(monthYear(now), style: UtText.label),
                         const SizedBox(height: 8),
                         Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -493,7 +454,8 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
                                 child: Text(
                                     b.limit == null
                                         ? tr('no limit set')
-                                        : 'of ${usd(b.limit)}',
+                                        : tr('of {limit}',
+                                            {'limit': usd(b.limit)}),
                                     style: UtText.body),
                               ),
                             ]),
@@ -1292,11 +1254,12 @@ class LiveExportScreen extends StatelessWidget {
                 child: Icon(Icons.file_download_outlined,
                     size: 40, color: UtColors.muted)),
             const SizedBox(height: 20),
-            Text(docs.isEmpty ? tr('Nothing to export') : 'Ready to export',
+            Text(docs.isEmpty ? tr('Nothing to export') : tr('Ready to export'),
                 textAlign: TextAlign.center, style: UtText.title),
             const SizedBox(height: 6),
             Text(
-                '${docs.length} daily records · ${monthName(now.month)} ${now.year}',
+                tr('{n} daily records · {month}',
+                    {'n': docs.length, 'month': monthYear(now)}),
                 textAlign: TextAlign.center,
                 style: UtText.body),
             const SizedBox(height: 28),

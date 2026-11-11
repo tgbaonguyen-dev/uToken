@@ -43,6 +43,9 @@ class FakeUsageRepository implements UsageRepository {
   Stream<InsightsDoc?> watchInsights({required String uid}) => insights.stream;
   @override
   Stream<DateTime?> watchLastSync({required String uid}) => sync.stream;
+  final offline = StreamController<bool>.broadcast();
+  @override
+  Stream<bool> watchOffline({required String uid}) => offline.stream;
 
   final desktopName = StreamController<String?>.broadcast();
   final requests = <String>[];
@@ -52,6 +55,10 @@ class FakeUsageRepository implements UsageRepository {
 
   @override
   Stream<String?> watchDesktopName({required String uid}) => desktopName.stream;
+  Map<String, String> projectNames = const {};
+  @override
+  Stream<Map<String, String>> watchProjectNames({required String uid}) =>
+      Stream.value(projectNames);
   final List<Map<String, dynamic>> savedInsights = [];
   @override
   Future<void> saveInsights(
@@ -63,13 +70,22 @@ class FakeUsageRepository implements UsageRepository {
   }
 
   final List<String> triggers = [];
+  bool autoCompleteSync = true;
   @override
   Future<String> requestSync(
       {required String uid, String trigger = 'manual_refresh'}) async {
     final id = 'req-${requests.length + 1}';
     requests.add(id);
     triggers.add(trigger);
-    requestStates[id] = StreamController<SyncRequestStatus?>.broadcast();
+    late final StreamController<SyncRequestStatus?> c;
+    c = StreamController<SyncRequestStatus?>.broadcast(onListen: () {
+      // By default the fake desktop finishes at once; tests that check the
+      // S03/S04 flow turn this off and drive the states themselves.
+      if (autoCompleteSync) {
+        scheduleMicrotask(() => c.add(const SyncRequestStatus(state: 'done')));
+      }
+    });
+    requestStates[id] = c;
     return id;
   }
 
@@ -265,12 +281,21 @@ void main() {
     expect(find.text('90.0%'), findsOneWidget);
     expect(find.text('Claude'), findsOneWidget);
 
+    // Without shared names the row shows a short id; with them, the folder name.
     await tester
         .pumpWidget(app(LiveDailyUsageScreen(args: argsFor(repository))));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Project'));
     await tester.pumpAndSettle();
-    expect(find.text('alpha'), findsOneWidget);
+    expect(find.text('Project alpha'), findsOneWidget);
+    repository.projectNames = {'alpha': 'uToken'};
+    await tester.pumpWidget(const SizedBox());
+    await tester
+        .pumpWidget(app(LiveDailyUsageScreen(args: argsFor(repository))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Project'));
+    await tester.pumpAndSettle();
+    expect(find.text('uToken'), findsOneWidget);
     expect(find.text('Unassigned'), findsOneWidget);
     expect(find.text('900'), findsOneWidget);
   });
@@ -387,6 +412,7 @@ void main() {
       (tester) async {
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
+    repository.autoCompleteSync = false;
     await tester.pumpWidget(app(LiveDesktopScreen(args: argsFor(repository))));
     repository.desktopName.add('CAMELLYA-PC');
     repository.sync.add(DateTime.now().subtract(const Duration(minutes: 2)));

@@ -109,25 +109,38 @@ class Insight {
       required this.confidence,
       this.provider,
       this.estimatedImpact,
-      this.estimatedSavingMicroPerMonth});
+      this.estimatedSavingMicroPerMonth,
+      this.why = '',
+      this.steps = const []});
   final String id, title, severity, category, recommendation, confidence;
+
+  /// Why the pattern costs tokens (newer desktop reviews only).
+  final String why;
+
+  /// Concrete actions in order (newer desktop reviews only).
+  final List<String> steps;
   final String? provider, estimatedImpact;
   final int? estimatedSavingMicroPerMonth;
   final List<Evidence> evidence;
   factory Insight.fromMap(JsonMap m) => Insight(
-      id: m['id'] as String? ?? '',
-      title: m['title'] as String? ?? '',
-      severity: m['severity'] as String? ?? 'low',
-      category: m['category'] as String? ?? '',
-      evidence: ((m['evidence'] as List?) ?? const [])
-          .map((e) => Evidence.fromMap((e as Map).cast<String, dynamic>()))
-          .toList(),
-      recommendation: m['recommendation'] as String? ?? '',
-      confidence: m['confidence'] as String? ?? 'low',
-      provider: m['provider'] as String?,
-      estimatedImpact: m['estimated_impact'] as String?,
-      estimatedSavingMicroPerMonth:
-          readInt(m['estimated_saving_micro_per_month']));
+          id: m['id'] as String? ?? '',
+          title: m['title'] as String? ?? '',
+          severity: m['severity'] as String? ?? 'low',
+          category: m['category'] as String? ?? '',
+          evidence: ((m['evidence'] as List?) ?? const [])
+              .map((e) => Evidence.fromMap((e as Map).cast<String, dynamic>()))
+              .toList(),
+          recommendation: m['recommendation'] as String? ?? '',
+          confidence: m['confidence'] as String? ?? 'low',
+          provider: m['provider'] as String?,
+          estimatedImpact: m['estimated_impact'] as String?,
+          estimatedSavingMicroPerMonth:
+              readInt(m['estimated_saving_micro_per_month']),
+          why: m['why'] as String? ?? '',
+          steps: [
+            for (final s in (m['steps'] as List?) ?? const [])
+              if (s is String && s.trim().isNotEmpty) s.trim()
+          ]);
 }
 
 /// One of the six scored review dimensions (cache, context, ...).

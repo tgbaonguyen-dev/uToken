@@ -6,6 +6,7 @@ import '../../core/format/token_format.dart';
 import '../../core/models/daily_doc.dart';
 import '../../core/ui/ut_kit.dart';
 import 'live_common.dart';
+import 'sync_banners.dart';
 import '../../core/i18n/tr.dart';
 
 /// M04 — Tokens overview, including the S01/S02/S04 states.
@@ -29,35 +30,59 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
   Widget build(BuildContext context) {
     return UtTabPage(
       title: tr('Tokens'),
-      largeTitle: false,
+      subtitle: tr('What your AI chats used.'),
       tabIndex: 0,
       onRefresh: () async {
         await widget.args.refresh();
         if (mounted) setState(() => _daily = widget.args.daily());
       },
-      body: StreamBuilder<DateTime?>(
-        stream: _lastSync,
-        builder: (context, sync) => UtStream<List<DailyDoc>>(
-          stream: _daily,
-          builder: (context, all) => _body(context, all, sync.data),
+      body: ListenableBuilder(
+        listenable: widget.args.sync,
+        builder: (context, _) => StreamBuilder<DateTime?>(
+          stream: _lastSync,
+          builder: (context, sync) {
+            _autoSync(sync.data);
+            return UtStream<List<DailyDoc>>(
+              stream: _daily,
+              builder: (context, all) => _body(context, all, sync.data),
+            );
+          },
         ),
       ),
     );
   }
 
+  /// FR-SYNC-001 screen_open: ask for fresh data when it's old. Deferred
+  /// to after the frame because it notifies listeners.
+  void _autoSync(DateTime? lastSync) {
+    if (lastSync == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.args.sync.maybeAutoSync(lastSync);
+    });
+  }
+
   Widget _body(BuildContext context, List<DailyDoc> all, DateTime? lastSync) {
     final now = DateTime.now();
+    final sync = widget.args.sync;
+    final banner = switch (sync.phase) {
+      SyncPhase.syncing => SyncingBanner(sync: sync),
+      SyncPhase.failed => SyncFailedBanner(sync: sync),
+      SyncPhase.idle =>
+        lastSync != null && now.difference(lastSync).inHours >= 24
+            ? _StaleBanner(lastSync: lastSync, sync: sync)
+            : null,
+    };
     if (all.isEmpty) {
       return UtList(children: [
+        if (banner != null && lastSync != null) banner,
         lastSync == null ? const _NotConnected() : const _WaitingForUsage(),
       ]);
     }
     final docs = filterPeriod(all, _period, now);
     final totals = sumTotals(docs);
     final providers = byProvider(docs);
-    final stale = lastSync != null && now.difference(lastSync).inHours >= 24;
     return UtList(children: [
-      if (stale) _StaleBanner(lastSync: lastSync),
+      if (banner != null) banner,
       UtSegmented<UsagePeriod>(
         values: UsagePeriod.values,
         selected: _period,
@@ -153,7 +178,14 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
 
   String _coverage(List<DailyDoc> docs, DateTime now) {
     final dates = docs.map((d) => d.date).toList()..sort();
-    return 'Cloud data: ${dates.first} to ${dates.last} (${dates.toSet().length} days). Dates use this phone: ${dayKey(now)}.';
+    return tr(
+        'Cloud data: {from} to {to} ({n} days). Dates use this phone: {today}.',
+        {
+          'from': dates.first,
+          'to': dates.last,
+          'n': dates.toSet().length,
+          'today': dayKey(now),
+        });
   }
 }
 
@@ -188,10 +220,10 @@ class _MiniStats extends StatelessWidget {
           ),
         );
     return Row(children: [
-      tile(compact(week), '7 days'),
-      tile(compact(month), '30 days'),
-      tile(days == 0 ? '—' : compact(total.tokens ~/ days), 'daily avg'),
-      tile(compact(total.cached), 'cached'),
+      tile(compact(week), tr('7 days')),
+      tile(compact(month), tr('30 days')),
+      tile(days == 0 ? '—' : compact(total.tokens ~/ days), tr('daily avg')),
+      tile(compact(total.cached), tr('cached')),
     ]);
   }
 }
@@ -233,7 +265,11 @@ class _ProviderCards extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                    '${providers[i].value.models.length} model${providers[i].value.models.length == 1 ? '' : 's'}',
+                    tr(
+                        providers[i].value.models.length == 1
+                            ? '{n} model'
+                            : '{n} models',
+                        {'n': providers[i].value.models.length}),
                     style: UtText.caption),
               ],
             ),
@@ -293,32 +329,24 @@ class _Trend extends StatelessWidget {
   }
 }
 
+/// Stale data: the last upload is over a day old. Data stays visible.
 class _StaleBanner extends StatelessWidget {
-  const _StaleBanner({required this.lastSync});
+  const _StaleBanner({required this.lastSync, required this.sync});
   final DateTime lastSync;
+  final SyncCenter sync;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: UtCard(
-          padding: const EdgeInsets.all(14),
-          child: Row(children: [
-            const Icon(Icons.error_outline, color: UtColors.orange, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tr('Couldn’t sync latest usage'),
-                      style: UtText.bodyStrong),
-                  Text(
-                      'Last successful sync ${relativeTime(lastSync, DateTime.now())}. Open μToken on your computer to upload new usage.',
-                      style: UtText.caption),
-                ],
-              ),
-            ),
-          ]),
-        ),
+  Widget build(BuildContext context) => SyncBannerCard(
+        key: const ValueKey('stale-banner'),
+        icon: Icons.schedule_rounded,
+        color: UtColors.muted,
+        title: tr('Data may be out of date'),
+        message: tr(
+            'Last sync {when}. Pull down or tap Sync now for fresh usage.',
+            {'when': relativeTime(lastSync, DateTime.now())}),
+        actions: [
+          UtChipButtonSmall(label: tr('Sync now'), onPressed: sync.start),
+        ],
       );
 }
 
@@ -545,6 +573,7 @@ class _LiveDailyUsageScreenState extends State<LiveDailyUsageScreen> {
   _Sort _sort = _Sort.name;
   bool _ascending = false;
   late final Stream<List<DailyDoc>> _daily = widget.args.daily();
+  late final Stream<Map<String, String>> _names = widget.args.projectNames();
 
   void _sortBy(_Sort sort) => setState(() {
         _ascending = sort == _sort ? !_ascending : false;
@@ -561,7 +590,7 @@ class _LiveDailyUsageScreenState extends State<LiveDailyUsageScreen> {
         UtSegmented<_Group>(
           values: _Group.values,
           selected: _group,
-          label: (g) => g == _Group.daily ? tr('Daily') : 'Project',
+          label: (g) => g == _Group.daily ? tr('Daily') : tr('Project'),
           onChanged: (g) => setState(() {
             _group = g;
             _sort = _Sort.name;
@@ -569,85 +598,104 @@ class _LiveDailyUsageScreenState extends State<LiveDailyUsageScreen> {
           }),
         ),
         const SizedBox(height: 20),
-        UtStream<List<DailyDoc>>(
-          stream: _daily,
-          builder: (context, all) {
-            final rows = _group == _Group.daily
-                ? [
-                    for (final d in all)
-                      (
-                        d.date,
-                        shortDate(d.date),
-                        d.totals.total,
-                        d.totals.chats
-                      )
-                  ]
-                : [
-                    for (final p in byProject(all))
-                      (p.key, p.key, p.value.tokens, p.value.chats)
-                  ];
-            int cmp((String, String, int, int) a,
-                    (String, String, int, int) b) =>
-                switch (_sort) {
-                  _Sort.name => a.$1.compareTo(b.$1),
-                  _Sort.tokens => a.$3.compareTo(b.$3),
-                  _Sort.chats => a.$4.compareTo(b.$4),
-                };
-            rows.sort((a, b) => _ascending ? cmp(a, b) : cmp(b, a));
-            return UtCard(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-              child: Column(children: [
-                Row(children: [
-                  _Header(
-                      label: _group == _Group.daily ? tr('Date') : 'Project',
-                      action: 'Sort date',
-                      flex: 3,
-                      active: _sort == _Sort.name,
-                      onTap: () => _sortBy(_Sort.name)),
-                  _Header(
-                      label: tr('Total'),
-                      action: 'Sort tokens',
-                      flex: 2,
-                      active: _sort == _Sort.tokens,
-                      onTap: () => _sortBy(_Sort.tokens)),
-                  _Header(
-                      label: tr('Chats'),
-                      action: 'Sort chats',
-                      flex: 2,
-                      active: _sort == _Sort.chats,
-                      onTap: () => _sortBy(_Sort.chats)),
+        StreamBuilder<Map<String, String>>(
+          stream: _names,
+          initialData: const {},
+          builder: (context, namesSnap) => UtStream<List<DailyDoc>>(
+            stream: _daily,
+            builder: (context, all) {
+              final names = namesSnap.data ?? const <String, String>{};
+              final rows = _group == _Group.daily
+                  ? [
+                      for (final d in all)
+                        (
+                          d.date,
+                          shortDate(d.date),
+                          d.totals.total,
+                          d.totals.chats
+                        )
+                    ]
+                  : [
+                      for (final p in byProject(all))
+                        (
+                          projectLabel(p.key, names).toLowerCase(),
+                          projectLabel(p.key, names),
+                          p.value.tokens,
+                          p.value.chats
+                        )
+                    ];
+              int cmp((String, String, int, int) a,
+                      (String, String, int, int) b) =>
+                  switch (_sort) {
+                    _Sort.name => a.$1.compareTo(b.$1),
+                    _Sort.tokens => a.$3.compareTo(b.$3),
+                    _Sort.chats => a.$4.compareTo(b.$4),
+                  };
+              rows.sort((a, b) => _ascending ? cmp(a, b) : cmp(b, a));
+              return UtCard(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                child: Column(children: [
+                  Row(children: [
+                    _Header(
+                        label:
+                            _group == _Group.daily ? tr('Date') : tr('Project'),
+                        action: 'Sort date',
+                        flex: 3,
+                        active: _sort == _Sort.name,
+                        onTap: () => _sortBy(_Sort.name)),
+                    _Header(
+                        label: tr('Total'),
+                        action: 'Sort tokens',
+                        flex: 2,
+                        active: _sort == _Sort.tokens,
+                        onTap: () => _sortBy(_Sort.tokens)),
+                    _Header(
+                        label: tr('Chats'),
+                        action: 'Sort chats',
+                        flex: 2,
+                        active: _sort == _Sort.chats,
+                        onTap: () => _sortBy(_Sort.chats)),
+                  ]),
+                  const UtDivider(),
+                  if (rows.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Text(tr('No usage uploaded yet.'),
+                          style: UtText.body),
+                    ),
+                  for (final r in rows)
+                    SizedBox(
+                      height: 50,
+                      child: Row(children: [
+                        Expanded(
+                            flex: 3,
+                            child: Text(r.$2,
+                                overflow: TextOverflow.ellipsis,
+                                style: UtText.bodyStrong)),
+                        Expanded(
+                            flex: 2,
+                            child: Text(tok(r.$3),
+                                textAlign: TextAlign.right,
+                                style: UtText.bodyStrong)),
+                        Expanded(
+                            flex: 2,
+                            child: Text('${r.$4}',
+                                textAlign: TextAlign.right,
+                                style: UtText.body)),
+                      ]),
+                    ),
                 ]),
-                const UtDivider(),
-                if (rows.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child:
-                        Text(tr('No usage uploaded yet.'), style: UtText.body),
-                  ),
-                for (final r in rows)
-                  SizedBox(
-                    height: 50,
-                    child: Row(children: [
-                      Expanded(
-                          flex: 3,
-                          child: Text(r.$2,
-                              overflow: TextOverflow.ellipsis,
-                              style: UtText.bodyStrong)),
-                      Expanded(
-                          flex: 2,
-                          child: Text(tok(r.$3),
-                              textAlign: TextAlign.right,
-                              style: UtText.bodyStrong)),
-                      Expanded(
-                          flex: 2,
-                          child: Text('${r.$4}',
-                              textAlign: TextAlign.right, style: UtText.body)),
-                    ]),
-                  ),
-              ]),
-            );
-          },
+              );
+            },
+          ),
         ),
+        if (_group == _Group.project)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+                tr('Names come from folder names on your desktop. Turn on "Share project names" in desktop Settings if you only see IDs.'),
+                style: UtText.caption),
+          ),
       ],
     );
   }

@@ -94,6 +94,8 @@ const _review = InsightsDoc(
               value: '4.2×')
         ],
         recommendation: 'Open a new chat when the task changes.',
+        why: 'Long chats resend the whole history on every turn.',
+        steps: ['Run /clear between tasks', 'Keep notes in a file'],
         estimatedSavingMicroPerMonth: 12500000,
         confidence: 'high'),
   ],
@@ -124,9 +126,10 @@ void main() {
     expect(find.text('Grade B'), findsOneWidget);
     expect(find.text('Run new review'), findsOneWidget);
     expect(find.text('What to fix first'), findsOneWidget);
-    final high =
-        tester.getTopLeft(find.text('Start fresh chats for new tasks'));
+    // Measure both after scrolling so the comparison shares one offset.
     await tester.scrollUntilVisible(find.text('Retry less often'), 200);
+    final high = tester.getTopLeft(
+        find.text('Start fresh chats for new tasks', skipOffstage: false));
     final low = tester.getTopLeft(find.text('Retry less often'));
     expect(high.dy < low.dy, isTrue);
     await tester.scrollUntilVisible(
@@ -139,13 +142,25 @@ void main() {
     await phone(tester);
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
-    repository.dailyValues
-        .add(keyedDoc(DateTime.now(), {'claude_code|sonnet|none': 3000}));
+    repository.dailyValues.add(keyedDoc(DateTime.now(), {
+      'claude_code|sonnet|none': 3000,
+      'claude_code|opus|k1': 1000,
+      'codex|gpt-5|k1': 9000,
+    }));
+    repository.projectNames = {'k1': 'uToken'};
     await tester.pumpWidget(app(
         LiveInsightDetailScreen(args: argsFor(repository), insightId: 'trim')));
     repository.insights.add(_review);
     await tester.pumpAndSettle();
     expect(find.text('What to do'), findsOneWidget);
+    expect(find.text('Long chats resend the whole history on every turn.'),
+        findsOneWidget);
+    expect(find.text('Run /clear between tasks'), findsOneWidget);
+    // Contributors come from this tool only (Codex excluded), with names.
+    await tester.scrollUntilVisible(find.text('Top projects'), 200);
+    expect(find.text('sonnet'), findsOneWidget);
+    expect(find.text('gpt-5'), findsNothing);
+    expect(find.text('uToken'), findsOneWidget);
     expect(find.text('\$150.00'), findsOneWidget); // yearly saving
     await tester.scrollUntilVisible(find.text('Claude · last 30 days'), 200);
     expect(find.text('Why this was flagged'), findsOneWidget);

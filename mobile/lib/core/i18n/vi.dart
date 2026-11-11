@@ -99,6 +99,17 @@ const Map<String, String> vi = {
       'Làm app crash và báo lên Firebase',
   'Crash the app?': 'Làm app crash?',
   'Daily': 'Theo ngày',
+  'Where it comes from · last 30 days': 'Đến từ đâu · 30 ngày qua',
+  'Uncached input': 'Input chưa cache',
+  'Input tokens': 'Token input',
+  'Thinking tokens': 'Token suy luận',
+  'No matching usage in the last 30 days.': 'Không có dữ liệu phù hợp trong 30 ngày qua.',
+  '{share} of {metric}': '{share} {metric}',
+  'Top projects': 'Dự án đóng góp nhiều nhất',
+  'Project': 'Dự án',
+  'Unassigned': 'Chưa rõ dự án',
+  'Names come from folder names on your desktop. Turn on "Share project names" in desktop Settings if you only see IDs.':
+      'Tên lấy từ tên thư mục trên máy tính. Nếu chỉ thấy mã, bật "Chia sẻ tên dự án" trong Settings của desktop.',
   'Daily totals only': 'Chỉ số liệu tổng theo ngày',
   'Daily usage': 'Sử dụng theo ngày',
   'Data': 'Dữ liệu',
@@ -290,6 +301,7 @@ const Map<String, String> vi = {
   'Redo rate {p} · chats retried within 2 min':
       'Tỉ lệ làm lại {p} · chat bị hỏi lại trong 2 phút',
   'Refresh from Firebase': 'Làm mới từ Firebase',
+  'Press back again to exit': 'Nhấn back lần nữa để thoát',
   'Reliability': 'Độ ổn định',
   'Remove saved key': 'Xóa key đã lưu',
   'Report {from} – {to}': 'Báo cáo {from} – {to}',
@@ -461,4 +473,105 @@ const Map<String, String> vi = {
   '{tool} · last 30 days': '{tool} · 30 ngày qua',
   '{tool} · {n} chats · {v} verified': '{tool} · {n} chat · {v} đã xác minh',
   'vs last month': 'so với tháng trước',
+  'Not enough chats to compare models yet': 'Chưa đủ chat để so sánh các model',
+  'Verified success': 'Thành công (đã xác minh)',
+  'Likely success': 'Có thể thành công',
+  'Good': 'Tốt',
+  'Review': 'Cần xem',
+  'No data': 'Chưa có dữ liệu',
+  'Needs another setup with 20+ chats to compare against':
+      'Cần thêm một cấu hình khác có từ 20 chat trở lên để so sánh',
+  'Cloud data: {from} to {to} ({n} days). Dates use this phone: {today}.':
+      'Dữ liệu trên cloud: {from} đến {to} ({n} ngày). Ngày tính theo điện thoại này: {today}.',
+  '7 days': '7 ngày',
+  '30 days': '30 ngày',
+  'daily avg': 'TB/ngày',
+  'cached': 'cache',
+  'Last successful sync {when}. Open μToken on your computer to upload new usage.':
+      'Lần đồng bộ thành công gần nhất: {when}. Mở μToken trên máy tính để tải dữ liệu mới.',
+  'Signed in': 'Đã đăng nhập',
+  'Enter a monthly limit above \$0.': 'Nhập hạn mức tháng lớn hơn \$0.',
+  'Ready to export': 'Sẵn sàng xuất',
+  'Sync now': 'Đồng bộ ngay',
+  'Up to date with the cloud.': 'Đã cập nhật dữ liệu từ cloud.',
+  'Firebase denied access. Check the signed-in account, project and Firestore Rules.':
+      'Firebase từ chối truy cập. Kiểm tra tài khoản đăng nhập, project và Firestore Rules.',
+  'Session expired. Sign in with Google again.':
+      'Phiên đăng nhập đã hết hạn. Đăng nhập Google lại.',
+  'Couldn’t load data. Check your internet connection.':
+      'Không tải được dữ liệu. Kiểm tra kết nối mạng.',
+  'What your AI chats used.': 'Lượng token các cuộc chat AI đã dùng.',
+  '{n} model': '{n} model',
+  '{n} models': '{n} model',
+  'of {limit}': 'trên {limit}',
+  '{n} daily records · {month}': '{n} bản ghi theo ngày · {month}',
+  'Asked μToken on your computer to upload new usage.':
+      'Đã nhờ μToken trên máy tính tải dữ liệu mới lên.',
+  'Couldn’t reach Firebase. Check your connection.':
+      'Không kết nối được Firebase. Kiểm tra mạng.',
+  'Data may be out of date': 'Dữ liệu có thể đã cũ',
+  'Desktop connection': 'Kết nối máy tính',
+  'Last sync {when}. Pull down or tap Sync now for fresh usage.':
+      'Đồng bộ lần cuối {when}. Kéo xuống hoặc bấm Đồng bộ ngay để lấy dữ liệu mới.',
+  'Offline · showing saved data. It updates when you reconnect.':
+      'Đang offline · hiện dữ liệu đã lưu. Sẽ tự cập nhật khi có mạng.',
+  'Retry sync': 'Thử lại',
+  'Syncing usage…': 'Đang đồng bộ…',
+  'Syncing…': 'Đang đồng bộ…',
+  'Waiting for your desktop…': 'Đang chờ máy tính…',
+  'Your desktop didn’t respond within 30 seconds. Open μToken on your computer, then try again.':
+      'Máy tính không phản hồi trong 30 giây. Mở μToken trên máy tính rồi thử lại.',
+  'Your desktop is uploading new usage. This page updates by itself.':
+      'Máy tính đang tải dữ liệu mới lên. Trang này sẽ tự cập nhật.',
+  'Your desktop started syncing but didn’t finish.':
+      'Máy tính đã bắt đầu đồng bộ nhưng chưa xong.',
+  '{reason} Showing the last synced data.':
+      '{reason} Đang hiện dữ liệu đồng bộ gần nhất.',
+  'Track your\nAI usage.': 'Theo dõi\nAI của bạn.',
+  'Codex, Gemini and Claude in one place': 'Codex, Gemini và Claude ở một chỗ',
+  'Priced from the desktop’s model catalog':
+      'Tính theo bảng giá model trên máy tính',
+  'Suggestions': 'Gợi ý',
+  'AI review of your usage patterns': 'AI đánh giá cách bạn dùng',
+  'Synced with your computer': 'Đồng bộ với máy tính',
+  'Same Google account on both devices':
+      'Cùng tài khoản Google trên cả hai thiết bị',
+  'Linux, macOS and Windows': 'Linux, macOS và Windows',
+  'Sign in with Google': 'Đăng nhập bằng Google',
+  'Use the same account as mobile': 'Dùng cùng tài khoản với điện thoại',
+  'Sign in on this phone': 'Đăng nhập trên điện thoại này',
+  'Continue with the same Google account': 'Tiếp tục với cùng tài khoản Google',
+  'Leave it running': 'Để app chạy',
+  'Usage syncs in the background': 'Dữ liệu tự đồng bộ ở chế độ nền',
+  'Tokens, model, cost, and time': 'Token, model, chi phí và thời gian',
+  'Never uploaded': 'Không bao giờ tải lên',
+  'Shared': 'Được chia sẻ',
+  'Could not restore your session. Please sign in again.':
+      'Không khôi phục được phiên đăng nhập. Hãy đăng nhập lại.',
+  'Sign-in was cancelled. You can try again.':
+      'Đã huỷ đăng nhập. Bạn có thể thử lại.',
+  'Sign-in could not complete. Please try again.':
+      'Không đăng nhập được. Hãy thử lại.',
+  'Could not sign out. Please try again.': 'Không đăng xuất được. Hãy thử lại.',
+  'Google sign-in is not configured. Check the Android package, SHA-1 and Firebase configuration.':
+      'Đăng nhập Google chưa được cấu hình. Kiểm tra package Android, SHA-1 và cấu hình Firebase.',
+  'Google sign-in returned no account. Please try again.':
+      'Google không trả về tài khoản nào. Hãy thử lại.',
+  'No connection. Check your network and try again.':
+      'Không có kết nối. Kiểm tra mạng rồi thử lại.',
+  'This account has been disabled. Contact your administrator.':
+      'Tài khoản này đã bị vô hiệu hoá. Liên hệ quản trị viên.',
+  'Google sign-in is not enabled for this Firebase project.':
+      'Project Firebase này chưa bật đăng nhập Google.',
+  'This email uses another sign-in provider.':
+      'Email này dùng phương thức đăng nhập khác.',
+  'Firebase configuration does not match this Android app.':
+      'Cấu hình Firebase không khớp với app Android này.',
+  'Firebase could not complete sign-in. Please try again.':
+      'Firebase không hoàn tất đăng nhập được. Hãy thử lại.',
+  'Google sign-in failed. Check Google Play services, the Android package and SHA-1, then retry.':
+      'Đăng nhập Google thất bại. Kiểm tra Google Play services, package Android và SHA-1 rồi thử lại.',
+  'Dismiss message': 'Đóng thông báo',
+  'Updating account': 'Đang cập nhật tài khoản',
+  'Please wait…': 'Vui lòng chờ…',
 };

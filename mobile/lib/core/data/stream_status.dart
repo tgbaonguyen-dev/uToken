@@ -7,13 +7,14 @@ String friendlyStreamError(Object error) {
   debugPrint('Firestore stream error: $error');
   if (error is FirebaseException) {
     if (error.code == 'permission-denied') {
-      return 'Firebase denied access. Check the signed-in account, project and Firestore Rules.';
+      return tr(
+          'Firebase denied access. Check the signed-in account, project and Firestore Rules.');
     }
     if (error.code == 'unauthenticated') {
-      return 'Session expired. Sign in with Google again.';
+      return tr('Session expired. Sign in with Google again.');
     }
   }
-  return 'Couldn’t load data. Check your internet connection.';
+  return tr('Couldn’t load data. Check your internet connection.');
 }
 
 /// Maps an AI provider error code to a user-facing message.

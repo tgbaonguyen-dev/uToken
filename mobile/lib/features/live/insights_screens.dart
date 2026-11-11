@@ -706,6 +706,10 @@ class _InsightDetail extends StatelessWidget {
             Text(providerName(insight.provider!), style: UtText.caption),
           ]),
         ],
+        if (insight.why.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(insight.why, style: UtText.body.copyWith(height: 1.5)),
+        ],
         const SizedBox(height: 22),
         Container(
           padding: const EdgeInsets.all(16),
@@ -727,31 +731,63 @@ class _InsightDetail extends StatelessWidget {
                   insight.recommendation.isEmpty ? '—' : insight.recommendation,
                   style: UtText.body.copyWith(
                       color: UtColors.text, fontSize: 15, height: 1.5)),
+              for (final (i, step) in insight.steps.indexed) ...[
+                const SizedBox(height: 10),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(
+                    width: 22,
+                    height: 22,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.18),
+                        shape: BoxShape.circle),
+                    child: Text('${i + 1}',
+                        style: UtText.caption.copyWith(
+                            color: color, fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                      child: Text(step,
+                          style: UtText.body
+                              .copyWith(color: UtColors.text, height: 1.45))),
+                ]),
+              ],
             ],
           ),
         ),
+        // Money as numbers, impact as text: a sentence squeezed into a
+        // number tile wraps badly, and empty "—" tiles add nothing.
         if ((saving != null && saving > 0) ||
             insight.estimatedImpact != null) ...[
           const SizedBox(height: 12),
           UtCard(
-            child: Row(children: [
-              Expanded(
-                  child: MiniStat(
-                      value: saving == null || saving <= 0
-                          ? '—'
-                          : usd(saving / 1e6),
-                      label: tr('Saving / month'))),
-              Expanded(
-                  child: MiniStat(
-                      value: saving == null || saving <= 0
-                          ? '—'
-                          : usd(saving * 12 / 1e6),
-                      label: tr('Saving / year'))),
-              Expanded(
-                  child: MiniStat(
-                      value: insight.estimatedImpact ?? '—',
-                      label: tr('Impact'))),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (saving != null && saving > 0)
+                  Row(children: [
+                    Expanded(
+                        child: MiniStat(
+                            value: usd(saving / 1e6),
+                            label: tr('Saving / month'))),
+                    Expanded(
+                        child: MiniStat(
+                            value: usd(saving * 12 / 1e6),
+                            label: tr('Saving / year'))),
+                  ]),
+                if (saving != null &&
+                    saving > 0 &&
+                    insight.estimatedImpact != null)
+                  const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      child: UtDivider()),
+                if (insight.estimatedImpact != null) ...[
+                  Text(tr('Impact'), style: UtText.label),
+                  const SizedBox(height: 6),
+                  Text(insight.estimatedImpact!, style: UtText.bodyStrong),
+                ],
+              ],
+            ),
           ),
         ],
         const SizedBox(height: 28),
@@ -771,6 +807,9 @@ class _InsightDetail extends StatelessWidget {
                     trailing: UtValue(e.value.isEmpty ? '—' : e.value)),
             ]),
           ),
+        const SizedBox(height: 28),
+        UtSectionLabel(tr('Where it comes from · last 30 days')),
+        _Contributors(args: args, insight: insight),
         if (dimension != null) ...[
           const SizedBox(height: 28),
           UtSectionLabel(
@@ -850,5 +889,100 @@ class _ProviderContext extends StatelessWidget {
             ),
           );
         },
+      );
+}
+
+/// Which models and projects drive the metric an insight is about, from the
+/// user's own daily summaries (not from the AI).
+class _Contributors extends StatelessWidget {
+  const _Contributors({required this.args, required this.insight});
+  final LiveArgs args;
+  final Insight insight;
+
+  /// The number that matters for this category, and how to print it.
+  (String, int Function(UsageTotals), String Function(int)) get _metric =>
+      switch (insight.category) {
+        'cache' => (
+            tr('Uncached input'),
+            (t) => (t.input - t.cached).clamp(0, 1 << 62),
+            compact
+          ),
+        'context' => (tr('Input tokens'), (t) => t.input, compact),
+        'reasoning' => (tr('Thinking tokens'), (t) => t.thinking, compact),
+        'reliability' => (
+            tr('Failed requests'),
+            (t) => t.errorRequests,
+            (v) => '$v'
+          ),
+        _ => (tr('Est. cost'), (t) => t.cost, (v) => usd(v / 1e6)),
+      };
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<Map<String, String>>(
+        stream: args.projectNames(),
+        initialData: const {},
+        builder: (context, namesSnap) => UtStream<List<DailyDoc>>(
+          stream: args.daily(),
+          builder: (context, all) {
+            final names = namesSnap.data ?? const <String, String>{};
+            final docs = filterLastDays(all, 30, DateTime.now());
+            final provider = insight.provider;
+            bool mine(UsageKey k) => provider == null || k.provider == provider;
+            final (label, value, format) = _metric;
+            List<(String, int)> top(String? Function(UsageKey) keyOf) {
+              final rows = [
+                for (final e in groupBy(docs, (k) => mine(k) ? keyOf(k) : null))
+                  (e.key, value(e.value))
+              ].where((r) => r.$2 > 0).toList()
+                ..sort((a, b) => b.$2.compareTo(a.$2));
+              return rows;
+            }
+
+            final models = top((k) => k.model);
+            final projects = top((k) => k.project ?? 'Unassigned');
+            if (models.isEmpty && projects.isEmpty) {
+              return UtCard(
+                  child: Text(tr('No matching usage in the last 30 days.'),
+                      style: UtText.body));
+            }
+            Widget group(String title, List<(String, int)> rows,
+                String Function(String) name) {
+              final total = rows.fold<int>(0, (s, r) => s + r.$2);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(title, style: UtText.label),
+                  const SizedBox(height: 4),
+                  for (final r in rows.take(3))
+                    UtRow(
+                        title: name(r.$1),
+                        subtitle: tr('{share} of {metric}', {
+                          'share': pct(share(r.$2, total), digits: 0),
+                          'metric': label.toLowerCase()
+                        }),
+                        trailing: UtValue(format(r.$2))),
+                ],
+              );
+            }
+
+            return UtCard(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (models.isNotEmpty)
+                    group(tr('Top models'), models, (m) => m),
+                  if (models.isNotEmpty && projects.isNotEmpty)
+                    const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: UtDivider()),
+                  if (projects.isNotEmpty)
+                    group(tr('Top projects'), projects,
+                        (p) => projectLabel(p, names)),
+                ],
+              ),
+            );
+          },
+        ),
       );
 }

@@ -19,8 +19,15 @@ abstract interface class UsageRepository {
   Stream<InsightsDoc?> watchInsights({required String uid});
   Stream<DateTime?> watchLastSync({required String uid});
 
+  /// True while Firestore can only serve cached data (no connection).
+  Stream<bool> watchOffline({required String uid});
+
   /// Name the desktop reported on its last upload (users/{uid}.desktop_name).
   Stream<String?> watchDesktopName({required String uid});
+
+  /// project_key → folder name the desktop shares (users/{uid}/meta/projects).
+  /// Empty when the desktop keeps names private.
+  Stream<Map<String, String>> watchProjectNames({required String uid});
 
   /// Asks the signed-in desktop to scan and upload now; returns the request id.
   /// [trigger] `ai_review` also makes the desktop run a fresh AI review.
@@ -131,9 +138,28 @@ class FirestoreUsageRepository implements UsageRepository {
       });
 
   @override
+  Stream<bool> watchOffline({required String uid}) => _user(uid)
+      .snapshots(includeMetadataChanges: true)
+      .map((s) => s.metadata.isFromCache)
+      .distinct();
+
+  @override
   Stream<String?> watchDesktopName({required String uid}) => _user(uid)
       .snapshots()
       .map((snapshot) => snapshot.data()?['desktop_name'] as String?);
+
+  @override
+  Stream<Map<String, String>> watchProjectNames({required String uid}) =>
+      _user(uid).collection('meta').doc('projects').snapshots().map((s) {
+        final names = s.data()?['names'];
+        return names is Map
+            ? {
+                for (final e in names.entries)
+                  if (e.value is String && (e.value as String).isNotEmpty)
+                    '${e.key}': e.value as String
+              }
+            : const <String, String>{};
+      });
 
   @override
   Future<String> requestSync(

@@ -14,6 +14,7 @@ import '../features/insights/presentation/insight_detail_screen.dart';
 import '../core/data/usage_repository.dart';
 import '../features/onboarding/presentation/onboarding_screens.dart';
 import '../core/data/local_prefs.dart';
+import '../core/data/offline_monitor.dart';
 import '../core/data/usage_aggregates.dart';
 import '../features/live/analytics_screens.dart';
 import '../features/live/insights_screens.dart';
@@ -35,7 +36,11 @@ GoRouter createAppRouter(
         if (!auth.ready) {
           return path == '/auth/loading' ? null : '/auth/loading';
         }
-        if (auth.user == null) LocalPrefs.instance.unbindAccount();
+        if (auth.user == null) {
+          LocalPrefs.instance.unbindAccount();
+          OfflineMonitor.unbind();
+          SyncCenter.resetAll();
+        }
         if (auth.user == null && !auth.demoMode) {
           return path == '/welcome' ? null : '/welcome';
         }
@@ -193,6 +198,7 @@ LiveArgs? _liveArgs(MobileAuthController? auth, UsageRepository? usage) {
   if (!_hasRealUser(auth, usage)) return null;
   final uid = auth!.user!.uid;
   LocalPrefs.instance.bindAccount(uid, usage!);
+  OfflineMonitor.bind(uid, usage);
   return LiveArgs(uid: uid, repository: usage);
 }
 
