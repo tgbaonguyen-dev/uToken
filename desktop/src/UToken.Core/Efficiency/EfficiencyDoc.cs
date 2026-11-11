@@ -13,7 +13,29 @@ public sealed record EfficiencyDoc(
     [property: JsonPropertyName("pricing_version")] string PricingVersion)
 {
     [JsonPropertyName("schema_version")] public int SchemaVersion => 1;
+
+    /// <summary>
+    /// Chỉ số kết quả trên mọi task của kỳ (FR-ANLY-003 mục C) cho dòng Efficiency ở M05 và thẻ Outcome ở M05B.
+    /// Khoảng tin cậy và phân vị chỉ tính được ở desktop (§10), nên mobile đọc trường này thay vì tự tính. null khi kỳ chưa có task.
+    /// </summary>
+    [JsonPropertyName("overall")] public OutcomeSummary? Overall { get; init; }
 }
+
+/// <summary>Tổng hợp kết quả của mọi setup trong kỳ; cùng công thức với <see cref="SetupReport"/>.</summary>
+public sealed record OutcomeSummary(
+    [property: JsonPropertyName("n_tasks")] int NTasks,
+    [property: JsonPropertyName("n_verified")] int NVerified,
+    [property: JsonPropertyName("sr")] double? Sr,
+    [property: JsonPropertyName("sr_ci_low")] double? SrCiLow,
+    [property: JsonPropertyName("sr_ci_high")] double? SrCiHigh,
+    [property: JsonPropertyName("sr_alt")] double? SrAlt,
+    [property: JsonPropertyName("cpst_micro")] long? CpstMicro,
+    [property: JsonPropertyName("cpst_ci_low_micro")] long? CpstCiLowMicro,
+    [property: JsonPropertyName("cpst_ci_high_micro")] long? CpstCiHighMicro,
+    [property: JsonPropertyName("cost_p50_micro")] long? CostP50Micro,
+    [property: JsonPropertyName("cost_p90_micro")] long? CostP90Micro,
+    [property: JsonPropertyName("redo_rate")] double? RedoRate,
+    [property: JsonPropertyName("stability_flag")] bool StabilityFlag);
 
 /// <summary>
 /// Chỉ số quá trình (FR-ANLY-003 mục A). Tỉ lệ lưu dạng phân số 0..1; context_growth và cost_tail là bội số;
