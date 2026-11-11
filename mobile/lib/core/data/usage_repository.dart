@@ -30,6 +30,15 @@ abstract interface class UsageRepository {
   /// Empty when the desktop keeps names private.
   Stream<Map<String, String>> watchProjectNames({required String uid});
 
+  /// Records who this account is and that the phone app was opened, so the
+  /// admin console can list users (merged into users/{uid}).
+  Future<void> touchProfile(
+      {required String uid,
+      String? email,
+      String? name,
+      required String appVersion,
+      required String platform});
+
   /// Asks the signed-in desktop to scan and upload now; returns the request id.
   /// [trigger] `ai_review` also makes the desktop run a fresh AI review.
   Future<String> requestSync(
@@ -186,6 +195,21 @@ class FirestoreUsageRepository implements UsageRepository {
   Stream<String?> watchDesktopName({required String uid}) => _user(uid)
       .snapshots()
       .map((snapshot) => parseDesktopName(snapshot.data()));
+
+  @override
+  Future<void> touchProfile(
+          {required String uid,
+          String? email,
+          String? name,
+          required String appVersion,
+          required String platform}) =>
+      _user(uid).set({
+        if (email != null) 'email': email,
+        if (name != null) 'display_name': name,
+        'mobile_app_version': appVersion,
+        'mobile_platform': platform,
+        'last_seen_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
   @override
   Stream<Map<String, String>> watchProjectNames({required String uid}) =>

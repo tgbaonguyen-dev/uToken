@@ -153,8 +153,10 @@ public sealed class FirebaseCloudSync : ICloudSync
             {
                 ["last_sync_at"] = FirestoreValues.Value(_clock.GetUtcNow()),
                 ["desktop_name"] = FirestoreValues.Value(Environment.MachineName),
+                ["desktop_os"] = FirestoreValues.Value(System.Runtime.InteropServices.RuntimeInformation.OSDescription),
+                ["email"] = FirestoreValues.Value(session.Email),
             });
-            profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at", "desktop_name") };
+            profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at", "desktop_name", "desktop_os", "email") };
             writes.Add(profile);
 
             long bytes = 0;

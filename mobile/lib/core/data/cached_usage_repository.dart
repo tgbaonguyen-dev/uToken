@@ -40,6 +40,20 @@ class CachedUsageRepository implements UsageRepository {
       _cached('desk/$uid', () => inner.watchDesktopName(uid: uid));
 
   @override
+  Future<void> touchProfile(
+          {required String uid,
+          String? email,
+          String? name,
+          required String appVersion,
+          required String platform}) =>
+      inner.touchProfile(
+          uid: uid,
+          email: email,
+          name: name,
+          appVersion: appVersion,
+          platform: platform);
+
+  @override
   Stream<Map<String, String>> watchProjectNames({required String uid}) =>
       _cached('proj/$uid', () => inner.watchProjectNames(uid: uid));
 
