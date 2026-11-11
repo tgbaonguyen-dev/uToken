@@ -25,8 +25,12 @@ public interface ICloudSync
 
     Task SignOutAsync(CancellationToken ct = default);
 
-    /// <summary>Ghi users/{uid}/daily/{date}, users/{uid}/efficiency/current và users/{uid}.last_sync_at. Trả về số byte đã gửi.</summary>
-    Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default);
+    /// <summary>
+    /// Ghi users/{uid}/daily/{date}, users/{uid}/efficiency/current và users/{uid}.last_sync_at. Trả về số byte đã gửi.
+    /// projectNames khác null thì ghi đè users/{uid}/meta/projects (project_key → tên thư mục cuối; rỗng = xóa tên).
+    /// </summary>
+    Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency,
+        IReadOnlyDictionary<string, string>? projectNames = null, CancellationToken ct = default);
 
     Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default);
 
@@ -119,7 +123,8 @@ public sealed class FirebaseCloudSync : ICloudSync
         }
     }
 
-    public async Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default)
+    public async Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency,
+        IReadOnlyDictionary<string, string>? projectNames = null, CancellationToken ct = default)
     {
         await _tokenLock.WaitAsync(ct);
         try
@@ -131,6 +136,12 @@ public sealed class FirebaseCloudSync : ICloudSync
             foreach (var d in daily)
                 writes.Add(Update($"users/{uid}/daily/{d.Date}", FirestoreValues.Fields(d)));
             writes.Add(Update($"users/{uid}/efficiency/current", FirestoreValues.Fields(efficiency)));
+            if (projectNames is not null)
+                writes.Add(Update($"users/{uid}/meta/projects", new JsonObject
+                {
+                    ["names"] = FirestoreValues.Value(projectNames.ToDictionary(p => p.Key, p => p.Value)),
+                    ["updated_at"] = FirestoreValues.Value(_clock.GetUtcNow()),
+                }));
             // Chỉ cập nhật đúng một trường ở users/{uid}, không ghi đè dữ liệu mobile đặt ở đó.
             var profile = Update($"users/{uid}", new JsonObject
             {

@@ -133,11 +133,14 @@ public sealed partial class RealDesktopApi
                 await GetSyncAsync(ct));
         }
 
-        var (dirty, efficiency) = await WithStoreAsync(() => (_store.GetDirtyDaily(), snapshot.Efficiency), ct);
+        // Chỉ tên thư mục cuối (không phải đường dẫn) và chỉ khi người dùng bật; tắt thì gửi rỗng để xóa trên cloud.
+        bool shareNames = (await GetSettingsAsync(ct)).Values.ShareProjectNames;
+        var (dirty, efficiency, projects) = await WithStoreAsync(() =>
+            (_store.GetDirtyDaily(), snapshot.Efficiency, shareNames ? _store.GetProjects() : new Dictionary<string, string>()), ct);
         try
         {
             var docs = dirty.Select(d => JsonSerializer.Deserialize<DailyDoc>(d.Json)!).ToList();
-            long sent = await _cloud!.UploadAsync(docs, efficiency, ct);
+            long sent = await _cloud!.UploadAsync(docs, efficiency, projects, ct);
             await WithStoreAsync(() => { foreach (var d in dirty) _store.MarkDailySynced(d.Date); return 0; }, ct);
             _lastUploadAt = Now;
             _bytesSent += sent;

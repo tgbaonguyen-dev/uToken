@@ -44,6 +44,8 @@ public static class InsightValidator
                 Provider = provider,
                 Evidence = evidence,
                 EstimatedSavingMicroPerMonth = saving,
+                Why = (i.Why ?? "").Trim(),
+                Steps = (i.Steps ?? []).Select(s => s.Trim()).Where(s => s.Length > 0).Take(4).ToArray(),
             };
         })
         .Where(i => i.Evidence.Count > 0)

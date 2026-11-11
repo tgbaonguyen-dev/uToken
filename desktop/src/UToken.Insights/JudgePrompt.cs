@@ -8,7 +8,11 @@ public static class JudgePrompt
         cache, context, reasoning, reliability, outcomes, hidden_cost. Only cite
         metric ids present in the catalog and never invent numbers. Write every
         field in clear, concise {LANGUAGE}: a short headline, plain-language titles,
-        and one actionable recommendation per insight. At most 5 insights,
+        and one actionable recommendation per insight. For each insight also
+        give "why": one or two sentences explaining how this pattern wastes
+        tokens or money for this developer, and "steps": 2-4 short, concrete
+        actions they can take in their tool (settings, prompt habits, commands),
+        in order. Mention the provider or model when it matters. At most 5 insights,
         ordered by impact. Base savings estimates only on real costs in the
         catalog.
         """;

@@ -68,6 +68,12 @@ public sealed class CloudSyncTests : IDisposable
         Assert.EndsWith("users/uid-1/efficiency/current", writes[2]!["update"]!["name"]!.GetValue<string>());
         Assert.Equal("last_sync_at", writes[3]!["updateMask"]!["fieldPaths"]![0]!.GetValue<string>());
 
+        // Tên dự án: chỉ ghi khi được truyền, vào users/{uid}/meta/projects.
+        await sync.UploadAsync([], Efficiency(), new Dictionary<string, string> { ["abc123def456"] = "uToken" });
+        var named = JsonNode.Parse(_server.Commits[^1].Body)!["writes"]!.AsArray();
+        var meta = named.Single(w => w!["update"]!["name"]!.GetValue<string>().EndsWith("users/uid-1/meta/projects"));
+        Assert.Equal("uToken", meta!["update"]!["fields"]!["names"]!["mapValue"]!["fields"]!["abc123def456"]!["stringValue"]!.GetValue<string>());
+
         // Mở lại app: khôi phục phiên, token cũ không lưu nên lần ghi đầu phải làm mới.
         var reopened = NewSync();
         Assert.Equal("uid-1", (await reopened.RestoreAsync())!.Uid);

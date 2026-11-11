@@ -135,8 +135,12 @@ public sealed class FakeCloud : ICloudSync
 
     public Task SignOutAsync(CancellationToken ct = default) { Account = null; return Task.CompletedTask; }
 
-    public Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default)
+    public IReadOnlyDictionary<string, string>? LastProjectNames { get; private set; }
+
+    public Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency,
+        IReadOnlyDictionary<string, string>? projectNames = null, CancellationToken ct = default)
     {
+        LastProjectNames = projectNames;
         var failure = NextUpload;
         NextUpload = Failure.None;
         return failure switch

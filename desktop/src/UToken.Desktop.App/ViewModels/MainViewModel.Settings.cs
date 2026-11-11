@@ -10,6 +10,7 @@ public partial class MainViewModel
     [ObservableProperty] private bool _backgroundCollection;
     [ObservableProperty] private bool _automaticUpdates;
     [ObservableProperty] private bool _usageNotifications;
+    [ObservableProperty] private bool _shareProjectNames = true;
     [ObservableProperty, NotifyPropertyChangedFor(nameof(SelectedRetention))] private int _retentionDays;
     public object SelectedRetention
     {
@@ -32,6 +33,7 @@ public partial class MainViewModel
         BackgroundCollection = data.Values.BackgroundCollection;
         AutomaticUpdates = data.Values.AutomaticUpdates;
         UsageNotifications = data.Values.UsageNotifications;
+        ShareProjectNames = data.Values.ShareProjectNames;
         RetentionDays = data.Values.RetentionDays;
         OnPropertyChanged(nameof(SelectedRetention));
     }
@@ -51,7 +53,7 @@ public partial class MainViewModel
     [RelayCommand] private Task SaveSettingsAsync() => RunAsync(async () =>
     {
         ApplySettings(await api.SaveSettingsAsync(new(LaunchAtStartup, BackgroundCollection,
-            AutomaticUpdates, UsageNotifications, RetentionDays)));
+            AutomaticUpdates, UsageNotifications, RetentionDays, ShareProjectNames)));
         // Một nút lưu cho cả trang: cấu hình AI review đi cùng (chỉ khi đã tải, để không ghi đè bằng mặc định).
         if (Judge is not null)
         {

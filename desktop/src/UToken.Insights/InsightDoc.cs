@@ -26,7 +26,11 @@ public sealed record InsightItem(
     [property: JsonPropertyName("estimated_impact")] string? EstimatedImpact,
     [property: JsonPropertyName("estimated_saving_micro_per_month")]
     long? EstimatedSavingMicroPerMonth,
-    [property: JsonPropertyName("confidence")] string Confidence);
+    [property: JsonPropertyName("confidence")] string Confidence,
+    /// <summary>Why this pattern costs tokens, in one or two sentences.</summary>
+    [property: JsonPropertyName("why")] string Why = "",
+    /// <summary>Concrete actions, in order (at most 4).</summary>
+    [property: JsonPropertyName("steps")] IReadOnlyList<string>? Steps = null);
 
 /// <summary>The validated output document returned by a judge.</summary>
 public sealed record InsightDoc(

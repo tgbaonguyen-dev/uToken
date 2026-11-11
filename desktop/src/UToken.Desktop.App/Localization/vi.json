@@ -484,6 +484,8 @@
  "Usage metadata only": "Chỉ metadata sử dụng",
  "Usage metadata only; prompt and response content stay private.": "Chỉ metadata sử dụng; nội dung prompt và phản hồi luôn riêng tư.",
  "Usage notifications": "Thông báo sử dụng",
+ "Share project names": "Chia sẻ tên dự án",
+ "Show folder names (not full paths) on your phone instead of project IDs": "Hiện tên thư mục (không phải đường dẫn đầy đủ) trên điện thoại thay cho mã dự án",
  "Usage summaries could not be uploaded to Firebase.": "Không tải được bản tóm tắt lên Firebase.",
  "Usage synced": "Đã đồng bộ",
  "Usage trend": "Xu hướng sử dụng",
