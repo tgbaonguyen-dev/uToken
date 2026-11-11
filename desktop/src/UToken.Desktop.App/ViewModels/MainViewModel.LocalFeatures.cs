@@ -32,25 +32,25 @@ public partial class MainViewModel
             if (value) Services.ClickSound.Play();
         }
     }
-    private string _savedLanguage = Localization.Loc.Language;
-
-    /// <summary>Tiếng Việt cho giao diện và đánh giá AI. Lưu ngay, áp dụng khi mở lại app.</summary>
+    /// <summary>
+    /// Tiếng Việt cho giao diện và đánh giá AI. Lưu vào language.txt và áp dụng ngay cho cửa sổ đang mở
+    /// (trang hiện tại và dữ liệu đang sửa giữ nguyên); lần AI review kế tiếp viết theo ngôn ngữ mới.
+    /// </summary>
     public bool UseVietnamese
     {
-        get => _savedLanguage == "vi";
+        get => Localization.Loc.Vietnamese;
         set
         {
             if (value == UseVietnamese) return;
-            _savedLanguage = value ? "vi" : "en";
-            try { Localization.Loc.Save(_savedLanguage); }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                Notice = "Could not save UI preferences. Your usage data is unchanged.";
-            }
+            var language = value ? "vi" : "en";
+            var saved = true;
+            try { Localization.Loc.Save(language); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { saved = false; }
+            Localization.Loc.Use(language);
             OnPropertyChanged();
-            Notice = _savedLanguage == "vi"
-                ? "Khởi động lại uToken để áp dụng ngôn ngữ mới."
-                : "Restart uToken to apply the new language.";
+            Notice = !saved
+                ? "Could not save UI preferences. Your usage data is unchanged."
+                : value ? "Language set to Vietnamese." : "Language set to English.";
         }
     }
 

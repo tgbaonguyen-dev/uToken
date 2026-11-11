@@ -78,9 +78,13 @@ public partial class MainWindow : Window
         if (e.Source is Visual v && (v as Button ?? v.FindAncestorOfType<Button>()) is not null) return;
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
     }
+    /// <summary>Đổi ngôn ngữ khi app đang chạy: dịch lại chữ đang hiển thị, không dựng lại view hay đổi trang.</summary>
+    private void OnLanguageChanged() => Localization.Loc.RefreshBindings(this);
+
     public MainWindow()
     {
         InitializeComponent();
+        Localization.Loc.LanguageChanged += OnLanguageChanged;
         // Windows: topbar thay thanh tiêu đề (nút thu nhỏ/phóng to/đóng của hệ thống vẽ ở góc phải).
         // Linux/macOS giữ khung của hệ điều hành để không mất snap/resize; topbar nằm ngay dưới.
         if (OperatingSystem.IsWindows())
@@ -114,6 +118,7 @@ public partial class MainWindow : Window
         };
         Closed += (_, _) =>
         {
+            Localization.Loc.LanguageChanged -= OnLanguageChanged;
             if (_viewModel is not null)
             {
                 _viewModel.NotificationRequested -= ShowNotification;
