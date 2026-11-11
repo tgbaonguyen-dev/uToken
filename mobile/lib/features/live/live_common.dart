@@ -80,7 +80,8 @@ void liveBack(BuildContext context, String fallback) {
   }
 }
 
-String withPeriod(String path, UsagePeriod period) => Uri(path: path, queryParameters: {
+String withPeriod(String path, UsagePeriod period) =>
+    Uri(path: path, queryParameters: {
       'period': period.label,
       if (period == UsagePeriod.custom && customUsageRange != null) ...{
         'from': dayKey(customUsageRange!.from),

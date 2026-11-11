@@ -1,0 +1,34 @@
+[
+  {
+    "trace_id": "30f96a78-69ac-4c2c-9c90-4eeafe7f7a91",
+    "device_serial": "emulator-5554",
+    "step_number": 1,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\9b6ab1b353ccf8ed6f4e2439aedfc16b8936075d1ea9ee53b51787982e9e211f.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\209c66d0d389f833b10e6381f9e33ef0a1e7517ea1e6811e14370e019b71b6c7.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\\step_1_overlay.jpg"
+  },
+  {
+    "trace_id": "30f96a78-69ac-4c2c-9c90-4eeafe7f7a91",
+    "device_serial": "emulator-5554",
+    "step_number": 2,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\209c66d0d389f833b10e6381f9e33ef0a1e7517ea1e6811e14370e019b71b6c7.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\760911b524b7cb4c2da2237900501764af6e5a1dcfc12e227254698ca9526053.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\\step_2_overlay.jpg"
+  },
+  {
+    "trace_id": "30f96a78-69ac-4c2c-9c90-4eeafe7f7a91",
+    "device_serial": "emulator-5554",
+    "step_number": 3,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\760911b524b7cb4c2da2237900501764af6e5a1dcfc12e227254698ca9526053.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\2445f0e7899bb2c96e84b25174cfad737d94a998717cac917bdb798d5947847d.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\\step_3_overlay.jpg"
+  },
+  {
+    "trace_id": "30f96a78-69ac-4c2c-9c90-4eeafe7f7a91",
+    "device_serial": "emulator-5554",
+    "step_number": 4,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\2445f0e7899bb2c96e84b25174cfad737d94a998717cac917bdb798d5947847d.jpg",
+    "after_screenshot": null,
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\\step_4_overlay.jpg"
+  }
+]

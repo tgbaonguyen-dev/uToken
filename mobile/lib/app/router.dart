@@ -6,8 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/figma/presentation/figma_pixel_screen.dart';
 import 'figma_routes.dart';
 import '../features/auth/domain/mobile_auth.dart';
-import '../core/widgets/ui_preview_scope.dart';
-import '../main_preview.dart';
 import '../features/auth/presentation/signing_in_screen.dart';
 import '../features/auth/data/auth_mock_repository.dart';
 import '../features/auth/domain/signing_in_state_model.dart';
@@ -92,9 +90,7 @@ GoRouter createAppRouter(
         ),
         GoRoute(
           path: '/state-preview',
-          redirect: (context, _) =>
-              UiPreviewScope.enabledOf(context) ? null : '/welcome',
-          builder: (_, __) => const PreviewApp(),
+          redirect: (_, __) => '/welcome',
         ),
         GoRoute(
           path: '/auth/signing-in',

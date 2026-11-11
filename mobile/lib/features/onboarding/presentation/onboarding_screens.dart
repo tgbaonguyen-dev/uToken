@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/ui/ut_kit.dart';
 import '../../auth/domain/mobile_auth.dart';
 import '../../auth/presentation/mobile_auth_status.dart';
-import '../../../core/widgets/ui_preview_scope.dart';
 import '../../../core/i18n/tr.dart';
 
 void _back(BuildContext context, String fallback) {
@@ -29,11 +28,6 @@ class WelcomeScreen extends StatelessWidget {
     }
   }
 
-  void _demo(BuildContext context) {
-    MobileAuthScope.maybeOf(context)?.enterDemo();
-    context.go('/tokens');
-  }
-
   @override
   Widget build(BuildContext context) {
     return MobileAuthStatus(
@@ -42,12 +36,6 @@ class WelcomeScreen extends StatelessWidget {
           UtButton(
               label: tr('Continue with Google'),
               onPressed: () => _continue(context)),
-          // Sample data is only offered in preview builds.
-          if (UiPreviewScope.enabledOf(context))
-            UtButton(
-                label: tr('View demo'),
-                style: UtButtonStyle.secondary,
-                onPressed: () => _demo(context)),
         ],
         footer: Text(tr('Your prompts stay on your devices.'),
             textAlign: TextAlign.center, style: UtText.caption),

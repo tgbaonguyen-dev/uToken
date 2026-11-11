@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:utoken_mobile/app/router.dart';
-import 'package:utoken_mobile/core/mock/figma_mock_repository.dart';
 import 'package:utoken_mobile/features/auth/domain/mobile_auth.dart';
 import 'mobile_auth_test.dart' show FakeAuthGateway, signedInUser;
 import 'account_states_test.dart' show settle;
@@ -33,8 +32,7 @@ void main() {
     auth.dispose();
     await gateway.sessions.close();
   });
-  testWidgets(
-      'View demo opens sample dashboard without calling sign-in',
+  testWidgets('Welcome has no demo bypass and guards signed-out routes',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(430, 950));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -42,29 +40,25 @@ void main() {
     final auth = MobileAuthController(gateway);
     gateway.sessions.add(null);
     final router = createAppRouter(auth: auth);
-    await tester.runAsync(() async {
-      for (final id in ['M01', 'M02', 'M04']) {
-        await FigmaMockRepository.screen(id, Brightness.dark);
-        await FigmaMockRepository.hotspots(id);
-      }
-      await FigmaMockRepository.tokensScreen(Brightness.dark);
-    });
     await tester.pumpWidget(MobileAuthScope(
         controller: auth,
         child:
             MaterialApp.router(theme: ThemeData.dark(), routerConfig: router)));
     await settle(tester);
-    await tester.runAsync(() =>
-        tester.tap(find.byKey(const ValueKey('figma-hotspot-View demo')).last));
-    await settle(tester);
-    expect(router.routeInformationProvider.value.uri.path, '/tokens');
-    expect(auth.demoMode, isTrue);
-    router.go('/connect-desktop');
-    await settle(tester);
+    expect(find.text('View demo'), findsNothing);
+    expect(find.text('Continue with Google'), findsOneWidget);
+    for (final path in [
+      '/tokens',
+      '/settings',
+      '/connect-desktop',
+      '/state-preview'
+    ]) {
+      router.go(path);
+      await settle(tester);
+      expect(router.routeInformationProvider.value.uri.path, '/welcome');
+    }
     expect(gateway.signInCalls, 0);
-    auth.exitDemo();
-    await settle(tester);
-    expect(router.routeInformationProvider.value.uri.path, '/welcome');
+    expect(auth.demoMode, isFalse);
     await tester.pumpWidget(const SizedBox());
     router.dispose();
     auth.dispose();

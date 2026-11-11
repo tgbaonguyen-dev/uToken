@@ -1,6 +1,6 @@
 # Android Google login
 
-The Android app uses Firebase Authentication in project `utoken-78191`, with package `com.utoken_mobile`. Usage and analytics remain sample data. Real same-account device pairing is implemented separately; usage sync is not enabled. See [PAIRING.md](../PAIRING.md) for required Firestore rules and the two-device flow.
+The Android app uses Firebase Authentication in project `utoken-78191`, with package `com.utoken_mobile`. The production entrypoint reads usage from Firebase. Desktop and mobile link through the same Google account; code pairing is no longer required.
 
 ## Run
 
@@ -10,7 +10,7 @@ From `mobile/`:
 flutter run -t lib/main.dart
 ```
 
-Use a device or emulator with Google Play services. `main_ui_preview.dart` deliberately keeps the existing mock login and screen/state tools; it does not exercise Firebase authentication.
+Use a device or emulator with Google Play services. Artemis must run `lib/main.dart` with a real Google test account. Preview launchers have been removed.
 
 ## Configuration
 

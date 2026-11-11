@@ -1,0 +1,66 @@
+[
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 1,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\4f43962294e790722b14207c9a7a5cbc81dd03a1061e34d8945a653d09facd5b.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\fe4788452e017b35f7caf1e3c1b314fe2a6ce4c65133cb9c9fa904e165b4235e.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_1_overlay.jpg"
+  },
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 2,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\fe4788452e017b35f7caf1e3c1b314fe2a6ce4c65133cb9c9fa904e165b4235e.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\809e29032904b66fd724ec0381f97d25300f6c76e27add9432274a238c191ce2.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_2_overlay.jpg"
+  },
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 3,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\809e29032904b66fd724ec0381f97d25300f6c76e27add9432274a238c191ce2.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\f92b85ba58146d6f4873128c090769c9088cdc75fdd879eb8e0a8a2c4aa750d8.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_3_overlay.jpg"
+  },
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 4,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\f92b85ba58146d6f4873128c090769c9088cdc75fdd879eb8e0a8a2c4aa750d8.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\6740ea3fe315a5db005eea6371023223f79e4c3832825240404f0f524fde5719.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_4_overlay.jpg"
+  },
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 5,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\6740ea3fe315a5db005eea6371023223f79e4c3832825240404f0f524fde5719.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\2b8551be824854a680e1a0f969a822e5818bd8fde696acaa78c36a6248b81b03.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_5_overlay.jpg"
+  },
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 6,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\2b8551be824854a680e1a0f969a822e5818bd8fde696acaa78c36a6248b81b03.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\efc1728c39c72a6998e00cdf2872c712794276989de497dd015b133886db74c6.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_6_overlay.jpg"
+  },
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 7,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\efc1728c39c72a6998e00cdf2872c712794276989de497dd015b133886db74c6.jpg",
+    "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\9997d111565c5107ee1849afc953a195284071e72c7810a00b315efeee8f9351.jpg",
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_7_overlay.jpg"
+  },
+  {
+    "trace_id": "c551443c-54eb-49e5-ad43-3d4e39871496",
+    "device_serial": "emulator-5554",
+    "step_number": 8,
+    "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\9997d111565c5107ee1849afc953a195284071e72c7810a00b315efeee8f9351.jpg",
+    "after_screenshot": null,
+    "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\c551443c-54eb-49e5-ad43-3d4e39871496\\step_8_overlay.jpg"
+  }
+]

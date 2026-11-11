@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:utoken_mobile/app/router.dart';
 import 'package:utoken_mobile/core/mock/figma_mock_repository.dart';
-import 'package:utoken_mobile/features/auth/presentation/signing_in_screen.dart';
 import 'package:utoken_mobile/features/insights/presentation/insight_detail_screen.dart';
-import 'package:utoken_mobile/main_preview.dart';
 
 void main() {
   testWidgets(
@@ -79,8 +77,7 @@ void main() {
 
     appRouter.go('/state-preview');
     await tester.pumpAndSettle();
-    expect(find.byType(PreviewApp), findsOneWidget);
-    expect(find.byType(SigningInScreen), findsOneWidget);
+    expect(appRouter.routeInformationProvider.value.uri.path, '/welcome');
     expect(tester.takeException(), isNull);
   });
 }

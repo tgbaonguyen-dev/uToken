@@ -1,3 +1,5 @@
+> Historical design document. Preview launchers and the state gallery have been removed; preview commands below are obsolete. Run `flutter run -t lib/main.dart` for the real app. Live usage comes from Firebase after Google sign-in; code pairing is obsolete.
+
 # μToken Mobile UI – Figma implementation
 
 ## Scope

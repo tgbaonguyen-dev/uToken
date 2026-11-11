@@ -1,0 +1,50 @@
+[
+  {
+    "step": 1,
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"trace_id\": \"30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\",\n  \"device_serial\": \"emulator-5554\",\n  \"step_number\": 1,\n  \"details\": \"- **Step 1 (T+00:26)**\\n  * [Reasoning & tool calls]:\\n    - Looking at the current state, I'm on the welcome screen showing \\\"Track your AI usage\\\" with a \\\"View demo\\\" button visible. No ANR dialog is present at start, so no setup action is needed. My plan: click \\\"View demo\\\" once, verify the Tokens dashboard appears, then click Analytics to verify its title, then click Tokens to verify its title, and report results.\\n      \\n      **Milestones:** (1) Click View demo → (2) Verify Tokens dashboard → (3) Click Analytics → (4) Verify Analytics title → (5) Click Tokens → (6) Verify Tokens title → (7) Report result.\\n      \\n      I'll click the \\\"View demo\\\" button to proceed to the demo.\\n  * [Action]: Tapped 'View demo' at [500, 877]\"\n}"
+        }
+      ],
+      "isError": false
+    }
+  },
+  {
+    "step": 2,
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"trace_id\": \"30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\",\n  \"device_serial\": \"emulator-5554\",\n  \"step_number\": 2,\n  \"details\": \"- **Step 2 (T+00:33)**\\n  * [Reasoning & tool calls]:\\n    - The View demo click succeeded — I'm now on the Tokens dashboard showing total tokens 6,830,736, $42.18 estimated, source breakdowns (Gemini 62.4%, Codex 28.8%, Claude 8.8%), and a usage trend chart. Checkpoint 1 (Tokens dashboard verified) passed. Next per plan: click Analytics once using the fresh hierarchy, then verify its title.\\n  * [Action]: Tapped 'Analytics' at [381, 937]\"\n}"
+        }
+      ],
+      "isError": false
+    }
+  },
+  {
+    "step": 3,
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"trace_id\": \"30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\",\n  \"device_serial\": \"emulator-5554\",\n  \"step_number\": 3,\n  \"details\": \"- **Step 3 (T+00:51)**\\n  * [Reasoning & tool calls]:\\n    - Analytics screen verified — title \\\"Analytics\\\" with subtitle \\\"Token mix, models, and cost.\\\" is displayed, along with model breakdowns (gemini-2.5-pro 50.1%, gpt-5.5-codex 28.8%, gemini-2.5-flash 12.3%, claude-sonnet 8.8%) and cost chart. Checkpoint 2 passed. Next: click Tokens once to verify its title.\\n  * [Action]: Tapped 'Tokens' at [144, 937]\"\n}"
+        }
+      ],
+      "isError": false
+    }
+  },
+  {
+    "step": 4,
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"trace_id\": \"30f96a78-69ac-4c2c-9c90-4eeafe7f7a91\",\n  \"device_serial\": \"emulator-5554\",\n  \"step_number\": 4,\n  \"details\": \"- **Step 4 (T+01:12)**\\n  * [Reasoning & tool calls]:\\n    - All checkpoints verified successfully:\\n      \\n      - **Setup**: No \\\"μToken isn't responding\\\" dialog was visible at start, so no setup action was needed.\\n      - **View demo**: Clicked once → Tokens dashboard appeared with title \\\"Tokens\\\", total tokens 6,830,736, $42.18 estimated, source breakdowns (Gemini 62.4%, Codex 28.8%, Claude 8.8%), and usage trend chart.\\n      - **Analytics**: Clicked once → Analytics title verified (\\\"Analytics\\\" with subtitle \\\"Token mix, models, and cost.\\\"), model list and cost chart visible.\\n      - **Tokens**: Clicked once → Tokens title verified (\\\"Tokens\\\" header with same dashboard data).\\n      - **No ANR** appeared at any point; app remained responsive throughout. No login, sync, settings edits, filters, or deletion performed.\\n  * [Action]: Action: report_task_status with args: {\\\"status\\\": \\\"completed\\\", \\\"description\\\": \\\"NAV-01 mock preview rerun completed successfully. Setup: no ANR dialog at start, no action needed. View demo clicked once → Tokens dashboard verified (title \\\\\\\"Tokens\\\\\\\", 6,830,736 total tokens, $42.18 estimated). Analytics clicked once → Analytics title verified (\\\\\\\"Token mix, models, and cost.\\\\\\\"). Tokens clicked once → Tokens title verified. No ANR occurred; app responsive throughout. No login, sync, settings edits, filters, or deletion performed.\\\"}\"\n}"
+        }
+      ],
+      "isError": false
+    }
+  }
+]

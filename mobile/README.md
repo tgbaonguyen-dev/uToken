@@ -52,8 +52,10 @@ is not an automated UI flow yet.
   separate provider billing API. Totals, by_key and cost fields are independent;
   a Console edit to one does not recalculate the others.
 
-`main_ui_preview.dart` and mock state routes retain design fixtures intentionally.
-Old pairing documents describe historical/demo flows, not live account linking.
+Artemis device tests use the real Android app: `flutter run -d emulator-5554 -t lib/main.dart`.
+Sign in with a real Google test account in the configured Firebase project.
+Preview launchers and the state gallery have been removed. Unit/widget tests can
+still use isolated fixtures; their results do not count as real-device E2E.
 
 ## Checks
 
