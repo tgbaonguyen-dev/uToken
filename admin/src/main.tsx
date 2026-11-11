@@ -12,6 +12,7 @@ import { Sync } from './pages/Sync';
 import { Reviews } from './pages/Reviews';
 import { Audit } from './pages/Audit';
 import { Admins } from './pages/Admins';
+import { Notices } from './pages/Notices';
 import { Avatar, Icon, friendlyError } from './ui';
 import './styles.css';
 
@@ -23,6 +24,7 @@ const nav: [string, string, string][] = [
   ['/crashes', 'Crash', 'bug'],
   ['/sync', 'Đồng bộ', 'sync'],
   ['/reviews', 'AI review', 'spark'],
+  ['/notices', 'Thông báo', 'bell'],
   ['/audit', 'Nhật ký admin', 'log'],
   ['/admins', 'Quản trị viên', 'shield'],
 ];
@@ -148,6 +150,7 @@ function Shell({ user }: { user: User }) {
             <Route path="/crashes" element={<Crashes />} />
             <Route path="/sync" element={<Sync />} />
             <Route path="/reviews" element={<Reviews />} />
+            <Route path="/notices" element={<Notices />} />
             <Route path="/audit" element={<Audit />} />
             <Route path="/admins" element={<Admins />} />
             <Route path="*" element={<Navigate to="/" />} />

@@ -14,6 +14,7 @@ import '../../core/ui/ut_kit.dart';
 import '../ai_review/phone_judge.dart';
 import '../ai_review/review_window.dart';
 import 'analytics_screens.dart' show metricHint;
+import 'notices.dart';
 import 'live_common.dart';
 
 String aiProviderName(String? id) => switch (id) {
@@ -117,6 +118,7 @@ class _LiveInsightsScreenState extends State<LiveInsightsScreen> {
   @override
   Widget build(BuildContext context) {
     return UtTabPage(
+      trailing: NoticeBell(args: widget.args),
       title: tr('Insights'),
       subtitle: tr('AI review of how you use tokens.'),
       tabIndex: 2,

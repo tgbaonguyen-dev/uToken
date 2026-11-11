@@ -8,6 +8,8 @@ const actionText: Record<string, string> = {
   unsuspend_user: 'Mở khóa tài khoản',
   resolve_crash: 'Đóng crash',
   reopen_crash: 'Mở lại crash',
+  send_notice: 'Gửi thông báo',
+  deactivate_notice: 'Tắt thông báo',
 };
 
 export function Audit() {

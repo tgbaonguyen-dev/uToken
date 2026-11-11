@@ -28,6 +28,22 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Thông báo admin gửi cho mọi người dùng. Người dùng chỉ đọc; admin tạo và tắt.
+    function validNotice(d) {
+      return d.title is string && d.title.size() > 0 && d.title.size() <= 80
+        && d.body is string && d.body.size() > 0 && d.body.size() <= 1000
+        && d.level in ['info', 'warning', 'critical']
+        && d.active is bool
+        && d.created_by == request.auth.uid;
+    }
+    match /announcements/{id} {
+      allow read: if signedIn();
+      allow create: if isAdmin() && validNotice(request.resource.data);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'deactivated_at']);
+      allow delete: if false;
+    }
+
     // Nhật ký thao tác admin: chỉ thêm, không sửa/xóa.
     match /admin_audit/{id} {
       allow read: if isAdmin();
@@ -42,6 +58,7 @@ service cloud.firestore {
     match /{path=**}/sync_requests/{id} { allow read: if isAdmin(); }
     match /{path=**}/daily/{date} { allow read: if isAdmin(); }
     match /{path=**}/insights/{id} { allow read: if isAdmin(); }
+    match /{path=**}/inbox/{id} { allow read: if isAdmin(); }
 
     // Mọi dữ liệu người dùng: chỉ chủ tài khoản đọc/ghi; admin chỉ đọc.
     match /users/{uid} {
@@ -64,6 +81,15 @@ service cloud.firestore {
         allow update: if isOwner(uid);
       }
 
+      // Thông báo gửi riêng: admin tạo/tắt, chủ tài khoản chỉ đọc.
+      match /inbox/{id} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isAdmin() && validNotice(request.resource.data);
+        allow update: if isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'deactivated_at']);
+        allow delete: if false;
+      }
+
       // Báo cáo crash: người dùng tạo; admin chỉ được đổi trạng thái xử lý.
       match /crash_reports/{id} {
         allow read: if isOwner(uid) || isAdmin();
@@ -73,11 +99,11 @@ service cloud.firestore {
                 .hasOnly(['status', 'resolved_by', 'resolved_at', 'admin_note']));
       }
 
-      // Các collection con còn lại (efficiency, budget…). Không áp cho daily, sync_requests, crash_reports:
+      // Các collection con còn lại (efficiency, budget…). Không áp cho daily, sync_requests, crash_reports, inbox:
       // Firestore OR các luật cùng khớp, nên nếu luật này phủ chúng thì kiểm tra riêng ở trên bị vô hiệu.
       match /{collection}/{rest=**} {
-        allow read: if (isOwner(uid) || isAdmin()) && !(collection in ['daily', 'sync_requests', 'crash_reports']);
-        allow write: if isOwner(uid) && !(collection in ['daily', 'sync_requests', 'crash_reports']);
+        allow read: if (isOwner(uid) || isAdmin()) && !(collection in ['daily', 'sync_requests', 'crash_reports', 'inbox']);
+        allow write: if isOwner(uid) && !(collection in ['daily', 'sync_requests', 'crash_reports', 'inbox']);
       }
     }
   }

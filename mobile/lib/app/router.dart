@@ -21,6 +21,7 @@ import '../core/data/usage_aggregates.dart';
 import '../features/live/analytics_screens.dart';
 import '../features/live/insights_screens.dart';
 import '../features/live/live_common.dart';
+import '../features/live/notices.dart';
 import '../features/live/settings_screens.dart';
 import '../features/live/tokens_screens.dart';
 
@@ -125,6 +126,15 @@ GoRouter createAppRouter(
             }
             return InsightDetailScreen(
                 initialPeriod: route.uri.queryParameters['period'] ?? 'Month');
+          },
+        ),
+        GoRoute(
+          path: '/notifications',
+          builder: (_, __) {
+            final args = _liveArgs(auth, usage);
+            return args == null
+                ? const SizedBox.shrink()
+                : _live(LiveNoticesScreen(args: args));
           },
         ),
         GoRoute(
