@@ -298,6 +298,7 @@ public sealed class JudgeSyncTests : IDisposable
         public int Calls { get; private set; }
         public string? LastKey { get; private set; }
         public string? LastBrief { get; private set; }
+        public string? LastSystemPrompt { get; private set; }
         public Action? BeforeReply;
 
         public IJudgeModel For(string provider, string model, string key)
@@ -315,6 +316,7 @@ public sealed class JudgeSyncTests : IDisposable
             {
                 owner.Calls++;
                 owner.LastBrief = briefJson;
+                owner.LastSystemPrompt = systemPrompt;
                 owner.BeforeReply?.Invoke();
                 if (owner.Error is not null) throw new JudgeModelException(owner.Error);
                 return Task.FromResult(owner.Response);

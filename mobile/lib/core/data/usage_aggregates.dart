@@ -3,7 +3,41 @@ import '../models/daily_doc.dart';
 import '../i18n/tr.dart';
 
 /// Time windows offered by the Tokens and Analytics period selector.
-enum UsagePeriod { day, week, month, total }
+/// [custom] uses [customUsageRange]. Not in SRS FR-DASH-001's list
+/// (day/week/month/total); added at the user's request.
+enum UsagePeriod { day, week, month, total, custom }
+
+/// Inclusive local-date range for [UsagePeriod.custom].
+class UsageRange {
+  UsageRange(DateTime from, DateTime to)
+      : from = DateTime(from.year, from.month, from.day),
+        to = DateTime(to.year, to.month, to.day);
+  final DateTime from, to;
+
+  int get days => to.difference(from).inDays + 1;
+
+  /// "01 Nov – 11 Nov" / "01/11 – 11/11".
+  String get label => from == to
+      ? shortDate(dayKey(from))
+      : '${shortDate(dayKey(from))} – ${shortDate(dayKey(to))}';
+
+  /// Parses "2026-11-01".."2026-11-11"; null when missing or reversed.
+  static UsageRange? tryParse(String? from, String? to) {
+    final a = from == null ? null : DateTime.tryParse(from);
+    final b = to == null ? null : DateTime.tryParse(to);
+    if (a == null || b == null || b.isBefore(a)) return null;
+    return UsageRange(a, b);
+  }
+}
+
+/// Range last picked with "Custom", shared across tabs like the period.
+UsageRange? customUsageRange;
+
+/// Period name for captions: the dates themselves for a custom range.
+String periodText(UsagePeriod period) =>
+    period == UsagePeriod.custom && customUsageRange != null
+        ? customUsageRange!.label
+        : period.label;
 
 extension UsagePeriodLabel on UsagePeriod {
   String get label => switch (this) {
@@ -11,6 +45,7 @@ extension UsagePeriodLabel on UsagePeriod {
         UsagePeriod.week => tr('Week'),
         UsagePeriod.month => tr('Month'),
         UsagePeriod.total => tr('Total'),
+        UsagePeriod.custom => tr('Custom'),
       };
 
   static UsagePeriod parse(String? value) => UsagePeriod.values.firstWhere(
@@ -22,16 +57,28 @@ String dayKey(DateTime value) => DateTime(value.year, value.month, value.day)
     .toIso8601String()
     .substring(0, 10);
 
-/// Keeps documents whose date falls inside the last [period] ending [now].
+/// Keeps documents inside [period] ending [now]: today, the last 7 days,
+/// the current calendar month (FR-DASH-001) or everything.
 List<DailyDoc> filterPeriod(
-    List<DailyDoc> docs, UsagePeriod period, DateTime now) {
-  if (period == UsagePeriod.total) return docs;
-  final days = switch (period) {
-    UsagePeriod.day => 1,
-    UsagePeriod.week => 7,
-    _ => 30,
-  };
-  return filterLastDays(docs, days, now);
+    List<DailyDoc> docs, UsagePeriod period, DateTime now) =>
+    switch (period) {
+      UsagePeriod.day => filterLastDays(docs, 1, now),
+      UsagePeriod.week => filterLastDays(docs, 7, now),
+      UsagePeriod.month => filterMonth(docs, now)
+          .where((d) => d.date.compareTo(dayKey(now)) <= 0)
+          .toList(),
+      UsagePeriod.total => docs,
+      UsagePeriod.custom => filterRange(docs, customUsageRange, now),
+    };
+
+/// Documents dated inside [range] (inclusive). Without a range this falls
+/// back to the current month, so a stale "Custom" link still shows data.
+List<DailyDoc> filterRange(List<DailyDoc> docs, UsageRange? range, DateTime now) {
+  if (range == null) return filterPeriod(docs, UsagePeriod.month, now);
+  final from = dayKey(range.from), to = dayKey(range.to);
+  return docs
+      .where((d) => d.date.compareTo(from) >= 0 && d.date.compareTo(to) <= 0)
+      .toList();
 }
 
 List<DailyDoc> filterLastDays(List<DailyDoc> docs, int days, DateTime now,
@@ -136,11 +183,20 @@ List<MapEntry<String, UsageTotals>> byModel(Iterable<DailyDoc> docs) =>
 List<MapEntry<String, UsageTotals>> byProject(Iterable<DailyDoc> docs) =>
     groupBy(docs, (k) => k.project ?? 'Unassigned');
 
-/// Chat outcome counts from tasks_by_state.
+/// Chat outcome counts from tasks_by_state (FR-ANLY-003 §C).
 class Outcomes {
-  int success = 0, failure = 0, undetermined = 0, verifiedSuccess = 0;
+  /// [success] and [failure] include likely results; the verified counts do not.
+  int success = 0, failure = 0, undetermined = 0;
+  int verifiedSuccess = 0, verifiedFailure = 0;
   int get decided => success + failure;
-  double? get successRate => decided == 0 ? null : success / decided;
+  int get verified => verifiedSuccess + verifiedFailure;
+
+  /// Main success rate: verified_success ÷ (verified_success + verified_failure).
+  double? get successRate => verified == 0 ? null : verifiedSuccess / verified;
+
+  /// Secondary rate that also counts likely results, to check a conclusion
+  /// holds when the criterion is relaxed.
+  double? get successRateInclLikely => decided == 0 ? null : success / decided;
 }
 
 Outcomes sumOutcomes(Iterable<DailyDoc> docs) {
@@ -148,6 +204,7 @@ Outcomes sumOutcomes(Iterable<DailyDoc> docs) {
   for (final d in docs) {
     final s = d.tasksByState;
     o.verifiedSuccess += s['verified_success'] ?? 0;
+    o.verifiedFailure += s['verified_failure'] ?? 0;
     o.success += (s['verified_success'] ?? 0) + (s['likely_success'] ?? 0);
     o.failure += (s['verified_failure'] ?? 0) + (s['likely_failure'] ?? 0);
     o.undetermined += s['undetermined'] ?? 0;

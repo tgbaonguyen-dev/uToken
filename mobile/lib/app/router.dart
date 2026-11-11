@@ -218,6 +218,10 @@ Widget? _liveScreen(String id, LiveArgs args, GoRouterState state) {
   final query = state.uri.queryParameters['period'];
   final period =
       query == null ? lastUsagePeriod : UsagePeriodLabel.parse(query);
+  // Links to a custom period carry their own range (see withPeriod).
+  final range = UsageRange.tryParse(
+      state.uri.queryParameters['from'], state.uri.queryParameters['to']);
+  if (period == UsagePeriod.custom && range != null) customUsageRange = range;
   return switch (id) {
     'M04' => LiveTokensScreen(args: args, initialPeriod: period),
     'M04B' => LiveUsageDetailsScreen(args: args, period: period),

@@ -27,7 +27,10 @@ public partial class MainViewModel
     [ObservableProperty] private JudgeSettingsData? _judge;
     [ObservableProperty] private bool _judgeEnabled;
     [ObservableProperty] private string _judgeModel = "";
-    [ObservableProperty] private string _judgeApiKey = "";
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(JudgeKeyState), nameof(JudgeKeyIsMasked))]
+    private string _judgeApiKey = "";
+    /// <summary>Hiện chữ trong ô key (nút Show key). Mặc định ẩn; tắt lại sau mỗi lần tải/lưu.</summary>
+    [ObservableProperty] private bool _revealJudgeKey;
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasJudgeMessage))]
     private string? _judgeMessage;
     [ObservableProperty] private bool _judgeMessageIsError;
@@ -53,10 +56,42 @@ public partial class MainViewModel
         ModelsOf(SelectedJudgeProvider.Id).FirstOrDefault(m => m.Model == JudgeModel)?.CostLabel
         ?? "Price unknown: not in the models.dev catalog";
 
-    public string JudgeKeyState => Judge is null ? "" :
-        Judge.HasKey && Judge.Settings.Provider == SelectedJudgeProvider.Id
-            ? "A key is saved on this computer. Leave the field empty to keep it."
-            : "No key saved for this provider.";
+    /// <summary>
+    /// Ô key khi đã lưu key: hiện chuỗi giả này (PasswordChar biến thành dấu chấm) để người dùng thấy
+    /// là có key. Key thật không bao giờ được nạp lại vào giao diện; chuỗi giả không bao giờ được gửi đi hay lưu.
+    /// </summary>
+    public const string SavedJudgeKeyMask = "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022";
+
+    /// <summary>Ô key đang hiện key đã lưu (dạng ẩn), chưa bị sửa.</summary>
+    public bool JudgeKeyIsMasked => JudgeApiKey == SavedJudgeKeyMask;
+
+    private bool HasSavedJudgeKey =>
+        Judge is { HasKey: true } && Judge.Settings.Provider == SelectedJudgeProvider.Id;
+
+    public string JudgeKeyState => Judge is null ? "" : (HasSavedJudgeKey, TypedJudgeKey() is not null) switch
+    {
+        (true, false) when JudgeKeyIsMasked => "A key is saved on this computer. Paste a new key to replace it.",
+        (true, false) => "A key is saved on this computer. Leave the field empty to keep it.",
+        (true, true) => "A key is saved on this computer. Save to replace it with the new key.",
+        (false, true) => "The key is stored on this computer when you save.",
+        _ => "No key saved for this provider.",
+    };
+
+    /// <summary>Key người dùng vừa nhập; null khi ô trống hoặc còn nguyên chuỗi giả (giữ key đã lưu).</summary>
+    private string? TypedJudgeKey() =>
+        string.IsNullOrWhiteSpace(JudgeApiKey) || JudgeApiKey.All(c => c == SavedJudgeKeyMask[0])
+            ? null
+            : JudgeApiKey;
+
+    partial void OnJudgeApiKeyChanged(string? oldValue, string newValue)
+    {
+        // Gõ/dán vào ô đang hiện key giả: bỏ các dấu chấm giả, chỉ giữ phần người dùng nhập
+        // (API key không chứa ký tự •). Xóa một dấu chấm cũng coi như xóa hết.
+        if (oldValue == SavedJudgeKeyMask && newValue != SavedJudgeKeyMask && newValue.Contains(SavedJudgeKeyMask[0]))
+            JudgeApiKey = newValue.Replace(SavedJudgeKeyMask[0].ToString(), "", StringComparison.Ordinal);
+    }
+
+    private string SavedJudgeKeyText() => HasSavedJudgeKey ? SavedJudgeKeyMask : "";
 
     public string JudgeStatusLabel => Judge switch
     {
@@ -90,7 +125,8 @@ public partial class MainViewModel
             JudgeModel = JudgeDefaults.For(value.Id).Model;
         else if (Judge is not null)
             JudgeModel = Judge.Settings.Model;
-        JudgeApiKey = "";
+        JudgeApiKey = SavedJudgeKeyText();
+        RevealJudgeKey = false;
         OnPropertyChanged(nameof(JudgeModelCost));
         OnPropertyChanged(nameof(JudgeKeyState));
     }
@@ -101,7 +137,8 @@ public partial class MainViewModel
         JudgeEnabled = data.Settings.Enabled;
         SelectedJudgeProvider = JudgeProviderOptions.First(o => o.Id == data.Settings.Provider);
         JudgeModel = data.Settings.Model;
-        JudgeApiKey = "";
+        JudgeApiKey = SavedJudgeKeyText();
+        RevealJudgeKey = false;
         foreach (var name in new[] { nameof(JudgeModelOptions), nameof(JudgeModelCost),
                      nameof(JudgeKeyState), nameof(JudgeStatusLabel), nameof(JudgeLastRunLabel),
                      nameof(JudgeHeadline) })
@@ -124,9 +161,10 @@ public partial class MainViewModel
         JudgeMessageIsError = error;
     }
 
+    // Ô trống hoặc còn chuỗi giả → key null: giữ key đã lưu (không có thao tác xóa key từ giao diện).
     [RelayCommand] private Task SaveJudgeAsync() => RunAsync(async () =>
     {
-        var key = string.IsNullOrWhiteSpace(JudgeApiKey) ? null : JudgeApiKey;
+        var key = TypedJudgeKey();
         ApplyJudge(await api.SaveJudgeSettingsAsync(CurrentJudgeSettings(), key));
         ShowJudgeMessage("AI review settings saved.", false);
     });
@@ -135,14 +173,13 @@ public partial class MainViewModel
     {
         var settings = CurrentJudgeSettings();
         var result = await api.TestJudgeConnectionAsync(
-            settings.Provider, settings.Model,
-            string.IsNullOrWhiteSpace(JudgeApiKey) ? null : JudgeApiKey);
+            settings.Provider, settings.Model, TypedJudgeKey());
         ShowJudgeMessage(result.Message, result.State != "success");
     });
 
     [RelayCommand] private Task RunJudgeNowAsync() => RunAsync(async () =>
     {
-        var key = string.IsNullOrWhiteSpace(JudgeApiKey) ? null : JudgeApiKey;
+        var key = TypedJudgeKey();
         await api.SaveJudgeSettingsAsync(CurrentJudgeSettings(), key);
         var result = await api.RunJudgeAsync(force: true);
         ApplyJudge(await api.GetJudgeSettingsAsync());

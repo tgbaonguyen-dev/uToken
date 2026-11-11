@@ -57,8 +57,7 @@ public partial class MainViewModel
         // Một nút lưu cho cả trang: cấu hình AI review đi cùng (chỉ khi đã tải, để không ghi đè bằng mặc định).
         if (Judge is not null)
         {
-            ApplyJudge(await api.SaveJudgeSettingsAsync(CurrentJudgeSettings(),
-                string.IsNullOrWhiteSpace(JudgeApiKey) ? null : JudgeApiKey));
+            ApplyJudge(await api.SaveJudgeSettingsAsync(CurrentJudgeSettings(), TypedJudgeKey()));
             JudgeMessage = null;
         }
         SettingsMessage = "Settings saved." + (LaunchAtStartup ? " uToken starts when you sign in to this computer." : "")

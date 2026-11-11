@@ -137,6 +137,11 @@ class _LiveTokensScreenState extends State<LiveTokensScreen>
     });
   }
 
+  Future<void> _choose(UsagePeriod p, DateTime now) async {
+    final picked = await choosePeriod(context, p, now);
+    if (picked != null && mounted) setState(() => _period = picked);
+  }
+
   Widget _body(BuildContext context, List<DailyDoc> all, DateTime? lastSync) {
     final now = widget.now();
     final sync = widget.args.sync;
@@ -162,9 +167,11 @@ class _LiveTokensScreenState extends State<LiveTokensScreen>
       UtSegmented<UsagePeriod>(
         values: UsagePeriod.values,
         selected: _period,
-        label: (p) => tr(p.label),
-        onChanged: (p) => setState(() => _period = lastUsagePeriod = p),
+        label: (p) => p.label,
+        onChanged: (p) => _choose(p, now),
       ),
+      if (_period == UsagePeriod.custom)
+        CustomRangeChip(onTap: () => _choose(UsagePeriod.custom, now)),
       const SizedBox(height: 22),
       UtCard(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
@@ -243,7 +250,8 @@ class _LiveTokensScreenState extends State<LiveTokensScreen>
   String _trendLabel(List<DailyDoc> docs, DateTime now) => switch (_period) {
         UsagePeriod.day => tr('Today'),
         UsagePeriod.week => tr('Last 7 days'),
-        UsagePeriod.month => tr('Last 30 days'),
+        UsagePeriod.month => monthYear(now),
+        UsagePeriod.custom => customUsageRange?.label ?? monthYear(now),
         UsagePeriod.total => docs.isEmpty
             ? tr('All time')
             // The chart shows at most 90 days (see _Trend).
@@ -365,18 +373,23 @@ class _Trend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final byDate = {for (final d in docs) d.date: d};
+    final range = period == UsagePeriod.custom ? customUsageRange : null;
+    // A custom range ends on its last day; every other period ends today.
+    final end = range?.to ?? now;
     final days = switch (period) {
       UsagePeriod.day => 1,
       UsagePeriod.week => 7,
-      UsagePeriod.month => 30,
+      // From the 1st of the current month to today.
+      UsagePeriod.month => now.day,
       UsagePeriod.total => docs.isEmpty
           ? 1
           : now.difference(DateTime.parse(docs.first.date)).inDays + 1,
+      UsagePeriod.custom => range?.days ?? now.day,
     }
         .clamp(1, 90);
     final keys = [
       for (var i = days - 1; i >= 0; i--)
-        dayKey(DateTime(now.year, now.month, now.day - i))
+        dayKey(DateTime(end.year, end.month, end.day - i))
     ];
     final providers = byProvider(docs).map((e) => e.key).toList();
     final stacks = [
@@ -505,7 +518,7 @@ class LiveUsageDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 UtSectionLabel(tr('Top models'),
-                    trailing: Text(period.label, style: UtText.caption)),
+                    trailing: Text(periodText(period), style: UtText.caption)),
                 UtCard(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                   child: models.isEmpty

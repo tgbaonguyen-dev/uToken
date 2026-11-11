@@ -50,10 +50,11 @@ public sealed class UsageEngine(
     /// rồi dùng ngay. Trả về số model có giá thay đổi; null nếu bỏ qua vì giá còn mới.
     /// Chỉ gửi một request GET tới models.dev, không gửi dữ liệu người dùng. Lỗi mạng thì ném ra; giá cũ vẫn dùng được.
     /// </summary>
-    public async Task<int?> UpdatePricesAsync(HttpClient http, TimeSpan? maxAge = null, CancellationToken ct = default)
+    public async Task<int?> UpdatePricesAsync(HttpClient http, TimeSpan? maxAge = null, CancellationToken ct = default,
+        Func<TimeSpan, CancellationToken, Task>? retryDelay = null)
     {
         if (PricesAreFresh(maxAge)) return null;
-        return ApplyPriceCatalog(await ModelsDevCatalog.FetchAsync(http, ct));
+        return ApplyPriceCatalog(await PricingSync.FetchAsync(http, ct, retryDelay));
     }
 
     /// <summary>Giá models.dev đã tải trong khoảng <paramref name="maxAge"/> (mặc định 20 giờ) chưa.</summary>

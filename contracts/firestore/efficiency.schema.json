@@ -229,6 +229,92 @@
     },
     "pricing_version": {
       "type": "string"
+    },
+    "overall": {
+      "description": "Outcome metrics across all setups in the period (M05 Efficiency row, M05B Outcome card). Absent or null when the period has no tasks.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "n_tasks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "n_verified": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Số task verified_success + verified_failure (mẫu số của sr)"
+        },
+        "sr": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "sr_ci_low": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "sr_ci_high": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "sr_alt": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "cpst_micro": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "cpst_ci_low_micro": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "cpst_ci_high_micro": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "cost_p50_micro": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "cost_p90_micro": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "redo_rate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "stability_flag": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "n_tasks",
+        "n_verified",
+        "stability_flag"
+      ]
     }
   }
 }

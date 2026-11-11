@@ -225,6 +225,26 @@ public class EfficiencyTests
         Assert.False(s.CrossTool);
     }
 
+    [Fact] // M05/M05B: SR chính ± khoảng tin cậy, SR phụ, CPST và P50/P90 tính trên mọi setup
+    public void Overall_outcome_spans_all_setups()
+    {
+        var tasks = Tasks("model-a", 40, 0.75, 200_000, 1).Concat(Tasks("model-b", 20, 0.5, 100_000, 2)).ToList();
+        var doc = EfficiencyCalculator.Build(Now, Make.Utc7, [], [], tasks, StaticPriceBook.Default);
+        var o = doc.Overall!;
+        Assert.Equal(60, o.NTasks);
+        Assert.Equal(60, o.NVerified);
+        Assert.Equal(0.6667, o.Sr);                  // (30 + 10) / 60
+        Assert.True(o.SrCiLow < o.Sr && o.SrCiHigh > o.Sr);
+        Assert.Equal(o.Sr, o.SrAlt);                 // không có task likely
+        Assert.Equal(250_000, o.CpstMicro);          // (40 × 0.2$ + 20 × 0.1$) / 40 thành công
+        Assert.Equal(200_000, o.CostP50Micro);
+        Assert.Equal(200_000, o.CostP90Micro);
+    }
+
+    [Fact]
+    public void Overall_is_null_without_tasks() =>
+        Assert.Null(EfficiencyCalculator.Build(Now, Make.Utc7, [], [], [], StaticPriceBook.Default).Overall);
+
     [Fact] // Cần ≥ 5 chat trong kỳ mới gắn nhãn
     public void Process_metrics_need_five_chats()
     {

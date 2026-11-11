@@ -45,6 +45,23 @@ public sealed class CloudSyncTests : IDisposable
         Assert.Equal("1", eff["schema_version"]!["integerValue"]!.GetValue<string>());
     }
 
+    [Fact] // Trường overall (M05/M05B) lên Firestore dạng map lồng nhau; không có task thì là nullValue
+    public void Efficiency_overall_is_a_nested_map_or_null()
+    {
+        var withOverall = Efficiency() with
+        {
+            Overall = new OutcomeSummary(60, 50, 0.66, 0.5, 0.78, 0.7, 250_000, null, null, 200_000, 900_000, 0.1, false),
+        };
+        var o = FirestoreValues.Fields(withOverall)["overall"]!["mapValue"]!["fields"]!;
+        Assert.Equal("50", o["n_verified"]!["integerValue"]!.GetValue<string>());
+        Assert.Equal(0.66, o["sr"]!["doubleValue"]!.GetValue<double>());
+        Assert.Equal("900000", o["cost_p90_micro"]!["integerValue"]!.GetValue<string>());
+        Assert.True(o["cpst_ci_low_micro"]!.AsObject().ContainsKey("nullValue"));
+        Assert.False(o["stability_flag"]!["booleanValue"]!.GetValue<bool>());
+
+        Assert.True(FirestoreValues.Fields(Efficiency())["overall"]!.AsObject().ContainsKey("nullValue"));
+    }
+
     [Fact]
     public async Task Sign_in_upload_and_restore_session()
     {

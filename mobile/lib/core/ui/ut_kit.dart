@@ -411,7 +411,11 @@ class UtTabPage extends StatelessWidget {
                                     fontWeight: FontWeight.w700)
                                 : UtText.title)),
                     if (onRefresh != null)
-                      UtRefreshButton(onRefresh: onRefresh!),
+                      UtRefreshButton(onRefresh: onRefresh!)
+                    else
+                      // Same height as the refresh button so the title,
+                      // subtitle and divider line up on every tab.
+                      const SizedBox(height: 44),
                   ]),
                 ),
                 if (subtitle != null)
@@ -711,7 +715,14 @@ class UtSegmented<T> extends StatelessWidget {
                       style: UtText.bodyStrong.copyWith(
                           color:
                               v == selected ? UtColors.text : UtColors.muted),
-                      child: Text(label(v)),
+                      // Shrink rather than wrap or clip long labels.
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(label(v), maxLines: 1, softWrap: false),
+                        ),
+                      ),
                     ),
                   ),
                 ),

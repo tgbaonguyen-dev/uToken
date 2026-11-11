@@ -53,7 +53,19 @@ public static class EfficiencyCalculator
             tsks.Count(t => t.Outcome == OutcomeState.Undetermined),
             metrics,
             Setups(tsks, startDate, tz),
-            prices.Version);
+            prices.Version)
+        {
+            Overall = Overall(tsks, startDate, tz),
+        };
+    }
+
+    /// <summary>SR chính/phụ, CPST, P50/P90 chi phí mỗi task trên mọi task trong kỳ (không chia setup).</summary>
+    private static OutcomeSummary? Overall(IReadOnlyList<TaskRecord> tasks, DateOnly start, TimeZoneInfo tz)
+    {
+        if (tasks.Count == 0) return null;
+        var r = Describe(default, "", null, default, tasks, start, tz).Report;
+        return new OutcomeSummary(r.NTasks, r.NVerified, r.Sr, r.SrCiLow, r.SrCiHigh, r.SrAlt,
+            r.CpstMicro, r.CpstCiLowMicro, r.CpstCiHighMicro, r.CostP50Micro, r.CostP90Micro, r.RedoRate, r.StabilityFlag);
     }
 
     // ───────────────────────── A. Chỉ số quá trình ─────────────────────────

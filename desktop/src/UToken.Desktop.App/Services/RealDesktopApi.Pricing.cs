@@ -3,6 +3,7 @@ using System.Text.Json;
 using UToken.Core.Models;
 using UToken.Core.Pricing;
 using UToken.Desktop.App.Models;
+using UToken.Storage;
 
 namespace UToken.Desktop.App.Services;
 
@@ -20,6 +21,9 @@ public sealed partial class RealDesktopApi
 
     /// <summary>Thay HttpClient trong test; null = client mặc định.</summary>
     public HttpClient? PriceHttpClient { get; init; }
+
+    /// <summary>Thay thời gian chờ giữa các lần thử lại trong test; null = Task.Delay.</summary>
+    public Func<TimeSpan, CancellationToken, Task>? PriceRetryDelay { get; init; }
 
     public async Task<PricingData> GetPricingAsync(CancellationToken ct)
     {
@@ -51,16 +55,18 @@ public sealed partial class RealDesktopApi
 
     /// <summary>
     /// Tải giá mới nếu giá đang dùng đã cũ. Gọi phía sau (không chặn giao diện); lỗi mạng chỉ ghi log, giá cũ vẫn dùng.
-    /// Trả về true khi đã áp bảng giá mới.
+    /// Trả về true khi đã áp bảng giá mới. <paramref name="retry"/> = false chỉ thử một lần: Sync gọi kiểu này
+    /// để models.dev chậm hay bị chặn không kéo dài mỗi lần đồng bộ (lần khởi động app vẫn thử lại).
     /// </summary>
-    public async Task<bool> UpdatePricesAsync(CancellationToken ct = default)
+    public async Task<bool> UpdatePricesAsync(CancellationToken ct = default, bool retry = true)
     {
         await _priceUpdateGate.WaitAsync(ct);
         try
         {
             if (await WithStoreAsync(() => _engine.PricesAreFresh(), ct)) return false;
             // Gọi mạng ngoài khóa SQLite; chỉ phần lưu đi qua khóa.
-            var catalog = await ModelsDevCatalog.FetchAsync(PriceHttpClient ?? Http.Value, ct);
+            var catalog = await PricingSync.FetchAsync(PriceHttpClient ?? Http.Value, ct, PriceRetryDelay,
+                attempts: retry ? 3 : 1);
             int changed = await WithStoreAsync(() => _engine.ApplyPriceCatalog(catalog), ct);
             DataChanged();
             _localSettings?.Record($"Prices updated from models.dev: {catalog.Count} models, {changed} changed");

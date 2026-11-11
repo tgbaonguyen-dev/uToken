@@ -153,7 +153,7 @@ public sealed partial class RealDesktopApi
 
     private async Task<SyncResult> SyncCoreAsync(bool runJudge, bool resendAll, CancellationToken ct)
     {
-        await UpdatePricesAsync(ct); // chỉ tải khi giá đã cũ hơn ~1 ngày
+        await UpdatePricesAsync(ct, retry: false); // chỉ tải khi giá đã cũ hơn ~1 ngày; một lần, không chờ thử lại
         var retention = (await GetSettingsAsync(ct)).Values.RetentionDays;
         var snapshot = await WithStoreAsync(() =>
         {

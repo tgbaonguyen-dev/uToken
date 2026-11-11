@@ -186,8 +186,10 @@ JudgeBrief buildBrief(List<DailyDoc> all, EfficiencyDoc? efficiency,
       t.requests == 0 ? 'N/A' : _pct(t.errorRequests / t.requests));
   final o = sumOutcomes(docs);
   if (since == null) {
-    add('outcome.success_rate', 'Success rate',
+    add('outcome.success_rate', 'Success rate (verified chats only)',
         o.successRate == null ? 'N/A' : _pct(o.successRate!));
+    add('outcome.success_rate_incl_likely', 'Success rate incl. likely results',
+        o.successRateInclLikely == null ? 'N/A' : _pct(o.successRateInclLikely!));
     add('outcome.undetermined', 'Undetermined chats', '${o.undetermined}');
   }
   for (final p in efficiency?.processMetrics ?? const <ProcessMetric>[]) {
