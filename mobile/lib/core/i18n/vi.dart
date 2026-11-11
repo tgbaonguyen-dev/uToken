@@ -2,8 +2,6 @@
 const Map<String, String> vi = {
   '+{amount} this week': '+{amount} tuần này',
   '119 days': '119 ngày',
-  'A chat counts as successful when it ends with a verified or likely successful result.':
-      'Một chat được tính là thành công khi kết thúc với kết quả đã xác minh hoặc nhiều khả năng thành công.',
   'A review sends about 6,000 tokens of usage totals and costs a few cents with most models. No prompts or code are sent.':
       'Mỗi lần đánh giá gửi khoảng 6.000 token số liệu tổng hợp, tốn vài cent với hầu hết model. Không gửi prompt hay code.',
   'AI responses': 'Phản hồi của AI',
@@ -35,7 +33,6 @@ const Map<String, String> vi = {
   'Automatic token and cost tracking for the tools you already use.':
       'Tự động theo dõi token và chi phí cho các công cụ bạn đang dùng.',
   'Avg. response time': 'Thời gian phản hồi TB',
-  'BEST FOR {g} TASKS': 'TỐT NHẤT CHO TASK {g}',
   'Back': 'Quay lại',
   'Background requests you did not send': 'Request chạy ngầm bạn không tự gửi',
   'Based on aggregate metadata only. No prompt text is sent to the AI.':
@@ -55,8 +52,6 @@ const Map<String, String> vi = {
   'Calculated from saved model pricing': 'Tính theo bảng giá model đã lưu',
   'Cancel': 'Hủy',
   'Chats': 'Chat',
-  'Chats judged': 'Chat đã chấm',
-  'Cheaper than avg': 'Rẻ hơn trung bình',
   'Cheaper, not worse': 'Rẻ hơn, chưa thấy kém',
   'Checking every number…': 'Đang kiểm tra từng con số…',
   'Cloud sync': 'Đồng bộ đám mây',
@@ -128,18 +123,12 @@ const Map<String, String> vi = {
   'Diagnostics': 'Chẩn đoán',
   'Dismiss': 'Đóng',
   'Download desktop app': 'Tải ứng dụng máy tính',
-  'Early ranking': 'Xếp hạng sơ bộ',
-  'Early results: no setup has enough chats for a confident verdict yet, so treat this ranking as a hint.':
-      'Kết quả sơ bộ: chưa cấu hình nào đủ chat để kết luận chắc chắn, hãy coi bảng xếp hạng này là gợi ý.',
   'Effective cost per million tokens from your usage':
       'Chi phí thực tế mỗi triệu token theo dữ liệu của bạn',
   'Effective rate = estimated cost ÷ tokens, so it blends input, cached and output prices. The desktop app prices each request from its saved catalog.':
       'Giá thực tế = chi phí ước tính ÷ token, nên đã gộp giá input, cache và output. Ứng dụng máy tính tính giá từng request theo bảng giá đã lưu.',
   'Effective rates from your usage': 'Giá thực tế theo dữ liệu của bạn',
   'Efficiency': 'Hiệu suất',
-  'Efficiency index': 'Chỉ số hiệu suất',
-  'Efficiency index = success rate ÷ (cost per success ÷ average). Above 1 is better than average. A verdict needs 20+ chats per setup and results precise to ±20%.':
-      'Chỉ số hiệu suất = tỉ lệ thành công ÷ (chi phí mỗi lần thành công ÷ trung bình). Trên 1 là tốt hơn trung bình. Cần từ 20 chat mỗi cấu hình và sai số trong ±20% mới kết luận.',
   'Enter an API key first': 'Hãy nhập API key trước',
   'Error rate': 'Tỉ lệ lỗi',
   'Est. cost': 'Chi phí ước tính',
@@ -187,7 +176,6 @@ const Map<String, String> vi = {
       'Lấy key ở Claude Console (platform.claude.com).',
   'Key from the OpenAI platform (platform.openai.com).':
       'Lấy key ở OpenAI platform (platform.openai.com).',
-  'LEADING SO FAR · {g} TASKS': 'ĐANG DẪN ĐẦU · TASK {g}',
   'Language': 'Ngôn ngữ',
   'Large': 'Lớn',
   'Last 30 days': '30 ngày qua',
@@ -195,8 +183,6 @@ const Map<String, String> vi = {
   'Last 7 days vs your daily median': '7 ngày qua so với trung vị hằng ngày',
   'Last 90 days': '90 ngày qua',
   'Last vs first turn in a chat': 'Lượt cuối so với lượt đầu trong một chat',
-  'Leading so far on {g} tasks: {m} · early results':
-      'Đang dẫn đầu ở task {g}: {m} · kết quả sơ bộ',
   'Leave empty to keep the saved key': 'Để trống để giữ key đã lưu',
   'Less': 'Ít',
   'Low confidence': 'Độ tin cậy thấp',
@@ -233,7 +219,6 @@ const Map<String, String> vi = {
   'No finished chats in the last 30 days.':
       'Không có chat nào hoàn tất trong 30 ngày qua.',
   'No monthly limit': 'Chưa đặt hạn mức',
-  'No outcomes yet': 'Chưa có kết quả',
   'No priced usage yet': 'Chưa có dữ liệu có giá',
   'No process metrics yet.': 'Chưa có chỉ số quy trình.',
   'No recommendations yet.': 'Chưa có gợi ý.',
@@ -298,8 +283,6 @@ const Map<String, String> vi = {
   'Reasoning inside output': 'Phần suy luận trong output',
   'Recent days': 'Những ngày gần đây',
   'Recommendations': 'Gợi ý',
-  'Redo rate {p} · chats retried within 2 min':
-      'Tỉ lệ làm lại {p} · chat bị hỏi lại trong 2 phút',
   'Refresh from Firebase': 'Làm mới từ Firebase',
   'Press back again to exit': 'Nhấn back lần nữa để thoát',
   'Reliability': 'Độ ổn định',
@@ -388,7 +371,6 @@ const Map<String, String> vi = {
   'Token numbers': 'Cách hiện số token',
   'Token totals': 'Tổng token',
   'Tokens': 'Token',
-  'Tokens / success': 'Token / lần thành công',
   'Tokens per turn': 'Token mỗi lượt',
   'Tokens · 30 days': 'Token · 30 ngày',
   'Top contributor · last 7 days': 'Đóng góp nhiều nhất · 7 ngày qua',
@@ -426,8 +408,6 @@ const Map<String, String> vi = {
   'What to do': 'Nên làm gì',
   'What to fix first': 'Nên sửa gì trước',
   'What you get': 'Bạn sẽ có',
-  'Which model gives the most success per dollar.':
-      'Model nào cho nhiều lần thành công nhất trên mỗi đô la.',
   'Why this was flagged': 'Vì sao bị đánh dấu',
   'Worse': 'Kém hơn',
   'You can sign in again with your Google account.':
@@ -451,8 +431,6 @@ const Map<String, String> vi = {
   '{amount}/win': '{amount}/lần thắng',
   '{device} · synced {when}': '{device} · đồng bộ {when}',
   '{done} of {all} reviewed': 'đã xem {done}/{all}',
-  '{g} tasks: {m} gives most success per dollar':
-      'Task {g}: {m} cho nhiều thành công nhất trên mỗi đô la',
   '{name} score': 'Điểm {name}',
   '{n} chats': '{n} chat',
   '{n} chats could not be judged': '{n} chat chưa chấm được',
@@ -472,8 +450,6 @@ const Map<String, String> vi = {
   '{share} of all tokens · {n} models': '{share} tổng token · {n} model',
   '{tool} · last 30 days': '{tool} · 30 ngày qua',
   '{tool} · {n} chats · {v} verified': '{tool} · {n} chat · {v} đã xác minh',
-  'vs last month': 'so với tháng trước',
-  'Not enough chats to compare models yet': 'Chưa đủ chat để so sánh các model',
   'Verified success': 'Thành công (đã xác minh)',
   'Likely success': 'Có thể thành công',
   'Good': 'Tốt',
@@ -619,4 +595,59 @@ const Map<String, String> vi = {
       'Chọn usage mới từ lần đánh giá thành công trước, hoặc tổng thể 30 ngày. Chỉ dữ liệu đã đồng bộ được sử dụng.',
   '{provider} reads synchronized usage for the selected period only, never your prompts or code. Every recommendation must cite a metric, and the app re-checks each number. Nothing is changed automatically.':
       '{provider} chỉ đọc usage đã đồng bộ trong phạm vi được chọn, không đọc prompt hay code. Mỗi gợi ý phải dẫn một chỉ số và app kiểm tra lại từng con số. Không có gì tự động thay đổi.',
+  'Success rate · verified chats': 'Tỉ lệ thành công · chat đã xác minh',
+  '{g} tasks: {m} · {v}': 'Việc {g}: {m} · {v}',
+  'No setup has a clear verdict yet':
+      'Chưa có setup nào đủ dữ liệu để kết luận',
+  'Success rate counts only chats with evidence: a passing test or build, or a failed or aborted turn. "Incl. likely" also counts likely results.':
+      'Tỉ lệ thành công chỉ tính chat có bằng chứng: test hoặc build chạy đạt, hoặc turn lỗi hay bị hủy. "Gồm khả năng cao" tính thêm các kết quả nhiều khả năng thành công hoặc thất bại.',
+  'vs previous 30 days': 'so với 30 ngày trước',
+  'Incl. likely': 'Gồm khả năng cao',
+  'Undetermined': 'Chưa xác định',
+  'Cost / task P50': 'Chi phí/task P50',
+  'Cost / task P90': 'Chi phí/task P90',
+  'Redo rate': 'Tỉ lệ làm lại',
+  'Not enough data: no chat has verified evidence yet.':
+      'Chưa đủ dữ liệu: chưa có chat nào có bằng chứng xác minh.',
+  '95% range {lo}–{hi} · {n} verified chats':
+      'Khoảng tin cậy 95% {lo}–{hi} · {n} chat đã xác minh',
+  '{n} verified chats': '{n} chat đã xác minh',
+  'Unstable: results swing a lot week to week.':
+      'Kém ổn định: kết quả dao động nhiều giữa các tuần.',
+  'Failed': 'Thất bại',
+  'Not enough data · {n}/20': 'Chưa đủ dữ liệu · {n}/20',
+  'High certainty': 'Mức chắc chắn cao',
+  'Medium certainty': 'Mức chắc chắn trung bình',
+  'Success and cost per success, with a verdict when the data is strong enough.':
+      'Tỉ lệ thành công và chi phí mỗi lần thành công, kèm kết luận khi dữ liệu đủ mạnh.',
+  'All tools': 'Mọi công cụ',
+  'Verdicts': 'Kết luận',
+  'Each setup is compared with the busiest setup of the same tool and task size. A verdict needs 20+ chats per setup and results precise to ±20 points; until then the setup shows its progress and is not ranked.':
+      'Mỗi setup được so với setup nhiều chat nhất cùng công cụ và cùng nhóm việc. Cần từ 20 chat mỗi setup và độ chính xác trong ±20 điểm mới có kết luận; trước đó setup chỉ hiện tiến độ, không xếp hạng.',
+  '{amount} / success': '{amount} / lần thành công',
+  'Best pick': 'Nên chọn',
+  'vs {m}': 'so với {m}',
+  'Unstable': 'Kém ổn định',
+  'Tool + model comparison': 'So sánh công cụ + model',
+  'BEST PICK · {g} TASKS': 'NÊN CHỌN · VIỆC {g}',
+  'Verdict': 'Kết luận',
+  '95% range {lo}–{hi}': 'Khoảng tin cậy 95% {lo}–{hi}',
+  'Redo rate {p}': 'Tỉ lệ làm lại {p}',
+  'vs previous 30 days (daily totals)': 'so với 30 ngày trước (theo tổng ngày)',
+  '{n} to review': '{n} cần xem lại',
+  '{n} setups have a clear verdict': '{n} setup đã có kết luận',
+  '{n} chats · {m} models · {amount} / success':
+      '{n} chat · {m} model · {amount} / lần thành công',
+  'BEST PICK IN {tool} · {g} TASKS': 'NÊN CHỌN TRONG {tool} · VIỆC {g}',
+  '{p} · by model': '{p} · theo model',
+  'Up to 10 model requests': 'Tối đa 10 lần gọi model',
+  '11–40 model requests': '11–40 lần gọi model',
+  'Over 40 model requests': 'Trên 40 lần gọi model',
+  '{n} chats · 1 model · {amount} / success':
+      '{n} chat · 1 model · {amount} / lần thành công',
+  'Custom': 'Tùy chọn',
+  'Choose dates': 'Chọn khoảng ngày',
+  'Apply': 'Áp dụng',
+  '{range} · {n} days': '{range} · {n} ngày',
+  'Change': 'Đổi',
 };

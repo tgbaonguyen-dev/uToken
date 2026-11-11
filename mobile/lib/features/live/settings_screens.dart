@@ -1325,7 +1325,7 @@ class LiveCostBreakdownScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return UtPage(
       title: tr('Estimated cost'),
-      subtitle: '${period.label} · by model',
+      subtitle: tr('{p} · by model', {'p': periodText(period)}),
       onBack: () => liveBack(context, '/tokens'),
       actions: [
         UtButton(

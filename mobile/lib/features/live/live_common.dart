@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -79,8 +80,86 @@ void liveBack(BuildContext context, String fallback) {
   }
 }
 
-String withPeriod(String path, UsagePeriod period) =>
-    Uri(path: path, queryParameters: {'period': period.label}).toString();
+String withPeriod(String path, UsagePeriod period) => Uri(path: path, queryParameters: {
+      'period': period.label,
+      if (period == UsagePeriod.custom && customUsageRange != null) ...{
+        'from': dayKey(customUsageRange!.from),
+        'to': dayKey(customUsageRange!.to),
+      },
+    }).toString();
+
+/// Applies a period chosen on the selector. "Custom" opens a from–to date
+/// picker first; returns null when the picker is cancelled (keep the old one).
+Future<UsagePeriod?> choosePeriod(
+    BuildContext context, UsagePeriod period, DateTime now) async {
+  if (period != UsagePeriod.custom) return lastUsagePeriod = period;
+  final range = await pickUsageRange(context, now);
+  if (range == null) return null;
+  customUsageRange = range;
+  return lastUsagePeriod = UsagePeriod.custom;
+}
+
+/// Material date-range picker in the app language, limited to today.
+Future<UsageRange?> pickUsageRange(BuildContext context, DateTime now) async {
+  final today = DateTime(now.year, now.month, now.day);
+  final current = customUsageRange;
+  final picked = await showDateRangePicker(
+    context: context,
+    firstDate: DateTime(today.year - 3, 1, 1),
+    lastDate: today,
+    initialDateRange: current == null || current.to.isAfter(today)
+        ? DateTimeRange(
+            start: today.subtract(const Duration(days: 6)), end: today)
+        : DateTimeRange(start: current.from, end: current.to),
+    helpText: tr('Choose dates'),
+    saveText: tr('Apply'),
+    builder: (context, child) => LocalPrefs.instance.vietnamese
+        ? Localizations.override(
+            context: context,
+            locale: const Locale('vi'),
+            delegates: GlobalMaterialLocalizations.delegates,
+            child: child)
+        : child!,
+  );
+  return picked == null ? null : UsageRange(picked.start, picked.end);
+}
+
+/// Shows the custom range under the period selector; tap to change it.
+class CustomRangeChip extends StatelessWidget {
+  const CustomRangeChip({super.key, required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final range = customUsageRange;
+    if (range == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: InkWell(
+          key: const ValueKey('custom-range-chip'),
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.date_range_rounded,
+                  size: 16, color: UtColors.muted),
+              const SizedBox(width: 6),
+              Text(
+                  tr('{range} · {n} days',
+                      {'range': range.label, 'n': range.days}),
+                  style: UtText.caption.copyWith(color: UtColors.text)),
+              const SizedBox(width: 6),
+              Text(tr('Change'), style: UtText.caption),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 /// Thin horizontal share bar made of coloured segments.
 class ShareBar extends StatelessWidget {

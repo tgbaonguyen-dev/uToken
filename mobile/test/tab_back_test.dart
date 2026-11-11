@@ -30,4 +30,26 @@ void main() {
     await tester.pump();
     expect(find.text('Press back again to exit'), findsOneWidget);
   });
+
+  testWidgets('tab header and divider line up with or without refresh',
+      (tester) async {
+    Future<(double, double)> layout(bool refresh) async {
+      await tester.pumpWidget(MaterialApp(
+          home: UtTabPage(
+              title: 'Title',
+              subtitle: 'Subtitle',
+              tabIndex: refresh ? 0 : 3,
+              onRefresh: refresh ? () async {} : null,
+              body: const SizedBox.expand())));
+      await tester.pump();
+      return (
+        tester.getTopLeft(find.text('Subtitle')).dy,
+        tester.getTopLeft(find.byType(UtDivider).first).dy,
+      );
+    }
+
+    final withRefresh = await layout(true);
+    final settingsLike = await layout(false);
+    expect(settingsLike, withRefresh);
+  });
 }

@@ -78,6 +78,7 @@ class FakeUsageRepository implements UsageRepository {
       required String platform}) async {
     touchedProfiles.add(uid);
   }
+
   @override
   Stream<Map<String, String>> watchProjectNames({required String uid}) =>
       Stream.value(projectNames);
@@ -225,7 +226,11 @@ void main() {
     ]..sort((a, b) => a.date.compareTo(b.date)));
     await tester.pumpWidget(app(LiveTokensScreen(args: argsFor(repository))));
     await tester.pumpAndSettle();
-    expect(exactTotal(tester), '31');
+    // Month = the current calendar month up to today (FR-DASH-001).
+    final monthTotal = repository.dailyValues
+        .where((d) => d.date.startsWith(dayKey(today).substring(0, 7)))
+        .fold<int>(0, (a, d) => a + d.totals.input);
+    expect(exactTotal(tester), '$monthTotal');
     for (final (period, total) in [
       ('Day', '1'),
       ('Week', '7'),
@@ -235,6 +240,48 @@ void main() {
       await tester.pumpAndSettle();
       expect(exactTotal(tester), total, reason: period);
     }
+  });
+
+  testWidgets('Custom opens a from–to picker and filters to that range',
+      (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
+    addTearDown(() {
+      customUsageRange = null;
+      lastUsagePeriod = UsagePeriod.month;
+    });
+    final repository = FakeUsageRepository();
+    addTearDown(repository.close);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    repository.dailyValues.addAll([
+      dailyDoc(today.subtract(const Duration(days: 40)), 1, 0),
+      dailyDoc(today.subtract(const Duration(days: 20)), 2, 0),
+      dailyDoc(today.subtract(const Duration(days: 10)), 4, 0),
+      dailyDoc(today, 8, 0),
+    ]..sort((a, b) => a.date.compareTo(b.date)));
+
+    // Cancelling the picker keeps the previous period.
+    await tester.pumpWidget(app(LiveTokensScreen(args: argsFor(repository))));
+    await tester.pumpAndSettle();
+    final before = exactTotal(tester);
+    await tester.tap(find.text('Custom'));
+    await tester.pumpAndSettle();
+    expect(find.byType(DateRangePickerDialog), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(exactTotal(tester), before);
+    expect(find.byKey(const ValueKey('custom-range-chip')), findsNothing);
+
+    // A chosen range (days 25..5 ago) keeps only the docs inside it.
+    customUsageRange = UsageRange(today.subtract(const Duration(days: 25)),
+        today.subtract(const Duration(days: 5)));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(app(LiveTokensScreen(
+        args: argsFor(repository), initialPeriod: UsagePeriod.custom)));
+    await tester.pumpAndSettle();
+    expect(exactTotal(tester), '6');
+    expect(find.byKey(const ValueKey('custom-range-chip')), findsOneWidget);
+    expect(find.textContaining('21 days'), findsOneWidget);
   });
 
   testWidgets('manual server refresh is single-flight and updates usage',
@@ -333,7 +380,7 @@ void main() {
     expect(find.text('900'), findsOneWidget);
   });
 
-  testWidgets('compare models ranks setups and lists insufficient ones',
+  testWidgets('compare models shows verdicts, a best pick and n/20 progress',
       (tester) async {
     addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
@@ -354,7 +401,21 @@ void main() {
             verdict: 'better',
             crossTool: false,
             sr: 0.8,
+            srCiLow: 0.65,
+            srCiHigh: 0.9,
+            confidence: 'medium',
+            comparedTo: 'slow',
             cpstMicro: 400000),
+        SetupMetric(
+            provider: 'codex',
+            model: 'slow',
+            taskGroup: 'medium',
+            tasks: 30,
+            verdict: 'worse',
+            crossTool: false,
+            sr: 0.6,
+            cpstMicro: 900000,
+            unstable: true),
         SetupMetric(
             provider: 'claude_code',
             model: 'new',
@@ -365,8 +426,102 @@ void main() {
       ],
     ));
     await tester.pumpAndSettle();
-    expect(find.text('BEST FOR MEDIUM TASKS'), findsOneWidget);
-    expect(find.text('13 more chats needed for a verdict'), findsOneWidget);
+    expect(find.text('BEST PICK · MEDIUM TASKS'), findsOneWidget);
+    expect(find.text('Better'), findsWidgets);
+    expect(find.text('Worse'), findsOneWidget);
+    expect(find.text('Not enough data · 7/20'), findsOneWidget);
+    expect(find.textContaining('80% (65%–90%) success'), findsOneWidget);
+    expect(find.textContaining('Unstable'), findsOneWidget);
+    // No ranking or efficiency index any more (SRS v0.10 FR-ANLY-003 §F).
+    expect(find.textContaining('Efficiency index'), findsNothing);
+    expect(find.textContaining('Ranking'), findsNothing);
+
+    // Source filter: Claude only has an insufficient setup → no best pick.
+    await tester.tap(find.text('Claude'));
+    await tester.pumpAndSettle();
+    expect(find.text('BEST PICK · MEDIUM TASKS'), findsNothing);
+    expect(find.text('Not enough data · 7/20'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('compare models shows one best pick per tool for All tools',
+      (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
+    final repository = FakeUsageRepository();
+    addTearDown(repository.close);
+    await tester
+        .pumpWidget(app(LiveModelComparisonScreen(args: argsFor(repository))));
+    repository.efficiency.add(const EfficiencyDoc(
+      periodStart: '2026-10-01',
+      periodEnd: '2026-10-30',
+      generatedAt: '',
+      processMetrics: [],
+      setups: [
+        SetupMetric(
+            provider: 'codex',
+            model: 'a',
+            taskGroup: 'medium',
+            tasks: 40,
+            verdict: 'better',
+            crossTool: false,
+            sr: 0.8,
+            cpstMicro: 900000),
+        SetupMetric(
+            provider: 'claude_code',
+            model: 'b',
+            taskGroup: 'medium',
+            tasks: 30,
+            verdict: 'better',
+            crossTool: false,
+            sr: 0.7,
+            cpstMicro: 100000),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('BEST PICK IN CODEX · MEDIUM TASKS'), findsOneWidget);
+    expect(find.text('BEST PICK IN CLAUDE · MEDIUM TASKS'), findsOneWidget);
+    expect(find.text('BEST PICK · MEDIUM TASKS'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('compare models never ranks setups without a verdict',
+      (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
+    final repository = FakeUsageRepository();
+    addTearDown(repository.close);
+    await tester
+        .pumpWidget(app(LiveModelComparisonScreen(args: argsFor(repository))));
+    repository.efficiency.add(const EfficiencyDoc(
+      periodStart: '2026-10-01',
+      periodEnd: '2026-10-30',
+      generatedAt: '',
+      processMetrics: [],
+      setups: [
+        SetupMetric(
+            provider: 'codex',
+            model: 'a',
+            taskGroup: 'small',
+            tasks: 12,
+            verdict: 'insufficient',
+            crossTool: false,
+            sr: 0.9,
+            cpstMicro: 100000),
+        SetupMetric(
+            provider: 'codex',
+            model: 'b',
+            taskGroup: 'small',
+            tasks: 9,
+            verdict: 'insufficient',
+            crossTool: false,
+            sr: 0.5,
+            cpstMicro: 300000),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Not enough data · 12/20'), findsOneWidget);
+    expect(find.text('Not enough data · 9/20'), findsOneWidget);
+    expect(find.textContaining('BEST PICK'), findsNothing);
+    expect(find.text('Verdicts'), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
 

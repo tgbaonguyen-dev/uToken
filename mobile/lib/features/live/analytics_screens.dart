@@ -27,6 +27,13 @@ class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen>
   void onDayChanged() => _daily = widget.args.daily();
   late UsagePeriod _period = widget.initialPeriod;
   late Stream<List<DailyDoc>> _daily = widget.args.daily();
+  late final Stream<EfficiencyDoc?> _efficiency =
+      widget.args.repository.watchEfficiency(uid: widget.args.uid);
+
+  Future<void> _choose(UsagePeriod p, DateTime now) async {
+    final picked = await choosePeriod(context, p, now);
+    if (picked != null && mounted) setState(() => _period = picked);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +57,11 @@ class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen>
             UtSegmented<UsagePeriod>(
               values: UsagePeriod.values,
               selected: _period,
-              label: (p) => tr(p.label),
-              onChanged: (p) => setState(() => _period = lastUsagePeriod = p),
+              label: (p) => p.label,
+              onChanged: (p) => _choose(p, now),
             ),
+            if (_period == UsagePeriod.custom)
+              CustomRangeChip(onTap: () => _choose(UsagePeriod.custom, now)),
             const SizedBox(height: 22),
             UtCard(
               child: Column(
@@ -138,15 +147,15 @@ class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen>
             const SizedBox(height: 16),
             UtCard(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-              child: UtRow(
-                title: tr('Efficiency'),
-                trailing: Text(
-                    outcomes.successRate == null
-                        ? tr('No outcomes yet')
-                        : tr('{p} success',
-                            {'p': pct(outcomes.successRate!, digits: 0)}),
-                    style: UtText.caption),
-                onTap: () => context.push('/efficiency'),
+              child: StreamBuilder<EfficiencyDoc?>(
+                stream: _efficiency,
+                builder: (context, snap) => UtRow(
+                  title: tr('Efficiency'),
+                  trailing: Text(
+                      efficiencySummary(snap.data?.overall, outcomes),
+                      style: UtText.caption),
+                  onTap: () => context.push('/efficiency'),
+                ),
               ),
             ),
           ]);
@@ -229,16 +238,27 @@ String metricValue(ProcessMetric m) {
   };
 }
 
-/// "Leading so far: X on small tasks" from early results, across task sizes.
-String _earlyLeader(List<SetupMetric> setups) {
-  for (final g in ['small', 'medium', 'large']) {
-    final (ranked, _) = rankForDisplay(setups, g);
-    if (ranked.isNotEmpty) {
-      return tr('Leading so far on {g} tasks: {m} · early results',
-          {'g': groupLabel(g), 'm': ranked.first.$1.name});
-    }
+/// "67% (58–75%)": a success rate with its 95% range when known.
+String srWithRange(double sr, double? low, double? high) =>
+    low == null || high == null
+    ? pct(sr, digits: 0)
+    : '${pct(sr, digits: 0)} (${pct(low, digits: 0)}–${pct(high, digits: 0)})';
+
+/// M05 Efficiency row: main success rate (± range from the desktop report)
+/// or "Not enough data" when no chat has verified evidence yet.
+String efficiencySummary(OutcomeSummary? overall, Outcomes daily) {
+  if (overall != null) {
+    // The desktop report is authoritative; do not mix in phone estimates.
+    return overall.sr == null
+        ? tr('Not enough data')
+        : tr('{p} success', {
+            'p': srWithRange(overall.sr!, overall.srCiLow, overall.srCiHigh),
+          });
   }
-  return tr('Not enough chats to compare models yet');
+  if (daily.successRate != null) {
+    return tr('{p} success', {'p': pct(daily.successRate!, digits: 0)});
+  }
+  return tr('Not enough data');
 }
 
 /// M05B — Efficiency: outcomes, reliability, process health and per-tool view.
@@ -253,6 +273,8 @@ class LiveEfficiencyScreen extends StatefulWidget {
 class _LiveEfficiencyScreenState extends State<LiveEfficiencyScreen> {
   late final Stream<List<DailyDoc>> _daily = widget.args.daily();
   late final Stream<EfficiencyDoc?> _doc =
+      widget.args.repository.watchEfficiency(uid: widget.args.uid);
+  late final Stream<EfficiencyDoc?> _summary =
       widget.args.repository.watchEfficiency(uid: widget.args.uid);
 
   @override
@@ -271,12 +293,20 @@ class _LiveEfficiencyScreenState extends State<LiveEfficiencyScreen> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _Outcome(month: month, prior: prior),
+                StreamBuilder<EfficiencyDoc?>(
+                  stream: _summary,
+                  builder: (context, snap) => _Outcome(
+                      month: month,
+                      prior: prior,
+                      overall: snap.data?.overall,
+                      undetermined: snap.data?.undeterminedTasks),
+                ),
                 const SizedBox(height: 16),
                 _OutcomeMix(docs: month),
                 const SizedBox(height: 28),
                 UtSectionLabel(tr('Weekly trend'),
-                    trailing: Text(tr('Success rate'), style: UtText.caption)),
+                    trailing: Text(tr('Success rate · verified chats'),
+                        style: UtText.caption)),
                 _WeeklyTrend(all: all, now: now),
                 const SizedBox(height: 28),
                 UtSectionLabel(tr('Reliability')),
@@ -298,13 +328,19 @@ class _LiveEfficiencyScreenState extends State<LiveEfficiencyScreen> {
             }
             final overall =
                 doc.processMetrics.where((m) => m.provider == null).toList();
-            final best = bestSetup(doc.setups, null);
+            final picks = [
+              for (final g in const ['small', 'medium', 'large'])
+                ...bestPicksPerTool(doc.setups, group: g)
+            ];
+            final best = picks.length == 1 ? picks.single : null;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 UtSectionLabel(tr('Process health'),
                     trailing: Text(
-                        '${overall.where((m) => m.label == 'review').length} to review',
+                        tr('{n} to review', {
+                          'n': overall.where((m) => m.label == 'review').length
+                        }),
                         style: UtText.caption)),
                 if (overall.isEmpty)
                   UtCard(
@@ -329,15 +365,21 @@ class _LiveEfficiencyScreenState extends State<LiveEfficiencyScreen> {
                   child: UtRow(
                     title: tr('Compare models'),
                     subtitle: best != null
-                        ? tr('{g} tasks: {m} gives most success per dollar',
-                            {'g': groupLabel(best.taskGroup), 'm': best.name})
-                        : _earlyLeader(doc.setups),
+                        ? tr('{g} tasks: {m} · {v}', {
+                            'g': groupLabel(best.taskGroup),
+                            'm': best.name,
+                            'v': verdictLabel(best.verdict)
+                          })
+                        : picks.isEmpty
+                            ? tr('No setup has a clear verdict yet')
+                            : tr('{n} setups have a clear verdict',
+                                {'n': picks.length}),
                     onTap: () => context.push('/model-comparison'),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                    '${tr('A chat counts as successful when it ends with a verified or likely successful result.')} '
+                    '${tr('Success rate counts only chats with evidence: a passing test or build, or a failed or aborted turn. "Incl. likely" also counts likely results.')} '
                     '${tr('Report {from} – {to}', {
                           'from': doc.periodStart,
                           'to': doc.periodEnd
@@ -366,63 +408,138 @@ class _LiveEfficiencyScreenState extends State<LiveEfficiencyScreen> {
 }
 
 class _Outcome extends StatelessWidget {
-  const _Outcome({required this.month, required this.prior});
+  const _Outcome({
+    required this.month,
+    required this.prior,
+    this.overall,
+    this.undetermined,
+  });
   final List<DailyDoc> month, prior;
 
-  static double? _cps(List<DailyDoc> docs) {
+  /// Desktop summary for the same 30 days; null for older desktop builds.
+  final OutcomeSummary? overall;
+  final int? undetermined;
+
+  /// Cost per verified success from daily totals (same rule as the desktop).
+  static double? _cpst(List<DailyDoc> docs) {
     final t = sumTotals(docs);
     final o = sumOutcomes(docs);
-    return o.success == 0 || !t.costKnown ? null : t.cost / 1e6 / o.success;
+    return o.verifiedSuccess == 0 || !t.costKnown
+        ? null
+        : t.cost / 1e6 / o.verifiedSuccess;
   }
+
+  static String _money(int? micro) =>
+      micro == null ? '—' : usdSmart(micro / 1e6);
 
   @override
   Widget build(BuildContext context) {
     final o = sumOutcomes(month);
-    final t = sumTotals(month);
-    final cps = _cps(month), before = _cps(prior);
-    final change = cps == null || before == null || before == 0
+    final s = overall;
+    // With a desktop summary every number below comes from it; daily totals
+    // are only a fallback for older desktop builds. The trend is always
+    // estimated from daily totals because the report has no prior period.
+    final cpst = s != null
+        ? (s.cpstMicro == null ? null : s.cpstMicro! / 1e6)
+        : _cpst(month);
+    final before = _cpst(prior), now = _cpst(month);
+    final change = now == null || before == null || before == 0
         ? null
-        : (cps - before) / before;
-    final tokensPerSuccess = o.success == 0 ? null : t.tokens ~/ o.success;
-    final all = o.decided + o.undetermined;
+        : (now - before) / before;
+    final sr = s != null ? s.sr : o.successRate;
+    final srAlt = s != null ? s.srAlt : o.successRateInclLikely;
+    final verified = s != null ? s.verified : o.verified;
+    final undecided = undetermined ?? o.undetermined;
     return UtCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(tr('Outcome'), style: UtText.label),
           const SizedBox(height: 10),
-          Text(usd(cps), style: UtText.code),
+          Text(usd(cpst), style: UtText.code),
           const SizedBox(height: 6),
-          Row(children: [
-            Expanded(
-                child: Text(tr('Cost per successful task'),
-                    style: UtText.caption)),
-            if (change != null)
-              Text(
-                  '${change <= 0 ? '−' : '+'}${pct(change.abs(), digits: 0)} ${tr('vs last month')}',
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  tr('Cost per successful task'),
+                  style: UtText.caption,
+                ),
+              ),
+              if (change != null)
+                Text(
+                  '${change <= 0 ? '−' : '+'}${pct(change.abs(), digits: 0)} ${tr(s == null ? 'vs previous 30 days' : 'vs previous 30 days (daily totals)')}',
                   style: UtText.caption.copyWith(
-                      color: change <= 0 ? UtColors.green : UtColors.orange)),
-          ]),
+                    color: change <= 0 ? UtColors.green : UtColors.orange,
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 20),
           const UtDivider(),
           const SizedBox(height: 16),
-          Row(children: [
-            Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: MiniStat(
-                    value: o.successRate == null
-                        ? '—'
-                        : pct(o.successRate!, digits: 0),
-                    label: tr('Success rate'))),
-            Expanded(
+                  value: sr == null ? '—' : pct(sr, digits: 0),
+                  label: tr('Success rate'),
+                ),
+              ),
+              Expanded(
                 child: MiniStat(
-                    value: tokensPerSuccess == null
-                        ? '—'
-                        : compact(tokensPerSuccess),
-                    label: tr('Tokens / success'))),
-            Expanded(
+                  value: srAlt == null ? '—' : pct(srAlt, digits: 0),
+                  label: tr('Incl. likely'),
+                ),
+              ),
+              Expanded(
+                child: MiniStat(value: '$undecided', label: tr('Undetermined')),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
                 child: MiniStat(
-                    value: all == 0 ? '—' : '$all', label: tr('Chats judged'))),
-          ]),
+                  value: _money(s?.costP50Micro),
+                  label: tr('Cost / task P50'),
+                ),
+              ),
+              Expanded(
+                child: MiniStat(
+                  value: _money(s?.costP90Micro),
+                  label: tr('Cost / task P90'),
+                ),
+              ),
+              Expanded(
+                child: MiniStat(
+                  value: s?.redoRate == null
+                      ? '—'
+                      : pct(s!.redoRate!, digits: 0),
+                  label: tr('Redo rate'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            [
+              if (sr == null)
+                tr('Not enough data: no chat has verified evidence yet.')
+              else if (s?.srCiLow != null && s?.srCiHigh != null)
+                tr('95% range {lo}–{hi} · {n} verified chats', {
+                  'lo': pct(s!.srCiLow!, digits: 0),
+                  'hi': pct(s.srCiHigh!, digits: 0),
+                  'n': verified,
+                })
+              else
+                tr('{n} verified chats', {'n': verified}),
+              if (s?.unstable ?? false)
+                tr('Unstable: results swing a lot week to week.'),
+            ].join(' · '),
+            style: UtText.caption,
+          ),
         ],
       ),
     );
@@ -446,11 +563,11 @@ class _OutcomeMix extends StatelessWidget {
         UtColors.green.withValues(alpha: 0.5)
       ),
       (
-        'Failed',
+        tr('Failed'),
         sum('verified_failure') + sum('likely_failure'),
         red,
       ),
-      ('Undetermined', sum('undetermined'), UtColors.muted),
+      (tr('Undetermined'), sum('undetermined'), UtColors.muted),
     ];
     final total = parts.fold<int>(0, (a, p) => a + p.$2);
     return UtCard(
@@ -493,9 +610,11 @@ class _OutcomeMix extends StatelessWidget {
   }
 }
 
-/// Success rate for each of the last four weeks, oldest first.
+/// Main success rate for each of the last four weeks, oldest first. A week
+/// needs at least [minVerified] verified chats, like the desktop report.
 class _WeeklyTrend extends StatelessWidget {
   const _WeeklyTrend({required this.all, required this.now});
+  static const minVerified = 5;
   final List<DailyDoc> all;
   final DateTime now;
 
@@ -507,44 +626,58 @@ class _WeeklyTrend extends StatelessWidget {
           sumOutcomes(filterLastDays(all, 7, now, offsetDays: w * 7)),
           sumTotals(filterLastDays(all, 7, now, offsetDays: w * 7)),
           w,
-        )
+        ),
     ];
-    final any = weeks.any((w) => w.$1.successRate != null);
+    double? rate(Outcomes o) =>
+        o.verified < _WeeklyTrend.minVerified ? null : o.successRate;
+    final any = weeks.any((w) => rate(w.$1) != null);
     return UtCard(
       child: !any
           ? Text(tr('Not enough judged chats yet.'), style: UtText.body)
-          : Column(children: [
-              BarChart(
+          : Column(
+              children: [
+                BarChart(
                   height: 80,
                   color: UtColors.green,
                   highlightLast: false,
-                  values: [for (final w in weeks) w.$1.successRate ?? 0]),
-              const SizedBox(height: 10),
-              Row(children: [
-                for (final w in weeks)
-                  Expanded(
-                    child: Column(children: [
-                      Text(
-                          w.$1.successRate == null
-                              ? '—'
-                              : pct(w.$1.successRate!, digits: 0),
-                          style: UtText.bodyStrong),
-                      Text(
-                          w.$3 == 0
-                              ? tr('This week')
-                              : tr('{n}w ago', {'n': w.$3}),
-                          style: UtText.caption),
-                      Text(
-                          w.$1.success == 0 || !w.$2.costKnown
-                              ? '—'
-                              : tr('{amount}/win', {
-                                  'amount': usd(w.$2.cost / 1e6 / w.$1.success)
-                                }),
-                          style: UtText.caption),
-                    ]),
-                  ),
-              ]),
-            ]),
+                  values: [for (final w in weeks) rate(w.$1) ?? 0],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    for (final w in weeks)
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              rate(w.$1) == null
+                                  ? '—'
+                                  : pct(rate(w.$1)!, digits: 0),
+                              style: UtText.bodyStrong,
+                            ),
+                            Text(
+                              w.$3 == 0
+                                  ? tr('This week')
+                                  : tr('{n}w ago', {'n': w.$3}),
+                              style: UtText.caption,
+                            ),
+                            Text(
+                              w.$1.verifiedSuccess == 0 || !w.$2.costKnown
+                                  ? '—'
+                                  : tr('{amount}/win', {
+                                      'amount': usd(
+                                        w.$2.cost / 1e6 / w.$1.verifiedSuccess,
+                                      ),
+                                    }),
+                              style: UtText.caption,
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
     );
   }
 }
@@ -680,17 +813,21 @@ class _ToolTable extends StatelessWidget {
     }
     final rows = byTool.entries.map((e) {
       final tasks = e.value.fold<int>(0, (a, s) => a + s.tasks);
+      // SR is verified successes ÷ verified chats across the tool's setups,
+      // so weight by verified chats (all chats when a report lacks
+      // n_verified); CPST = total cost ÷ total successes.
+      double w(SetupMetric s) => (s.verified > 0 ? s.verified : s.tasks) * 1.0;
       final judged = e.value.where((s) => s.sr != null).toList();
-      final judgedTasks = judged.fold<int>(0, (a, s) => a + s.tasks);
-      final sr = judgedTasks == 0
+      final weight = judged.fold<double>(0, (a, s) => a + w(s));
+      final sr = weight == 0
           ? null
-          : judged.fold<double>(0, (a, s) => a + s.sr! * s.tasks) / judgedTasks;
-      final priced = e.value.where((s) => s.cpstMicro != null).toList();
-      final pricedTasks = priced.fold<int>(0, (a, s) => a + s.tasks);
-      final cps = pricedTasks == 0
+          : judged.fold<double>(0, (a, s) => a + s.sr! * w(s)) / weight;
+      final priced = judged.where((s) => s.cpstMicro != null).toList();
+      final wins = priced.fold<double>(0, (a, s) => a + s.sr! * w(s));
+      final cps = wins == 0
           ? null
-          : priced.fold<double>(0, (a, s) => a + s.cpstMicro! * s.tasks) /
-              pricedTasks /
+          : priced.fold<double>(0, (a, s) => a + s.cpstMicro! * s.sr! * w(s)) /
+              wins /
               1e6;
       return (e.key, tasks, sr, cps, e.value.map((s) => s.model).toSet());
     }).toList()
@@ -702,8 +839,15 @@ class _ToolTable extends StatelessWidget {
           UtRow(
             leading: ProviderBadge(r.$1),
             title: providerName(r.$1),
-            subtitle:
-                '${r.$2} chats · ${r.$5.length} model${r.$5.length == 1 ? '' : 's'} · ${r.$4 == null ? '—' : usd(r.$4)} / success',
+            subtitle: tr(
+                r.$5.length == 1
+                    ? '{n} chats · 1 model · {amount} / success'
+                    : '{n} chats · {m} models · {amount} / success',
+                {
+              'n': r.$2,
+              'm': r.$5.length,
+              'amount': r.$4 == null ? '—' : usd(r.$4)
+            }),
             trailing: UtValue(r.$3 == null ? '—' : pct(r.$3!, digits: 0),
                 color: r.$3 == null ? UtColors.muted : UtColors.green),
           ),
@@ -719,70 +863,80 @@ String groupLabel(String g) => switch (g) {
       _ => g,
     };
 
-/// Highest success-per-dollar setup with a real verdict, optionally per group.
-SetupMetric? bestSetup(List<SetupMetric> setups, String? group) {
-  final ranked = rankSetups(setups, group);
-  return ranked.isEmpty ? null : ranked.first.$1;
+/// "Best pick" (FR-ANLY-003 M05C): only a setup whose verdict is "Better" or
+/// "Cheaper, not worse". "Better" wins, then the lower cost per success.
+SetupMetric? bestPick(
+  Iterable<SetupMetric> setups, {
+  String? group,
+  String? provider,
+}) {
+  final picks =
+      setups
+          .where(
+            (s) =>
+                s.isBestPick &&
+                (group == null || s.taskGroup == group) &&
+                (provider == null || s.provider == provider),
+          )
+          .toList()
+        ..sort((a, b) {
+          final v = (a.verdict == 'better' ? 0 : 1).compareTo(
+            b.verdict == 'better' ? 0 : 1,
+          );
+          if (v != 0) return v;
+          return (a.cpstMicro ?? 1 << 52).compareTo(b.cpstMicro ?? 1 << 52);
+        });
+  return picks.isEmpty ? null : picks.first;
 }
 
-/// Ranked (setup, efficiency index) pairs; insufficient setups are excluded.
-List<(SetupMetric, double)> rankSetups(
-    List<SetupMetric> setups, String? group) {
-  final usable = setups
-      .where((s) =>
-          (group == null || s.taskGroup == group) &&
-          s.verdict != 'insufficient' &&
-          s.sr != null &&
-          s.cpstMicro != null &&
-          s.cpstMicro! > 0)
-      .toList();
-  if (usable.isEmpty) return [];
-  final avg =
-      usable.fold<int>(0, (sum, s) => sum + s.cpstMicro!) / usable.length;
-  final ranked = [
-    for (final s in usable) (s, s.sr! / (s.cpstMicro! / avg)),
-  ]..sort((a, b) => b.$2.compareTo(a.$2));
-  return ranked;
+/// One best pick per tool: verdicts only compare setups of the same tool and
+/// task size (FR-ANLY-003 §D step 0), so picks from different tools were never
+/// compared with each other and are shown side by side.
+List<SetupMetric> bestPicksPerTool(Iterable<SetupMetric> setups,
+    {String? group}) {
+  final tools = setups.map((s) => s.provider).toSet().toList()..sort();
+  return [
+    for (final t in tools)
+      if (bestPick(setups, group: group, provider: t) case final pick?) pick
+  ];
 }
 
-/// Setups with enough data to rank. When none has a verdict yet, falls back
-/// to early results (≥ 5 chats) so the screen is still useful.
-(List<(SetupMetric, double)>, bool early) rankForDisplay(
-    List<SetupMetric> setups, String group) {
-  final ranked = rankSetups(setups, group);
-  if (ranked.isNotEmpty) return (ranked, false);
-  final usable = setups
-      .where((s) =>
-          s.taskGroup == group &&
-          s.tasks >= 5 &&
-          s.sr != null &&
-          s.cpstMicro != null &&
-          s.cpstMicro! > 0)
-      .toList();
-  if (usable.isEmpty) return (const [], true);
-  final avg =
-      usable.fold<int>(0, (sum, s) => sum + s.cpstMicro!) / usable.length;
-  return (
-    [for (final s in usable) (s, s.sr! / (s.cpstMicro! / avg))]
-      ..sort((a, b) => b.$2.compareTo(a.$2)),
-    true
-  );
-}
+/// Display order for setups with a verdict. This groups setups by verdict; it
+/// is not a ranking (the SRS removed the efficiency index).
+const _verdictOrder = [
+  'better',
+  'cheaper_not_worse',
+  'no_clear_difference',
+  'tradeoff',
+  'worse',
+];
 
 /// Why a setup has no verdict yet, in plain words.
 String pendingReason(SetupMetric s) {
   if (s.tasks < 20) {
-    final more = 20 - s.tasks;
-    return '$more more chat${more == 1 ? '' : 's'} needed for a verdict';
+    return tr('Not enough data · {n}/20', {'n': s.tasks});
   }
   if (s.mde != null && s.mde! > 0.2) {
-    return tr(
-        'Results still vary too much (±{p})', {'p': pct(s.mde!, digits: 0)});
+    return tr('Results still vary too much (±{p})', {
+      'p': pct(s.mde!, digits: 0),
+    });
   }
   return tr('Needs another setup with 20+ chats to compare against');
 }
 
-/// M05C — Compare models by task size.
+UtTone verdictTone(String verdict) => switch (verdict) {
+  'better' || 'cheaper_not_worse' => UtTone.good,
+  'worse' => UtTone.review,
+  _ => UtTone.neutral,
+};
+
+String? confidenceLabel(String? c) => switch (c) {
+  'high' => tr('High certainty'),
+  'medium' => tr('Medium certainty'),
+  _ => null,
+};
+
+/// M05C — Compare setups by source and task size, with verdicts instead of a ranking.
 class LiveModelComparisonScreen extends StatefulWidget {
   const LiveModelComparisonScreen({super.key, required this.args});
   final LiveArgs args;
@@ -794,49 +948,76 @@ class LiveModelComparisonScreen extends StatefulWidget {
 
 class _LiveModelComparisonScreenState extends State<LiveModelComparisonScreen> {
   String? _group;
-  late final Stream<EfficiencyDoc?> _doc =
-      widget.args.repository.watchEfficiency(uid: widget.args.uid);
+
+  /// Selected source (collector id); null = every source.
+  String? _provider;
+  late final Stream<EfficiencyDoc?> _doc = widget.args.repository
+      .watchEfficiency(uid: widget.args.uid);
 
   static const _groups = ['small', 'medium', 'large'];
   static const _hints = {
-    'small': '1 turn · 1 file',
-    'medium': '2–15 turns · 2–5 files',
-    'large': '15+ turns · 6+ files',
+    // Same split as the desktop TaskBuilder (model requests per task).
+    'small': 'Up to 10 model requests',
+    'medium': '11–40 model requests',
+    'large': 'Over 40 model requests',
   };
 
   @override
   Widget build(BuildContext context) {
     return UtPage(
       title: tr('Compare models'),
-      subtitle: tr('Which model gives the most success per dollar.'),
+      subtitle: tr(
+        'Success and cost per success, with a verdict when the data is strong enough.',
+      ),
       onBack: () => liveBack(context, '/efficiency'),
       children: [
         UtStream<EfficiencyDoc?>(
           stream: _doc,
           builder: (context, doc) {
-            final all = doc?.setups ?? const <SetupMetric>[];
+            final everything = doc?.setups ?? const <SetupMetric>[];
+            final sources = everything.map((s) => s.provider).toSet().toList()
+              ..sort();
+            final provider = sources.contains(_provider) ? _provider : null;
+            final all = everything
+                .where((s) => provider == null || s.provider == provider)
+                .toList();
             int count(String g) => all
                 .where((s) => s.taskGroup == g)
                 .fold(0, (a, s) => a + s.tasks);
             // Open on the task size with the most chats.
-            final group = _group ??
+            final group =
+                _group ??
                 (all.isEmpty
                     ? 'medium'
                     : (_groups.toList()
-                          ..sort((a, b) => count(b).compareTo(count(a))))
-                        .first);
+                            ..sort((a, b) => count(b).compareTo(count(a))))
+                          .first);
             final setups = all.where((s) => s.taskGroup == group).toList();
-            final (ranked, early) = rankForDisplay(all, group);
-            final shown = {for (final r in ranked) r.$1};
-            final pending = setups.where((s) => !shown.contains(s)).toList()
-              ..sort((a, b) => b.tasks.compareTo(a.tasks));
-            final avg = ranked.isEmpty
-                ? 0.0
-                : ranked.fold<int>(0, (a, r) => a + r.$1.cpstMicro!) /
-                    ranked.length;
+            final decided =
+                setups.where((s) => _verdictOrder.contains(s.verdict)).toList()
+                  ..sort((a, b) {
+                    final v = _verdictOrder
+                        .indexOf(a.verdict)
+                        .compareTo(_verdictOrder.indexOf(b.verdict));
+                    return v != 0 ? v : b.tasks.compareTo(a.tasks);
+                  });
+            final pending =
+                setups.where((s) => !_verdictOrder.contains(s.verdict)).toList()
+                  ..sort((a, b) => b.tasks.compareTo(a.tasks));
+            final picks = bestPicksPerTool(setups);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (sources.length > 1) ...[
+                  UtSegmented<String>(
+                    values: ['', ...sources],
+                    selected: provider ?? '',
+                    label: (p) => p.isEmpty ? tr('All tools') : providerName(p),
+                    onChanged: (p) =>
+                        setState(() => _provider = p.isEmpty ? null : p),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 UtSegmented<String>(
                   values: _groups,
                   selected: group,
@@ -844,58 +1025,61 @@ class _LiveModelComparisonScreenState extends State<LiveModelComparisonScreen> {
                   onChanged: (g) => setState(() => _group = g),
                 ),
                 const SizedBox(height: 8),
-                Text('${_hints[group]!} · ${tr('number = chats')}',
-                    style: UtText.caption),
+                Text(
+                  '${tr(_hints[group]!)} · ${tr('number = chats')}',
+                  style: UtText.caption,
+                ),
                 const SizedBox(height: 20),
                 if (setups.isEmpty)
                   UtMessage(
-                      icon: Icons.compare_arrows_rounded,
-                      title: tr('Nothing to compare yet'),
-                      message: tr(
-                          'No chats of this size were recorded in the latest efficiency report.'))
+                    icon: Icons.compare_arrows_rounded,
+                    title: tr('Nothing to compare yet'),
+                    message: tr(
+                      'No chats of this size were recorded in the latest efficiency report.',
+                    ),
+                  )
                 else ...[
-                  if (ranked.isNotEmpty)
+                  for (var i = 0; i < picks.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 12),
                     _BestCard(
-                        setup: ranked.first.$1,
+                        setup: picks[i],
                         group: group,
-                        avg: avg,
-                        early: early),
-                  if (early && ranked.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    const _EarlyNote(),
+                        perTool: picks.length > 1),
                   ],
-                  if (ranked.isNotEmpty) ...[
-                    const SizedBox(height: 28),
-                    UtSectionLabel(early ? tr('Early ranking') : 'Ranking',
-                        trailing: Text(tr('Efficiency index'),
-                            style: UtText.caption)),
+                  if (decided.isNotEmpty) ...[
+                    if (picks.isNotEmpty) const SizedBox(height: 28),
+                    UtSectionLabel(tr('Verdicts')),
                     UtCard(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: UtRowGroup(children: [
-                        for (var i = 0; i < ranked.length; i++)
-                          _SetupRow(
-                              rank: i + 1,
-                              setup: ranked[i].$1,
-                              index: ranked[i].$2,
-                              best: i == 0 && !early),
-                      ]),
+                      child: UtRowGroup(
+                        children: [
+                          for (final s in decided)
+                            _SetupRow(setup: s, best: picks.contains(s)),
+                        ],
+                      ),
                     ),
                   ],
                   if (pending.isNotEmpty) ...[
-                    const SizedBox(height: 28),
+                    if (picks.isNotEmpty || decided.isNotEmpty)
+                      const SizedBox(height: 28),
                     UtSectionLabel(tr('Collecting data')),
                     UtCard(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: UtRowGroup(children: [
-                        for (final s in pending) _PendingRow(setup: s),
-                      ]),
+                      child: UtRowGroup(
+                        children: [
+                          for (final s in pending) _PendingRow(setup: s),
+                        ],
+                      ),
                     ),
                   ],
                 ],
                 const SizedBox(height: 16),
                 Text(
-                    tr('Efficiency index = success rate ÷ (cost per success ÷ average). Above 1 is better than average. A verdict needs 20+ chats per setup and results precise to ±20%.'),
-                    style: UtText.caption),
+                  tr(
+                    'Each setup is compared with the busiest setup of the same tool and task size. A verdict needs 20+ chats per setup and results precise to ±20 points; until then the setup shows its progress and is not ranked.',
+                  ),
+                  style: UtText.caption,
+                ),
               ],
             );
           },
@@ -903,24 +1087,6 @@ class _LiveModelComparisonScreenState extends State<LiveModelComparisonScreen> {
       ],
     );
   }
-}
-
-class _EarlyNote extends StatelessWidget {
-  const _EarlyNote();
-  @override
-  Widget build(BuildContext context) => UtCard(
-        padding: const EdgeInsets.all(14),
-        child: Row(children: [
-          const Icon(Icons.info_outline_rounded,
-              size: 18, color: UtColors.orange),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-                tr('Early results: no setup has enough chats for a confident verdict yet, so treat this ranking as a hint.'),
-                style: UtText.caption.copyWith(color: UtColors.text)),
-          ),
-        ]),
-      );
 }
 
 /// Success-rate bar with its 95% range shaded behind it.
@@ -932,87 +1098,126 @@ class _SuccessBar extends StatelessWidget {
     final sr = (setup.sr ?? 0).clamp(0.0, 1.0);
     final lo = (setup.srCiLow ?? sr).clamp(0.0, 1.0);
     final hi = (setup.srCiHigh ?? sr).clamp(0.0, 1.0);
-    return LayoutBuilder(builder: (context, c) {
-      final w = c.maxWidth;
-      return SizedBox(
-        height: 6,
-        child: Stack(children: [
-          Container(
-              decoration: BoxDecoration(
-                  color: UtColors.chip,
-                  borderRadius: BorderRadius.circular(3))),
-          Positioned(
-            left: lo * w,
-            width: ((hi - lo) * w).clamp(0, w),
-            top: 0,
-            bottom: 0,
-            child: Container(
+    return LayoutBuilder(
+      builder: (context, c) {
+        final w = c.maxWidth;
+        return SizedBox(
+          height: 6,
+          child: Stack(
+            children: [
+              Container(
                 decoration: BoxDecoration(
-                    color:
-                        providerColorOf(setup.provider).withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(3))),
-          ),
-          Container(
-              width: sr * w,
-              decoration: BoxDecoration(
+                  color: UtColors.chip,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              Positioned(
+                left: lo * w,
+                width: ((hi - lo) * w).clamp(0, w),
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: providerColorOf(setup.provider)
+                        .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              Container(
+                width: sr * w,
+                decoration: BoxDecoration(
                   color: providerColorOf(setup.provider),
-                  borderRadius: BorderRadius.circular(3))),
-        ]),
-      );
-    });
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
-String _srText(SetupMetric s) {
-  if (s.sr == null) return '—';
-  final range = s.srCiLow != null && s.srCiHigh != null
-      ? ' (${pct(s.srCiLow!, digits: 0)}–${pct(s.srCiHigh!, digits: 0)})'
+String _srText(SetupMetric s) => s.sr == null
+    ? '—'
+    : tr('{p} success', {'p': srWithRange(s.sr!, s.srCiLow, s.srCiHigh)});
+
+/// "$0.18 / success" with its bootstrap range when the desktop computed one.
+String _cpstText(SetupMetric s) {
+  if (s.cpstMicro == null) return tr('{amount} / success', {'amount': '—'});
+  final range = s.cpstCiLowMicro != null && s.cpstCiHighMicro != null
+      ? ' (${usdSmart(s.cpstCiLowMicro! / 1e6)}–${usdSmart(s.cpstCiHighMicro! / 1e6)})'
       : '';
-  return '${tr('{p} success', {'p': pct(s.sr!, digits: 0)})}$range';
+  return tr('{amount} / success', {
+    'amount': '${usdSmart(s.cpstMicro! / 1e6)}$range',
+  });
 }
 
 class _SetupRow extends StatelessWidget {
-  const _SetupRow(
-      {required this.rank,
-      required this.setup,
-      required this.index,
-      required this.best});
-  final int rank;
+  const _SetupRow({required this.setup, required this.best});
   final SetupMetric setup;
-  final double index;
   final bool best;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(children: [
-              SizedBox(width: 18, child: Text('$rank', style: UtText.caption)),
+  Widget build(BuildContext context) {
+    final certainty = confidenceLabel(setup.confidence);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
               ProviderBadge(setup.provider, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                  child: Text(setup.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: UtText.bodyStrong)),
+                child: Text(
+                  setup.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: UtText.bodyStrong,
+                ),
+              ),
               if (best) ...[
-                UtPill(tr('Best'), tone: UtTone.good),
-                const SizedBox(width: 8),
+                UtPill(tr('Best pick'), tone: UtTone.good),
+                const SizedBox(width: 6),
               ],
-              UtValue(index.toStringAsFixed(2),
-                  color: index >= 1 ? UtColors.green : UtColors.text),
-            ]),
-            const SizedBox(height: 10),
-            _SuccessBar(setup: setup),
-            const SizedBox(height: 8),
-            Text(
-                '${_srText(setup)} · ${usd(setup.cpstMicro! / 1e6)} / success · ${setup.tasks} chats'
-                '${setup.verdict == 'insufficient' ? '' : ' · ${verdictLabel(setup.verdict)}'}',
-                style: UtText.caption),
-          ],
-        ),
-      );
+              UtPill(
+                verdictLabel(setup.verdict),
+                tone: verdictTone(setup.verdict),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _SuccessBar(setup: setup),
+          const SizedBox(height: 8),
+          Text(
+            [
+              _srText(setup),
+              _cpstText(setup),
+              tr('{n} chats', {'n': setup.tasks}),
+            ].join(' · '),
+            style: UtText.caption,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            [
+              if (setup.comparedTo != null)
+                tr('vs {m}', {'m': setup.comparedTo}),
+              if (certainty != null) certainty,
+              if (setup.mde != null)
+                tr('MDE ±{p}', {'p': pct(setup.mde!, digits: 0)}),
+              if (setup.unstable) tr('Unstable'),
+              if (setup.crossTool) tr('Tool + model comparison'),
+            ].join(' · '),
+            style: UtText.caption.copyWith(
+              color: setup.unstable ? UtColors.orange : UtColors.muted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _PendingRow extends StatelessWidget {
@@ -1021,105 +1226,128 @@ class _PendingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    padding: const EdgeInsets.symmetric(vertical: 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
           children: [
-            Row(children: [
-              ProviderBadge(setup.provider, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Text(setup.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: UtText.bodyStrong)),
-              Text(tr('{n} chats', {'n': setup.tasks}), style: UtText.caption),
-            ]),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                minHeight: 4,
-                value: (setup.tasks / 20).clamp(0, 1),
-                backgroundColor: UtColors.chip,
-                color: UtColors.muted,
+            ProviderBadge(setup.provider, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                setup.name,
+                overflow: TextOverflow.ellipsis,
+                style: UtText.bodyStrong,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-                [
-                  pendingReason(setup),
-                  if (setup.sr != null) _srText(setup),
-                ].join(' · '),
-                style: UtText.caption),
+            Text(tr('{n} chats', {'n': setup.tasks}), style: UtText.caption),
           ],
         ),
-      );
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: LinearProgressIndicator(
+            minHeight: 4,
+            value: (setup.tasks / 20).clamp(0, 1),
+            backgroundColor: UtColors.chip,
+            color: UtColors.muted,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(pendingReason(setup), style: UtText.caption),
+      ],
+    ),
+  );
 }
 
 class _BestCard extends StatelessWidget {
   const _BestCard(
-      {required this.setup,
-      required this.group,
-      required this.avg,
-      this.early = false});
+      {required this.setup, required this.group, this.perTool = false});
   final SetupMetric setup;
   final String group;
-  final double avg;
-  final bool early;
+
+  /// Several tools each have a pick; say the pick is within its own tool.
+  final bool perTool;
 
   @override
   Widget build(BuildContext context) {
-    final cheaper = avg == 0 ? null : 1 - setup.cpstMicro! / avg;
+    final certainty = confidenceLabel(setup.confidence);
     return UtCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-              early
-                  ? tr('LEADING SO FAR · {g} TASKS',
-                      {'g': groupLabel(group).toUpperCase()})
-                  : tr('BEST FOR {g} TASKS',
-                      {'g': groupLabel(group).toUpperCase()}),
-              style: UtText.label
-                  .copyWith(color: early ? UtColors.orange : UtColors.green)),
+            perTool
+                ? tr('BEST PICK IN {tool} · {g} TASKS', {
+                    'tool': providerName(setup.provider).toUpperCase(),
+                    'g': groupLabel(group).toUpperCase()
+                  })
+                : tr('BEST PICK · {g} TASKS',
+                    {'g': groupLabel(group).toUpperCase()}),
+            style: UtText.label.copyWith(color: UtColors.green),
+          ),
           const SizedBox(height: 8),
-          Row(children: [
-            ProviderBadge(setup.provider),
-            const SizedBox(width: 10),
-            Expanded(child: Text(setup.name, style: UtText.title)),
-          ]),
+          Row(
+            children: [
+              ProviderBadge(setup.provider),
+              const SizedBox(width: 10),
+              Expanded(child: Text(setup.name, style: UtText.title)),
+            ],
+          ),
           const SizedBox(height: 4),
           Text(
-              tr('{tool} · {n} chats · {v} verified', {
-                'tool': providerName(setup.provider),
-                'n': setup.tasks,
-                'v': setup.verified
-              }),
-              style: UtText.caption),
+            tr('{tool} · {n} chats · {v} verified', {
+              'tool': providerName(setup.provider),
+              'n': setup.tasks,
+              'v': setup.verified,
+            }),
+            style: UtText.caption,
+          ),
           const SizedBox(height: 18),
-          Row(children: [
-            Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: MiniStat(
-                    value: pct(setup.sr!, digits: 0),
-                    label: tr('Success rate'))),
-            Expanded(
+                  value: setup.sr == null ? '—' : pct(setup.sr!, digits: 0),
+                  label: tr('Success rate'),
+                ),
+              ),
+              Expanded(
                 child: MiniStat(
-                    value: usd(setup.cpstMicro! / 1e6),
-                    label: tr('Cost per success'))),
-            Expanded(
+                  value: setup.cpstMicro == null
+                      ? '—'
+                      : usdSmart(setup.cpstMicro! / 1e6),
+                  label: tr('Cost per success'),
+                ),
+              ),
+              Expanded(
                 child: MiniStat(
-                    value: cheaper == null || cheaper <= 0
-                        ? '—'
-                        : pct(cheaper, digits: 0),
-                    label: tr('Cheaper than avg'))),
-          ]),
-          if (setup.redoRate != null) ...[
-            const SizedBox(height: 12),
-            Text(
-                tr('Redo rate {p} · chats retried within 2 min',
-                    {'p': pct(setup.redoRate!, digits: 0)}),
-                style: UtText.caption),
-          ],
+                  value: verdictLabel(setup.verdict),
+                  label: setup.comparedTo == null
+                      ? tr('Verdict')
+                      : tr('vs {m}', {'m': setup.comparedTo}),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            [
+              if (setup.srCiLow != null && setup.srCiHigh != null)
+                tr('95% range {lo}–{hi}', {
+                  'lo': pct(setup.srCiLow!, digits: 0),
+                  'hi': pct(setup.srCiHigh!, digits: 0),
+                }),
+              if (certainty != null) certainty,
+              if (setup.verdict == 'cheaper_not_worse' && setup.mde != null)
+                tr('MDE ±{p}', {'p': pct(setup.mde!, digits: 0)}),
+              if (setup.redoRate != null)
+                tr('Redo rate {p}', {'p': pct(setup.redoRate!, digits: 0)}),
+              if (setup.unstable) tr('Unstable'),
+            ].join(' · '),
+            style: UtText.caption,
+          ),
         ],
       ),
     );
