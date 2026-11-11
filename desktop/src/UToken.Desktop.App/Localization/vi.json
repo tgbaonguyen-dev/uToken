@@ -537,5 +537,6 @@
  "Collector running": "Bộ thu thập đang chạy",
  "Collector stopped": "Bộ thu thập đã dừng",
  "{x1} events": "{x1} sự kiện",
- "{x1} of {x2} folders readable": "Đọc được {x1}/{x2} thư mục"
+ "{x1} of {x2} folders readable": "Đọc được {x1}/{x2} thư mục",
+ "An AI model reviews your last 30 days of retained usage (metrics only, never prompts, code or project names). Use Save changes at the top to keep these settings.": "AI đánh giá tổng thể 30 ngày usage còn lưu (chỉ số tổng hợp, không có prompt, code hay tên dự án). Nhấn Lưu thay đổi ở đầu trang để giữ các thiết lập này."
 }

@@ -12,6 +12,7 @@ import '../../core/models/daily_doc.dart';
 import '../../core/models/usage_docs.dart';
 import '../../core/ui/ut_kit.dart';
 import '../ai_review/phone_judge.dart';
+import '../ai_review/review_window.dart';
 import 'analytics_screens.dart' show metricHint;
 import 'live_common.dart';
 
@@ -86,6 +87,12 @@ String _evidenceHint(String metric) {
 
 DateTime? _parseTime(String value) => DateTime.tryParse(value)?.toLocal();
 
+String _reviewTime(String value) {
+  final at = _parseTime(value);
+  if (at == null) return '—';
+  return '${shortDate(dayKey(at))}, ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}';
+}
+
 bool _isStale(InsightsDoc doc) {
   final at = _parseTime(doc.generatedAt);
   return at == null || DateTime.now().difference(at).inHours >= 24;
@@ -107,18 +114,6 @@ class LiveInsightsScreen extends StatefulWidget {
 class _LiveInsightsScreenState extends State<LiveInsightsScreen> {
   late final Stream<InsightsDoc?> _doc =
       widget.args.repository.watchInsights(uid: widget.args.uid);
-  bool _autoChecked = false;
-
-  /// Runs once a day on open when the phone has a key (FR-RECO-001).
-  void _maybeAutoRun(InsightsDoc? doc) {
-    if (_autoChecked) return;
-    _autoChecked = true;
-    final judge = PhoneJudge.instance;
-    if (!judge.hasKey || judge.running) return;
-    if (doc != null && !_isStale(doc)) return;
-    scheduleMicrotask(() => runReview(context, widget.args));
-  }
-
   @override
   Widget build(BuildContext context) {
     return UtTabPage(
@@ -132,7 +127,6 @@ class _LiveInsightsScreenState extends State<LiveInsightsScreen> {
         builder: (context, _) => UtStream<InsightsDoc?>(
           stream: _doc,
           builder: (context, doc) {
-            _maybeAutoRun(doc);
             return _InsightsBody(args: widget.args, doc: doc);
           },
         ),
@@ -147,9 +141,49 @@ Future<void> runReview(BuildContext context, LiveArgs args) async {
   final judge = PhoneJudge.instance;
   if (judge.running) return;
   if (judge.hasKey) {
+    final scope = await showModalBottomSheet<ReviewScope>(
+      context: context,
+      backgroundColor: UtColors.card,
+      showDragHandle: true,
+      builder: (sheet) => SafeArea(
+          child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(tr('Choose review period'), style: UtText.title),
+              const SizedBox(height: 8),
+              Text(
+                  tr('Review new synchronized usage since your last successful review, or the full last 30 days. First run? Choose 30 days to establish a baseline.'),
+                  style: UtText.body),
+              const SizedBox(height: 16),
+              UtButton(
+                  label: tr('Since last successful review'),
+                  actionName: 'Review new usage',
+                  onPressed: () =>
+                      Navigator.pop(sheet, ReviewScope.sinceLastReview)),
+              const SizedBox(height: 10),
+              UtButton(
+                  label: tr('Last 30 days'),
+                  actionName: 'Review 30 days',
+                  style: UtButtonStyle.secondary,
+                  onPressed: () =>
+                      Navigator.pop(sheet, ReviewScope.last30Days)),
+              const SizedBox(height: 10),
+              Text(
+                  tr('The baseline belongs to this account on this phone. Only synced usage is included; late uploads may include earlier activity.'),
+                  style: UtText.caption),
+            ]),
+      )),
+    );
+    if (scope == null || !context.mounted) return;
     HapticFeedback.mediumImpact();
     await judge.run(
-        uid: args.uid, repository: args.repository, language: aiLanguage());
+        uid: args.uid,
+        repository: args.repository,
+        language: aiLanguage(),
+        scope: scope);
     if (judge.step == JudgeStep.done) HapticFeedback.lightImpact();
     return;
   }
@@ -259,7 +293,7 @@ class _InsightsBody extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
             tr(
-                '{provider} reads 30 days of usage totals only, never your prompts or code. Every recommendation must cite a metric, and the app re-checks each number. Nothing is changed automatically.',
+                '{provider} reads synchronized usage for the selected period only, never your prompts or code. Every recommendation must cite a metric, and the app re-checks each number. Nothing is changed automatically.',
                 {
                   'provider':
                       '${aiProviderName(doc.provider)}${doc.model == null ? '' : ' (${doc.model})'}'
@@ -271,6 +305,13 @@ class _InsightsBody extends StatelessWidget {
 
   Widget? _statusBanner(InsightsDoc? doc) {
     final judge = PhoneJudge.instance;
+    if (judge.step == JudgeStep.noNewUsage) {
+      return _Banner(
+          icon: Icons.check_circle_outline,
+          color: UtColors.muted,
+          text: tr(
+              'No new synchronized usage since your last successful review. Sync desktop first if you have used more tokens.'));
+    }
     if (judge.step == JudgeStep.failed && judge.errorCode != null) {
       return _Banner(
           icon: Icons.error_outline,
@@ -370,14 +411,20 @@ class _ScoreHeader extends StatelessWidget {
                   Text(
                       doc == null
                           ? tr(
-                              'Get a score and concrete tips based on your last 30 days.')
+                              'Choose new usage since your last successful review, or a 30-day overview. Only synchronized data is available.')
                           : [
+                              tr(doc.reviewMode == 'sinceLastReview'
+                                  ? 'Since last successful review'
+                                  : 'Last 30 days'),
                               if (generated != null)
                                 tr('Updated {when}', {
                                   'when':
                                       relativeTime(generated, DateTime.now())
                                 }),
-                              if (doc.periodStart != null &&
+                              if (doc.reviewFrom != null &&
+                                  doc.reviewThrough != null)
+                                '${_reviewTime(doc.reviewFrom!)} – ${_reviewTime(doc.reviewThrough!)}'
+                              else if (doc.periodStart != null &&
                                   doc.periodEnd != null)
                                 '${shortDate(doc.periodStart!)} – ${shortDate(doc.periodEnd!)}',
                             ].join(' · '),
@@ -613,12 +660,42 @@ class _EvidenceChip extends StatelessWidget {
 // M08 — Insight detail.
 
 /// M08 — Insight detail: what to do, why it was flagged, and what it saves.
-class LiveInsightDetailScreen extends StatelessWidget {
+class LiveInsightDetailScreen extends StatefulWidget {
   const LiveInsightDetailScreen(
       {super.key, required this.args, required this.insightId});
   final LiveArgs args;
   final String insightId;
 
+  @override
+  State<LiveInsightDetailScreen> createState() =>
+      _LiveInsightDetailScreenState();
+}
+
+class _LiveInsightDetailScreenState extends State<LiveInsightDetailScreen> {
+  LiveArgs get args => widget.args;
+  String get insightId => widget.insightId;
+  late Stream<InsightsDoc?> _stream =
+      args.repository.watchInsights(uid: args.uid);
+  void _retry() =>
+      setState(() => _stream = args.repository.watchInsights(uid: args.uid));
+  @override
+  void didUpdateWidget(covariant LiveInsightDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.args.uid != args.uid ||
+        oldWidget.args.repository != args.repository) {
+      _stream = args.repository.watchInsights(uid: args.uid);
+    }
+  }
+
+  Widget _recovery(String message) => UtMessage(
+      title: tr('Insight unavailable'),
+      message: tr(message),
+      action: Column(children: [
+        UtButton(label: tr('Retry'), onPressed: _retry),
+        UtButton(
+            label: tr('Back to Insights'),
+            onPressed: () => liveBack(context, '/insights'))
+      ]));
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -642,16 +719,23 @@ class LiveInsightDetailScreen extends StatelessWidget {
             ),
           ],
           children: [
-            UtStream<InsightsDoc?>(
-              stream: args.repository.watchInsights(uid: args.uid),
-              builder: (context, doc) {
+            StreamBuilder<InsightsDoc?>(
+              stream: _stream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return _recovery(friendlyStreamError(snapshot.error!));
+                }
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final doc = snapshot.data;
                 final insight =
                     doc?.insights.where((i) => i.id == insightId).firstOrNull;
                 if (doc == null || insight == null) {
-                  return UtMessage(
-                      title: tr('Insight not found'),
-                      message: tr(
-                          'It may have been replaced by a newer AI review.'));
+                  return _recovery(doc == null
+                      ? 'No AI review available yet.'
+                      : 'This insight no longer exists in the latest review.');
                 }
                 return _InsightDetail(
                     args: args, doc: doc, insight: insight, reviewed: reviewed);

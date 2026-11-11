@@ -206,6 +206,38 @@ public sealed class CloudSyncTests : IDisposable
     public async Task Upload_requires_sign_in() =>
         await Assert.ThrowsAsync<CloudAuthException>(() => NewSync().UploadAsync([], Efficiency()));
 
+    [Fact]
+    public async Task Another_desktop_cannot_overwrite_the_bound_collector()
+    {
+        var first = NewSync();
+        await first.SignInAsync();
+        await first.UploadAsync([Daily("2026-11-07")], Efficiency());
+        var before = _server.Commits.Count;
+        var other = new FirebaseCloudSync(new HttpClient(_server), Options,
+            Path.Combine(_dir.FullName, "other", "auth.json"), new FakeGoogle(), _clock, desktopId: "other-desktop");
+        await other.SignInAsync();
+        await Assert.ThrowsAsync<DesktopAlreadyLinkedException>(() => other.UploadAsync([Daily("2026-11-07")], Efficiency()));
+        Assert.Equal(before, _server.Commits.Count);
+        Assert.Empty(await other.ClaimSyncRequestsAsync());
+        Assert.Single(_server.Bindings);
+        var reopened = NewSync();
+        await reopened.RestoreAsync();
+        await reopened.UploadAsync([], Efficiency());
+        Assert.Equal(before + 1, _server.Commits.Count);
+        Assert.Single(_server.Bindings);
+    }
+
+    [Fact]
+    public async Task Racing_collector_claim_reads_the_winner_before_uploading_usage()
+    {
+        var sync = NewSync();
+        await sync.SignInAsync();
+        _server.ClaimWinner = "other-desktop";
+        await Assert.ThrowsAsync<DesktopAlreadyLinkedException>(() => sync.UploadAsync([Daily("2026-11-07")], Efficiency()));
+        Assert.Empty(_server.Commits);
+        Assert.Equal("other-desktop", _server.Profiles["users/uid-1"]["fields"]!["collector_id"]!["stringValue"]!.GetValue<string>());
+    }
+
     public void Dispose() => _dir.Delete(true);
 
     private sealed class FakeGoogle : IGoogleSignIn
@@ -226,12 +258,60 @@ public sealed class CloudSyncTests : IDisposable
         public int Refreshes;
         public bool RefreshFails;
         public HttpStatusCode CommitStatus = HttpStatusCode.OK;
+        public Dictionary<string, JsonObject> Profiles { get; } = [];
+        public List<string> Bindings { get; } = [];
+        public string? ClaimWinner;
+        private int _profileVersion;
+        private HttpResponseMessage? ProfileRequest(HttpRequestMessage request, string? body)
+        {
+            var path = request.RequestUri!.AbsolutePath;
+            if (request.Method == HttpMethod.Get && path.Contains("/documents/users/"))
+            {
+                var key = path.Split("/documents/")[1];
+                return Profiles.TryGetValue(key, out var doc)
+                    ? new(HttpStatusCode.OK) { Content = new StringContent(doc.ToJsonString()) }
+                    : new(HttpStatusCode.NotFound);
+            }
+            if (!path.EndsWith(":commit") || body is null) return null;
+            var writes = JsonNode.Parse(body)!["writes"]!.AsArray();
+            foreach (var write in writes)
+            {
+                var name = write!["update"]!["name"]!.GetValue<string>().Split("/documents/")[1];
+                if (ClaimWinner is { } winner && write["update"]!["fields"]?["collector_id"] is not null)
+                {
+                    ClaimWinner = null;
+                    Profiles[name] = new JsonObject { ["fields"] = new JsonObject { ["collector_id"] = new JsonObject { ["stringValue"] = winner } }, ["updateTime"] = "2026-01-01T00:00:00Z" };
+                }
+                if (name.Split('/').Length != 2) continue;
+                Profiles.TryGetValue(name, out var current);
+                var condition = write["currentDocument"];
+                if (condition?["exists"]?.GetValue<bool>() == false && current is not null ||
+                    condition?["updateTime"] is { } stamp && stamp.GetValue<string>() != current?["updateTime"]?.GetValue<string>())
+                    return new(HttpStatusCode.Conflict) { Content = new StringContent("{}") };
+            }
+            var binding = false;
+            foreach (var write in writes)
+            {
+                var name = write!["update"]!["name"]!.GetValue<string>().Split("/documents/")[1];
+                if (name.Split('/').Length != 2) continue;
+                if (!Profiles.TryGetValue(name, out var doc)) doc = new JsonObject { ["fields"] = new JsonObject() };
+                foreach (var field in write["update"]!["fields"]!.AsObject()) doc["fields"]![field.Key] = field.Value?.DeepClone();
+                doc["updateTime"] = DateTimeOffset.UnixEpoch.AddTicks(++_profileVersion).ToString("O");
+                Profiles[name] = doc;
+                binding |= write["update"]!["fields"]?["collector_id"] is not null;
+            }
+            if (!binding) return null;
+            Bindings.Add(body);
+            return new(HttpStatusCode.OK) { Content = new StringContent("{\"writeResults\":[]}") };
+        }
+
         public List<(string Auth, string Body)> Commits = [];
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
         {
             var url = req.RequestUri!.ToString();
             var body = req.Content is null ? "" : await req.Content.ReadAsStringAsync(ct);
+            if (req.Method == HttpMethod.Get && ProfileRequest(req, null) is { } get) return get;
             if (url.Contains("accounts:signInWithIdp"))
             {
                 LastSignInBody = body;
@@ -246,6 +326,7 @@ public sealed class CloudSyncTests : IDisposable
             if (url.EndsWith(":commit"))
             {
                 if (CommitStatus != HttpStatusCode.OK) return Json("{}", CommitStatus);
+                if (ProfileRequest(req, body) is { } profile) return profile;
                 Commits.Add((req.Headers.Authorization!.ToString(), body));
                 return Json("""{"writeResults":[]}""");
             }

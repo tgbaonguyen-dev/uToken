@@ -1,3 +1,4 @@
+using System.Text.Json;
 using UToken.Desktop.App.Models;
 using Xunit;
 
@@ -57,6 +58,46 @@ public sealed class RealDesktopApiTests : IDisposable
     }
 
     [Fact]
+    public async Task Export_includes_all_matching_rows_beyond_the_activity_limit()
+    {
+        _home.AddClaudeUsage(1105);
+        _home.AddClaudeUsage(1105, warning: true);
+        using var api = _home.Api();
+        foreach (var warnings in new[] { false, true })
+        {
+            var query = new ActivityQuery(Provider: "Claude", Model: "claude-export-check",
+                Period: "All time", Search: "bulk-", WarningsOnly: warnings);
+            Assert.Equal(1000, (await api.GetActivityAsync(query)).Events.Length);
+            var csv = await api.ExportActivityAsync(query);
+            var rows = csv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            Assert.Equal(1106, rows.Length);
+            Assert.All(rows.Skip(1), row =>
+            {
+                Assert.Contains(warnings ? "bulk-warning-" : "bulk-collected-", row);
+                Assert.Contains("claude-export-check", row);
+            });
+            var one = await api.ExportActivityAsync(query with { Search = "bulk-collected-1104" });
+            Assert.Equal(warnings ? 1 : 2, one.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Length);
+        }
+    }
+
+    [Fact]
+    public async Task Old_usage_scanned_before_retention_stays_queued_until_upload()
+    {
+        _home.Clock.Now += TimeSpan.FromDays(40);
+        using var api = _home.Api();
+        await api.RescanSourcesAsync();
+        await api.SignInAsync();
+        _home.Cloud.NextUpload = FakeCloud.Failure.Network;
+        Assert.Equal("network", (await api.SyncNowAsync()).State);
+        Assert.Equal("success", (await api.SyncNowAsync()).State);
+        var uploaded = Assert.Single(_home.Cloud.Uploads).Daily;
+        Assert.Contains(uploaded, d => d.Date == "2026-11-05" && d.Totals.Requests == 5);
+        Assert.Contains(uploaded, d => d.Date == "2026-11-06" && d.Totals.Requests == 4);
+        Assert.Equal(0, (await api.GetSyncAsync()).NextSync.Events);
+    }
+
+    [Fact]
     public async Task Rescan_reports_progress_and_new_event_count()
     {
         using var api = _home.Api();
@@ -101,6 +142,36 @@ public sealed class RealDesktopApiTests : IDisposable
         var second = await api.SyncNowAsync();
         Assert.Equal("no_new_usage", second.State);
         Assert.Empty(_home.Cloud.Uploads[^1].Daily); // chỉ efficiency + last_sync_at
+    }
+
+    [Fact]
+    public async Task Explicit_sync_restores_cloud_edits_and_failed_restore_stays_queued()
+    {
+        using var api = _home.Api();
+        await api.SignInAsync();
+        await api.SyncNowAsync();
+        var original = _home.Cloud.Uploads[^1].Daily;
+        Assert.NotEmpty(original);
+        // Simulate a Console edit to an already acknowledged daily document.
+        var cloud = original.ToDictionary(d => d.Date, d => JsonSerializer.Serialize(d));
+        cloud[original[0].Date] = "console-edited-value";
+        await api.SyncNowAsync();
+        Assert.Empty(_home.Cloud.Uploads[^1].Daily);
+        Assert.Equal("console-edited-value", cloud[original[0].Date]);
+
+        var restored = await api.SyncNowAsync(resendAll: true);
+        Assert.Equal("success", restored.State);
+        foreach (var doc in _home.Cloud.Uploads[^1].Daily)
+            cloud[doc.Date] = JsonSerializer.Serialize(doc);
+        foreach (var doc in original)
+            Assert.Equal(JsonSerializer.Serialize(doc), cloud[doc.Date]);
+
+        _home.Cloud.NextUpload = FakeCloud.Failure.Network;
+        Assert.Equal("network", (await api.SyncNowAsync(resendAll: true)).State);
+        Assert.Equal("success", (await api.SyncNowAsync()).State);
+        Assert.Equal(original.Count, _home.Cloud.Uploads[^1].Daily.Count);
+        await api.SyncNowAsync();
+        Assert.Empty(_home.Cloud.Uploads[^1].Daily);
     }
 
     [Fact]

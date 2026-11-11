@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/local_prefs.dart';
+import '../../core/data/stream_status.dart';
 import '../../core/data/usage_aggregates.dart';
 import '../../core/data/usage_repository.dart';
 import '../../core/format/token_format.dart';
@@ -11,7 +13,9 @@ import '../../core/ui/ut_kit.dart';
 
 /// Signed-in user and the Firestore reader every live screen needs.
 class LiveArgs {
-  const LiveArgs({required this.uid, required this.repository});
+  const LiveArgs(
+      {required this.uid, required this.repository, this.now = DateTime.now});
+  final DateTime Function() now;
   final String uid;
   final UsageRepository repository;
 
@@ -20,14 +24,15 @@ class LiveArgs {
     await repository.refresh(uid: uid);
     try {
       await repository.requestSync(uid: uid);
-    } catch (error) {
-      debugPrint('Could not ask the desktop to sync: $error');
+    } catch (_) {
+      throw const DesktopSyncRequestException();
     }
   }
 
   /// All daily summaries. No end bound: screens filter by the current date,
   /// so a listener left open past midnight still receives the new day.
-  Stream<List<DailyDoc>> daily() => repository.watchDaily(uid: uid);
+  Stream<List<DailyDoc>> daily() =>
+      repository.watchDaily(uid: uid).map(DailyDocuments.new);
 }
 
 /// Period last picked on Tokens or Analytics, so switching tabs keeps it.
@@ -231,4 +236,50 @@ class MiniStat extends StatelessWidget {
           Text(label, style: UtText.caption),
         ],
       );
+}
+
+/// Requeries date-bounded data after midnight or resuming on a new day.
+mixin DayRollover<T extends StatefulWidget> on State<T> {
+  DateTime get localNow;
+  void onDayChanged();
+  Timer? _dayTimer;
+  late AppLifecycleListener _lifecycle;
+  late DateTime _day;
+  @override
+  void initState() {
+    super.initState();
+    _day = DateUtils.dateOnly(localNow);
+    _lifecycle = AppLifecycleListener(onResume: _checkDay);
+    _scheduleDay();
+  }
+
+  void _scheduleDay() {
+    _dayTimer?.cancel();
+    final now = localNow;
+    _dayTimer = Timer(
+        DateTime(now.year, now.month, now.day + 1).difference(now), _checkDay);
+  }
+
+  void _checkDay() {
+    if (!mounted) return;
+    final day = DateUtils.dateOnly(localNow);
+    if (_day != day) {
+      _day = day;
+      setState(onDayChanged);
+    }
+    _scheduleDay();
+  }
+
+  @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _checkDay();
+  }
+
+  @override
+  void dispose() {
+    _dayTimer?.cancel();
+    _lifecycle.dispose();
+    super.dispose();
+  }
 }

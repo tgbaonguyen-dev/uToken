@@ -75,6 +75,22 @@ public sealed class RealHome : IDisposable
         File.Copy(Path.Combine(AppContext.BaseDirectory, "fixtures", fixture), dest, overwrite: true);
     }
 
+    public void AddClaudeUsage(int count, bool warning = false, bool distinctSessions = false)
+    {
+        var folder = Path.Combine(Home, ".claude", "projects", "audit");
+        Directory.CreateDirectory(folder);
+        var prefix = warning ? "warning" : "collected";
+        var lines = Enumerable.Range(0, count).Select(i => System.Text.Json.JsonSerializer.Serialize(new
+        {
+            type = "assistant", uuid = $"{prefix}-{i}", sessionId = distinctSessions ? $"audit-{i}" : "audit",
+            timestamp = Clock.Now.AddMinutes(-1).AddMilliseconds(i).ToString("O"),
+            isApiErrorMessage = warning,
+            message = new { id = $"bulk-{prefix}-{i}", model = "claude-export-check",
+                usage = new { input_tokens = 100, output_tokens = 10 } },
+        }));
+        File.WriteAllLines(Path.Combine(folder, prefix + ".jsonl"), lines);
+    }
+
     /// <summary>API dữ liệu thật trên thư mục này. <paramref name="cloud"/> = false: chưa cấu hình đăng nhập Google.</summary>
     public RealDesktopApi Api(bool cloud = true, ICloudSync? cloudSync = null,
         string? judgeDirectory = null,
@@ -122,6 +138,8 @@ public sealed class FakeCloud : ICloudSync
     public Exception? SignInError { get; set; }
     public List<(IReadOnlyList<DailyDoc> Daily, EfficiencyDoc Efficiency)> Uploads { get; } = [];
     public List<InsightDoc> InsightUploads { get; } = [];
+    public bool FailInsightUpload { get; set; }
+    public CloudAccount? NextSignInAccount { get; set; }
 
     public Task<CloudAccount?> RestoreAsync(CancellationToken ct = default) => Task.FromResult(Account);
 
@@ -129,7 +147,7 @@ public sealed class FakeCloud : ICloudSync
     {
         if (SignInError is not null) throw SignInError;
         if (SignInFails) throw new CloudAuthException("cancelled");
-        Account = new CloudAccount("uid-1", "ana@example.com", "Ana", "utoken-78191", Emulator: true);
+        Account = NextSignInAccount ?? new CloudAccount("uid-1", "ana@example.com", "Ana", "utoken-78191", Emulator: true);
         return Task.FromResult(Account);
     }
 
@@ -156,6 +174,7 @@ public sealed class FakeCloud : ICloudSync
 
     public Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default)
     {
+        if (FailInsightUpload) throw new HttpRequestException("Offline insights test");
         InsightUploads.Add(insights);
         return Task.FromResult(500L);
     }

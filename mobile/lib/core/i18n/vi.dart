@@ -461,4 +461,49 @@ const Map<String, String> vi = {
   '{tool} · last 30 days': '{tool} · 30 ngày qua',
   '{tool} · {n} chats · {v} verified': '{tool} · {n} chat · {v} đã xác minh',
   'vs last month': 'so với tháng trước',
+  'Insight unavailable': 'Không xem được gợi ý',
+  'No AI review available yet.': 'Chưa có bản đánh giá AI.',
+  'This insight no longer exists in the latest review.':
+      'Gợi ý này không còn trong bản đánh giá mới nhất.',
+  'Back to Insights': 'Quay lại Gợi ý',
+  'Could not save preferences. Use Retry above.':
+      'Chưa lưu được tùy chọn. Hãy nhấn Thử lưu lại ở trên.',
+  'No data available': 'Chưa có dữ liệu',
+  'Refresh to try reading this report again.':
+      'Làm mới để thử đọc lại báo cáo.',
+  'Ignored {n} invalid daily summaries. Totals and exports exclude these days. Fix field types in Firebase and refresh.':
+      'Đã bỏ qua {n} bản tổng hợp ngày không hợp lệ. Tổng số và dữ liệu xuất không bao gồm các ngày này. Hãy sửa kiểu dữ liệu trong Firebase rồi làm mới.',
+  'Retry saving': 'Thử lưu lại',
+  'Preferences could not be saved. Retry saving.':
+      'Chưa lưu được tùy chọn. Hãy thử lưu lại.',
+  'Preferences could not be saved locally. Retry saving.':
+      'Chưa lưu được tùy chọn trên máy. Hãy thử lưu lại.',
+  'Preferences could not be saved. Your changes are kept here; retry saving.':
+      'Chưa lưu được tùy chọn. Thay đổi vẫn được giữ trên máy; hãy thử lưu lại.',
+  'Preferences are waiting to be saved to your account. Retry saving.':
+      'Tùy chọn đang chờ lưu vào tài khoản. Hãy thử lưu lại.',
+  'Could not restore pending preferences. Check local storage.':
+      'Không khôi phục được tùy chọn chờ lưu. Hãy kiểm tra bộ nhớ trên máy.',
+  'Choose review period': 'Chọn phạm vi đánh giá',
+  'The baseline belongs to this account on this phone. Only synced usage is included; late uploads may include earlier activity.':
+      'Mốc được lưu theo tài khoản trên điện thoại này. Chỉ tính usage đã đồng bộ; dữ liệu tải lên muộn có thể gồm hoạt động trước đó.',
+  'Since last successful review': 'Từ lần đánh giá thành công trước',
+  'Review new synchronized usage since your last successful review, or the full last 30 days. First run? Choose 30 days to establish a baseline.':
+      'Đánh giá usage mới đã đồng bộ từ lần đánh giá thành công trước, hoặc tổng thể 30 ngày. Lần đầu hãy chọn 30 ngày để tạo mốc.',
+  'No new synchronized usage since your last successful review. Sync desktop first if you have used more tokens.':
+      'Chưa có usage mới đã đồng bộ từ lần đánh giá thành công trước. Nếu đã sử dụng thêm token, hãy đồng bộ desktop trước.',
+  'Run a 30-day review first to establish the last-review baseline on this phone.':
+      'Hãy chạy đánh giá 30 ngày trước để tạo mốc đánh giá trên điện thoại này.',
+  'Usage history changed. Run a 30-day review to establish a fresh baseline.':
+      'Lịch sử usage đã thay đổi. Hãy chạy đánh giá 30 ngày để tạo lại mốc.',
+  'Some daily summaries are invalid. Correct them and refresh before reviewing.':
+      'Một số bản tổng hợp ngày không hợp lệ. Hãy sửa dữ liệu và làm mới trước khi đánh giá.',
+  'The review was uploaded, but its baseline could not be saved on this phone. Run a 30-day review again before reviewing new usage.':
+      'Đã tải bản đánh giá lên nhưng chưa lưu được mốc trên điện thoại. Hãy đánh giá 30 ngày lại trước khi đánh giá usage mới.',
+  'Could not read current Firebase usage. Check your connection and try again.':
+      'Chưa đọc được usage hiện tại trên Firebase. Hãy kiểm tra kết nối và thử lại.',
+  'Choose new usage since your last successful review, or a 30-day overview. Only synchronized data is available.':
+      'Chọn usage mới từ lần đánh giá thành công trước, hoặc tổng thể 30 ngày. Chỉ dữ liệu đã đồng bộ được sử dụng.',
+  '{provider} reads synchronized usage for the selected period only, never your prompts or code. Every recommendation must cite a metric, and the app re-checks each number. Nothing is changed automatically.':
+      '{provider} chỉ đọc usage đã đồng bộ trong phạm vi được chọn, không đọc prompt hay code. Mỗi gợi ý phải dẫn một chỉ số và app kiểm tra lại từng con số. Không có gì tự động thay đổi.',
 };

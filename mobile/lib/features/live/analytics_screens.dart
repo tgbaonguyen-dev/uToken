@@ -19,7 +19,12 @@ class LiveAnalyticsScreen extends StatefulWidget {
   State<LiveAnalyticsScreen> createState() => _LiveAnalyticsScreenState();
 }
 
-class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen> {
+class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen>
+    with DayRollover<LiveAnalyticsScreen> {
+  @override
+  DateTime get localNow => widget.args.now();
+  @override
+  void onDayChanged() => _daily = widget.args.daily();
   late UsagePeriod _period = widget.initialPeriod;
   late Stream<List<DailyDoc>> _daily = widget.args.daily();
 
@@ -36,7 +41,7 @@ class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen> {
       body: UtStream<List<DailyDoc>>(
         stream: _daily,
         builder: (context, all) {
-          final now = DateTime.now();
+          final now = localNow;
           final docs = filterPeriod(all, _period, now);
           final t = sumTotals(docs);
           final models = byModel(docs);

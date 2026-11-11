@@ -18,7 +18,13 @@ public partial class MainViewModel
     [ObservableProperty] private bool _confirmDisconnect;
     [ObservableProperty] private bool _isSyncing;
     partial void OnIsSyncingChanged(bool value) { NotifySyncState(); NotifyTopbar(); }
-    partial void OnSyncChanged(SyncData? value) { NotifySyncState(); NotifyPairingState(); OnPropertyChanged(nameof(CloudSyncLabel)); NotifyTopbar(); }
+    partial void OnSyncChanged(SyncData? value)
+    {
+        if (Overview is { } overview)
+            Overview = overview with { Collector = overview.Collector with
+            { LastSyncAt = value?.Device?.LastSyncAt, ReferenceTime = value?.ReferenceTime ?? overview.Collector.ReferenceTime } };
+        NotifySyncState(); NotifyPairingState(); OnPropertyChanged(nameof(CloudSyncLabel)); NotifyTopbar();
+    }
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasSyncMessage))] private string _syncMessage = "";
     [ObservableProperty] private string _syncMessageColor = "#2EC790";
     [ObservableProperty] private PairingData? _pairing;
@@ -45,10 +51,16 @@ public partial class MainViewModel
     public string PairingMessageColor => IsPaired ? "#2EC790" : "#F26039";
 
     public ActivityQuery CurrentActivityQuery => new(ActivityProvider, ActivityModel, ActivityPeriod, ActivitySearch, WarningsOnly);
-    private async Task LoadActivityCoreAsync()
+    private int _activityLoadVersion;
+    private async Task LoadActivityCoreAsync(int? pageVersion = null)
     {
         RestoreUiPreferences();
-        var result = await api.GetActivityAsync(CurrentActivityQuery);
+        var request = ++_activityLoadVersion;
+        var version = pageVersion ?? _pageVersion;
+        var query = CurrentActivityQuery;
+        bool Current() => request == _activityLoadVersion && IsCurrentLoad(version) && CurrentActivityQuery == query;
+        var result = await api.GetActivityAsync(query);
+        if (!Current()) return;
         // Keep selector collections stable when replacing the response, preserving the selected filters.
         foreach (var value in result.Providers) if (!ActivityProviders.Contains(value)) ActivityProviders.Add(value);
         foreach (var value in result.Models) if (!ActivityModels.Contains(value)) ActivityModels.Add(value);
@@ -59,7 +71,9 @@ public partial class MainViewModel
         {
             if (invalidProvider) ActivityProvider = "All sources";
             if (invalidModel) ActivityModel = "All models";
-            result = await api.GetActivityAsync(CurrentActivityQuery);
+            query = CurrentActivityQuery;
+            result = await api.GetActivityAsync(query);
+            if (!Current()) return;
         }
         ActivityPage = result;
         SelectedActivity = result.Events.FirstOrDefault(e => e.Id == SelectedActivity?.Id) ?? result.Events.FirstOrDefault();
@@ -70,13 +84,13 @@ public partial class MainViewModel
     {
         if (!CanNavigate) return Task.CompletedTask;
         Page = "activity";
-        return LoadPageAsync(_ => LoadActivityCoreAsync());
+        return LoadPageAsync(version => LoadActivityCoreAsync(version));
     }
-    [RelayCommand] private Task RefreshActivityAsync() => LoadPageAsync(_ => LoadActivityCoreAsync());
+    [RelayCommand] private Task RefreshActivityAsync() => LoadPageAsync(version => LoadActivityCoreAsync(version));
     [RelayCommand]
-    private Task ShowCollectedAsync() { WarningsOnly = false; return LoadPageAsync(_ => LoadActivityCoreAsync()); }
+    private Task ShowCollectedAsync() { WarningsOnly = false; return LoadPageAsync(version => LoadActivityCoreAsync(version)); }
     [RelayCommand]
-    private Task ShowWarningsAsync() { WarningsOnly = true; return LoadPageAsync(_ => LoadActivityCoreAsync()); }
+    private Task ShowWarningsAsync() { WarningsOnly = true; return LoadPageAsync(version => LoadActivityCoreAsync(version)); }
     public async Task<string?> ExportActivityCsvAsync()
     {
         string? csv = null;
@@ -106,10 +120,10 @@ public partial class MainViewModel
         IsSyncing = true; SyncMessage = HasDevice ? "Analyzing local usage and uploading summaries..." : "Analyzing local usage...";
         try
         {
-            var result = await api.SyncNowAsync();
+            var result = await api.SyncNowAsync(resendAll: true);
             ApplySyncResult(result);
             Notice = result.Message;
-            Overview = await api.GetOverviewAsync();
+            await RefreshUsageAfterSyncAsync();
         }
         catch { SetSyncResultState("failed"); SyncMessage = "Sync did not complete. Please try again."; SyncMessageColor = "#F26039"; throw; }
         finally { IsSyncing = false; }
@@ -120,6 +134,22 @@ public partial class MainViewModel
         SetSyncResultState(result.State);
         SyncMessageColor = result.State is "success" or "no_new_usage" ? "#2EC790" : "#F26039";
     }
+    private async Task RefreshUsageAfterSyncAsync()
+    {
+        Overview = await api.GetOverviewAsync();
+        ApplySourcePermission(await api.GetSourcePermissionAsync());
+        if (IsDetail && SelectedSource is { } source)
+        {
+            var period = SelectedPeriod;
+            var detail = await api.GetSourceAsync(source.Id, period);
+            if (IsDetail && SelectedSource?.Id == source.Id && SelectedPeriod == period)
+            {
+                SelectedSource = detail;
+                _loadedPeriod = period;
+            }
+        }
+        if (IsActivityPage) await LoadActivityCoreAsync();
+    }
     [RelayCommand] private void RequestDisconnect() { if (!IsBusy) ConfirmDisconnect = true; }
     [RelayCommand] private void CancelDisconnect() => ConfirmDisconnect = false;
     [RelayCommand]
@@ -127,6 +157,7 @@ public partial class MainViewModel
     {
         try
         {
+            CancelPageLoad();
             Sync = await api.DisconnectAsync(); ConfirmDisconnect = false; PairingState = "waiting";
             SyncMessage = "Signed out. Local usage collection continues; sign in again to resume cloud sync."; SyncMessageColor = "#9096A1";
         }
@@ -136,12 +167,15 @@ public partial class MainViewModel
             SyncMessage = "Sign-out could not be saved."; SyncMessageColor = "#F26039";
         }
     });
-    private async Task LoadPairingPageCoreAsync()
+    private async Task LoadPairingPageCoreAsync(int? pageVersion = null)
     {
-        PairingScenarios = await api.GetPairingScenariosAsync();
-        SupportedSources = await api.GetSupportedSourcesAsync();
-        Pairing = await api.GetPairingInfoAsync();
-        Sync = await api.GetSyncAsync();
+        var version = pageVersion ?? _pageVersion;
+        var scenarios = await api.GetPairingScenariosAsync();
+        var supported = await api.GetSupportedSourcesAsync();
+        var pairing = await api.GetPairingInfoAsync();
+        var sync = await api.GetSyncAsync();
+        if (!IsCurrentLoad(version)) return;
+        PairingScenarios = scenarios; SupportedSources = supported; Pairing = pairing; Sync = sync;
         PairingState = HasDevice ? "connected" : "waiting";
         PairingMessage = HasDevice ? $"Signed in as {Sync.Device!.Name}." : "";
     }
@@ -150,7 +184,7 @@ public partial class MainViewModel
     {
         if (!CanNavigate) return Task.CompletedTask;
         Page = "pairing";
-        return LoadPageAsync(_ => LoadPairingPageCoreAsync());
+        return LoadPageAsync(version => LoadPairingPageCoreAsync(version));
     }
     [RelayCommand]
     private Task RestartPairingAsync() => RunAsync(async () => { if (!HasDevice) await LoadPairingPageCoreAsync(); });
@@ -160,6 +194,7 @@ public partial class MainViewModel
     private async Task<bool> SignInCoreAsync()
     {
         if (HasDevice) return true;
+        CancelPageLoad();
         PairingState = "verifying"; PairingMessage = "Finish signing in with Google in your browser...";
         try
         {

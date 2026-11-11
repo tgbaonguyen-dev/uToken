@@ -19,19 +19,61 @@ public sealed partial class RealDesktopApi
     private long _bytesSent;
     private readonly List<SyncHistoryData> _history = [];
     private bool _cloudRestored;
+    private Dictionary<string, DateTimeOffset>? _uploadTimes;
+
+    private static string UploadKey(CloudAccount account) =>
+        $"{account.ProjectId}:{account.Emulator}:{account.Uid}";
+
+    private Dictionary<string, DateTimeOffset> UploadTimes()
+    {
+        if (_uploadTimes is not null) return _uploadTimes;
+        _uploadTimes = [];
+        if (_localSettings is null) return _uploadTimes;
+        var path = Path.Combine(_localSettings.DirectoryPath, "sync-status.json");
+        try
+        {
+            if (File.Exists(path))
+                _uploadTimes = JsonSerializer.Deserialize<Dictionary<string, DateTimeOffset>>(File.ReadAllText(path)) ?? [];
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        { _localSettings.Record("Sync status unavailable: " + ex.GetType().Name); }
+        return _uploadTimes;
+    }
+
+    private void RecordUpload(CloudAccount account, DateTimeOffset at)
+    {
+        UploadTimes()[UploadKey(account)] = at;
+        _lastUploadAt = at;
+        if (_localSettings is null) return;
+        var path = Path.Combine(_localSettings.DirectoryPath, "sync-status.json");
+        var temporary = path + ".tmp";
+        try
+        {
+            Directory.CreateDirectory(_localSettings.DirectoryPath);
+            File.WriteAllText(temporary, JsonSerializer.Serialize(UploadTimes()));
+            File.Move(temporary, path, true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Upload already succeeded; a local status failure must not report a failed upload.
+            _localSettings.Record("Could not save sync status: " + ex.GetType().Name);
+        }
+    }
 
     /// <summary>Snapshot của lần phân tích gần nhất.</summary>
     public AnalysisSnapshot? LastSnapshot { get; private set; }
 
     private async Task<CloudAccount?> AccountAsync(CancellationToken ct)
     {
-        if (_cloud is null) return null;
+        if (_cloud is null) { _lastUploadAt = null; return null; }
         if (!_cloudRestored)
         {
-            _cloudRestored = true;
             await _cloud.RestoreAsync(ct);
+            _cloudRestored = true;
         }
-        return _cloud.Account;
+        var account = _cloud.Account;
+        _lastUploadAt = account is not null && UploadTimes().TryGetValue(UploadKey(account), out var at) ? at : null;
+        return account;
     }
 
     private string DeviceLabel(CloudAccount a) => a.Emulator ? "Firebase emulator" : $"Firebase · {a.ProjectId}";
@@ -106,9 +148,10 @@ public sealed partial class RealDesktopApi
     /// Phân tích log rồi đẩy lên Firestore. State: success, no_new_usage, not_paired (chưa đăng nhập),
     /// revoked (phiên hết hiệu lực, cần đăng nhập lại), network (không tới được Firebase), failed.
     /// </summary>
-    public Task<SyncResult> SyncNowAsync(CancellationToken ct = default) => SyncCoreAsync(runJudge: true, ct);
+    public Task<SyncResult> SyncNowAsync(CancellationToken ct = default, bool resendAll = false) =>
+        SyncCoreAsync(runJudge: true, resendAll, ct);
 
-    private async Task<SyncResult> SyncCoreAsync(bool runJudge, CancellationToken ct)
+    private async Task<SyncResult> SyncCoreAsync(bool runJudge, bool resendAll, CancellationToken ct)
     {
         await UpdatePricesAsync(ct); // chỉ tải khi giá đã cũ hơn ~1 ngày
         var retention = (await GetSettingsAsync(ct)).Values.RetentionDays;
@@ -116,7 +159,7 @@ public sealed partial class RealDesktopApi
         {
             var s = _engine.Run(ct);
             DataChanged();
-            _store.PruneBefore(Now.AddDays(-retention));
+            _store.PruneBefore(Now.AddDays(-retention), _engine.TimeZone);
             return s;
         }, ct);
         LastSnapshot = snapshot;
@@ -133,13 +176,18 @@ public sealed partial class RealDesktopApi
                 await GetSyncAsync(ct));
         }
 
-        var (dirty, efficiency) = await WithStoreAsync(() => (_store.GetDirtyDaily(), snapshot.Efficiency), ct);
+        var (dirty, efficiency) = await WithStoreAsync(() =>
+        {
+            // Explicit sync restores local summaries even after cloud-only edits.
+            if (resendAll) _store.MarkAllDailyDirty();
+            return (_store.GetDirtyDaily(), snapshot.Efficiency);
+        }, ct);
         try
         {
             var docs = dirty.Select(d => JsonSerializer.Deserialize<DailyDoc>(d.Json)!).ToList();
             long sent = await _cloud!.UploadAsync(docs, efficiency, ct);
             await WithStoreAsync(() => { foreach (var d in dirty) _store.MarkDailySynced(d.Date); return 0; }, ct);
-            _lastUploadAt = Now;
+            RecordUpload(account, Now);
             _bytesSent += sent;
             // Cột EVENTS: số lần gọi model nằm trong các bản daily vừa đẩy lên.
             _history.Insert(0, new SyncHistoryData(Now, account.Email, docs.Sum(d => d.Totals.Requests), sent, "Success"));
@@ -148,6 +196,10 @@ public sealed partial class RealDesktopApi
             return new(state,
                 state == "success" ? $"Uploaded {dirty.Count} daily summaries and the efficiency report." : "No new usage since the last sync.",
                 await GetSyncAsync(ct));
+        }
+        catch (DesktopAlreadyLinkedException)
+        {
+            return new("failed", "This account is linked to another desktop. Use that desktop to sync; local usage is kept here.", await GetSyncAsync(ct));
         }
         catch (CloudAuthException)
         {
@@ -183,7 +235,7 @@ public sealed partial class RealDesktopApi
         var wantsReview = requests.Any(r => r.WantsReview);
         _localSettings?.Record($"Mobile requested sync ({requests.Count}{(wantsReview ? ", AI review" : "")})");
         // Khi mobile xin AI review: không chạy judge kiểu "nếu đến hạn" trong sync, mà chạy ép ngay sau đó.
-        var result = await SyncCoreAsync(runJudge: !wantsReview, ct);
+        var result = await SyncCoreAsync(runJudge: !wantsReview, resendAll: true, ct);
         var syncError = result.State is "success" or "no_new_usage" ? null : result.State;
         var reviewError = syncError;
         if (wantsReview && syncError is null)

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:utoken_mobile/features/ai_review/phone_judge.dart';
+import 'package:utoken_mobile/features/ai_review/review_window.dart';
+import 'package:utoken_mobile/core/data/usage_repository.dart';
 import 'package:utoken_mobile/features/live/tokens_screens.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:utoken_mobile/core/data/local_prefs.dart';
@@ -14,6 +16,23 @@ import 'package:utoken_mobile/features/live/insights_screens.dart';
 import 'package:utoken_mobile/features/live/live_common.dart';
 
 import 'live_screens_test.dart' show FakeUsageRepository, app, keyedDoc;
+
+class _ScopeJudge extends PhoneJudge {
+  _ScopeJudge() : super(MemoryPrefsStore());
+  final scopes = <ReviewScope>[];
+  @override
+  bool get hasKey => true;
+  @override
+  Future<void> run(
+      {required String uid,
+      required UsageRepository repository,
+      required String language,
+      ReviewScope scope = ReviewScope.last30Days}) async {
+    scopes.add(scope);
+    step = JudgeStep.done;
+    notifyListeners();
+  }
+}
 
 final _modelReply = {
   'score': 64,
@@ -112,6 +131,34 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
+  testWidgets(
+      'the review picker routes both scopes and opening it makes no AI call',
+      (tester) async {
+    await phone(tester);
+    final repository = FakeUsageRepository();
+    addTearDown(repository.close);
+    final judge = _ScopeJudge();
+    PhoneJudge.instance = judge;
+    addTearDown(judge.dispose);
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
+    await tester.pumpWidget(app(LiveInsightsScreen(args: argsFor(repository))));
+    repository.insights.add(_review);
+    await tester.pumpAndSettle();
+    expect(judge.scopes, isEmpty);
+    for (final entry in [
+      ('Review new usage', ReviewScope.sinceLastReview),
+      ('Review 30 days', ReviewScope.last30Days),
+    ]) {
+      await tester.tap(find.text('Run new review'));
+      await tester.pumpAndSettle();
+      expect(
+          judge.scopes.length, entry.$2 == ReviewScope.sinceLastReview ? 0 : 1);
+      await tester.tap(find.byKey(ValueKey('figma-hotspot-${entry.$1}')));
+      await tester.pumpAndSettle();
+      expect(judge.scopes.last, entry.$2);
+    }
+  });
+
   testWidgets('insights show score, priorities first and full breakdown',
       (tester) async {
     await phone(tester);
@@ -173,6 +220,7 @@ void main() {
       (tester) async {
     await phone(tester);
     final repository = FakeUsageRepository();
+    repository.efficiencyStream = Stream.value(null);
     addTearDown(repository.close);
     final now = DateTime.now();
     for (var i = 0; i < 4; i++) {
@@ -214,7 +262,13 @@ void main() {
     await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 200)));
     await tester.pumpAndSettle();
-    // No review yet + key present → runs automatically once.
+    // Opening Insights never starts a paid call before the user chooses a scope.
+    expect(repository.savedInsights, isEmpty);
+    await tester.tap(find.text('Run AI review'));
+    await tester.pumpAndSettle();
+    expect(find.text('Since last successful review'), findsOneWidget);
+    await tester.tap(find.text('Last 30 days'));
+    await tester.pumpAndSettle();
     expect(repository.savedInsights.single['status'], 'ok');
     expect(find.text('Use the cache more'), findsOneWidget);
     // The invented metric was dropped; the real one kept the brief's value.

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../data/stream_status.dart';
 import '../i18n/tr.dart';
+import '../data/usage_repository.dart';
+import '../data/local_prefs.dart';
 
 /// Dark design tokens taken from the Figma "07 - Final UI Dark" exports
 /// (lib/core/mock/data/figma_dark_*.json).
@@ -231,7 +233,7 @@ class UtPage extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: children),
+                    children: [const PreferencesSaveStatus(), ...children]),
               ),
             ),
             if (actions.isNotEmpty || footer != null)
@@ -393,6 +395,7 @@ class UtTabPage extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
               child: UtDivider(),
             ),
+            const PreferencesSaveStatus(),
             Expanded(
                 child: onRefresh == null
                     ? body
@@ -783,7 +786,33 @@ class UtStream<T> extends StatelessWidget {
                   child: CircularProgressIndicator(color: UtColors.muted)),
             );
           }
-          return builder(context, snapshot.data as T);
+          if (!snapshot.hasData && null is! T) {
+            return UtMessage(
+                title: tr('No data available'),
+                message: tr('Refresh to try reading this report again.'));
+          }
+          final data = snapshot.data as T;
+          final child = builder(context, data);
+          if (data is! DailyDocuments || data.invalidDocumentIds.isEmpty) {
+            return child;
+          }
+          return LayoutBuilder(
+              builder: (context, constraints) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                              tr('Ignored {n} invalid daily summaries. Totals and exports exclude these days. Fix field types in Firebase and refresh.',
+                                  {'n': data.invalidDocumentIds.length}),
+                              key: const ValueKey('invalid-daily-warning'),
+                              style: UtText.caption)),
+                      if (constraints.hasBoundedHeight)
+                        Expanded(child: child)
+                      else
+                        child,
+                    ],
+                  ));
         },
       );
 }
@@ -812,4 +841,25 @@ class UtRowGroup extends StatelessWidget {
           children[i],
         ],
       ]);
+}
+
+/// Persistent save failure with an explicit retry, shared by live pages.
+class PreferencesSaveStatus extends StatelessWidget {
+  const PreferencesSaveStatus({super.key});
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+      listenable: LocalPrefs.instance,
+      builder: (context, _) {
+        final prefs = LocalPrefs.instance;
+        if (prefs.saveError == null) return const SizedBox.shrink();
+        return Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(children: [
+              Text(tr(prefs.saveError!),
+                  style: UtText.body, textAlign: TextAlign.center),
+              TextButton(
+                  onPressed: prefs.isSaving ? null : prefs.retrySave,
+                  child: Text(tr('Retry saving'))),
+            ]));
+      });
 }

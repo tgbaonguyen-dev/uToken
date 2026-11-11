@@ -24,10 +24,26 @@ The app now runs on real local data. `App.axaml.cs` builds `RealDesktopApi` (`Se
 - Enabled sources and log folders come from `appsettings.json` (`Collectors.Enabled`, `CodexHome`, `ClaudeHome`). Gemini/Antigravity shows *Paused* unless enabled; its local logs have no token data yet (OQ-10).
 - Sources check the real log folder: missing → *Not found*, unreadable → *Permission required*. Rescan scans each provider and reports progress.
 - Activity lists real usage events (newest 1,000 per query); Export writes them to CSV.
-- **Sync now** runs a full local analysis (scan, daily summaries, efficiency report) and keeps summaries queued. Cloud upload is not wired yet: when the sync module is ready, set `RealDesktopApi.Uploader`; until then Sync reports *Not paired* and history rows say *Local only*. Pairing codes are not used (desktop and mobile will sign in with the same Google account).
+- **Sync now** scans local logs, reconciles retained daily summaries and uploads dirty daily documents plus the efficiency report through Firebase REST. It reports upload failures and keeps summaries queued. Desktop and mobile use the same Google account; pairing codes are not required. Manual and background sync refresh Sources and the selected source detail.
 - Static UI copy (setup steps, preview-state scenarios, permission instructions) lives in `src/UToken.Desktop.App/UiContent/*.json`. The *Preview state* selectors only preview screen states; they never change stored usage.
 
 The mock implementation (`MockDesktopApi`) and its JSON fixtures moved to `tests/UToken.Desktop.Tests/Mock` and `tests/UToken.Desktop.Tests/MockData`. They are used only by UI tests; the sections below describe that mock behaviour.
+
+## Configuration recovery and last upload
+
+Invalid JSON or configuration value types at startup open a recovery window.
+Correct `appsettings.json`, `appsettings.Local.json` beside the running executable,
+or the `UTOKEN_` environment overrides, then choose Retry. Files are not reset and
+raw configuration errors/credentials are not displayed. If changing a source
+configuration file, rebuild so it is copied into the executable's output directory.
+
+Successful upload times are saved in `%LOCALAPPDATA%/uToken/sync-status.json`, keyed
+by Firebase project, emulator/production mode and UID. They restore after a full
+exit; a failed upload does not advance the saved timestamp. Corrupt status metadata
+does not block authentication or upload. This records this computer's uploads,
+not an online-presence signal; sync history and transferred byte counters remain
+per session. Activity displays at most 1,000 matching rows, while CSV export includes
+all matching retained rows using the same filters.
 
 ## Desktop UI with mock data (tests only; D02, D05, D06, D04, D07, D03)
 
@@ -148,3 +164,15 @@ Pairing displays an actual remaining-time counter derived from the service sessi
 Diagnostics popups and Settings diagnostics include Copy report and Save report. Copy uses the system clipboard; Save uses the native file picker and writes a UTF-8 text file. Canceling does not write a file; errors leave the report available for retry. The diagnostic fixture check now also includes `sync-states.json` and `pairing-states.json`.
 
 `LocalFeaturesTests` covers expiry/restart and stable previews with an injected clock, preference restoration/stale selections, corrupt JSON and atomic-save failure, DPI/off-screen placement, maximized/minimized normal bounds, clipboard transfer and UTF-8 report truncation. Native Windows file-picker interaction and physical monitor changes still require a manual check.
+
+### Mobile-triggered sync recovery
+
+Desktop polls pending and running sync requests. A running request records `started_at`; after 30 minutes without completion it can be reclaimed on a later poll, including after app restart. Legacy running requests without a timestamp are recoverable immediately. Claims use the Firestore document update time as a write precondition to prevent two desktops claiming the same version. Syncs longer than 30 minutes need lease renewal before supporting that workload.
+
+Mobile-triggered sync holds the desktop busy guard through request handling and refresh, and refreshes Overview, Sources, the open provider/period and Activity through the same path as manual sync.
+
+### One collector and 30-day AI reviews
+
+One desktop collector is supported per Firebase account. The first upload claims `users/{uid}.collector_id` using an atomic Firestore existence/update-time precondition before any daily write. Other installations cannot upload daily/AI reports or claim mobile sync requests for that account. `desktop-id.txt` is a stable random installation ID beside the session file, not a token; retain it when restoring the same installation. Moving to another installation needs an explicit collector reassignment procedure; there is no automatic takeover UI. This client guard is not device attestation: the account owner/admin can still edit their profile in Console. Legacy profiles bind on their first upload from the updated app.
+
+Every desktop AI review uses the last 30 days of retained usage, including repeated manual reviews and requests from mobile. Desktop no longer keeps an incremental review boundary; an old LastReviewedThrough value in persisted JSON is ignored. Scheduled reviews still respect their interval. Upload retries reuse the queued result without another model call. Clear local usage invalidates the cached snapshot; existing review/pending deletion policy is unchanged. Original source logs are not deleted and may be reimported.
