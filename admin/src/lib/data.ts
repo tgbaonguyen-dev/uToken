@@ -244,3 +244,62 @@ export async function setCrashStatus(c: CrashRow, status: 'open' | 'resolved', n
   });
   await audit(status === 'resolved' ? 'resolve_crash' : 'reopen_crash', c.uid, `${c.id}${note ? ` · ${note}` : ''}`);
 }
+
+// ── Notices (admin → users) ──
+
+export type NoticeLevel = 'info' | 'warning' | 'critical';
+export type NoticeRow = {
+  id: string;
+  /** null = everyone (announcements), otherwise users/{uid}/inbox. */
+  targetUid: string | null;
+  title: string;
+  body: string;
+  level: NoticeLevel;
+  active: boolean;
+  createdAt: Date | null;
+  expiresAt: Date | null;
+  createdBy: string;
+};
+
+function noticeFrom(d: DocumentSnapshot, targetUid: string | null): NoticeRow {
+  const m = d.data() ?? {};
+  const level = (['info', 'warning', 'critical'] as const).includes(m.level) ? (m.level as NoticeLevel) : 'info';
+  return {
+    id: d.id,
+    targetUid,
+    title: String(m.title ?? ''),
+    body: String(m.body ?? ''),
+    level,
+    active: m.active === true,
+    createdAt: toDate(m.created_at),
+    expiresAt: toDate(m.expires_at),
+    createdBy: String(m.created_by ?? ''),
+  };
+}
+
+export async function loadNotices(): Promise<NoticeRow[]> {
+  const [all, inbox] = await Promise.all([getDocs(collection(db, 'announcements')), getDocs(collectionGroup(db, 'inbox'))]);
+  return [...all.docs.map((d) => noticeFrom(d, null)), ...inbox.docs.map((d) => noticeFrom(d, ownerOf(d)))].sort(byNewest);
+}
+
+export async function sendNotice(n: { title: string; body: string; level: NoticeLevel; targetUid: string | null; expiresAt: Date | null }) {
+  const data = {
+    title: n.title,
+    body: n.body,
+    level: n.level,
+    active: true,
+    created_by: auth.currentUser!.uid,
+    created_at: serverTimestamp(),
+    ...(n.expiresAt ? { expires_at: n.expiresAt } : {}),
+  };
+  const ref = n.targetUid
+    ? await addDoc(collection(db, 'users', n.targetUid, 'inbox'), data)
+    : await addDoc(collection(db, 'announcements'), data);
+  await audit('send_notice', n.targetUid, `${ref.id} · ${n.title}`);
+}
+
+export async function deactivateNotice(n: NoticeRow) {
+  const ref = n.targetUid ? doc(db, 'users', n.targetUid, 'inbox', n.id) : doc(db, 'announcements', n.id);
+  await updateDoc(ref, { active: false, deactivated_at: serverTimestamp() });
+  await audit('deactivate_notice', n.targetUid, `${n.id} · ${n.title}`);
+}

@@ -7,6 +7,7 @@ import '../../core/data/usage_aggregates.dart';
 import '../../core/format/token_format.dart';
 import '../../core/models/daily_doc.dart';
 import '../../core/ui/ut_kit.dart';
+import 'notices.dart';
 import 'live_common.dart';
 import 'sync_banners.dart';
 import '../../core/i18n/tr.dart';
@@ -95,6 +96,7 @@ class _LiveTokensScreenState extends State<LiveTokensScreen>
   @override
   Widget build(BuildContext context) {
     return UtTabPage(
+      trailing: NoticeBell(args: widget.args),
       title: tr('Tokens'),
       subtitle: tr('What your AI chats used.'),
       tabIndex: 0,
@@ -150,6 +152,7 @@ class _LiveTokensScreenState extends State<LiveTokensScreen>
     };
     if (all.isEmpty) {
       return UtList(children: [
+        NoticeBanner(args: widget.args),
         if (banner != null && lastSync != null) banner,
         lastSync == null ? const _NotConnected() : const _WaitingForUsage(),
       ]);
@@ -158,6 +161,7 @@ class _LiveTokensScreenState extends State<LiveTokensScreen>
     final totals = sumTotals(docs);
     final providers = byProvider(docs);
     return UtList(children: [
+      NoticeBanner(args: widget.args),
       if (banner != null) banner,
       UtSegmented<UsagePeriod>(
         values: UsagePeriod.values,

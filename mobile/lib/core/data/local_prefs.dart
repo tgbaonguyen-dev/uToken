@@ -69,6 +69,24 @@ class LocalPrefs extends ChangeNotifier {
 
   bool isReviewed(String insightId) => _reviewed.contains(insightId);
 
+  /// Admin notices already seen on this phone (local only, not synced).
+  final Set<String> _readNotices = {};
+  bool isNoticeRead(String id) => _readNotices.contains(id);
+
+  Future<void> markNoticesRead(Iterable<String> ids) async {
+    var changed = false;
+    for (final id in ids) {
+      changed |= _readNotices.add(id);
+    }
+    if (!changed) return;
+    notifyListeners();
+    try {
+      await _store.write('read_notices', jsonEncode(_readNotices.toList()));
+    } catch (error) {
+      debugPrint('Could not save read notices: $error');
+    }
+  }
+
   StreamSubscription<Map<String, dynamic>?>? _remote;
   String? _uid;
 
@@ -262,6 +280,10 @@ class LocalPrefs extends ChangeNotifier {
       _tokenFormat = (await _store.read('token_format')) == 'full'
           ? TokenFormat.full
           : TokenFormat.compact;
+      final notices = await _store.read('read_notices');
+      if (notices != null) {
+        _readNotices.addAll((jsonDecode(notices) as List).cast<String>());
+      }
       final reviewed = await _store.read('reviewed_insights');
       if (reviewed != null) {
         _reviewed.addAll((jsonDecode(reviewed) as List).cast<String>());

@@ -54,6 +54,10 @@ class CachedUsageRepository implements UsageRepository {
           platform: platform);
 
   @override
+  Stream<List<Notice>> watchNotices({required String uid}) =>
+      _cached('notices/$uid', () => inner.watchNotices(uid: uid));
+
+  @override
   Stream<Map<String, String>> watchProjectNames({required String uid}) =>
       _cached('proj/$uid', () => inner.watchProjectNames(uid: uid));
 
