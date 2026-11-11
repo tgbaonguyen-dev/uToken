@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -7,27 +8,58 @@ import '../../core/data/usage_aggregates.dart';
 import '../../core/data/usage_repository.dart';
 import '../../core/format/token_format.dart';
 import '../../core/models/daily_doc.dart';
+import '../../core/i18n/tr.dart';
 import '../../core/ui/ut_kit.dart';
+import 'sync_center.dart';
+
+export 'sync_center.dart';
+
+/// User-facing text for an S04 error code.
+String syncErrorText(String? code) => switch (code) {
+      'companion_offline' => tr(
+          'Your desktop didn’t respond within 30 seconds. Open μToken on your computer, then try again.'),
+      'timeout' => tr('Your desktop started syncing but didn’t finish.'),
+      'firebase' => tr('Couldn’t reach Firebase. Check your connection.'),
+      'network' => tr('Desktop couldn’t reach Firebase'),
+      'revoked' => tr('Desktop needs to sign in again'),
+      'not_paired' => tr('Desktop is signed out'),
+      _ => tr('Desktop sync failed'),
+    };
 
 /// Signed-in user and the Firestore reader every live screen needs.
 class LiveArgs {
-  const LiveArgs({required this.uid, required this.repository});
+  const LiveArgs(
+      {required this.uid, required this.repository, this.now = DateTime.now});
+  final DateTime Function() now;
   final String uid;
   final UsageRepository repository;
 
-  /// Reads the server copy and asks the desktop to upload new usage.
+  /// Shared sync flow (S03/S04) for this account.
+  SyncCenter get sync => SyncCenter.of(repository, uid);
+
+  /// Reads the server copy, then asks the desktop to upload new usage. The
+  /// desktop's progress shows as S03/S04 banners, not in this future.
   Future<void> refresh() async {
     await repository.refresh(uid: uid);
-    try {
-      await repository.requestSync(uid: uid);
-    } catch (error) {
-      debugPrint('Could not ask the desktop to sync: $error');
-    }
+    unawaited(sync.start());
   }
 
   /// All daily summaries. No end bound: screens filter by the current date,
   /// so a listener left open past midnight still receives the new day.
-  Stream<List<DailyDoc>> daily() => repository.watchDaily(uid: uid);
+  Stream<List<DailyDoc>> daily() =>
+      repository.watchDaily(uid: uid).map(DailyDocuments.new);
+
+  /// Folder names for project keys, when the desktop shares them.
+  Stream<Map<String, String>> projectNames() =>
+      repository.watchProjectNames(uid: uid);
+}
+
+/// Readable project label: the shared folder name, else a short id.
+String projectLabel(String key, Map<String, String> names) {
+  if (key == 'Unassigned') return tr('Unassigned');
+  final name = names[key];
+  if (name != null) return name;
+  return '${tr('Project')} ${key.length > 6 ? key.substring(0, 6) : key}';
 }
 
 /// Period last picked on Tokens or Analytics, so switching tabs keeps it.
@@ -231,4 +263,50 @@ class MiniStat extends StatelessWidget {
           Text(label, style: UtText.caption),
         ],
       );
+}
+
+/// Requeries date-bounded data after midnight or resuming on a new day.
+mixin DayRollover<T extends StatefulWidget> on State<T> {
+  DateTime get localNow;
+  void onDayChanged();
+  Timer? _dayTimer;
+  late AppLifecycleListener _lifecycle;
+  late DateTime _day;
+  @override
+  void initState() {
+    super.initState();
+    _day = DateUtils.dateOnly(localNow);
+    _lifecycle = AppLifecycleListener(onResume: _checkDay);
+    _scheduleDay();
+  }
+
+  void _scheduleDay() {
+    _dayTimer?.cancel();
+    final now = localNow;
+    _dayTimer = Timer(
+        DateTime(now.year, now.month, now.day + 1).difference(now), _checkDay);
+  }
+
+  void _checkDay() {
+    if (!mounted) return;
+    final day = DateUtils.dateOnly(localNow);
+    if (_day != day) {
+      _day = day;
+      setState(onDayChanged);
+    }
+    _scheduleDay();
+  }
+
+  @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _checkDay();
+  }
+
+  @override
+  void dispose() {
+    _dayTimer?.cancel();
+    _lifecycle.dispose();
+    super.dispose();
+  }
 }

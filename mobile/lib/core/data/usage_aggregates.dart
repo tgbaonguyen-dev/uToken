@@ -1,3 +1,4 @@
+import 'local_prefs.dart';
 import '../models/daily_doc.dart';
 import '../i18n/tr.dart';
 
@@ -159,8 +160,17 @@ double share(int part, int whole) => whole == 0 ? 0 : part / whole;
 String pct(double value, {int digits = 1}) =>
     '${(value * 100).toStringAsFixed(digits)}%';
 
-String usd(double? value, {int digits = 2}) =>
-    value == null ? '—' : '\$${value.toStringAsFixed(digits)}';
+/// US dollars with thousands separators: \$5,000.00, -\$1,234.5678.
+String usd(double? value, {int digits = 2}) {
+  if (value == null) return '—';
+  final fixed = value.abs().toStringAsFixed(digits);
+  final dot = fixed.indexOf('.');
+  final whole = dot < 0 ? fixed : fixed.substring(0, dot);
+  final rest = dot < 0 ? '' : fixed.substring(dot);
+  final grouped =
+      whole.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
+  return '${value < 0 ? '-' : ''}\$$grouped$rest';
+}
 
 /// Cost with 4 decimals below \$1 and 2 decimals above.
 String usdSmart(double? value) =>
@@ -171,13 +181,22 @@ const _months = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ];
 
-String monthName(int month) => _months[month - 1];
+String monthName(int month) =>
+    LocalPrefs.instance.vietnamese ? 'Tháng $month' : _months[month - 1];
+
+/// "Nov 2026" / "Tháng 11, 2026".
+String monthYear(DateTime d) => LocalPrefs.instance.vietnamese
+    ? 'Tháng ${d.month}, ${d.year}'
+    : '${_months[d.month - 1]} ${d.year}';
 
 /// "01 Nov" from "2026-11-01".
 String shortDate(String key) {
   final d = DateTime.tryParse(key);
   if (d == null) return key;
-  return '${d.day.toString().padLeft(2, '0')} ${monthName(d.month)}';
+  final day = d.day.toString().padLeft(2, '0');
+  return LocalPrefs.instance.vietnamese
+      ? '$day/${d.month.toString().padLeft(2, '0')}'
+      : '$day ${_months[d.month - 1]}';
 }
 
 String relativeTime(DateTime value, DateTime now) {

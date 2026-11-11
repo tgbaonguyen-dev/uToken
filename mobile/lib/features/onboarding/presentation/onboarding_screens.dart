@@ -53,7 +53,7 @@ class WelcomeScreen extends StatelessWidget {
             textAlign: TextAlign.center, style: UtText.caption),
         children: [
           const SizedBox(height: 32),
-          const Text('Track your\nAI usage.', style: UtText.hero),
+          Text(tr('Track your\nAI usage.'), style: UtText.hero),
           const SizedBox(height: 12),
           Text(
               tr('Automatic token and cost tracking for the tools you already use.'),
@@ -119,8 +119,8 @@ class _FeatureCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(r.$2, style: UtText.bodyStrong),
-                      Text(r.$3, style: UtText.caption),
+                      Text(tr(r.$2), style: UtText.bodyStrong),
+                      Text(tr(r.$3), style: UtText.caption),
                     ],
                   ),
                 ),
@@ -199,12 +199,12 @@ class ConnectDesktopScreen extends StatelessWidget {
                   const SizedBox(height: 18),
                   _SharedRow(
                       title: tr('Usage totals'),
-                      detail: 'Tokens, model, cost, and time',
+                      detail: tr('Tokens, model, cost, and time'),
                       shared: true),
                   const SizedBox(height: 20),
                   _SharedRow(
                       title: tr('Prompt content'),
-                      detail: 'Never uploaded',
+                      detail: tr('Never uploaded'),
                       shared: false),
                 ],
               ),
@@ -261,8 +261,8 @@ class _SharedRow extends StatelessWidget {
       SizedBox(
         width: 30,
         child: shared
-            ? const Icon(Icons.check,
-                size: 16, color: UtColors.green, semanticLabel: 'Shared')
+            ? Icon(Icons.check,
+                size: 16, color: UtColors.green, semanticLabel: tr('Shared'))
             : Text('—',
                 textAlign: TextAlign.center,
                 semanticsLabel: tr('Not shared'),
@@ -318,8 +318,8 @@ class InstallGuideScreen extends StatelessWidget {
               for (var i = 0; i < _steps.length; i++)
                 _Step(
                   number: i + 1,
-                  title: _steps[i].$1,
-                  detail: _steps[i].$2,
+                  title: tr(_steps[i].$1),
+                  detail: tr(_steps[i].$2),
                   last: i == _steps.length - 1,
                 ),
             ],

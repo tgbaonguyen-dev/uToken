@@ -28,6 +28,25 @@ class FirebaseMobileAuth implements MobileAuthGateway {
   @override
   Future<MobileAuthUser?> signInWithGoogle() async {
     try {
+      return await _signInWithGoogle();
+    } on MobileAuthFailure {
+      // Forget the cached Google account so the next attempt shows the picker
+      // again instead of silently reusing the account that just failed.
+      await _forgetGoogleAccount();
+      rethrow;
+    }
+  }
+
+  Future<void> _forgetGoogleAccount() async {
+    try {
+      await _google.signOut();
+    } on PlatformException {
+      // Best effort: the picker simply may not reappear.
+    }
+  }
+
+  Future<MobileAuthUser?> _signInWithGoogle() async {
+    try {
       final account = await _google.signIn();
       if (account == null) return null;
       final tokens = await account.authentication;

@@ -14,7 +14,8 @@ public sealed record JudgeState(
     InsightDoc? LastInsights,
     DateTimeOffset? LastRunAt,
     string? LastStatus,
-    string? LastErrorCode);
+    string? LastErrorCode,
+    Dictionary<string, InsightDoc>? PendingUploads = null);
 
 /// <summary>Kết quả một lần chạy AI review hoặc thử kết nối.</summary>
 public sealed record JudgeRunResult(string State, string Message, InsightDoc? Insights);
@@ -54,8 +55,7 @@ public sealed partial class RealDesktopApi
         if (JudgeStatePath is not { } path || !File.Exists(path)) return _judgeState = fallback;
         try
         {
-            return _judgeState = JsonSerializer.Deserialize<JudgeState>(File.ReadAllText(path))
-                ?? fallback;
+            return _judgeState = JsonSerializer.Deserialize<JudgeState>(File.ReadAllText(path)) ?? fallback;
         }
         catch (Exception ex) when (ex is JsonException or IOException
             or UnauthorizedAccessException)
@@ -183,7 +183,7 @@ public sealed partial class RealDesktopApi
         InsightDoc result;
         try
         {
-            var brief = await WithStoreAsync(BuildJudgeBrief, ct);
+            var brief = await WithStoreAsync(() => BuildJudgeBrief(ct), ct);
             var model = CreateJudgeModel(settings.Provider, settings.Model, key);
             result = await new JudgeService().RunAsync(brief, model, ct, Localization.Loc.AiLanguage);
         }
@@ -198,29 +198,26 @@ public sealed partial class RealDesktopApi
         var toUpload = result.Status == "failed"
             ? FailedFrom(state.LastInsights, settings, result.ErrorCode ?? "provider_error")
             : result;
+        var account = await AccountAsync(ct);
+        var pending = new Dictionary<string, InsightDoc>(state.PendingUploads ?? []);
+        if (account is not null) pending[UploadKey(account)] = toUpload;
         SaveJudgeState(state with
         {
             LastInsights = good,
             LastRunAt = Now,
             LastStatus = result.Status,
             LastErrorCode = result.ErrorCode,
+            PendingUploads = pending,
         });
         _localSettings?.Record($"AI review: {result.Status}" +
             (result.ErrorCode is null ? "" : " (" + result.ErrorCode + ")"));
 
-        if (_cloud is not null && await AccountAsync(ct) is not null)
-        {
-            try { _bytesSent += await _cloud.UploadInsightsAsync(toUpload, ct); }
-            catch (Exception ex) when (ex is HttpRequestException
-                or UToken.Sync.Auth.CloudAuthException
-                or TaskCanceledException { InnerException: TimeoutException })
-            {
-                _localSettings?.Record("AI review upload failed: " + ex.GetType().Name);
-            }
-        }
+        await RetryPendingInsightsAsync(ct);
+        var pendingMessage = account is not null && GetJudgeState().PendingUploads?.ContainsKey(UploadKey(account)) == true
+            ? " Upload pending; Sync now will retry without another AI call." : "";
         return result.Status switch
         {
-            "ok" => new("success", $"AI review score {result.Score}/100 ({result.Grade}).", result),
+            "ok" => new("success", $"AI review score {result.Score}/100 ({result.Grade})." + pendingMessage, result),
             "insufficient_data" => new("insufficient_data",
                 "Not enough usage yet: AI review needs at least 5 chats.", result),
             _ => new(result.ErrorCode ?? "provider_error",
@@ -232,7 +229,7 @@ public sealed partial class RealDesktopApi
     private async Task RunJudgeAfterSyncAsync(CancellationToken ct)
     {
         if (JudgeDirectory is null) return;
-        try { await RunJudgeAsync(force: false, ct); }
+        try { await RetryPendingInsightsAsync(ct); await RunJudgeAsync(force: false, ct); }
         catch (Exception ex) when (
             ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
@@ -240,15 +237,33 @@ public sealed partial class RealDesktopApi
         }
     }
 
-    private JudgeBrief BuildJudgeBrief()
+    private async Task RetryPendingInsightsAsync(CancellationToken ct)
     {
-        // Chưa phân tích lần nào (chạy tay trước Sync): tính daily/efficiency trước.
-        if (LastSnapshot is null) { LastSnapshot = _engine.Run(); DataChanged(); }
-        var from = _engine.Today.AddDays(-(JudgePeriodDays - 1))
-            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        var account = await AccountAsync(ct);
+        var state = GetJudgeState();
+        if (_cloud is null || account is null || state.PendingUploads is null ||
+            !state.PendingUploads.TryGetValue(UploadKey(account), out var pending)) return;
+        try
+        {
+            _bytesSent += await _cloud.UploadInsightsAsync(pending, ct);
+            var remaining = new Dictionary<string, InsightDoc>(state.PendingUploads);
+            remaining.Remove(UploadKey(account));
+            SaveJudgeState(state with { PendingUploads = remaining });
+        }
+        catch (Exception ex) when (ex is HttpRequestException or UToken.Sync.Auth.CloudAuthException or UToken.Sync.DesktopAlreadyLinkedException
+            or TaskCanceledException { InnerException: TimeoutException })
+        { _localSettings?.Record("AI review upload pending: " + ex.GetType().Name); }
+    }
+
+    private JudgeBrief BuildJudgeBrief(CancellationToken ct)
+    {
+        LastSnapshot = _engine.Run(ct);
+        DataChanged();
+        var from = _engine.Today.AddDays(-(JudgePeriodDays - 1)).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        var through = _engine.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var daily = _store.GetDailyJsonSince(from)
             .Select(json => JsonSerializer.Deserialize<DailyDoc>(json)!)
-            .ToList();
+            .Where(doc => string.CompareOrdinal(doc.Date, through) <= 0).ToList();
         return JudgeBriefBuilder.Build(LastSnapshot.Efficiency, daily);
     }
 

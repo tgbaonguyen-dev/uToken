@@ -17,9 +17,7 @@ public partial class MainViewModel
         {
             result = await api.SyncNowAsync();
             ApplySyncResult(result);
-            Overview = await api.GetOverviewAsync();
-            ApplySourcePermission(await api.GetSourcePermissionAsync());
-            if (IsActivityPage) await LoadActivityCoreAsync();
+            await RefreshUsageAfterSyncAsync();
         });
         if (result is null || Settings?.Values.UsageNotifications != true) return;
         switch (result.State)
@@ -43,19 +41,20 @@ public partial class MainViewModel
 
     public async Task ServeMobileSyncRequestsAsync()
     {
-        // Sync + AI review có thể lâu hơn chu kỳ timer: không chạy chồng.
         if (_servingMobile || IsBusy || IsFirstRunPage || IsScanningSources) return;
         _servingMobile = true;
-        Models.SyncResult? result = null;
-        try { result = await api.ServeMobileSyncRequestsAsync(); }
-        catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException) { return; }
-        finally { _servingMobile = false; }
-        if (result is null) return;
-        await RunAsync(async () =>
+        try
         {
-            ApplySyncResult(result);
-            Overview = await api.GetOverviewAsync();
-            if (IsActivityPage) await LoadActivityCoreAsync();
-        });
+            await RunAsync(async () =>
+            {
+                Models.SyncResult? result;
+                try { result = await api.ServeMobileSyncRequestsAsync(); }
+                catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException) { return; }
+                if (result is null) return;
+                ApplySyncResult(result);
+                await RefreshUsageAfterSyncAsync();
+            });
+        }
+        finally { _servingMobile = false; }
     }
 }

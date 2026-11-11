@@ -79,7 +79,7 @@ public sealed partial class RealDesktopApi
         values = values with { AutomaticUpdates = false };
         Startup?.Apply(values.LaunchAtStartup);
         if (_localSettings is not null) await _localSettings.SaveAsync(values, ct);
-        _localSettings?.Record($"Settings saved: startup={values.LaunchAtStartup}, background={values.BackgroundCollection}, notifications={values.UsageNotifications}, retention={values.RetentionDays}d");
+        _localSettings?.Record($"Settings saved: startup={values.LaunchAtStartup}, background={values.BackgroundCollection}, notifications={values.UsageNotifications}, projectNames={values.ShareProjectNames}, retention={values.RetentionDays}d");
         return _settings = settings with { Values = values };
     }
 

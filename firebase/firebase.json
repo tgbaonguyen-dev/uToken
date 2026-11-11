@@ -13,5 +13,32 @@
       "host": "127.0.0.1",
       "port": 9099
     }
+  },
+  "hosting": {
+    "site": "utoken-78191",
+    "public": "admin-dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "no-referrer"
+          }
+        ]
+      }
+    ]
   }
 }

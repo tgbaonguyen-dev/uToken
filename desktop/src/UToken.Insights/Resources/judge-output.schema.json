@@ -21,7 +21,7 @@
       "type": "array", "maxItems": 5,
       "items": {
         "type": "object", "additionalProperties": false,
-        "required": ["id", "title", "severity", "category", "provider", "evidence", "recommendation", "estimated_impact", "estimated_saving_usd_per_month", "confidence"],
+        "required": ["id", "title", "severity", "category", "provider", "evidence", "recommendation", "estimated_impact", "estimated_saving_usd_per_month", "confidence", "why", "steps"],
         "properties": {
           "id": { "type": "string" }, "title": { "type": "string" },
           "severity": { "enum": ["high", "medium", "low"] },
@@ -30,7 +30,9 @@
           "evidence": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["metric"], "properties": { "metric": { "type": "string" } } } },
           "recommendation": { "type": "string" }, "estimated_impact": { "type": ["string", "null"] },
           "estimated_saving_usd_per_month": { "type": ["number", "null"] },
-          "confidence": { "enum": ["high", "medium", "low"] }
+          "confidence": { "enum": ["high", "medium", "low"] },
+          "why": { "type": "string" },
+          "steps": { "type": "array", "maxItems": 4, "items": { "type": "string" } }
         }
       }
     }

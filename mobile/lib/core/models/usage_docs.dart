@@ -8,9 +8,9 @@ class ProcessMetric {
   final String? provider;
   final double? value;
   factory ProcessMetric.fromMap(JsonMap m) => ProcessMetric(
-      metric: m['metric'] as String? ?? '',
-      label: m['label'] as String? ?? 'no_data',
-      provider: m['provider'] as String?,
+      metric: readString(m['metric']) ?? '',
+      label: readString(m['label']) ?? 'no_data',
+      provider: readString(m['provider']),
       value: readDouble(m['value']));
 }
 
@@ -43,12 +43,12 @@ class SetupMetric {
   String get name =>
       effort == null || effort!.isEmpty ? model : '$model · $effort';
   factory SetupMetric.fromMap(JsonMap m) => SetupMetric(
-      provider: m['provider'] as String? ?? '',
-      model: m['model'] as String? ?? '',
-      taskGroup: m['task_group'] as String? ?? '',
+      provider: readString(m['provider']) ?? '',
+      model: readString(m['model']) ?? '',
+      taskGroup: readString(m['task_group']) ?? '',
       tasks: readInt(m['n_tasks']) ?? 0,
-      verdict: m['verdict'] as String? ?? 'insufficient',
-      crossTool: m['cross_tool'] as bool? ?? false,
+      verdict: readString(m['verdict']) ?? 'insufficient',
+      crossTool: readBool(m['cross_tool']) ?? false,
       sr: readDouble(m['sr']),
       cpstMicro: readInt(m['cpst_micro']),
       effort: m['effort'] as String?,
@@ -74,14 +74,14 @@ class EfficiencyDoc {
   final List<SetupMetric> setups;
   final int? undeterminedTasks;
   factory EfficiencyDoc.fromMap(JsonMap m) => EfficiencyDoc(
-      periodStart: m['period_start'] as String? ?? '',
-      periodEnd: m['period_end'] as String? ?? '',
-      generatedAt: m['generated_at'] as String? ?? '',
-      processMetrics: ((m['process_metrics'] as List?) ?? const [])
-          .map((e) => ProcessMetric.fromMap((e as Map).cast<String, dynamic>()))
+      periodStart: readString(m['period_start']) ?? '',
+      periodEnd: readString(m['period_end']) ?? '',
+      generatedAt: readString(m['generated_at']) ?? '',
+      processMetrics: readList(m['process_metrics'])
+          .map((e) => ProcessMetric.fromMap(readMap(e)))
           .toList(),
-      setups: ((m['setups'] as List?) ?? const [])
-          .map((e) => SetupMetric.fromMap((e as Map).cast<String, dynamic>()))
+      setups: readList(m['setups'])
+          .map((e) => SetupMetric.fromMap(readMap(e)))
           .toList(),
       undeterminedTasks: readInt(m['undetermined_tasks']));
 }
@@ -92,9 +92,9 @@ class Evidence {
       {required this.metric, required this.label, required this.value});
   final String metric, label, value;
   factory Evidence.fromMap(JsonMap m) => Evidence(
-      metric: m['metric'] as String? ?? '',
-      label: m['label'] as String? ?? '',
-      value: m['value'] as String? ?? '');
+      metric: readString(m['metric']) ?? '',
+      label: readString(m['label']) ?? '',
+      value: readString(m['value']) ?? '');
 }
 
 /// A single actionable AI recommendation.
@@ -109,25 +109,38 @@ class Insight {
       required this.confidence,
       this.provider,
       this.estimatedImpact,
-      this.estimatedSavingMicroPerMonth});
+      this.estimatedSavingMicroPerMonth,
+      this.why = '',
+      this.steps = const []});
   final String id, title, severity, category, recommendation, confidence;
+
+  /// Why the pattern costs tokens (newer desktop reviews only).
+  final String why;
+
+  /// Concrete actions in order (newer desktop reviews only).
+  final List<String> steps;
   final String? provider, estimatedImpact;
   final int? estimatedSavingMicroPerMonth;
   final List<Evidence> evidence;
   factory Insight.fromMap(JsonMap m) => Insight(
-      id: m['id'] as String? ?? '',
-      title: m['title'] as String? ?? '',
-      severity: m['severity'] as String? ?? 'low',
-      category: m['category'] as String? ?? '',
-      evidence: ((m['evidence'] as List?) ?? const [])
-          .map((e) => Evidence.fromMap((e as Map).cast<String, dynamic>()))
+      id: readString(m['id']) ?? '',
+      title: readString(m['title']) ?? '',
+      severity: readString(m['severity']) ?? 'low',
+      category: readString(m['category']) ?? '',
+      evidence: readList(m['evidence'])
+          .map((e) => Evidence.fromMap(readMap(e)))
           .toList(),
-      recommendation: m['recommendation'] as String? ?? '',
-      confidence: m['confidence'] as String? ?? 'low',
-      provider: m['provider'] as String?,
-      estimatedImpact: m['estimated_impact'] as String?,
+      recommendation: readString(m['recommendation']) ?? '',
+      confidence: readString(m['confidence']) ?? 'low',
+      provider: readString(m['provider']),
+      estimatedImpact: readString(m['estimated_impact']),
       estimatedSavingMicroPerMonth:
-          readInt(m['estimated_saving_micro_per_month']));
+          readInt(m['estimated_saving_micro_per_month']),
+      why: readString(m['why']) ?? '',
+      steps: [
+        for (final s in readList(m['steps']))
+          if (s is String && s.trim().isNotEmpty) s.trim()
+      ]);
 }
 
 /// One of the six scored review dimensions (cache, context, ...).
@@ -155,28 +168,35 @@ class InsightsDoc {
       this.periodStart,
       this.periodEnd,
       this.provider,
-      this.model});
+      this.model,
+      this.reviewMode,
+      this.reviewFrom,
+      this.reviewThrough});
   final String status, generatedAt, headline;
   final List<Insight> insights;
   final List<InsightDimension> dimensions;
   final double? score;
   final String? grade, errorCode, periodStart, periodEnd, provider, model;
+  final String? reviewMode, reviewFrom, reviewThrough;
   factory InsightsDoc.fromMap(JsonMap m) => InsightsDoc(
-      status: m['status'] as String? ?? 'failed',
-      generatedAt: m['generated_at'] as String? ?? '',
-      headline: m['headline'] as String? ?? '',
-      insights: ((m['insights'] as List?) ?? const [])
-          .map((e) => Insight.fromMap((e as Map).cast<String, dynamic>()))
+      status: readString(m['status']) ?? 'failed',
+      generatedAt: readString(m['generated_at']) ?? '',
+      headline: readString(m['headline']) ?? '',
+      insights: readList(m['insights'])
+          .map((e) => Insight.fromMap(readMap(e)))
           .toList(),
       dimensions: ((m['dimensions'] as List?) ?? const [])
           .map((e) =>
               InsightDimension.fromMap((e as Map).cast<String, dynamic>()))
           .toList(),
       score: readDouble(m['score']),
-      grade: m['grade'] as String?,
-      errorCode: m['error_code'] as String?,
-      periodStart: m['period_start'] as String?,
-      periodEnd: m['period_end'] as String?,
-      provider: m['provider'] as String?,
-      model: m['model'] as String?);
+      grade: readString(m['grade']),
+      errorCode: readString(m['error_code']),
+      periodStart: readString(m['period_start']),
+      periodEnd: readString(m['period_end']),
+      provider: readString(m['provider']),
+      model: readString(m['model']),
+      reviewMode: readString(m['review_mode']),
+      reviewFrom: readString(m['review_from']),
+      reviewThrough: readString(m['review_through']));
 }

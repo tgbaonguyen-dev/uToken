@@ -10,6 +10,48 @@ import 'package:flutter/foundation.dart';
 class CrashReporter {
   CrashReporter._();
 
+  /// Signed-in account; uncaught errors are also logged under it so the admin
+  /// console can list them (Crashlytics data is not readable from the web).
+  static String? currentUid;
+  static String appVersion = '';
+  static final _sent = <String>{};
+  static const _maxReportsPerLaunch = 5;
+
+  /// Remembers who is signed in. Pure Dart, so it is safe in widget tests.
+  static void bindUser(String? uid, {required String version}) {
+    currentUid = uid;
+    appVersion = version;
+  }
+
+  /// Best-effort Firestore copy of an uncaught error (deduplicated, capped).
+  static Future<void> _logToFirestore(Object error, StackTrace? stack,
+      {required bool fatal, String? context}) async {
+    final uid = currentUid;
+    final message = error.toString();
+    if (uid == null || _sent.length >= _maxReportsPerLaunch) return;
+    if (!_sent.add(message)) return;
+    try {
+      await FirebaseCrashlytics.instance.setUserIdentifier(uid);
+      final trace = stack?.toString() ?? '';
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('crash_reports')
+          .add({
+        'type': fatal ? 'fatal_error' : 'error',
+        'platform': defaultTargetPlatform.name,
+        'app_version': appVersion,
+        'screen': context ?? '',
+        'message': message.length > 500 ? message.substring(0, 500) : message,
+        'stack': trace.length > 4000 ? trace.substring(0, 4000) : trace,
+        'created_at': FieldValue.serverTimestamp(),
+        'client_time': DateTime.now().toUtc().toIso8601String(),
+      }).timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Reporting must never throw from an error handler.
+    }
+  }
+
   /// Call once, right after `Firebase.initializeApp()`.
   static Future<void> install() async {
     final crashlytics = FirebaseCrashlytics.instance;
@@ -18,9 +60,12 @@ class CrashReporter {
       // Keep the red screen and console output in debug builds.
       FlutterError.presentError(details);
       crashlytics.recordFlutterFatalError(details);
+      unawaited(_logToFirestore(details.exception, details.stack,
+          fatal: true, context: details.context?.toDescription()));
     };
     PlatformDispatcher.instance.onError = (error, stack) {
       crashlytics.recordError(error, stack, fatal: true);
+      unawaited(_logToFirestore(error, stack, fatal: true));
       return true;
     };
   }

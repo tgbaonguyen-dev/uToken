@@ -40,10 +40,10 @@ public sealed class AppSettings
     /// Thứ tự đọc (sau ghi đè trước): appsettings.json → appsettings.Local.json → biến môi trường UTOKEN_*.
     /// Ví dụ biến môi trường: UTOKEN_Firebase__UseEmulator=false
     /// </summary>
-    public static AppSettings Load()
+    public static AppSettings Load(string? baseDirectory = null)
     {
         var config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
+            .SetBasePath(baseDirectory ?? AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
             .AddJsonFile("appsettings.Local.json", optional: true)
             .AddEnvironmentVariables("UTOKEN_")

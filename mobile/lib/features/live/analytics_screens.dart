@@ -19,7 +19,12 @@ class LiveAnalyticsScreen extends StatefulWidget {
   State<LiveAnalyticsScreen> createState() => _LiveAnalyticsScreenState();
 }
 
-class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen> {
+class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen>
+    with DayRollover<LiveAnalyticsScreen> {
+  @override
+  DateTime get localNow => widget.args.now();
+  @override
+  void onDayChanged() => _daily = widget.args.daily();
   late UsagePeriod _period = widget.initialPeriod;
   late Stream<List<DailyDoc>> _daily = widget.args.daily();
 
@@ -36,7 +41,7 @@ class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen> {
       body: UtStream<List<DailyDoc>>(
         stream: _daily,
         builder: (context, all) {
-          final now = DateTime.now();
+          final now = localNow;
           final docs = filterPeriod(all, _period, now);
           final t = sumTotals(docs);
           final models = byModel(docs);
@@ -233,7 +238,7 @@ String _earlyLeader(List<SetupMetric> setups) {
           {'g': groupLabel(g), 'm': ranked.first.$1.name});
     }
   }
-  return 'Not enough chats to compare models yet';
+  return tr('Not enough chats to compare models yet');
 }
 
 /// M05B — Efficiency: outcomes, reliability, process health and per-tool view.
@@ -434,9 +439,9 @@ class _OutcomeMix extends StatelessWidget {
     int sum(String k) => docs.fold(0, (a, d) => a + (d.tasksByState[k] ?? 0));
     const red = Color(0xFFE0525B);
     final parts = [
-      ('Verified success', sum('verified_success'), UtColors.green),
+      (tr('Verified success'), sum('verified_success'), UtColors.green),
       (
-        'Likely success',
+        tr('Likely success'),
         sum('likely_success'),
         UtColors.green.withValues(alpha: 0.5)
       ),
@@ -611,9 +616,9 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (text, tone) = switch (metric.label) {
-      'good' => ('Good', UtTone.good),
-      'review' => ('Review', UtTone.review),
-      _ => ('No data', UtTone.neutral),
+      'good' => (tr('Good'), UtTone.good),
+      'review' => (tr('Review'), UtTone.review),
+      _ => (tr('No data'), UtTone.neutral),
     };
     return UtCard(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -774,7 +779,7 @@ String pendingReason(SetupMetric s) {
     return tr(
         'Results still vary too much (±{p})', {'p': pct(s.mde!, digits: 0)});
   }
-  return 'Needs another setup with 20+ chats to compare against';
+  return tr('Needs another setup with 20+ chats to compare against');
 }
 
 /// M05C — Compare models by task size.

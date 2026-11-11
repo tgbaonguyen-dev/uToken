@@ -31,7 +31,9 @@ public sealed record JudgeInsightOutput(
     [property: JsonPropertyName("estimated_impact")] string? EstimatedImpact,
     [property: JsonPropertyName("estimated_saving_usd_per_month")]
     double? EstimatedSavingUsdPerMonth,
-    [property: JsonPropertyName("confidence")] string Confidence);
+    [property: JsonPropertyName("confidence")] string Confidence,
+    [property: JsonPropertyName("why")] string? Why = null,
+    [property: JsonPropertyName("steps")] IReadOnlyList<string>? Steps = null);
 
 /// <summary>Maps raw judge output into the validated insight contract.</summary>
 public static class JudgeOutputMapper
@@ -61,7 +63,9 @@ public static class JudgeOutputMapper
                 i.EstimatedSavingUsdPerMonth is null
                     ? null
                     : (long)Math.Round(i.EstimatedSavingUsdPerMonth.Value * 1_000_000d),
-                i.Confidence))
+                i.Confidence,
+                i.Why ?? "",
+                i.Steps ?? []))
             .ToArray();
         var raw = new InsightDoc(
             "ok",

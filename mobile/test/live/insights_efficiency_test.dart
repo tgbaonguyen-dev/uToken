@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:utoken_mobile/features/ai_review/phone_judge.dart';
+import 'package:utoken_mobile/features/ai_review/review_window.dart';
+import 'package:utoken_mobile/core/data/usage_repository.dart';
 import 'package:utoken_mobile/features/live/tokens_screens.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:utoken_mobile/core/data/local_prefs.dart';
@@ -14,6 +16,23 @@ import 'package:utoken_mobile/features/live/insights_screens.dart';
 import 'package:utoken_mobile/features/live/live_common.dart';
 
 import 'live_screens_test.dart' show FakeUsageRepository, app, keyedDoc;
+
+class _ScopeJudge extends PhoneJudge {
+  _ScopeJudge() : super(MemoryPrefsStore());
+  final scopes = <ReviewScope>[];
+  @override
+  bool get hasKey => true;
+  @override
+  Future<void> run(
+      {required String uid,
+      required UsageRepository repository,
+      required String language,
+      ReviewScope scope = ReviewScope.last30Days}) async {
+    scopes.add(scope);
+    step = JudgeStep.done;
+    notifyListeners();
+  }
+}
 
 final _modelReply = {
   'score': 64,
@@ -94,6 +113,8 @@ const _review = InsightsDoc(
               value: '4.2×')
         ],
         recommendation: 'Open a new chat when the task changes.',
+        why: 'Long chats resend the whole history on every turn.',
+        steps: ['Run /clear between tasks', 'Keep notes in a file'],
         estimatedSavingMicroPerMonth: 12500000,
         confidence: 'high'),
   ],
@@ -112,6 +133,34 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
+  testWidgets(
+      'the review picker routes both scopes and opening it makes no AI call',
+      (tester) async {
+    await phone(tester);
+    final repository = FakeUsageRepository();
+    addTearDown(repository.close);
+    final judge = _ScopeJudge();
+    PhoneJudge.instance = judge;
+    addTearDown(judge.dispose);
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
+    await tester.pumpWidget(app(LiveInsightsScreen(args: argsFor(repository))));
+    repository.insights.add(_review);
+    await tester.pumpAndSettle();
+    expect(judge.scopes, isEmpty);
+    for (final entry in [
+      ('Review new usage', ReviewScope.sinceLastReview),
+      ('Review 30 days', ReviewScope.last30Days),
+    ]) {
+      await tester.tap(find.text('Run new review'));
+      await tester.pumpAndSettle();
+      expect(
+          judge.scopes.length, entry.$2 == ReviewScope.sinceLastReview ? 0 : 1);
+      await tester.tap(find.byKey(ValueKey('figma-hotspot-${entry.$1}')));
+      await tester.pumpAndSettle();
+      expect(judge.scopes.last, entry.$2);
+    }
+  });
+
   testWidgets('insights show score, priorities first and full breakdown',
       (tester) async {
     await phone(tester);
@@ -124,9 +173,10 @@ void main() {
     expect(find.text('Grade B'), findsOneWidget);
     expect(find.text('Run new review'), findsOneWidget);
     expect(find.text('What to fix first'), findsOneWidget);
-    final high =
-        tester.getTopLeft(find.text('Start fresh chats for new tasks'));
+    // Measure both after scrolling so the comparison shares one offset.
     await tester.scrollUntilVisible(find.text('Retry less often'), 200);
+    final high = tester.getTopLeft(
+        find.text('Start fresh chats for new tasks', skipOffstage: false));
     final low = tester.getTopLeft(find.text('Retry less often'));
     expect(high.dy < low.dy, isTrue);
     await tester.scrollUntilVisible(
@@ -139,13 +189,25 @@ void main() {
     await phone(tester);
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
-    repository.dailyValues
-        .add(keyedDoc(DateTime.now(), {'claude_code|sonnet|none': 3000}));
+    repository.dailyValues.add(keyedDoc(DateTime.now(), {
+      'claude_code|sonnet|none': 3000,
+      'claude_code|opus|k1': 1000,
+      'codex|gpt-5|k1': 9000,
+    }));
+    repository.projectNames = {'k1': 'uToken'};
     await tester.pumpWidget(app(
         LiveInsightDetailScreen(args: argsFor(repository), insightId: 'trim')));
     repository.insights.add(_review);
     await tester.pumpAndSettle();
     expect(find.text('What to do'), findsOneWidget);
+    expect(find.text('Long chats resend the whole history on every turn.'),
+        findsOneWidget);
+    expect(find.text('Run /clear between tasks'), findsOneWidget);
+    // Contributors come from this tool only (Codex excluded), with names.
+    await tester.scrollUntilVisible(find.text('Top projects'), 200);
+    expect(find.text('sonnet'), findsOneWidget);
+    expect(find.text('gpt-5'), findsNothing);
+    expect(find.text('uToken'), findsOneWidget);
     expect(find.text('\$150.00'), findsOneWidget); // yearly saving
     await tester.scrollUntilVisible(find.text('Claude · last 30 days'), 200);
     expect(find.text('Why this was flagged'), findsOneWidget);
@@ -173,6 +235,7 @@ void main() {
       (tester) async {
     await phone(tester);
     final repository = FakeUsageRepository();
+    repository.efficiencyStream = Stream.value(null);
     addTearDown(repository.close);
     final now = DateTime.now();
     for (var i = 0; i < 4; i++) {
@@ -214,7 +277,13 @@ void main() {
     await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 200)));
     await tester.pumpAndSettle();
-    // No review yet + key present → runs automatically once.
+    // Opening Insights never starts a paid call before the user chooses a scope.
+    expect(repository.savedInsights, isEmpty);
+    await tester.tap(find.text('Run AI review'));
+    await tester.pumpAndSettle();
+    expect(find.text('Since last successful review'), findsOneWidget);
+    await tester.tap(find.text('Last 30 days'));
+    await tester.pumpAndSettle();
     expect(repository.savedInsights.single['status'], 'ok');
     expect(find.text('Use the cache more'), findsOneWidget);
     // The invented metric was dropped; the real one kept the brief's value.

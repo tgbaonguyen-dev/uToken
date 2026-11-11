@@ -41,6 +41,13 @@ class LocalPrefs extends ChangeNotifier {
 
   final PrefsStore _store;
   bool _loaded = false;
+  String? saveError;
+  bool isSaving = false;
+  bool _pending = false;
+  int _version = 0;
+  Future<void>? _writes;
+  Future<void>? _localWrites;
+  Future<void> retrySave() => _save();
 
   double? _budgetUsd;
   TokenFormat _tokenFormat = TokenFormat.compact;
@@ -75,8 +82,12 @@ class LocalPrefs extends ChangeNotifier {
     unbindAccount();
     _uid = uid;
     _repository = repository;
+    final restored = _restorePending(uid, repository);
     _remote = repository.watchPreferences(uid: uid).listen(
       (values) async {
+        await restored;
+        if (_uid != uid || _repository != repository) return;
+        if (_pending && _cachedFor == uid) return;
         if (values != null) {
           _apply(values);
         } else if (_cachedFor == uid) {
@@ -86,8 +97,14 @@ class LocalPrefs extends ChangeNotifier {
           // Cache belongs to another account; start clean.
           _apply(const {});
         }
+        if (_uid != uid || _repository != repository) return;
         _cachedFor = uid;
-        await _store.write('prefs_uid', uid);
+        try {
+          await _store.write('prefs_uid', uid);
+        } catch (_) {
+          saveError = 'Preferences could not be saved. Retry saving.';
+          notifyListeners();
+        }
       },
       onError: (Object error) =>
           debugPrint('Could not read account preferences: $error'),
@@ -97,6 +114,11 @@ class LocalPrefs extends ChangeNotifier {
   void unbindAccount() {
     _remote?.cancel();
     _remote = null;
+    _version++;
+    _writes = null;
+    _pending = false;
+    saveError = null;
+    isSaving = false;
     _uid = null;
     _repository = null;
   }
@@ -118,17 +140,109 @@ class LocalPrefs extends ChangeNotifier {
       ..clear()
       ..addAll(reviewed is List ? reviewed.whereType<String>() : const []);
     notifyListeners();
-    _cache();
+    unawaited(_cache().catchError((Object _) {
+      saveError = "Preferences could not be saved. Retry saving.";
+      notifyListeners();
+    }));
   }
 
-  Future<void> _push() async {
-    final uid = _uid, repository = _repository;
-    if (uid == null || repository == null) return;
+  Future<void> _push() => _save();
+
+  String _pendingKey(String uid) => 'pending_preferences_$uid';
+
+  Future<void> _restorePending(String uid, UsageRepository repository) async {
+    final version = _version;
     try {
-      await repository.savePreferences(uid: uid, values: _values);
-    } catch (error) {
-      debugPrint('Could not save account preferences: $error');
+      final raw = await _store.read(_pendingKey(uid));
+      if (_uid != uid ||
+          _repository != repository ||
+          _version != version ||
+          raw == null ||
+          raw.isEmpty) {
+        return;
+      }
+      final values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      _pending = true;
+      _cachedFor = uid;
+      _apply(values);
+      saveError =
+          'Preferences are waiting to be saved to your account. Retry saving.';
+      notifyListeners();
+    } catch (_) {
+      if (_uid == uid && _repository == repository && _version == version) {
+        saveError =
+            'Could not restore pending preferences. Check local storage.';
+        notifyListeners();
+      }
     }
+  }
+
+  Future<void> _save() {
+    final uid = _uid, repository = _repository;
+    final version = ++_version;
+    final values = _values;
+    _pending = true;
+    _cachedFor = uid;
+    isSaving = true;
+    saveError = null;
+    notifyListeners();
+    // Persist every intent independently of an older network write waiting offline.
+    var persisted = false;
+    final local = (_localWrites ?? Future<void>.value()).then((_) async {
+      if (uid == null && _uid != null) return;
+      try {
+        if (uid != null) {
+          await _store.write(_pendingKey(uid), jsonEncode(values));
+        }
+        if (_uid != uid || _repository != repository) {
+          persisted = true;
+          return;
+        }
+        await _store.write(
+            'budget_usd', (values['budget_usd'] as double?)?.toString() ?? '');
+        await _store.write('token_format', values['token_format'] as String);
+        await _store.write(
+            'reviewed_insights', jsonEncode(values['reviewed_insights']));
+        if (uid != null) await _store.write('prefs_uid', uid);
+        persisted = true;
+      } catch (_) {
+        if (_version == version) {
+          saveError = 'Preferences could not be saved locally. Retry saving.';
+          notifyListeners();
+        }
+      }
+    });
+    _localWrites = local;
+    final task = (_writes ?? Future<void>.value()).then((_) async {
+      await local;
+      if (!persisted || _uid != uid || _repository != repository) return;
+      try {
+        if (uid != null && repository != null) {
+          await repository.savePreferences(uid: uid, values: values);
+        }
+        final clear = (_localWrites ?? Future<void>.value()).then((_) async {
+          if (_version != version || _uid != uid || _repository != repository) {
+            return;
+          }
+          if (uid != null) await _store.write(_pendingKey(uid), '');
+          if (_version == version) _pending = false;
+        });
+        _localWrites = clear;
+        await clear;
+      } catch (_) {
+        if (_version == version) {
+          saveError =
+              'Preferences could not be saved. Your changes are kept here; retry saving.';
+        }
+      }
+    }).whenComplete(() {
+      if (_version == version) {
+        isSaving = false;
+        notifyListeners();
+      }
+    });
+    _writes = task;
+    return task;
   }
 
   Future<void> _cache() async {
@@ -161,22 +275,18 @@ class LocalPrefs extends ChangeNotifier {
   Future<void> setMonthlyBudget(double? usd) async {
     _budgetUsd = usd;
     notifyListeners();
-    await _store.write('budget_usd', usd?.toString() ?? '');
-    await _push();
+    await _save();
   }
 
   Future<void> setTokenFormat(TokenFormat format) async {
     _tokenFormat = format;
     notifyListeners();
-    await _store.write(
-        'token_format', format == TokenFormat.full ? 'full' : 'compact');
-    await _push();
+    await _save();
   }
 
   Future<void> markReviewed(String insightId) async {
     if (!_reviewed.add(insightId)) return;
     notifyListeners();
-    await _store.write('reviewed_insights', jsonEncode(_reviewed.toList()));
-    await _push();
+    await _save();
   }
 }

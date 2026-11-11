@@ -21,6 +21,25 @@ public sealed class JudgeSettingsViewModelTests : IDisposable
         return new(api, new MainViewModel(api));
     }
 
+    [AvaloniaFact]
+    public async Task Repeating_desktop_review_runs_the_30_day_review_again()
+    {
+        _home.Clock.Now = DateTimeOffset.Parse("2026-11-06T16:00:00Z");
+        _home.AddClaudeUsage(6, distinctSessions: true);
+        using var scope = Open();
+        var vm = scope.Vm;
+        await vm.ShowSettingsCommand.ExecuteAsync(null);
+        vm.JudgeApiKey = "test-key";
+        await vm.SaveSettingsCommand.ExecuteAsync(null);
+        await vm.RunJudgeNowCommand.ExecuteAsync(null);
+        Assert.False(vm.JudgeMessageIsError);
+        var calls = _judge.Calls;
+        await vm.RunJudgeNowCommand.ExecuteAsync(null);
+        Assert.Contains("AI review score", vm.JudgeMessage);
+        Assert.False(vm.JudgeMessageIsError);
+        Assert.Equal(calls + 1, _judge.Calls);
+    }
+
     [Fact]
     public async Task Defaults_to_gemini_without_key()
     {

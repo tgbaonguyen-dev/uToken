@@ -1,4 +1,5 @@
 using System.Text;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -8,6 +9,8 @@ using UToken.Sync.Auth;
 using UToken.Insights;
 
 namespace UToken.Sync;
+
+public sealed class DesktopAlreadyLinkedException() : Exception("This account is linked to another desktop. Use that desktop to sync.");
 
 /// <summary>Tài khoản đã đăng nhập (không chứa token).</summary>
 public sealed record CloudAccount(string Uid, string Email, string? DisplayName, string ProjectId, bool Emulator);
@@ -25,8 +28,12 @@ public interface ICloudSync
 
     Task SignOutAsync(CancellationToken ct = default);
 
-    /// <summary>Ghi users/{uid}/daily/{date}, users/{uid}/efficiency/current và users/{uid}.last_sync_at. Trả về số byte đã gửi.</summary>
-    Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default);
+    /// <summary>
+    /// Ghi users/{uid}/daily/{date}, users/{uid}/efficiency/current và users/{uid}.last_sync_at. Trả về số byte đã gửi.
+    /// projectNames khác null thì ghi đè users/{uid}/meta/projects (project_key → tên thư mục cuối; rỗng = xóa tên).
+    /// </summary>
+    Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency,
+        IReadOnlyDictionary<string, string>? projectNames = null, CancellationToken ct = default);
 
     Task<long> UploadInsightsAsync(InsightDoc insights, CancellationToken ct = default);
 
@@ -59,9 +66,11 @@ public sealed class FirebaseCloudSync : ICloudSync
     private readonly TimeProvider _clock;
     private readonly SemaphoreSlim _tokenLock = new(1, 1);
     private FirebaseSession? _session;
+    private string? _desktopId;
 
-    public FirebaseCloudSync(HttpClient http, FirebaseOptions options, string sessionFile, IGoogleSignIn? google = null, TimeProvider? clock = null)
+    public FirebaseCloudSync(HttpClient http, FirebaseOptions options, string sessionFile, IGoogleSignIn? google = null, TimeProvider? clock = null, string? desktopId = null)
     {
+        _desktopId = desktopId;
         _http = http;
         _options = options;
         _sessionFile = sessionFile;
@@ -119,25 +128,35 @@ public sealed class FirebaseCloudSync : ICloudSync
         }
     }
 
-    public async Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency, CancellationToken ct = default)
+    public async Task<long> UploadAsync(IReadOnlyList<DailyDoc> daily, EfficiencyDoc efficiency,
+        IReadOnlyDictionary<string, string>? projectNames = null, CancellationToken ct = default)
     {
         await _tokenLock.WaitAsync(ct);
         try
         {
             if (_session is not { } session) throw new CloudAuthException("Not signed in.");
+            await EnsureCollectorAsync(session.Uid, ct);
             string uid = session.Uid;
 
             var writes = new List<JsonObject>();
             foreach (var d in daily)
                 writes.Add(Update($"users/{uid}/daily/{d.Date}", FirestoreValues.Fields(d)));
             writes.Add(Update($"users/{uid}/efficiency/current", FirestoreValues.Fields(efficiency)));
+            if (projectNames is not null)
+                writes.Add(Update($"users/{uid}/meta/projects", new JsonObject
+                {
+                    ["names"] = FirestoreValues.Value(projectNames.ToDictionary(p => p.Key, p => p.Value)),
+                    ["updated_at"] = FirestoreValues.Value(_clock.GetUtcNow()),
+                }));
             // Chỉ cập nhật đúng một trường ở users/{uid}, không ghi đè dữ liệu mobile đặt ở đó.
             var profile = Update($"users/{uid}", new JsonObject
             {
                 ["last_sync_at"] = FirestoreValues.Value(_clock.GetUtcNow()),
                 ["desktop_name"] = FirestoreValues.Value(Environment.MachineName),
+                ["desktop_os"] = FirestoreValues.Value(System.Runtime.InteropServices.RuntimeInformation.OSDescription),
+                ["email"] = FirestoreValues.Value(session.Email),
             });
-            profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at", "desktop_name") };
+            profile["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("last_sync_at", "desktop_name", "desktop_os", "email") };
             writes.Add(profile);
 
             long bytes = 0;
@@ -163,6 +182,7 @@ public sealed class FirebaseCloudSync : ICloudSync
         try
         {
             if (_session is not { } session) throw new CloudAuthException("Not signed in.");
+            await EnsureCollectorAsync(session.Uid, ct);
             var body = new JsonObject { ["writes"] = new JsonArray(Update($"users/{session.Uid}/insights/current", FirestoreValues.Fields(insights))) }.ToJsonString();
             await _firestore.CommitAsync(body, ct);
             return Encoding.UTF8.GetByteCount(body);
@@ -171,12 +191,64 @@ public sealed class FirebaseCloudSync : ICloudSync
         finally { _tokenLock.Release(); }
     }
 
+    private string DesktopId()
+    {
+        if (_desktopId is not null) return _desktopId;
+        var folder = Path.GetDirectoryName(Path.GetFullPath(_sessionFile))!;
+        Directory.CreateDirectory(folder);
+        var path = Path.Combine(folder, "desktop-id.txt");
+        if (!File.Exists(path))
+        {
+            try
+            {
+                using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
+                using var writer = new StreamWriter(stream);
+                writer.Write(Guid.NewGuid().ToString("N"));
+            }
+            catch (IOException) when (File.Exists(path)) { }
+        }
+        var id = File.ReadAllText(path).Trim();
+        if (!Guid.TryParseExact(id, "N", out _)) throw new InvalidDataException("Invalid desktop installation identity.");
+        return _desktopId = id;
+    }
+
+    private async Task EnsureCollectorAsync(string uid, CancellationToken ct)
+    {
+        var id = DesktopId();
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var profile = await _firestore.GetDocumentAsync($"users/{uid}", ct);
+            var owner = profile?["fields"]?["collector_id"]?["stringValue"]?.GetValue<string>();
+            if (owner == id) return;
+            if (!string.IsNullOrEmpty(owner)) throw new DesktopAlreadyLinkedException();
+            var write = Update($"users/{uid}", new JsonObject
+            {
+                ["collector_id"] = FirestoreValues.Value(id),
+                ["desktop_name"] = FirestoreValues.Value(Environment.MachineName),
+            });
+            write["updateMask"] = new JsonObject { ["fieldPaths"] = new JsonArray("collector_id", "desktop_name") };
+            write["currentDocument"] = profile is null
+                ? new JsonObject { ["exists"] = false }
+                : new JsonObject { ["updateTime"] = profile["updateTime"]!.GetValue<string>() };
+            try
+            {
+                await _firestore.CommitAsync(new JsonObject { ["writes"] = new JsonArray(write) }.ToJsonString(), ct);
+                return;
+            }
+            catch (HttpRequestException ex) when (attempt == 0 && ex.StatusCode is HttpStatusCode.Conflict or HttpStatusCode.PreconditionFailed or HttpStatusCode.BadRequest)
+            { /* Another desktop or profile update may have won; read before retrying. */ }
+        }
+    }
+
     public async Task<IReadOnlyList<MobileSyncRequest>> ClaimSyncRequestsAsync(CancellationToken ct = default)
     {
         await _tokenLock.WaitAsync(ct);
         try
         {
             if (_session is not { } session) return [];
+            var profile = await _firestore.GetDocumentAsync($"users/{session.Uid}", ct);
+            var owner = profile?["fields"]?["collector_id"]?["stringValue"]?.GetValue<string>();
+            if (!string.IsNullOrEmpty(owner) && owner != DesktopId()) return [];
             var query = new JsonObject
             {
                 ["from"] = new JsonArray(new JsonObject { ["collectionId"] = "sync_requests" }),
@@ -185,19 +257,29 @@ public sealed class FirebaseCloudSync : ICloudSync
                     ["fieldFilter"] = new JsonObject
                     {
                         ["field"] = new JsonObject { ["fieldPath"] = "state" },
-                        ["op"] = "EQUAL",
-                        ["value"] = FirestoreValues.Value("pending"),
+                        ["op"] = "IN",
+                        ["value"] = new JsonObject { ["arrayValue"] = new JsonObject { ["values"] = new JsonArray(FirestoreValues.Value("pending"), FirestoreValues.Value("running")) } },
                     },
                 },
                 ["limit"] = 20,
             };
             var docs = await _firestore.RunQueryAsync($"users/{session.Uid}", query, ct);
-            var requests = docs.Select(d => new MobileSyncRequest(
+            // shortcut: leases expire after 30 minutes; add renewal if syncs can exceed that duration.
+            var cutoff = _clock.GetUtcNow().AddMinutes(-30);
+            var claimable = docs.Where(d =>
+            {
+                var fields = d["fields"];
+                if (fields?["state"]?["stringValue"]?.GetValue<string>() != "running") return true;
+                var started = fields?["started_at"]?["stringValue"]?.GetValue<string>();
+                return !DateTimeOffset.TryParse(started, out var at) || at <= cutoff;
+            }).ToList();
+            var ids = claimable.Select(d => d["name"]!.GetValue<string>().Split('/')[^1]).ToList();
+            var versions = claimable.Where(d => d["updateTime"] is not null).ToDictionary(
+                d => d["name"]!.GetValue<string>().Split('/')[^1], d => d["updateTime"]!.GetValue<string>());
+            if (ids.Count > 0) await SetRequestStateAsync(session.Uid, ids, "running", null, finished: false, ct, versions);
+            return claimable.Select(d => new MobileSyncRequest(
                 d["name"]!.GetValue<string>().Split('/')[^1],
                 d["fields"]?["trigger"]?["stringValue"]?.GetValue<string>() ?? "manual_refresh")).ToList();
-            if (requests.Count > 0)
-                await SetRequestStateAsync(session.Uid, requests.Select(r => r.Id).ToList(), "running", null, finished: false, ct);
-            return requests;
         }
         catch (CloudAuthException) { ClearSession(); throw; }
         finally { _tokenLock.Release(); }
@@ -216,7 +298,7 @@ public sealed class FirebaseCloudSync : ICloudSync
         finally { _tokenLock.Release(); }
     }
 
-    private async Task SetRequestStateAsync(string uid, IReadOnlyList<string> ids, string state, string? errorCode, bool finished, CancellationToken ct)
+    private async Task SetRequestStateAsync(string uid, IReadOnlyList<string> ids, string state, string? errorCode, bool finished, CancellationToken ct, IReadOnlyDictionary<string, string>? versions = null)
     {
         var writes = new JsonArray();
         foreach (var id in ids)
@@ -230,9 +312,16 @@ public sealed class FirebaseCloudSync : ICloudSync
                 mask.Add("finished_at");
                 mask.Add("error_code");
             }
+            else
+            {
+                fields["started_at"] = FirestoreValues.Value(_clock.GetUtcNow().ToString("O"));
+                mask.Add("started_at");
+            }
             var write = Update($"users/{uid}/sync_requests/{id}", fields);
             write["updateMask"] = new JsonObject { ["fieldPaths"] = mask };
-            write["currentDocument"] = new JsonObject { ["exists"] = true };
+            write["currentDocument"] = versions is not null && versions.TryGetValue(id, out var version)
+                ? new JsonObject { ["updateTime"] = version }
+                : new JsonObject { ["exists"] = true };
             writes.Add(write);
         }
         await _firestore.CommitAsync(new JsonObject { ["writes"] = writes }.ToJsonString(), ct);

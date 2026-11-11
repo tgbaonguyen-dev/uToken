@@ -1,0 +1,54 @@
+{
+  "date": "2026-11-11",
+  "project": "utoken-78191",
+  "device": "user-started Android emulator-5554; not physical hardware",
+  "dotnet_regression_suite": {
+    "passed": 265,
+    "failed": 0,
+    "skipped": 4,
+    "skip_reason": "production tests are opt-in; 2 Firebase live checks and 1 roundtrip were run separately and passed"
+  },
+  "production_roundtrip": {
+    "passed": true,
+    "retained_daily_documents_compared": 27,
+    "inconsistent_cloud_token_totals_after_sync": 0,
+    "baseline_cloud_tokens": 1772428529,
+    "controlled_delta": 1000,
+    "edited_cloud_and_mobile_tokens": 1772429529,
+    "restored_cloud_and_mobile_tokens": 1772598119,
+    "restoration_compared_to": "latest SQLite daily; new real usage arrived during test",
+    "paid_ai_called": false,
+    "desktop_ui_automated": false,
+    "edit_method": "authenticated Firestore REST with updateTime precondition",
+    "cleanup": "controlled delta removed by manual desktop sync"
+  },
+  "offline_android": {
+    "preference_changed_offline": true,
+    "preference_survived_full_restart": true,
+    "pending_save_visible": true,
+    "cached_usage_visible": true,
+    "refresh_error_visible": true,
+    "network_restored": true,
+    "original_compact_format_restored": true,
+    "save_error_absent_after_reconnect": true
+  },
+  "npm": {
+    "clean_install_passed": true,
+    "tests_passed": 14,
+    "tests_failed": 0,
+    "audit_total": 0,
+    "audit_high": 0,
+    "audit_moderate": 0,
+    "major_transitive_overrides": true,
+    "node_engine_warning_remains": true,
+    "production_deployment_tested": false
+  },
+  "remaining_production_checks": [
+    "fresh Google sign-in, account switch and revocation on Android",
+    "deployed Rules source comparison (management read credential missing)",
+    "mobile-request / desktop-poll / final-status completion path",
+    "physical Android hardware"
+  ],
+  "rules_deployed": false,
+  "committed": false
+}

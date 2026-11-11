@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/figma/presentation/figma_pixel_screen.dart';
@@ -14,6 +15,8 @@ import '../features/insights/presentation/insight_detail_screen.dart';
 import '../core/data/usage_repository.dart';
 import '../features/onboarding/presentation/onboarding_screens.dart';
 import '../core/data/local_prefs.dart';
+import '../core/data/offline_monitor.dart';
+import '../core/firebase/crash_reporter.dart';
 import '../core/data/usage_aggregates.dart';
 import '../features/live/analytics_screens.dart';
 import '../features/live/insights_screens.dart';
@@ -35,7 +38,11 @@ GoRouter createAppRouter(
         if (!auth.ready) {
           return path == '/auth/loading' ? null : '/auth/loading';
         }
-        if (auth.user == null) LocalPrefs.instance.unbindAccount();
+        if (auth.user == null) {
+          LocalPrefs.instance.unbindAccount();
+          OfflineMonitor.unbind();
+          SyncCenter.resetAll();
+        }
         if (auth.user == null && !auth.demoMode) {
           return path == '/welcome' ? null : '/welcome';
         }
@@ -193,6 +200,8 @@ LiveArgs? _liveArgs(MobileAuthController? auth, UsageRepository? usage) {
   if (!_hasRealUser(auth, usage)) return null;
   final uid = auth!.user!.uid;
   LocalPrefs.instance.bindAccount(uid, usage!);
+  OfflineMonitor.bind(uid, usage);
+  _touchProfileOnce(uid, auth.user!, usage);
   return LiveArgs(uid: uid, repository: usage);
 }
 
@@ -229,4 +238,20 @@ Widget? _liveScreen(String id, LiveArgs args, GoRouterState state) {
     'O03' => LiveCostBreakdownScreen(args: args, period: period),
     _ => null,
   };
+}
+
+final _touchedProfiles = <String>{};
+
+/// Once per account per launch: tell the admin console this user is active.
+void _touchProfileOnce(String uid, MobileAuthUser user, UsageRepository usage) {
+  CrashReporter.bindUser(uid, version: appVersion);
+  if (!_touchedProfiles.add(uid)) return;
+  usage
+      .touchProfile(
+          uid: uid,
+          email: user.email,
+          name: user.name,
+          appVersion: appVersion,
+          platform: defaultTargetPlatform.name)
+      .catchError((Object e) => debugPrint('Profile update failed: $e'));
 }

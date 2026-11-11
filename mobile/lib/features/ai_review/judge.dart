@@ -38,7 +38,10 @@ invent numbers. Do not decide which setup is better: setup verdicts come from th
 catalog and must not be changed. Every insight must cite at least one metric.
 Write every text field in clear, concise $language: a short headline, plain-language
 titles, a one-sentence comment per dimension, and one actionable recommendation per
-insight. At most 5 insights, ordered by impact. Base savings estimates only on real
+insight. For each insight also give "why": one or two sentences on how this pattern
+wastes tokens or money for this developer, and "steps": 2-4 short, concrete actions
+they can take in their tool (settings, prompt habits, commands), in order. At most 5
+insights, ordered by impact. Base savings estimates only on real
 costs in the catalog.''';
 
 /// Strict structured-output schema shared by all providers.
@@ -85,7 +88,9 @@ final Map<String, dynamic> judgeSchema = {
           'recommendation',
           'estimated_impact',
           'estimated_saving_usd_per_month',
-          'confidence'
+          'confidence',
+          'why',
+          'steps'
         ],
         'properties': {
           'id': {'type': 'string'},
@@ -115,6 +120,12 @@ final Map<String, dynamic> judgeSchema = {
             'type': ['number', 'null']
           },
           'confidence': {'enum': _levels.toList()},
+          'why': {'type': 'string'},
+          'steps': {
+            'type': 'array',
+            'maxItems': 4,
+            'items': {'type': 'string'}
+          },
         },
       },
     },
@@ -135,10 +146,12 @@ class JudgeBrief {
       required this.catalog,
       required this.chats,
       required this.requests,
-      required this.monthlyCostMicro});
+      required this.monthlyCostMicro,
+      this.pricingVersion = 'unknown'});
   final String periodStart, periodEnd;
   final Map<String, BriefMetric> catalog;
   final int chats, requests, monthlyCostMicro;
+  final String pricingVersion;
 
   String toJson() => jsonEncode({
         'period_start': periodStart,
@@ -153,9 +166,9 @@ String _usd(int micro) => '${(micro / 1e6).toStringAsFixed(2)} USD';
 /// Builds the catalog from the last 30 days of daily summaries and the
 /// desktop's efficiency report (same metric ids as the desktop judge).
 JudgeBrief buildBrief(List<DailyDoc> all, EfficiencyDoc? efficiency,
-    {DateTime? now}) {
+    {DateTime? now, DateTime? since}) {
   final today = now ?? DateTime.now();
-  final docs = filterLastDays(all, 30, today);
+  final docs = since == null ? filterLastDays(all, 30, today) : all;
   final t = sumTotals(docs);
   final c = <String, BriefMetric>{};
   void add(String id, String label, String value) =>
@@ -165,15 +178,18 @@ JudgeBrief buildBrief(List<DailyDoc> all, EfficiencyDoc? efficiency,
   add('usage.input_tokens', 'Input tokens', '${t.input}');
   add('usage.cached_tokens', 'Cached tokens', '${t.cached}');
   add('usage.output_tokens', 'Output tokens', '${t.output}');
-  add('usage.cost_micro', 'Monthly cost', _usd(t.cost));
+  add('usage.cost_micro', since == null ? 'Monthly cost' : 'Period cost',
+      t.costKnown ? _usd(t.cost) : 'N/A');
   add('usage.cache_hit_rate', 'Cache hit rate',
       t.input == 0 ? 'N/A' : _pct(t.cached / t.input));
   add('usage.error_rate', 'Error request rate',
       t.requests == 0 ? 'N/A' : _pct(t.errorRequests / t.requests));
   final o = sumOutcomes(docs);
-  add('outcome.success_rate', 'Success rate',
-      o.successRate == null ? 'N/A' : _pct(o.successRate!));
-  add('outcome.undetermined', 'Undetermined chats', '${o.undetermined}');
+  if (since == null) {
+    add('outcome.success_rate', 'Success rate',
+        o.successRate == null ? 'N/A' : _pct(o.successRate!));
+    add('outcome.undetermined', 'Undetermined chats', '${o.undetermined}');
+  }
   for (final p in efficiency?.processMetrics ?? const <ProcessMetric>[]) {
     final id =
         'process.${p.metric}${p.provider == null ? '' : '.${p.provider}'}';
@@ -205,20 +221,29 @@ JudgeBrief buildBrief(List<DailyDoc> all, EfficiencyDoc? efficiency,
     final pre = 'usage.${m.value.provider}.${m.key}';
     final v = m.value;
     add('$pre.tokens', 'Tokens (${m.key})', '${v.tokens}');
-    add('$pre.cost_micro', 'Cost (${m.key})', _usd(v.cost));
+    add('$pre.cost_micro', 'Cost (${m.key})',
+        v.costKnown ? _usd(v.cost) : 'N/A');
     add('$pre.cache_rate', 'Cache hit rate (${m.key})',
         v.input == 0 ? 'N/A' : _pct(v.cached / v.input));
     add('$pre.thinking_share', 'Thinking share (${m.key})',
         v.output == 0 ? 'N/A' : _pct(v.thinking / v.output));
   }
   final dates = docs.map((d) => d.date).toList()..sort();
+  final pricingVersions =
+      docs.map((d) => d.pricingVersion).whereType<String>().toSet();
   return JudgeBrief(
-      periodStart: dates.isEmpty ? dayKey(today) : dates.first,
+      periodStart: since != null
+          ? dayKey(since)
+          : dates.isEmpty
+              ? dayKey(today)
+              : dates.first,
       periodEnd: dayKey(today),
       catalog: c,
       chats: t.chats,
       requests: t.requests,
-      monthlyCostMicro: t.cost);
+      monthlyCostMicro: t.costKnown ? t.cost : 0,
+      pricingVersion:
+          pricingVersions.isEmpty ? 'unknown' : pricingVersions.join(','));
 }
 
 /// Error codes shared with the desktop and the mobile UI.
@@ -424,6 +449,11 @@ Map<String, dynamic> validateOutput(String text, JudgeBrief brief,
           ? (saving * 1e6).round().clamp(0, brief.monthlyCostMicro)
           : null,
       'confidence': i['confidence'],
+      'why': i['why'] is String ? (i['why'] as String).trim() : '',
+      'steps': [
+        for (final s in i['steps'] is List ? i['steps'] as List : const [])
+          if (s is String && s.trim().isNotEmpty) s.trim()
+      ].take(4).toList(),
     });
     if (insights.length == 5) break;
   }
@@ -450,6 +480,9 @@ Map<String, dynamic> _base(
       'provider': provider,
       'model': model,
       'source': 'phone',
+      'pricing_version': brief.pricingVersion,
+      'score': null,
+      'grade': null,
     };
 
 /// SRS FR-RECO-001 data rule: needs ≥ 3 days of data and ≥ 5 chats.
@@ -466,10 +499,11 @@ Future<Map<String, dynamic>> runJudge(
     required String model,
     required String apiKey,
     required String language,
-    DateTime? now}) async {
+    DateTime? now,
+    DateTime? since}) async {
   final at = now ?? DateTime.now();
-  final brief = buildBrief(daily, efficiency, now: at);
-  if (!briefIsSufficient(brief, daily, at)) {
+  final brief = buildBrief(daily, efficiency, now: at, since: since);
+  if (since == null && !briefIsSufficient(brief, daily, at)) {
     return {
       ..._base(brief, provider, model, at),
       'status': 'insufficient_data',
