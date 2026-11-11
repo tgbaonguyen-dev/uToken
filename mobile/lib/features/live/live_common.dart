@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +28,9 @@ String syncErrorText(String? code) => switch (code) {
 
 /// Signed-in user and the Firestore reader every live screen needs.
 class LiveArgs {
-  const LiveArgs({required this.uid, required this.repository});
+  const LiveArgs(
+      {required this.uid, required this.repository, this.now = DateTime.now});
+  final DateTime Function() now;
   final String uid;
   final UsageRepository repository;
 
@@ -45,7 +46,8 @@ class LiveArgs {
 
   /// All daily summaries. No end bound: screens filter by the current date,
   /// so a listener left open past midnight still receives the new day.
-  Stream<List<DailyDoc>> daily() => repository.watchDaily(uid: uid);
+  Stream<List<DailyDoc>> daily() =>
+      repository.watchDaily(uid: uid).map(DailyDocuments.new);
 
   /// Folder names for project keys, when the desktop shares them.
   Stream<Map<String, String>> projectNames() =>
@@ -261,4 +263,50 @@ class MiniStat extends StatelessWidget {
           Text(label, style: UtText.caption),
         ],
       );
+}
+
+/// Requeries date-bounded data after midnight or resuming on a new day.
+mixin DayRollover<T extends StatefulWidget> on State<T> {
+  DateTime get localNow;
+  void onDayChanged();
+  Timer? _dayTimer;
+  late AppLifecycleListener _lifecycle;
+  late DateTime _day;
+  @override
+  void initState() {
+    super.initState();
+    _day = DateUtils.dateOnly(localNow);
+    _lifecycle = AppLifecycleListener(onResume: _checkDay);
+    _scheduleDay();
+  }
+
+  void _scheduleDay() {
+    _dayTimer?.cancel();
+    final now = localNow;
+    _dayTimer = Timer(
+        DateTime(now.year, now.month, now.day + 1).difference(now), _checkDay);
+  }
+
+  void _checkDay() {
+    if (!mounted) return;
+    final day = DateUtils.dateOnly(localNow);
+    if (_day != day) {
+      _day = day;
+      setState(onDayChanged);
+    }
+    _scheduleDay();
+  }
+
+  @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _checkDay();
+  }
+
+  @override
+  void dispose() {
+    _dayTimer?.cancel();
+    _lifecycle.dispose();
+    super.dispose();
+  }
 }

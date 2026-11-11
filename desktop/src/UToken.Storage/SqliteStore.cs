@@ -246,14 +246,17 @@ public sealed class SqliteStore : IDisposable
     }
 
     /// <summary>Retention: xóa event, turn, task và bản nháp daily cũ hơn <paramref name="cutoffUtc"/>. Trả về số event đã xóa.</summary>
-    public int PruneBefore(DateTimeOffset cutoffUtc)
+    public int PruneBefore(DateTimeOffset cutoffUtc, TimeZoneInfo? timeZone = null)
     {
-        var cutoff = Ts(cutoffUtc);
+        // Prune whole local days so retained daily summaries are never rebuilt from a partial day.
+        var zone = timeZone ?? TimeZoneInfo.Utc;
+        var localDay = TimeZoneInfo.ConvertTime(cutoffUtc, zone).Date;
+        var cutoff = Ts(new DateTimeOffset(localDay, zone.GetUtcOffset(localDay)));
         using var tx = _db.BeginTransaction();
         int n = _db.Execute("DELETE FROM usage_events WHERE occurred_at < @cutoff", new { cutoff }, tx);
         _db.Execute("DELETE FROM turns WHERE started_at < @cutoff", new { cutoff }, tx);
         _db.Execute("DELETE FROM task_outcomes WHERE started_at < @cutoff", new { cutoff }, tx);
-        _db.Execute("DELETE FROM daily_local WHERE date < @day", new { day = cutoffUtc.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) }, tx);
+        _db.Execute("DELETE FROM daily_local WHERE date < @day AND dirty = 0", new { day = localDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) }, tx);
         tx.Commit();
         return n;
     }

@@ -1,4 +1,3 @@
-import '../models/daily_doc.dart';
 import '../models/usage_docs.dart';
 import 'replay_stream.dart';
 import 'usage_repository.dart';
@@ -15,7 +14,7 @@ class CachedUsageRepository implements UsageRepository {
       _streams.putIfAbsent(key, () => ReplayStream<T>(open)) as ReplayStream<T>;
 
   @override
-  Stream<List<DailyDoc>> watchDaily(
+  Stream<DailySnapshot> watchDaily(
           {required String uid, DateTime? start, DateTime? end}) =>
       _cached('daily/$uid/$start/$end',
           () => inner.watchDaily(uid: uid, start: start, end: end));

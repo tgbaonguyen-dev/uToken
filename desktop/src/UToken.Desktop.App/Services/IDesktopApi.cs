@@ -42,7 +42,7 @@ public interface IDesktopApi
     // Sync với Firestore và tài khoản Google
     Task<SyncStateConfig> GetSyncStateConfigAsync(CancellationToken ct = default);
     Task<SyncData> GetSyncAsync(CancellationToken ct = default);
-    Task<SyncResult> SyncNowAsync(CancellationToken ct = default);
+    Task<SyncResult> SyncNowAsync(CancellationToken ct = default, bool resendAll = false);
     /// <summary>
     /// Chạy sync nếu mobile đã yêu cầu (users/{uid}/sync_requests). Null khi không có yêu cầu nào.
     /// </summary>

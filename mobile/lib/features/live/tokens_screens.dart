@@ -1,3 +1,5 @@
+import 'dart:async';
+import '../../core/data/usage_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,19 +14,83 @@ import '../../core/i18n/tr.dart';
 /// M04 — Tokens overview, including the S01/S02/S04 states.
 class LiveTokensScreen extends StatefulWidget {
   const LiveTokensScreen(
-      {super.key, required this.args, this.initialPeriod = UsagePeriod.month});
+      {super.key,
+      required this.args,
+      this.initialPeriod = UsagePeriod.month,
+      this.now = DateTime.now});
   final LiveArgs args;
   final UsagePeriod initialPeriod;
+  final DateTime Function() now;
 
   @override
   State<LiveTokensScreen> createState() => _LiveTokensScreenState();
 }
 
-class _LiveTokensScreenState extends State<LiveTokensScreen> {
+class _LiveTokensScreenState extends State<LiveTokensScreen>
+    with WidgetsBindingObserver {
   late UsagePeriod _period = widget.initialPeriod;
-  late Stream<List<DailyDoc>> _daily = widget.args.daily();
-  late final Stream<DateTime?> _lastSync =
+  late Stream<DailySnapshot> _daily;
+  late Stream<DateTime?> _lastSync =
       widget.args.repository.watchLastSync(uid: widget.args.uid);
+
+  Timer? _midnightTimer;
+  String? _queryDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _daily = _watchDaily();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleMidnight();
+  }
+
+  @override
+  void didUpdateWidget(covariant LiveTokensScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.args.uid != widget.args.uid ||
+        oldWidget.args.repository != widget.args.repository ||
+        oldWidget.now != widget.now) {
+      _daily = _watchDaily();
+      _lastSync = widget.args.repository.watchLastSync(uid: widget.args.uid);
+      _scheduleMidnight();
+    }
+  }
+
+  Stream<DailySnapshot> _watchDaily() {
+    final now = widget.now();
+    _queryDate = now.toIso8601String().substring(0, 10);
+    return widget.args.repository.watchDaily(
+      uid: widget.args.uid,
+      end: now,
+    );
+  }
+
+  void _scheduleMidnight() {
+    _midnightTimer?.cancel();
+    final now = widget.now();
+    final next = DateTime(now.year, now.month, now.day + 1);
+    _midnightTimer = Timer(next.difference(now), _refreshDate);
+  }
+
+  void _refreshDate() {
+    if (!mounted) return;
+    if (_queryDate != widget.now().toIso8601String().substring(0, 10)) {
+      setState(() => _daily = _watchDaily());
+    }
+    _scheduleMidnight();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refreshDate();
+  }
+
+  @override
+  void dispose() {
+    _midnightTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +100,7 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
       tabIndex: 0,
       onRefresh: () async {
         await widget.args.refresh();
-        if (mounted) setState(() => _daily = widget.args.daily());
+        if (mounted) setState(() => _daily = _watchDaily());
       },
       body: ListenableBuilder(
         listenable: widget.args.sync,
@@ -42,9 +108,19 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
           stream: _lastSync,
           builder: (context, sync) {
             _autoSync(sync.data);
-            return UtStream<List<DailyDoc>>(
+            return UtStream<DailySnapshot>(
               stream: _daily,
-              builder: (context, all) => _body(context, all, sync.data),
+              builder: (context, all) => Column(children: [
+                if (all.invalidDocumentIds.isNotEmpty)
+                  Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                          tr('Ignored {n} invalid daily summaries. Totals and exports exclude these days. Fix field types in Firebase and refresh.',
+                              {'n': all.invalidDocumentIds.length}),
+                          key: const ValueKey('invalid-daily-warning'),
+                          style: UtText.caption)),
+                Expanded(child: _body(context, all.documents, sync.data)),
+              ]),
             );
           },
         ),
@@ -62,7 +138,7 @@ class _LiveTokensScreenState extends State<LiveTokensScreen> {
   }
 
   Widget _body(BuildContext context, List<DailyDoc> all, DateTime? lastSync) {
-    final now = DateTime.now();
+    final now = widget.now();
     final sync = widget.args.sync;
     final banner = switch (sync.phase) {
       SyncPhase.syncing => SyncingBanner(sync: sync),

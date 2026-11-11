@@ -1,0 +1,95 @@
+{
+  "design_version": 2,
+  "revised_date": "2026-11-11",
+  "audit_evidence_date": "2026-11-10",
+  "source_changes_in_design_revision": false,
+  "new_build_or_analyzer_runs": false,
+  "dynamic_executed_in_design_revision": false,
+  "active_static_ids": [
+    "ST01",
+    "ST02",
+    "ST03",
+    "ST04",
+    "ST05",
+    "ST06",
+    "ST07",
+    "ST08",
+    "ST10",
+    "ST12",
+    "ST13",
+    "ST14",
+    "ST16",
+    "ST17",
+    "ST18",
+    "ST19",
+    "ST20",
+    "ST21",
+    "ST22",
+    "ST23"
+  ],
+  "merged_ids": {
+    "ST09": "ST07",
+    "ST15": "ST08",
+    "ST11": "ST10"
+  },
+  "dynamic_ids": [
+    "DT01",
+    "DT02",
+    "DT03",
+    "DT04",
+    "DT05",
+    "DT06",
+    "DT07",
+    "DT08",
+    "DT09",
+    "DT10",
+    "DT11",
+    "DT12",
+    "DT13",
+    "DT14",
+    "DT15",
+    "DT16",
+    "DT17"
+  ],
+  "temporary_requirement_ids": [
+    "QA-AUTH",
+    "QA-BUILD",
+    "QA-DATA",
+    "QA-DELETE",
+    "QA-DOC",
+    "QA-LIFECYCLE",
+    "QA-MULTI",
+    "QA-PREFS",
+    "QA-PRIVACY",
+    "QA-SYNC",
+    "QA-UI"
+  ],
+  "open_decisions": [
+    "Q01",
+    "Q02",
+    "Q03",
+    "Q04",
+    "Q05",
+    "Q06",
+    "Q07"
+  ],
+  "documents": [
+    "test-design-v2.md",
+    "dynamic-plan.md",
+    "cases.csv",
+    "dynamic-cases.csv"
+  ],
+  "historical_evidence_files": [
+    "report.md",
+    "evidence.json"
+  ],
+  "execution_report": "execution-report-2026-11-11.md",
+  "execution_evidence": "execution-evidence-2026-11-11.json",
+  "execution_date": "2026-11-11",
+  "confirmed_decisions_after_design": [
+    "Q03",
+    "Q04",
+    "QA-REVIEW"
+  ],
+  "new_runtime_tests_executed_after_design": true
+}

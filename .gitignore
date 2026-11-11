@@ -114,3 +114,9 @@ coverage/
 *.temp
 *.log
 
+# Raw local advisory output; share reviewed snapshots in docs/static-testing instead.
+desktop/static-dependency-audit.json
+firebase/static-npm-audit.json
+firebase/qa-audit-plan.json
+firebase/qa-audit-after.json
+

@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:developer' as developer;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,11 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/daily_doc.dart';
 import '../models/usage_docs.dart';
 
-/// Read-only contract for usage documents owned by a signed-in user.
+/// Usage reads and sync-request/preferences writes for the signed-in user.
 abstract interface class UsageRepository {
   /// Explicitly read the server; offline/cache-only reads must not report success.
   Future<void> refresh({required String uid});
-  Stream<List<DailyDoc>> watchDaily({
+  Stream<DailySnapshot> watchDaily({
     required String uid,
     DateTime? start,
     DateTime? end,
@@ -54,11 +55,65 @@ class SyncRequestStatus {
   const SyncRequestStatus({required this.state, this.errorCode});
   final String state;
   final String? errorCode;
+  factory SyncRequestStatus.fromMap(JsonMap values) {
+    final state = readString(values['state']) ?? 'pending';
+    if (!const {'pending', 'running', 'done', 'failed'}.contains(state)) {
+      throw const FormatException('Unsupported sync request state.');
+    }
+    return SyncRequestStatus(
+        state: state, errorCode: readString(values['error_code']));
+  }
   bool get finished => state == 'done' || state == 'failed';
 }
 
-/// Firestore implementation of [UsageRepository]. Writes only sync requests,
-/// preferences and the phone's AI review.
+class DailySnapshot {
+  const DailySnapshot(this.documents, {this.invalidDocumentIds = const []});
+  final List<DailyDoc> documents;
+  final List<String> invalidDocumentIds;
+}
+
+/// A normal read-only daily list retaining validation warnings for all live pages.
+class DailyDocuments extends ListBase<DailyDoc> {
+  DailyDocuments(DailySnapshot snapshot)
+      : _values = List.unmodifiable(snapshot.documents),
+        invalidDocumentIds = List.unmodifiable(snapshot.invalidDocumentIds);
+  final List<DailyDoc> _values;
+  final List<String> invalidDocumentIds;
+  @override
+  int get length => _values.length;
+  @override
+  set length(int value) =>
+      throw UnsupportedError('Daily documents are read-only.');
+  @override
+  DailyDoc operator [](int index) => _values[index];
+  @override
+  void operator []=(int index, DailyDoc value) =>
+      throw UnsupportedError('Daily documents are read-only.');
+}
+
+String? parseDesktopName(JsonMap? values) =>
+    readString(values?['desktop_name']);
+
+/// Used for both Firestore snapshots and console-edit regression tests.
+DailySnapshot parseDailySnapshot(Map<String, JsonMap> values) {
+  final documents = <DailyDoc>[];
+  final invalid = <String>[];
+  for (final entry in values.entries) {
+    try {
+      documents.add(DailyDoc.fromMap({
+        ...entry.value,
+        'date': entry.value['date'] ?? entry.key,
+      }));
+    } on FormatException {
+      invalid.add(entry.key);
+      developer.log('Ignoring invalid daily document',
+          name: 'utoken.firestore');
+    }
+  }
+  return DailySnapshot(documents, invalidDocumentIds: invalid);
+}
+
+/// Firestore usage reader; writes sync requests, preferences and phone AI reviews.
 class FirestoreUsageRepository implements UsageRepository {
   FirestoreUsageRepository({required this.firestore});
 
@@ -80,7 +135,7 @@ class FirestoreUsageRepository implements UsageRepository {
   }
 
   @override
-  Stream<List<DailyDoc>> watchDaily({
+  Stream<DailySnapshot> watchDaily({
     required String uid,
     DateTime? start,
     DateTime? end,
@@ -89,25 +144,9 @@ class FirestoreUsageRepository implements UsageRepository {
         _user(uid).collection('daily').orderBy(FieldPath.documentId);
     if (end != null) query = query.endAt([_day(end)]);
     if (start != null) query = query.startAt([_day(start)]);
-    return query.snapshots().map((snapshot) {
-      final documents = <DailyDoc>[];
-      for (final document in snapshot.docs) {
-        try {
-          documents.add(DailyDoc.fromMap({
-            ...document.data(),
-            'date': document.data()['date'] ?? document.id,
-          }));
-        } on FormatException catch (error, stackTrace) {
-          developer.log(
-            'Ignoring invalid daily document',
-            name: 'utoken.firestore',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        }
-      }
-      return documents;
-    });
+    return query.snapshots().map((snapshot) => parseDailySnapshot({
+          for (final document in snapshot.docs) document.id: document.data(),
+        }));
   }
 
   @override
@@ -146,7 +185,7 @@ class FirestoreUsageRepository implements UsageRepository {
   @override
   Stream<String?> watchDesktopName({required String uid}) => _user(uid)
       .snapshots()
-      .map((snapshot) => snapshot.data()?['desktop_name'] as String?);
+      .map((snapshot) => parseDesktopName(snapshot.data()));
 
   @override
   Stream<Map<String, String>> watchProjectNames({required String uid}) =>
@@ -178,9 +217,7 @@ class FirestoreUsageRepository implements UsageRepository {
       _user(uid).collection('sync_requests').doc(id).snapshots().map((s) {
         final data = s.data();
         if (data == null) return null;
-        return SyncRequestStatus(
-            state: data['state'] as String? ?? 'pending',
-            errorCode: data['error_code'] as String?);
+        return SyncRequestStatus.fromMap(data);
       });
 
   @override

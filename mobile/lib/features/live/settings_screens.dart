@@ -389,10 +389,15 @@ class LiveBudgetScreen extends StatefulWidget {
   State<LiveBudgetScreen> createState() => _LiveBudgetScreenState();
 }
 
-class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
+class _LiveBudgetScreenState extends State<LiveBudgetScreen>
+    with DayRollover<LiveBudgetScreen> {
+  @override
+  DateTime get localNow => widget.args.now();
+  @override
+  void onDayChanged() => _daily = widget.args.daily();
   late final _controller = TextEditingController(
       text: LocalPrefs.instance.monthlyBudgetUsd?.toStringAsFixed(2) ?? '');
-  late final Stream<List<DailyDoc>> _daily = widget.args.daily();
+  late Stream<List<DailyDoc>> _daily = widget.args.daily();
 
   @override
   void dispose() {
@@ -412,15 +417,17 @@ class _LiveBudgetScreenState extends State<LiveBudgetScreen> {
     if (mounted) {
       utShowNotice(
           context,
-          value == null
-              ? tr('Monthly limit removed.')
-              : tr('Monthly limit saved on this phone.'));
+          LocalPrefs.instance.saveError != null
+              ? tr('Could not save preferences. Use Retry above.')
+              : value == null
+                  ? tr('Monthly limit removed.')
+                  : tr('Monthly limit saved on this phone.'));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
+    final now = localNow;
     return UtPage(
       title: tr('Budget'),
       subtitle: tr('Monthly spending limit and alerts.'),

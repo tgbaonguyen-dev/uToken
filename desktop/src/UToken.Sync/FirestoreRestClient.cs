@@ -33,6 +33,18 @@ public sealed class FirestoreRestClient(HttpClient http, FirebaseOptions options
         throw new HttpRequestException($"Firestore commit failed: {detail}", null, res.StatusCode);
     }
 
+    public async Task<JsonObject?> GetDocumentAsync(string path, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"{DocumentsBase}/{path}");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await getIdToken(ct));
+        using var res = await http.SendAsync(req, ct);
+        if (res.StatusCode == HttpStatusCode.NotFound) return null;
+        if (res.StatusCode == HttpStatusCode.Unauthorized) throw new CloudAuthException("Firestore rejected the session (401).");
+        res.EnsureSuccessStatusCode();
+        return JsonNode.Parse(await res.Content.ReadAsStringAsync(ct)) as JsonObject
+            ?? throw new InvalidDataException("Invalid Firestore document.");
+    }
+
     /// <summary>
     /// Chạy structured query dưới <paramref name="parentPath"/> (ví dụ users/abc) và trả về các document tìm được.
     /// Mobile ghi users/{uid}/sync_requests; desktop poll bằng hàm này (ADR-0003).

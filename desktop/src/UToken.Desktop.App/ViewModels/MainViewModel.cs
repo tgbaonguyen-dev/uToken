@@ -65,6 +65,7 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     private async Task RunAsync(Func<Task> action)
     {
         if (IsBusy) return;
+        CancelPageLoad();
         IsBusy = true; Error = null;
         try { await action(); }
         catch (Exception ex) when (IsDataError(ex)) { Error = DataErrorMessage; }
@@ -150,7 +151,7 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
         {
             var period = SelectedPeriod;
             var detail = await api.GetSourceAsync(source.Id, period);
-            if (!IsCurrentLoad(version)) return;
+            if (!IsCurrentLoad(version) || !IsDetail || SelectedSource?.Id != source.Id || SelectedPeriod != period) return;
             SelectedSource = detail; _loadedPeriod = period;
         });
     }
@@ -174,14 +175,19 @@ public partial class MainViewModel(Services.IDesktopApi api, bool showSetupOnSta
     [RelayCommand]
     private async Task ChangePeriodAsync()
     {
-        await RunAsync(async () =>
+        if (!IsDetail || SelectedSource is not { } source) return;
+        var period = SelectedPeriod;
+        var requestVersion = 0;
+        await LoadPageAsync(async version =>
         {
-            if (SelectedSource is null) return;
-            SelectedSource = await api.GetSourceAsync(SelectedSource.Id, SelectedPeriod);
-            _loadedPeriod = SelectedPeriod;
+            requestVersion = version;
+            var detail = await api.GetSourceAsync(source.Id, period);
+            if (!IsCurrentLoad(version) || !IsDetail || SelectedSource?.Id != source.Id || SelectedPeriod != period) return;
+            SelectedSource = detail;
+            _loadedPeriod = period;
             SaveUiPreferences();
         });
-        if (HasError)
+        if (IsCurrentLoad(requestVersion) && HasError && IsDetail && SelectedSource?.Id == source.Id && SelectedPeriod == period)
         {
             _restoringPeriod = true;
             SelectedPeriod = _loadedPeriod;

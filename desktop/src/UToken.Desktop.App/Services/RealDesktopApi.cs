@@ -303,6 +303,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
 
     public async Task<OverviewData> GetOverviewAsync(CancellationToken ct = default)
     {
+        await AccountAsync(ct);
         var sources = await GetSourcesAsync(ct);
         var (recent, counts) = await WithStoreAsync(() =>
         {
@@ -337,7 +338,10 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
 
     private const int MaxActivityRows = 1000;
 
-    public async Task<ActivityPageData> GetActivityAsync(ActivityQuery query, CancellationToken ct = default)
+    public Task<ActivityPageData> GetActivityAsync(ActivityQuery query, CancellationToken ct = default) =>
+        ReadActivityAsync(query, MaxActivityRows, ct);
+
+    private async Task<ActivityPageData> ReadActivityAsync(ActivityQuery query, int? rowLimit, CancellationToken ct)
     {
         var now = Now;
         var cutoff = query.Period switch
@@ -364,7 +368,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
                 (query.WarningsOnly ? e.Status != "OK" : e.Status == "OK") &&
                 (search.Length == 0 || $"{e.Id} {e.Provider} {e.Model}".Contains(search, StringComparison.OrdinalIgnoreCase)))
             .OrderByDescending(e => e.OccurredAt)
-            .Take(MaxActivityRows)
+            .Take(rowLimit ?? int.MaxValue)
             .ToArray();
 
         return new ActivityPageData(
@@ -377,7 +381,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
 
     public async Task<string> ExportActivityAsync(ActivityQuery query, CancellationToken ct = default)
     {
-        var page = await GetActivityAsync(query, ct);
+        var page = await ReadActivityAsync(query, null, ct);
         var csv = new StringBuilder("Event ID,Timestamp,Source,Model,Input,Cached,Output,Total,Cost USD,Status\r\n");
         foreach (var e in page.Events)
         {
@@ -437,7 +441,12 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
             };
             progress?.Report(new(config, i + 1, items.Length, l.Name, items.ToArray()));
         }
-        await WithStoreAsync(() => _store.PruneBefore(Now.AddDays(-retention)), ct);
+        await WithStoreAsync(() =>
+        {
+            // Rescan consumes parser offsets too; summarize before raw retention removes old events.
+            LastSnapshot = _engine.Run(ct);
+            return _store.PruneBefore(Now.AddDays(-retention), _engine.TimeZone);
+        }, ct);
         _lastScan = new ScanReport(_locations.Count, 0, newEvents, 0, malformed, [], []);
         _lastScanAt = Now;
         return (await GetSourcesAsync(ct)) with { NewEvents = newEvents };
@@ -452,6 +461,7 @@ public sealed partial class RealDesktopApi : IDesktopApi, IDisposable
         {
             var n = _store.Counts().Events;
             _store.ClearUsage();
+            LastSnapshot = null;
             DataChanged();
             return n;
         }, ct);

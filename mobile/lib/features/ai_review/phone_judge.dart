@@ -3,23 +3,29 @@ import 'package:http/http.dart' as http;
 
 import '../../core/data/local_prefs.dart';
 import '../../core/data/usage_repository.dart';
+import '../../core/models/daily_doc.dart';
 import '../../core/models/usage_docs.dart';
 import 'judge.dart';
+import 'review_window.dart';
 
 /// Steps shown while a phone review runs.
-enum JudgeStep { idle, reading, asking, checking, done, failed }
+enum JudgeStep { idle, reading, asking, checking, done, noNewUsage, failed }
 
 /// Provider, model and API key for the on-phone AI review (SRS FR-AIKEY-001).
 /// The key lives only in Android Keystore (flutter_secure_storage); it is
 /// never written to Firestore, logs or exports.
 class PhoneJudge extends ChangeNotifier {
-  PhoneJudge(this._store, {http.Client? client})
-      : _client = client ?? http.Client();
+  PhoneJudge(this._store, {http.Client? client, DateTime Function()? now})
+      : _client = client ?? http.Client(),
+        _now = now ?? DateTime.now;
 
   static PhoneJudge instance = PhoneJudge(MemoryPrefsStore());
 
   final PrefsStore _store;
   final http.Client _client;
+  final DateTime Function() _now;
+
+  String _checkpointKey(String uid) => 'ai_review_checkpoint_v1_$uid';
 
   String _provider = 'google';
   String _model = defaultJudgeModel('google');
@@ -111,26 +117,60 @@ class PhoneJudge extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Runs a review and writes users/{uid}/insights/current.
-  /// On failure the previous insights stay and get a failed status + code.
+  /// Both modes advance the same per-account baseline only after a saved success.
   Future<void> run(
       {required String uid,
       required UsageRepository repository,
-      required String language}) async {
+      required String language,
+      ReviewScope scope = ReviewScope.last30Days}) async {
     if (running) return;
     if (!hasKey) return _set(JudgeStep.failed, 'missing_key');
+    final through = _now();
     _set(JudgeStep.reading);
     try {
-      final daily = await repository
+      ReviewCheckpoint? previous;
+      if (scope == ReviewScope.sinceLastReview) {
+        final saved = await _store.read(_checkpointKey(uid));
+        if (saved == null || saved.isEmpty) {
+          throw const ReviewWindowException('review_checkpoint_missing');
+        }
+        try {
+          previous = ReviewCheckpoint.decode(saved);
+        } catch (_) {
+          throw const ReviewWindowException('review_data_changed');
+        }
+      }
+      // A cached/offline read must not consume a new review window.
+      try {
+        await repository.refresh(uid: uid).timeout(const Duration(seconds: 20));
+      } catch (_) {
+        throw const ReviewWindowException('review_data_unavailable');
+      }
+      final snapshot = await repository
           .watchDaily(uid: uid)
           .first
           .timeout(const Duration(seconds: 20));
+      if (snapshot.invalidDocumentIds.isNotEmpty) {
+        throw const ReviewWindowException('invalid_review_data');
+      }
+      final captured = ReviewCheckpoint(through, snapshot.documents);
+      final incremental = scope == ReviewScope.sinceLastReview;
+      final List<DailyDoc> daily = incremental
+          ? newSynchronizedUsage(captured.documents, previous!, through)
+          : captured.documents;
+      if (incremental && daily.isEmpty) {
+        _set(JudgeStep.noNewUsage);
+        return;
+      }
       EfficiencyDoc? efficiency;
       try {
-        efficiency = await repository
-            .watchEfficiency(uid: uid)
-            .first
-            .timeout(const Duration(seconds: 10));
+        // The desktop efficiency document describes 30 days, not the delta.
+        if (!incremental) {
+          efficiency = await repository
+              .watchEfficiency(uid: uid)
+              .first
+              .timeout(const Duration(seconds: 10));
+        }
       } catch (_) {}
       _set(JudgeStep.asking);
       final doc = await runJudge(
@@ -140,10 +180,29 @@ class PhoneJudge extends ChangeNotifier {
           provider: _provider,
           model: _model,
           apiKey: _key!,
-          language: language);
+          language: language,
+          now: through,
+          since: incremental ? previous!.through.toLocal() : null);
+      doc['review_mode'] = scope.name;
+      doc['review_from'] = incremental
+          ? previous!.through.toUtc().toIso8601String()
+          : DateTime(through.year, through.month, through.day - 29)
+              .toUtc()
+              .toIso8601String();
+      doc['review_through'] = through.toUtc().toIso8601String();
       _set(JudgeStep.checking);
       await repository.saveInsights(uid: uid, values: doc);
+      if (doc['status'] == 'ok') {
+        try {
+          await _store.write(_checkpointKey(uid), captured.encode());
+        } catch (_) {
+          _set(JudgeStep.failed, 'review_checkpoint_save_error');
+          return;
+        }
+      }
       _set(JudgeStep.done);
+    } on ReviewWindowException catch (e) {
+      _set(JudgeStep.failed, e.code);
     } on JudgeException catch (e) {
       await _markFailed(uid, repository, e.code);
     } catch (e) {

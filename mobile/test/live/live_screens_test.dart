@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:utoken_mobile/core/data/usage_repository.dart';
+import 'package:utoken_mobile/core/data/usage_aggregates.dart';
 import 'package:utoken_mobile/core/models/daily_doc.dart';
 import 'package:utoken_mobile/core/models/usage_docs.dart';
 import 'package:utoken_mobile/core/data/local_prefs.dart';
@@ -15,6 +16,9 @@ import 'package:utoken_mobile/features/live/tokens_screens.dart';
 
 class FakeUsageRepository implements UsageRepository {
   int refreshCalls = 0;
+  bool failRequest = false;
+  bool failPreferences = false;
+  Future<void> Function()? savePreferencesHandler;
   Future<void> Function()? refreshHandler;
   @override
   Future<void> refresh({required String uid}) async {
@@ -25,20 +29,28 @@ class FakeUsageRepository implements UsageRepository {
   final List<DailyDoc> dailyValues = [];
   Object? dailyError;
   Stream<List<DailyDoc>>? dailyStream;
+  Stream<DailySnapshot>? parsedDailyStream;
+  final List<DateTime> requestedEnds = [];
   final efficiency = StreamController<EfficiencyDoc?>.broadcast();
+  Stream<EfficiencyDoc?>? efficiencyStream;
   final insights = StreamController<InsightsDoc?>.broadcast();
   final sync = StreamController<DateTime?>.broadcast();
 
   @override
-  Stream<List<DailyDoc>> watchDaily(
-          {required String uid, DateTime? start, DateTime? end}) =>
-      dailyStream ??
-      (dailyError == null
-          ? Stream.value(dailyValues)
-          : Stream.error(dailyError!));
+  Stream<DailySnapshot> watchDaily(
+      {required String uid, DateTime? start, DateTime? end}) {
+    if (end != null) requestedEnds.add(end);
+    return parsedDailyStream ??
+        (dailyStream ??
+                (dailyError == null
+                    ? Stream.value(dailyValues)
+                    : Stream<List<DailyDoc>>.error(dailyError!)))
+            .map((docs) => DailySnapshot(docs));
+  }
+
   @override
   Stream<EfficiencyDoc?> watchEfficiency({required String uid}) =>
-      efficiency.stream;
+      efficiencyStream ?? efficiency.stream;
   @override
   Stream<InsightsDoc?> watchInsights({required String uid}) => insights.stream;
   @override
@@ -60,11 +72,13 @@ class FakeUsageRepository implements UsageRepository {
   Stream<Map<String, String>> watchProjectNames({required String uid}) =>
       Stream.value(projectNames);
   final List<Map<String, dynamic>> savedInsights = [];
+  bool failInsights = false;
   @override
   Future<void> saveInsights(
       {required String uid,
       required Map<String, dynamic> values,
       bool merge = false}) async {
+    if (failInsights) throw Exception('insight upload failed');
     savedInsights.add(values);
     if (!merge) insights.add(InsightsDoc.fromMap(values));
   }
@@ -74,6 +88,7 @@ class FakeUsageRepository implements UsageRepository {
   @override
   Future<String> requestSync(
       {required String uid, String trigger = 'manual_refresh'}) async {
+    if (failRequest) throw Exception('request denied');
     final id = 'req-${requests.length + 1}';
     requests.add(id);
     triggers.add(trigger);
@@ -99,6 +114,8 @@ class FakeUsageRepository implements UsageRepository {
   @override
   Future<void> savePreferences(
       {required String uid, required Map<String, dynamic> values}) async {
+    if (savePreferencesHandler != null) await savePreferencesHandler!();
+    if (failPreferences) throw Exception('save denied');
     savedPrefs.add(values);
   }
 
@@ -158,6 +175,7 @@ void main() {
 
   testWidgets('live snapshots update exact totals without manual refresh',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     final updates = StreamController<List<DailyDoc>>();
     repository.dailyStream = updates.stream;
@@ -181,6 +199,7 @@ void main() {
   testWidgets(
       'calendar periods exclude extra dates and Total includes old history',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     final now = DateTime.now();
@@ -210,6 +229,7 @@ void main() {
 
   testWidgets('manual server refresh is single-flight and updates usage',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     repository.dailyValues.add(dailyDoc(DateTime.now(), 1200, 2500000));
@@ -235,6 +255,7 @@ void main() {
 
   testWidgets('failed manual refresh retains data and allows retry',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     repository.dailyValues.add(dailyDoc(DateTime.now(), 1200, 2500000));
@@ -255,6 +276,7 @@ void main() {
 
   testWidgets('empty account shows S01, then S02 once desktop has synced',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     await tester.pumpWidget(app(LiveTokensScreen(args: argsFor(repository))));
@@ -267,6 +289,7 @@ void main() {
 
   testWidgets('providers, models and projects come from by_key',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     final now = DateTime.now();
@@ -302,6 +325,7 @@ void main() {
 
   testWidgets('compare models ranks setups and lists insufficient ones',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     await tester
@@ -337,6 +361,7 @@ void main() {
   });
 
   testWidgets('desktop status shows last sync time', (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     await tester.pumpWidget(app(LiveDesktopScreen(args: argsFor(repository))));
@@ -351,6 +376,7 @@ void main() {
 
   testWidgets('budget limit is saved locally and alerts use real cost',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     final now = DateTime.now();
@@ -369,6 +395,7 @@ void main() {
   });
 
   testWidgets('insight detail can be marked reviewed', (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     await tester.pumpWidget(app(
@@ -410,6 +437,7 @@ void main() {
 
   testWidgets('Sync now asks the desktop and shows the request state',
       (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     repository.autoCompleteSync = false;
@@ -479,7 +507,84 @@ void main() {
     await repository.close();
   });
 
+  testWidgets('request failure is visible and refresh can retry',
+      (tester) async {
+    final repository = FakeUsageRepository()..failRequest = true;
+    addTearDown(repository.close);
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
+    repository.dailyValues.add(dailyDoc(DateTime.now(), 100, 0));
+    await tester.pumpWidget(app(LiveTokensScreen(args: argsFor(repository))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('figma-hotspot-Refresh')));
+    await tester.pumpAndSettle();
+    // A failed request shows the S04 banner instead of a success notice.
+    expect(find.byKey(const ValueKey('s04-sync-failed')), findsOneWidget);
+    expect(find.textContaining('Couldn’t reach Firebase'), findsOneWidget);
+    expect(find.textContaining('Read latest data'), findsNothing);
+    repository.failRequest = false;
+    await tester.tap(find.byKey(const ValueKey('figma-hotspot-Refresh')));
+    await tester.pumpAndSettle();
+    expect(repository.requests, ['req-1']);
+  });
+
+  testWidgets('preference failure keeps local changes and offers retry',
+      (tester) async {
+    final repository = FakeUsageRepository()..failPreferences = true;
+    final prefs = LocalPrefs.instance;
+    prefs.bindAccount('u', repository);
+    addTearDown(() async {
+      prefs.unbindAccount();
+      await repository.close();
+    });
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
+    await tester.pumpWidget(app(LiveBudgetScreen(args: argsFor(repository))));
+    await tester.pumpAndSettle();
+    await prefs.setMonthlyBudget(75);
+    await tester.pumpAndSettle();
+    expect(prefs.saveError, isNotNull);
+    expect(prefs.monthlyBudgetUsd, 75);
+    expect(find.text('Retry saving'), findsOneWidget);
+    repository.prefs.add({'budget_usd': 10});
+    await tester.pumpAndSettle();
+    expect(prefs.monthlyBudgetUsd, 75);
+    repository.failPreferences = false;
+    await tester.tap(find.text('Retry saving'));
+    await tester.pumpAndSettle();
+    expect(prefs.saveError, isNull);
+    expect(repository.savedPrefs.last['budget_usd'], 75);
+    expect(find.text('Retry saving'), findsNothing);
+  });
+
+  for (final budget in [false, true]) {
+    testWidgets(
+        '${budget ? 'Budget' : 'Analytics'} rolls over at midnight and resume',
+        (tester) async {
+      final repository = FakeUsageRepository();
+      addTearDown(repository.close);
+      addTearDown(() => tester.pumpWidget(const SizedBox()));
+      var now = DateTime(2026, 11, 30, 23, 59);
+      final args = LiveArgs(uid: 'u', repository: repository, now: () => now);
+      repository.dailyValues.add(dailyDoc(now, 100, 1000000));
+      await tester.pumpWidget(app(budget
+          ? LiveBudgetScreen(args: args)
+          : LiveAnalyticsScreen(args: args, initialPeriod: UsagePeriod.day)));
+      await tester.pumpAndSettle();
+      expect(find.text(budget ? '\$1.00' : '100'), findsWidgets);
+      now = DateTime(2026, 12, 1);
+      repository.dailyValues.add(dailyDoc(now, 200, 2000000));
+      await tester.pump(const Duration(minutes: 1));
+      await tester.pumpAndSettle();
+      expect(find.text(budget ? '\$2.00' : '200'), findsWidgets);
+      now = DateTime(2026, 12, 2, 9);
+      repository.dailyValues.add(dailyDoc(now, 300, 3000000));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(find.text(budget ? '\$5.00' : '300'), findsWidgets);
+    });
+  }
+
   testWidgets('stream errors show friendly text', (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox()));
     final repository = FakeUsageRepository();
     addTearDown(repository.close);
     repository.dailyError = Exception('x');

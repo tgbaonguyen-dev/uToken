@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-11",
+  "head": "7093df8",
+  "branch": "dev",
+  "includes_uncommitted_changes": true,
+  "dotnet": [
+    {
+      "project": "UToken.Core.Tests.dll",
+      "passed": 76,
+      "failed": 0,
+      "skipped": 0,
+      "total": 76
+    },
+    {
+      "project": "UToken.Storage.Tests.dll",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "total": 13
+    },
+    {
+      "project": "UToken.Collectors.Tests.dll",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "total": 14
+    },
+    {
+      "project": "UToken.Engine.Tests.dll",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "total": 6
+    },
+    {
+      "project": "UToken.Sync.Tests.dll",
+      "passed": 16,
+      "failed": 0,
+      "skipped": 3,
+      "total": 19
+    },
+    {
+      "project": "UToken.Insights.Tests.dll",
+      "passed": 37,
+      "failed": 0,
+      "skipped": 0,
+      "total": 37
+    },
+    {
+      "project": "UToken.Desktop.Tests.dll",
+      "passed": 103,
+      "failed": 0,
+      "skipped": 0,
+      "total": 103
+    }
+  ],
+  "npm_after": {
+    "info": 0,
+    "low": 0,
+    "moderate": 14,
+    "high": 0,
+    "critical": 0,
+    "total": 14
+  },
+  "npm_override": {
+    "@grpc/grpc-js": "^1.14.7"
+  },
+  "no_production_writes": true,
+  "no_rules_deployment": true,
+  "android_connected": false,
+  "accepted_decisions": {
+    "preferences_pending": "durable per UID, retry after restart",
+    "collectors": "one desktop per account",
+    "AI_review": "only usage since last successful review; failed/insufficient attempts do not advance checkpoint"
+  },
+  "clear_AI_deletion_policy": "not changed; cached snapshot invalidated, original source logs and existing pending reports preserved",
+  "flutter": {
+    "passed": 193,
+    "failed": 0,
+    "scope": "full suite"
+  },
+  "flutter_analyze": "No issues found",
+  "firebase_emulator": {
+    "passed": 10,
+    "failed": 0,
+    "project": "demo-utoken"
+  },
+  "android_build": {
+    "result": "passed",
+    "mode": "debug",
+    "runtime_executed": false,
+    "artifact": "mobile/build/app/outputs/flutter-apk/app-debug.apk",
+    "bytes": 249074790
+  },
+  "baseline": {
+    "dotnet_passed": 255,
+    "dotnet_failed": 1,
+    "dotnet_skipped": 3,
+    "flutter_passed": 182,
+    "firebase_emulator_passed": 9
+  },
+  "new_regressions_reproduced_before_fix": [
+    "nullable Suggestions report stayed loading",
+    "nullable Efficiency report stayed loading"
+  ],
+  "remaining_limitations": [
+    "3 .NET production tests skipped",
+    "no Android device connected; runtime/native login not executed",
+    "14 moderate npm tooling advisories",
+    "Node 24.11.0 below SDK engine >=24.12.0",
+    "collector takeover UI and legacy client enforcement not implemented",
+    "full Clear pending-AI deletion policy not changed",
+    "full stress/clean machine/version matrix not executed"
+  ],
+  "source_fingerprint": {
+    "method": "SHA256 of sorted path:SHA256 lines for current code/test/contracts and selected package files; ignored private config excluded",
+    "file_count": 322,
+    "sha256": "a45d0a87f6d65fe7c137921f99cf5dd78d913e1ebc2b0e9306c179e21b725324"
+  }
+}

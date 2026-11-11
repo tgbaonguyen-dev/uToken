@@ -33,7 +33,7 @@
 
  <Border Classes="card" IsEnabled="{Binding !IsBusy}"><StackPanel Spacing="14">
  <Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="6"><TextBlock Text="{l:T 'AI review'}" Classes="heading"/>
- <TextBlock Text="{l:T 'An AI model reviews your usage summary (metrics only, never prompts, code or project names) and suggests ways to save tokens. Use Save changes at the top to keep these settings.'}" Classes="muted" FontSize="10" TextWrapping="Wrap"/></StackPanel>
+ <TextBlock Text="{l:T 'An AI model reviews your last 30 days of retained usage (metrics only, never prompts, code or project names). Use Save changes at the top to keep these settings.'}" Classes="muted" FontSize="10" TextWrapping="Wrap"/></StackPanel>
  <ToggleSwitch Grid.Column="1" IsChecked="{Binding JudgeEnabled, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" VerticalAlignment="Center" AutomationProperties.Name="AI review enabled"/></Grid>
  <Grid ColumnDefinitions="*,20,*" RowDefinitions="Auto,Auto">
  <StackPanel Spacing="6"><TextBlock Text="{l:T 'Provider'}" Classes="muted" FontSize="10"/>

@@ -25,6 +25,35 @@ public sealed class DesktopFlowTests : IDisposable
     }
 
     [AvaloniaFact]
+    public async Task Manual_and_background_sync_refresh_sources_and_selected_period()
+    {
+        using var api = _home.Api();
+        var vm = new MainViewModel(api);
+        await vm.LoadCommand.ExecuteAsync(null);
+        vm.ShowSourcesCommand.Execute(null);
+        var before = vm.SourceList!.Sources.Single(s => s.Id == "claude").Tokens;
+        _home.AddClaudeUsage(1);
+        await vm.SyncNowCommand.ExecuteAsync(null);
+        Assert.True(vm.SourceList.Sources.Single(s => s.Id == "claude").Tokens > before);
+        Assert.Equal(vm.SourceList.Sources.Sum(s => s.Tokens), vm.Overview!.TotalTokens);
+        await vm.OpenSourceCommand.ExecuteAsync(vm.SourceList.Sources.Single(s => s.Id == "claude"));
+        vm.SelectedPeriod = "Week";
+        if (vm.ChangePeriodCommand.ExecutionTask is { } pending) await pending;
+        before = vm.SelectedSource!.Tokens;
+        _home.AddClaudeUsage(2);
+        await vm.BackgroundSyncAsync();
+        Assert.Equal("Week", vm.SelectedPeriod);
+        Assert.Equal("claude", vm.SelectedSource!.Id);
+        Assert.True(vm.SelectedSource.Tokens > before);
+        Assert.Equal(vm.SelectedSource.Tokens, (await api.GetSourceAsync("claude", "Week")).Tokens);
+        before = vm.SelectedSource.Tokens;
+        _home.AddClaudeUsage(3);
+        await vm.SyncNowCommand.ExecuteAsync(null);
+        Assert.True(vm.SelectedSource.Tokens > before);
+        Assert.Equal("Week", vm.SelectedPeriod);
+    }
+
+    [AvaloniaFact]
     public async Task Dashboard_sources_details_and_activity_render_real_usage()
     {
         using var api = _home.Api();
