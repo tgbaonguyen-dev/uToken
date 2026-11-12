@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- google_sign_in looks these up by name at runtime; stop release resource shrinking from removing them. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/default_web_client_id,@string/gcm_defaultSenderId,@string/google_app_id,@string/google_api_key,@string/project_id,@string/google_storage_bucket,@string/google_crash_reporting_api_key" />

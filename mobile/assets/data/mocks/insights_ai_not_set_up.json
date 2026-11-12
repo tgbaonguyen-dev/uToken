@@ -1,0 +1,61 @@
+{
+  "screen_id": "M07",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "state_type": "ai_not_set_up",
+  "active_tab": "Insights",
+  "action": {
+    "button_label": "Set up AI suggestions",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show this instead of the feed when no API key is saved. The button opens M15."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "No provider configured",
+        "subtitle": "Settings › AI suggestions"
+      },
+      {
+        "title": "Your usage is still tracked",
+        "subtitle": "Key stays on this phone"
+      }
+    ],
+    "title": "Choose an AI model",
+    "description": "Suggestions are written by an LLM you pick. Add a provider and API key to start.",
+    "icon_type": "empty"
+  },
+  "badge_text": "AI NOT SET UP",
+  "specification_subtitle": "State specification · AI not set up",
+  "figma_layout": {
+    "node": "153:3329",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/b67b6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 23.160216,
+      "w": 89.856,
+      "h": 38.086708
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e7cbc.svg",
+      "assets/figma/reviewed/68341.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/b20c3.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

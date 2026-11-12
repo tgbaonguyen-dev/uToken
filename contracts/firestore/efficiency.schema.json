@@ -35,7 +35,16 @@
         ],
         "properties": {
           "metric": {
-            "type": "string"
+            "enum": [
+              "cache_hit_rate",
+              "context_growth",
+              "thinking_share",
+              "error_rate",
+              "retry_rate",
+              "tokens_per_turn_vs_median",
+              "cost_tail",
+              "hidden_cost_share"
+            ]
           },
           "provider": {
             "type": [
@@ -103,6 +112,11 @@
             "type": "integer",
             "minimum": 0
           },
+          "n_verified": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Số task verified_success + verified_failure (mẫu số của sr)"
+          },
           "sr": {
             "type": [
               "number",
@@ -128,6 +142,18 @@
             ]
           },
           "cpst_micro": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cpst_ci_low_micro": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cpst_ci_high_micro": {
             "type": [
               "integer",
               "null"
@@ -200,6 +226,9 @@
     },
     "schema_version": {
       "const": 1
+    },
+    "pricing_version": {
+      "type": "string"
     }
   }
 }

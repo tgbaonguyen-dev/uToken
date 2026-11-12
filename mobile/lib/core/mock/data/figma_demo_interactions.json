@@ -1,0 +1,459 @@
+{
+  "description": "UI-only interaction targets, entirely separate from the original exported Figma layers and proto hotspots.",
+  "fallbackMessage": "This button has no backend in the UI preview. You can still browse screens with the tab bar.",
+  "areas": {
+    "M02": [
+      {
+        "n": "Copy code",
+        "x": 24,
+        "y": 314,
+        "w": 342,
+        "h": 62
+      },
+      {
+        "n": "I’ve paired my device",
+        "x": 24,
+        "y": 712,
+        "w": 342,
+        "h": 50
+      }
+    ],
+    "M04": [
+      {
+        "n": "Refresh",
+        "x": 326,
+        "y": 42,
+        "w": 52,
+        "h": 52
+      },
+      {
+        "n": "Day",
+        "x": 20,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Week",
+        "x": 106,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Month",
+        "x": 193,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Total",
+        "x": 280,
+        "y": 108,
+        "w": 87,
+        "h": 50
+      },
+      {
+        "n": "Open sources",
+        "x": 20,
+        "y": 446,
+        "w": 350,
+        "h": 82
+      },
+      {
+        "n": "Open usage trend",
+        "x": 20,
+        "y": 552,
+        "w": 350,
+        "h": 198
+      }
+    ],
+    "M05": [
+      {
+        "n": "Day",
+        "x": 20,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Week",
+        "x": 98,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Month",
+        "x": 178,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Total",
+        "x": 262,
+        "y": 160,
+        "w": 83,
+        "h": 52
+      },
+      {
+        "n": "Open model list",
+        "x": 20,
+        "y": 366,
+        "w": 350,
+        "h": 200
+      }
+    ],
+    "M05C": [
+      {
+        "n": "Small",
+        "x": 26,
+        "y": 136,
+        "w": 70,
+        "h": 48
+      },
+      {
+        "n": "Medium",
+        "x": 90,
+        "y": 136,
+        "w": 70,
+        "h": 48
+      },
+      {
+        "n": "Large",
+        "x": 166,
+        "y": 136,
+        "w": 70,
+        "h": 48
+      }
+    ],
+    "M06": [
+      {
+        "n": "Daily",
+        "x": 20,
+        "y": 165,
+        "w": 130,
+        "h": 52
+      },
+      {
+        "n": "Project",
+        "x": 148,
+        "y": 165,
+        "w": 130,
+        "h": 52
+      },
+      {
+        "n": "Sort date",
+        "x": 30,
+        "y": 216,
+        "w": 132,
+        "h": 36
+      },
+      {
+        "n": "Sort tokens",
+        "x": 168,
+        "y": 216,
+        "w": 100,
+        "h": 36
+      },
+      {
+        "n": "Sort chats",
+        "x": 278,
+        "y": 216,
+        "w": 76,
+        "h": 36
+      }
+    ],
+    "M07": [
+      {
+        "n": "Trim repeated context",
+        "x": 20,
+        "y": 284,
+        "w": 350,
+        "h": 89
+      },
+      {
+        "n": "Enable prompt caching",
+        "x": 20,
+        "y": 378,
+        "w": 350,
+        "h": 84
+      }
+    ],
+    "M09": [
+      {
+        "n": "Language",
+        "x": 20,
+        "y": 294,
+        "w": 350,
+        "h": 49
+      },
+      {
+        "n": "Token numbers",
+        "x": 20,
+        "y": 445,
+        "w": 350,
+        "h": 46
+      },
+      {
+        "n": "Sync interval",
+        "x": 20,
+        "y": 548,
+        "w": 350,
+        "h": 45
+      }
+    ],
+    "M10": [
+      {
+        "n": "Disconnect this computer",
+        "x": 20,
+        "y": 712,
+        "w": 350,
+        "h": 52
+      },
+      {
+        "n": "Background sync",
+        "x": 20,
+        "y": 481,
+        "w": 350,
+        "h": 55
+      }
+    ],
+    "M11": [
+      {
+        "n": "Edit monthly limit",
+        "x": 20,
+        "y": 540,
+        "w": 350,
+        "h": 61
+      },
+      {
+        "n": "90% alert",
+        "x": 20,
+        "y": 411,
+        "w": 350,
+        "h": 56
+      },
+      {
+        "n": "100% alert",
+        "x": 20,
+        "y": 467,
+        "w": 350,
+        "h": 56
+      }
+    ],
+    "M12": [
+      {
+        "n": "Diagnostics",
+        "x": 20,
+        "y": 578,
+        "w": 350,
+        "h": 60
+      }
+    ],
+    "M13": [
+      {
+        "n": "Connected devices",
+        "x": 20,
+        "y": 402,
+        "w": 350,
+        "h": 63
+      },
+      {
+        "n": "Google account",
+        "x": 20,
+        "y": 505,
+        "w": 350,
+        "h": 59
+      }
+    ],
+    "M15": [
+      {
+        "n": "OpenAI",
+        "x": 20,
+        "y": 197,
+        "w": 350,
+        "h": 59
+      },
+      {
+        "n": "Anthropic",
+        "x": 20,
+        "y": 253,
+        "w": 350,
+        "h": 60
+      },
+      {
+        "n": "Google Gemini",
+        "x": 20,
+        "y": 310,
+        "w": 350,
+        "h": 59
+      },
+      {
+        "n": "Edit model",
+        "x": 20,
+        "y": 408,
+        "w": 350,
+        "h": 55
+      },
+      {
+        "n": "Edit API key",
+        "x": 20,
+        "y": 464,
+        "w": 350,
+        "h": 60
+      }
+    ],
+    "M08": [
+      {
+        "n": "Back",
+        "x": 8,
+        "y": 38,
+        "w": 46,
+        "h": 46
+      },
+      {
+        "n": "Mark reviewed",
+        "x": 20,
+        "y": 704,
+        "w": 350,
+        "h": 48
+      }
+    ]
+  },
+  "actions": {
+    "M02": {
+      "Copy code": {
+        "type": "copy",
+        "value": "8K4 — M2P",
+        "message": "Sample pairing code copied. It only works in the UI preview."
+      },
+      "I’ve paired my device": {
+        "type": "route",
+        "path": "/ui-state/verifying"
+      },
+      "I?ve paired my device": {
+        "type": "route",
+        "path": "/ui-state/verifying"
+      }
+    },
+    "M04": {
+      "Refresh": {
+        "type": "route",
+        "path": "/ui-state/updatingWithData"
+      },
+      "Day": {
+        "type": "select",
+        "message": ""
+      },
+      "Week": {
+        "type": "select",
+        "message": ""
+      },
+      "Month": {
+        "type": "select",
+        "message": ""
+      },
+      "Total": {
+        "type": "select",
+        "message": ""
+      },
+      "Open sources": {
+        "type": "route",
+        "target": "M04B"
+      },
+      "Open usage trend": {
+        "type": "route",
+        "target": "M06"
+      }
+    },
+    "M05": {
+      "Day": {
+        "type": "select",
+        "message": ""
+      },
+      "Week": {
+        "type": "select",
+        "message": ""
+      },
+      "Month": {
+        "type": "select",
+        "message": ""
+      },
+      "Total": {
+        "type": "select",
+        "message": ""
+      },
+      "Open model list": {
+        "type": "route",
+        "target": "M05C"
+      }
+    },
+    "M05C": {
+      "Small": {
+        "type": "select",
+        "message": ""
+      },
+      "Medium": {
+        "type": "select",
+        "message": ""
+      },
+      "Large": {
+        "type": "select",
+        "message": ""
+      }
+    },
+    "M06": {
+      "Daily": {
+        "type": "select",
+        "message": ""
+      },
+      "Project": {
+        "type": "select",
+        "message": ""
+      }
+    },
+    "M07": {
+      "Trim repeated context": {
+        "type": "route",
+        "target": "M08"
+      },
+      "Enable prompt caching": {
+        "type": "notice",
+        "message": "Sample suggestion: check whether long sessions can use prompt caching. Not connected to real data."
+      }
+    },
+    "M09": {},
+    "M10": {
+      "Sync now": {
+        "type": "route",
+        "target": "S03",
+        "message": "?ang hi?n th? tr?ng th?i ??ng b? m?u, kh?ng c? ??ng b? th?c."
+      }
+    },
+    "M11": {},
+    "M12": {},
+    "M13": {
+      "Connected devices": {
+        "type": "route",
+        "target": "M10"
+      }
+    },
+    "M15": {},
+    "M03": {
+      "Download desktop app": {
+        "type": "notice",
+        "message": "UI preview: requires the Desktop Companion installer from the team."
+      }
+    },
+    "O01": {},
+    "M01": {
+      "Continue with Google": {
+        "type": "route",
+        "path": "/ui-state/signingIn"
+      }
+    }
+  }
+}

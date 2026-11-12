@@ -1,0 +1,66 @@
+{
+  "screen_id": "M06",
+  "state_type": "cost_unavailable",
+  "screen_title": "Daily breakdown",
+  "has_back_button": true,
+  "badge_text": "COST UNAVAILABLE",
+  "specification_subtitle": "State specification · Cost unavailable",
+  "card": {
+    "icon_type": "empty",
+    "title": "Daily cost can’t be calculated",
+    "description": "Token and request data are present, but model pricing is unavailable.",
+    "items": [
+      {
+        "id": "daily_token_valid",
+        "title": "Daily token total is valid",
+        "subtitle": "Only the cost field is unavailable",
+        "bullet_color": "#7B7F88"
+      },
+      {
+        "id": "pricing_review_available",
+        "title": "Pricing review available",
+        "subtitle": "No $0.00 placeholder is used",
+        "bullet_color": "#7B7F88"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep token evidence visible."
+  },
+  "action": {
+    "button_label": "View model pricing",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics",
+  "figma_layout": {
+    "node": "94:1872",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/b67b6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 23.160216,
+      "w": 89.856,
+      "h": 38.086708
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e7cbc.svg",
+      "assets/figma/reviewed/68341.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/2521a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

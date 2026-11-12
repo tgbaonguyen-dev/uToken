@@ -1,0 +1,103 @@
+{
+  "scenarios": [
+    {
+      "id": "sync-failed",
+      "name": "D12 - Sync Failed",
+      "title": "Upload failed",
+      "subtitle": "Usage summaries could not be uploaded to Firebase.",
+      "status": "SYNC INTERRUPTED",
+      "headline": "Upload failed",
+      "description": "Summaries stay queued on this computer and are retried on the next sync.",
+      "accent": "#D14DA6",
+      "code": "!",
+      "primaryLabel": "Retry sync",
+      "primaryAction": "retry",
+      "secondaryLabel": "Account",
+      "secondaryAction": "pair",
+      "collectorState": "running",
+      "emptyUsage": false,
+      "details": [],
+      "guide": []
+    },
+    {
+      "id": "not-paired",
+      "name": "D13 - Not Paired",
+      "title": "Sign in to sync",
+      "subtitle": "Sign in with Google before usage can be uploaded.",
+      "status": "Not paired",
+      "headline": "Sign in to sync",
+      "description": "Local analysis is up to date. Sign in with the same Google account as uToken mobile to upload it.",
+      "accent": "#F26039",
+      "code": "01",
+      "primaryLabel": "Sign in with Google",
+      "primaryAction": "pair",
+      "secondaryLabel": "Open settings",
+      "secondaryAction": "settings",
+      "collectorState": "running",
+      "emptyUsage": false,
+      "details": [
+        {
+          "label": "Google account",
+          "value": "Required",
+          "color": "#9096A1"
+        },
+        {
+          "label": "Local history",
+          "value": "Preserved",
+          "color": "#9096A1"
+        }
+      ],
+      "guide": []
+    },
+    {
+      "id": "syncing",
+      "name": "D20 - Syncing",
+      "title": "Sync in progress",
+      "subtitle": "Scanning logs and uploading daily summaries to Firebase.",
+      "status": "Syncing",
+      "headline": "Sync in progress",
+      "description": "Scanning logs and uploading daily summaries to Firebase.",
+      "accent": "#4089EF",
+      "code": "08",
+      "primaryLabel": "View sync",
+      "primaryAction": "sync",
+      "secondaryLabel": "Open settings",
+      "secondaryAction": "settings",
+      "collectorState": "running",
+      "emptyUsage": false,
+      "details": [
+        {
+          "label": "Transfer",
+          "value": "Usage metadata only",
+          "color": "#9096A1"
+        },
+        {
+          "label": "Prompt content",
+          "value": "Not collected",
+          "color": "#9096A1"
+        }
+      ],
+      "guide": []
+    }
+  ],
+  "queue": [
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "events": 9,
+      "bytes": 412000
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "events": 6,
+      "bytes": 284000
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "events": 3,
+      "bytes": 118000
+    }
+  ]
+}

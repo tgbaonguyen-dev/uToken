@@ -1,0 +1,66 @@
+{
+  "screen_id": "M02",
+  "state_type": "verifying",
+  "screen_title": "Connect desktop",
+  "has_back_button": true,
+  "badge_text": "VERIFYING",
+  "specification_subtitle": "State specification · Verifying",
+  "card": {
+    "icon_type": "signing_in",
+    "title": "Verifying this desktop",
+    "description": "Checking the one-time code and desktop identity.",
+    "items": [
+      {
+        "id": "pairing_code_received",
+        "title": "Pairing code received",
+        "subtitle": "Codes expire after 10 minutes",
+        "bullet_color": "#6678E8"
+      },
+      {
+        "id": "waiting_desktop",
+        "title": "Waiting for desktop",
+        "subtitle": "Keep the companion app open",
+        "bullet_color": "#6678E8"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Disable duplicate submits while verification is running."
+  },
+  "has_bottom_navigation": false,
+  "action": {
+    "button_label": "Cancel pairing",
+    "cancel_label": "Cancel pairing",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "figma_layout": {
+    "node": "93:413",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 736,
+    "illustration": "assets/figma/reviewed/5a53e.svg",
+    "illustration_rect": {
+      "x": 141.552,
+      "y": 22.023916,
+      "w": 69.472,
+      "h": 42.881784
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/21f2c.svg",
+      "assets/figma/reviewed/f1f72.svg"
+    ],
+    "nav": [
+      null,
+      null,
+      null,
+      null
+    ]
+  }
+}

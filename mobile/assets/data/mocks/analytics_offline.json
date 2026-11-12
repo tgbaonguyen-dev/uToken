@@ -1,0 +1,66 @@
+{
+  "screen_id": "M05",
+  "state_type": "offline",
+  "screen_title": "Analytics",
+  "has_back_button": false,
+  "badge_text": "OFFLINE",
+  "specification_subtitle": "State specification · Offline",
+  "card": {
+    "icon_type": "offline",
+    "title": "Analytics needs a connection",
+    "description": "This filtered view is not available from the local cache.",
+    "items": [
+      {
+        "id": "dashboard_may_still_work",
+        "title": "Dashboard may still work",
+        "subtitle": "Previously loaded summaries remain accessible",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "query_is_paused",
+        "title": "Query is paused",
+        "subtitle": "Reconnect to load this breakdown",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Distinguish cached overview from uncached analytics."
+  },
+  "action": {
+    "button_label": "Try again",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Analytics",
+  "figma_layout": {
+    "node": "94:1508",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/2521a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

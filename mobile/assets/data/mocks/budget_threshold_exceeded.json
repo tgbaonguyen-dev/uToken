@@ -1,0 +1,61 @@
+{
+  "screen_id": "M11",
+  "screen_title": "Budget & alerts",
+  "has_back_button": true,
+  "state_type": "threshold_exceeded",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "View contributing usage",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Deduplicate alerts per threshold and month."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "90% threshold reached",
+        "subtitle": "One notification created for this month"
+      },
+      {
+        "title": "Budget is not exceeded yet",
+        "subtitle": "Tracking continues normally"
+      }
+    ],
+    "title": "Budget alert threshold reached",
+    "description": "Estimated monthly cost crossed a configured alert level.",
+    "icon_type": "offline"
+  },
+  "badge_text": "ALERT TRIGGERED",
+  "specification_subtitle": "State specification · Alert triggered",
+  "figma_layout": {
+    "node": "94:4099",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

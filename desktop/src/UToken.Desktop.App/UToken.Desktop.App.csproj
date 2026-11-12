@@ -2,22 +2,40 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- Publish (-r linux-x64 / win-x64): biên dịch sẵn để cửa sổ đầu mở nhanh hơn (bớt JIT lúc khởi động). -->
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Svg.Skia" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../UToken.Core/UToken.Core.csproj" />
     <ProjectReference Include="../UToken.Collectors/UToken.Collectors.csproj" />
     <ProjectReference Include="../UToken.Storage/UToken.Storage.csproj" />
+    <ProjectReference Include="../UToken.Engine/UToken.Engine.csproj" />
     <ProjectReference Include="../UToken.Sync/UToken.Sync.csproj" />
+    <ProjectReference Include="../UToken.Insights/UToken.Insights.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="firebase.desktop.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Remove="appsettings.Local.json" />
+    <None Include="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="UiContent/*.json" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Localization/vi.json" />
+    <AvaloniaResource Include="Assets/**" />
   </ItemGroup>
+  <Target Name="CreateLocalSettings" BeforeTargets="PrepareForBuild"
+          Condition="!Exists('$(MSBuildProjectDirectory)/appsettings.Local.json')">
+    <Copy SourceFiles="$(MSBuildProjectDirectory)/appsettings.Local.example.json"
+          DestinationFiles="$(MSBuildProjectDirectory)/appsettings.Local.json" />
+    <Message Importance="high" Text="Created appsettings.Local.json from the example. Fill in your team's Firebase/Google OAuth settings to enable sign-in." />
+  </Target>
 </Project>

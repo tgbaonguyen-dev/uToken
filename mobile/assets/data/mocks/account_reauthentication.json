@@ -1,0 +1,61 @@
+{
+  "screen_id": "M13",
+  "screen_title": "Account",
+  "has_back_button": true,
+  "state_type": "reauthentication",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Verify account",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Do not sign the user out preemptively."
+  },
+  "card": {
+    "items": [
+      {
+        "title": "Profile remains signed in",
+        "subtitle": "Normal analytics is still available"
+      },
+      {
+        "title": "Sensitive action paused",
+        "subtitle": "Continue after verification"
+      }
+    ],
+    "title": "Confirm it’s you",
+    "description": "This account action requires a recent Google authentication.",
+    "icon_type": "offline"
+  },
+  "badge_text": "REAUTHENTICATE",
+  "specification_subtitle": "State specification · Reauthenticate",
+  "figma_layout": {
+    "node": "94:5034",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 708,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

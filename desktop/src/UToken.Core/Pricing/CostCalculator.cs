@@ -20,4 +20,6 @@ public static class CostCalculator
     }
 
     public static long CostMicroUsd(UsageEvent e, Price p) => CostMicroUsd(e.Input, e.Cached, e.CacheWrite, e.Output, p);
+
+    public static long CostMicroUsd(UsageEvent e, PriceSchedule schedule) => CostMicroUsd(e, schedule.For(e.Input));
 }

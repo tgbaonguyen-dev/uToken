@@ -8,6 +8,6 @@ void main() {
   });
 
   test('Không hiển thị 0 khi không có dữ liệu', () {
-    expect(formatRateOrNoData(null), 'Không có dữ liệu');
+    expect(formatRateOrNoData(null), 'No data');
   });
 }

@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:l="using:UToken.Desktop.App.Localization" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:views="using:UToken.Desktop.App.Views"
+ xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+ x:Class="UToken.Desktop.App.Views.SourceNotFoundView" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models">
+ <Border Classes="card" Padding="32"><StackPanel Spacing="28">
+ <Grid ColumnDefinitions="64,24,*"><Border Width="64" Height="64" CornerRadius="20" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Background="#191C20" VerticalAlignment="Top"><TextBlock Text="{Binding NotFoundScenario.Code, Converter={x:Static l:Tr.Converter}}" FontSize="25" Foreground="#F26039" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border>
+ <StackPanel Grid.Column="2" Spacing="12"><TextBlock Text="{Binding NotFoundScenario.Headline, Converter={x:Static l:Tr.Converter}}" FontSize="25" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding NotFoundScenario.Description, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="12" TextWrapping="Wrap"/></StackPanel></Grid>
+ <StackPanel Spacing="14"><TextBlock Text="{l:T 'PROVIDER AVAILABILITY'}" Classes="label"/>
+ <Border Background="#191A1C" CornerRadius="14" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Padding="20,4">
+ <ItemsControl ItemsSource="{Binding DiscoveryProviders}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceScanItem">
+ <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="32,14,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="2" Text="{Binding Name, Converter={x:Static l:Tr.Converter}}" FontSize="13" VerticalAlignment="Center"/><StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding Color}"/><TextBlock Text="{Binding Label, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding Color}" FontSize="11"/></StackPanel></Grid></Border>
+ </DataTemplate></ItemsControl.ItemTemplate></ItemsControl></Border></StackPanel>
+ <WrapPanel IsEnabled="{Binding !IsBusy}"><Button Classes="primary" Content="{l:T 'Configure sources'}" Command="{Binding ConfigureSourcesCommand}" MinWidth="170" Margin="0,0,12,8"/><Button Content="{l:T 'Rescan sources'}" Command="{Binding RescanSourcesCommand}" Margin="0,0,12,8"/><Button Content="{l:T 'Open settings'}" Command="{Binding ShowSettingsCommand}" Margin="0,0,0,8"/></WrapPanel>
+ <TextBlock Text="{l:T 'Previously collected usage remains available. uToken only checks the log folders listed above; system settings are never changed.'}" Classes="muted" FontSize="11" TextWrapping="Wrap"/>
+ </StackPanel></Border>
+</UserControl>

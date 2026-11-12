@@ -1,22 +1,186 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:UToken.Desktop.App.ViewModels"
-        x:Class="UToken.Desktop.App.Views.MainWindow"
-        x:DataType="vm:MainViewModel"
-        Title="μToken" Width="1100" Height="720">
-  <DockPanel>
-    <StackPanel DockPanel.Dock="Left" Width="200" Margin="16" Spacing="8">
-      <TextBlock Text="μToken" FontSize="20" FontWeight="SemiBold" />
-      <Button Content="Overview" />
-      <Button Content="Sources" />
-      <Button Content="Sync" />
-      <Button Content="Settings" />
+<Window xmlns="https://github.com/avaloniaui" xmlns:l="using:UToken.Desktop.App.Localization" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+ xmlns:views="using:UToken.Desktop.App.Views"
+ x:Class="UToken.Desktop.App.Views.MainWindow" x:CompileBindings="True" x:DataType="vm:MainViewModel" xmlns:vm="using:UToken.Desktop.App.ViewModels" xmlns:m="using:UToken.Desktop.App.Models"
+ Title="{l:T '&#x03BC;Token &#x2014; Desktop Companion'}" Width="1180" Height="760" MinWidth="1020" MinHeight="650">
+ <Window.KeyBindings>
+  <KeyBinding Gesture="Ctrl+D1" Command="{Binding ShowOverviewCommand}"/>
+  <KeyBinding Gesture="Ctrl+D2" Command="{Binding ShowSourcesCommand}"/>
+  <KeyBinding Gesture="Ctrl+D3" Command="{Binding ShowPricingCommand}"/>
+  <KeyBinding Gesture="Ctrl+D4" Command="{Binding ShowSyncCommand}"/>
+  <KeyBinding Gesture="Ctrl+D5" Command="{Binding ShowSettingsCommand}"/>
+  <KeyBinding Gesture="F5" Command="{Binding RefreshPageCommand}"/>
+  <KeyBinding Gesture="Ctrl+R" Command="{Binding RefreshPageCommand}"/>
+ </Window.KeyBindings>
+ <Grid RowDefinitions="52,*">
+ <!-- Topbar: logo, breadcrumb, trạng thái sync và hành động chung. Trên Windows thay cho thanh tiêu đề (xem MainWindow.axaml.cs). -->
+ <Border x:Name="Topbar" Classes="topbar" PointerPressed="TopbarPointerPressed" DoubleTapped="TopbarDoubleTapped">
+  <Grid ColumnDefinitions="220,*,Auto">
+   <StackPanel Orientation="Horizontal" Spacing="10" Margin="28,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+    <Border Width="26" Height="26" CornerRadius="8" Background="{StaticResource SuccessBrush}"><TextBlock Text="{l:T '&#x03BC;'}" FontSize="15" FontWeight="Bold" Foreground="#060708" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="None"/></Border>
+    <TextBlock Text="{l:T '&#x03BC;Token'}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+    <TextBlock Text="{l:T 'DESKTOP'}" Classes="muted" FontSize="9" LetterSpacing="1.2" VerticalAlignment="Center" Margin="2,2,0,0"/>
+   </StackPanel>
+   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="40,0,0,0" VerticalAlignment="Center">
+    <Button Classes="crumb" Content="{Binding SectionName, Converter={x:Static l:Tr.Converter}}" Command="{Binding GoToSectionCommand}" IsVisible="{Binding IsSubPage}" ToolTip.Tip="{l:T 'Back'}"/>
+    <TextBlock Text="&#x203A;" Classes="muted" FontSize="14" VerticalAlignment="Center" IsVisible="{Binding IsSubPage}" TextTrimming="None"/>
+    <TextBlock Text="{Binding PageTitle, Converter={x:Static l:Tr.Converter}}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" IsVisible="{Binding IsSubPage}"/>
+    <TextBlock Text="{Binding SectionName, Converter={x:Static l:Tr.Converter}}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" IsVisible="{Binding !IsSubPage}"/>
+   </StackPanel>
+   <StackPanel x:Name="TopbarActions" Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,0,20,0" VerticalAlignment="Center">
+    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,6,0" IsHitTestVisible="False">
+     <Ellipse Classes="status-dot" Width="7" Height="7" Fill="{Binding SidebarStatusColor}"/>
+     <TextBlock Text="{Binding TopbarSyncLabel, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10" VerticalAlignment="Center" MaxWidth="220"/>
     </StackPanel>
-    <StackPanel Margin="24" Spacing="12">
-      <TextBlock Text="{Binding Status}" />
-      <TextBlock Text="{Binding TotalTokens, StringFormat='Tổng token: {0:N0}'}" FontSize="28" />
-      <TextBlock Text="{Binding LastSync}" />
-      <Button Content="Rescan sources" Command="{Binding RescanSourcesCommand}" />
+    <Button Classes="icon" Content="&#x27F3;" Command="{Binding RefreshPageCommand}" ToolTip.Tip="{l:T 'Refresh this page (F5)'}" AutomationProperties.Name="Refresh"/>
+    <Button Classes="topbar-primary" Content="{l:T 'Sync now'}" Command="{Binding SyncNowCommand}" IsEnabled="{Binding CanSyncFromTopbar}" ToolTip.Tip="{l:T 'Analyze local logs and upload summaries'}" AutomationProperties.Name="Sync now (top bar)"/>
+    <Button Classes="account" Command="{Binding ShowPairingCommand}" IsEnabled="{Binding CanNavigate}" ToolTip.Tip="{l:T 'Google account'}" AutomationProperties.Name="Account">
+     <StackPanel Orientation="Horizontal" Spacing="8"><Border Width="22" Height="22" CornerRadius="11" Background="#22262B"><TextBlock Text="{Binding AccountInitial, Converter={x:Static l:Tr.Converter}}" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="None"/></Border><TextBlock Text="{Binding AccountLabel, Converter={x:Static l:Tr.Converter}}" FontSize="11" VerticalAlignment="Center" MaxWidth="140"/></StackPanel>
+    </Button>
+   </StackPanel>
+  </Grid>
+ </Border>
+ <Grid Grid.Row="1" ColumnDefinitions="220,*">
+  <Border Background="#121315" Padding="16,24,16,20">
+   <Grid RowDefinitions="*,Auto">
+    <StackPanel Grid.Row="0" Spacing="10" IsEnabled="{Binding CanNavigate}" ToolTip.Tip="{l:T 'Finish setup or wait for the source scan to unlock navigation.'}">
+     <Button Classes="nav" Classes.active="{Binding IsOverviewSection}" ToolTip.Tip="{l:T 'Ctrl+1'}" Command="{Binding ShowOverviewCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><Path Data="M1,1 H9 V9 H1 Z M13,1 H21 V9 H13 Z M1,13 H9 V21 H1 Z M13,13 H21 V21 H13 Z" Width="22" Height="22" Stretch="Uniform" Fill="{Binding $parent[Button].Foreground}"/><TextBlock Text="{l:T 'Overview'}" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsSourceSection}" ToolTip.Tip="{l:T 'Ctrl+2'}" Command="{Binding ShowSourcesCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><Grid Width="24" Height="24"><Border Height="3" Width="20" CornerRadius="2" Background="{Binding $parent[Button].Foreground}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,5,0,0"/><Border Height="3" Width="14" CornerRadius="2" Background="{Binding $parent[Button].Foreground}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,5"/></Grid><TextBlock Text="{l:T 'Sources'}" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsPricingPage}" ToolTip.Tip="{l:T 'Ctrl+3'}" Command="{Binding ShowPricingCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="$" FontSize="22" Width="24" TextAlignment="Center"/><TextBlock Text="{l:T 'Pricing'}" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsSyncSection}" ToolTip.Tip="{l:T 'Ctrl+4'}" Command="{Binding ShowSyncCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="&#x21C4;" FontSize="22" Width="24" TextTrimming="None"/><TextBlock Text="{l:T 'Sync'}" VerticalAlignment="Center"/></StackPanel></Button>
+     <Button Classes="nav" Classes.active="{Binding IsSettingsPage}" ToolTip.Tip="{l:T 'Ctrl+5'}" Command="{Binding ShowSettingsCommand}"><StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="&#x2699;" FontSize="22" Width="24" TextTrimming="None"/><TextBlock Text="{l:T 'Settings'}" VerticalAlignment="Center"/></StackPanel></Button>
     </StackPanel>
-  </DockPanel>
+    <Border Grid.Row="1" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="13" Padding="14" Background="{StaticResource PageBrush}">
+     <StackPanel Spacing="6"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="SidebarStatusDot" Classes="status-dot" Fill="{Binding SidebarStatusColor}"/><TextBlock Text="{Binding SidebarStatusLabel, Converter={x:Static l:Tr.Converter}}" FontSize="11"/></StackPanel><TextBlock Text="{l:T 'Local collector'}" Classes="muted" FontSize="9" TextWrapping="Wrap"/></StackPanel>
+    </Border>
+   </Grid>
+  </Border>
+  <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,*" Margin="40,28,40,20">
+   <Grid ColumnDefinitions="*,Auto">
+    <StackPanel Spacing="9"><TextBlock Text="{Binding PageTitle, Converter={x:Static l:Tr.Converter}}" TextWrapping="Wrap" FontSize="27" FontWeight="SemiBold"/><TextBlock Text="{Binding Subtitle, Converter={x:Static l:Tr.Converter}}" Classes="muted" TextWrapping="Wrap"/></StackPanel>
+    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+     <Border Classes="card" BorderBrush="{Binding DisplayedCollector.Color}" Padding="16,10" MinWidth="150" IsVisible="{Binding IsOverviewDashboard}"><StackPanel Orientation="Horizontal" Spacing="12"><Ellipse Classes="status-dot" Fill="{Binding DisplayedCollector.Color}"/><TextBlock Text="{Binding DisplayedCollector.Label, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding DisplayedCollector.Color}"/></StackPanel></Border>
+     <Border Classes="card" Padding="12,10" IsVisible="{Binding IsOverviewState}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="{Binding OverviewPreview.Scenario.Accent}"/><TextBlock Text="{Binding OverviewPreview.Scenario.Status, Converter={x:Static l:Tr.Converter}}" FontSize="11"/></StackPanel></Border>
+     <Button Content="{l:T 'Restore defaults'}" IsVisible="{Binding IsSettingsPage}" Command="{Binding ResetSettingsCommand}" IsEnabled="{Binding !IsBusy}"/>
+     <Button Classes="primary" Content="{l:T 'Save changes'}" IsVisible="{Binding IsSettingsPage}" Command="{Binding SaveSettingsCommand}" IsEnabled="{Binding !IsBusy}"/>
+     <Border Classes="card" Padding="12,10" IsVisible="{Binding IsScanningSources}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="#4089EF"/><TextBlock Text="{l:T 'Scanning'}" FontSize="11"/></StackPanel></Border>
+     <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSourceNotFound}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="#F26039"/><TextBlock Text="{l:T 'Needs setup'}" FontSize="11"/></StackPanel></Border>
+     <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSourcesStatePreview}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="SourceStateHeaderDot" Classes="status-dot" Fill="{Binding SectionScenario.Accent}"/><TextBlock Text="{Binding SectionScenario.Status, Converter={x:Static l:Tr.Converter}}" FontSize="11"/></StackPanel></Border>
+     <Button x:Name="RescanSourcesButton" Content="{l:T 'Rescan sources'}" IsVisible="{Binding IsSources}" Command="{Binding RescanSourcesCommand}" IsEnabled="{Binding !IsBusy}" ToolTip.Tip="{l:T 'Read local logs. Use Sync now to upload summaries to Firebase.'}"/>
+     <Border Classes="card" Padding="12,10" IsVisible="{Binding IsSyncStatePreview}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="{Binding ActiveSyncScenario.Accent}"/><TextBlock Text="{Binding ActiveSyncScenario.Status, Converter={x:Static l:Tr.Converter}}" FontSize="11"/></StackPanel></Border>
+     <Button Classes="primary" Content="{Binding PairingActionLabel, Converter={x:Static l:Tr.Converter}}" IsVisible="{Binding ShowSyncSignIn}" Command="{Binding ShowPairingCommand}" IsEnabled="{Binding !IsBusy}"/>
+     <Border Classes="card" Padding="12,10" IsVisible="{Binding IsPairingStateVisible}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse x:Name="PairingStateHeaderDot" Classes="status-dot" Fill="{Binding ActivePairingScenario.Accent}"/><TextBlock Text="{Binding ActivePairingScenario.Status, Converter={x:Static l:Tr.Converter}}" FontSize="11"/></StackPanel></Border>
+     <Border Classes="card" BorderBrush="{Binding SelectedSource.StatusColor}" Padding="12,10" IsVisible="{Binding IsDetail}"><StackPanel Orientation="Horizontal" Spacing="10"><Ellipse Classes="status-dot" Fill="{Binding SelectedSource.StatusColor}"/><TextBlock Text="{Binding SelectedSource.StatusLabel, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding SelectedSource.StatusColor}" FontSize="11"/></StackPanel></Border>
+     <ComboBox x:Name="PeriodSelector" ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod, Mode=TwoWay}" IsVisible="{Binding IsDetail}" IsEnabled="{Binding !IsBusy}" MinWidth="115" Height="38" AutomationProperties.Name="Usage period"/>
+     <Image Source="{Binding SelectedSource.Logo, Converter={x:Static views:SvgLogo.Instance}}" IsVisible="{Binding IsDetail}" Width="32" Height="32" VerticalAlignment="Center"/>
+    </StackPanel>
+   </Grid>
+   <Grid Grid.Row="1" Margin="0,14,0,10" ColumnDefinitions="*,Auto">
+    <TextBlock Text="{Binding Notice, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10"/>
+    <ProgressBar Grid.Column="1" x:Name="PageProgress" IsIndeterminate="True" Width="120" Height="2" VerticalAlignment="Center" Foreground="{StaticResource SuccessBrush}" Background="Transparent" IsVisible="{Binding ShowProgress}" AutomationProperties.Name="Loading"/>
+   </Grid>
+   <Border Grid.Row="2" IsVisible="{Binding HasError}" BorderBrush="#F26039" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
+    <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Error, Converter={x:Static l:Tr.Converter}}" TextWrapping="Wrap" VerticalAlignment="Center"/><Button Grid.Column="1" Content="{l:T 'Try again'}" Command="{Binding LoadCommand}" IsEnabled="{Binding !IsBusy}"/></Grid>
+   </Border>
+   <ScrollViewer Grid.Row="3" x:Name="PageHost" Margin="0,0,-14,0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer.RenderTransform><TranslateTransform/></ScrollViewer.RenderTransform>
+    <!-- Chừa chỗ cho thanh cuộn để nó không đè lên mép phải các thẻ. -->
+    <StackPanel Margin="0,0,14,0">
+     <views:LazyView ViewType="{x:Type views:OverviewStateView}" IsVisible="{Binding IsOverviewState}"/>
+     <!-- D02: Collector Dashboard -->
+     <StackPanel IsVisible="{Binding IsOverviewDashboard}" Spacing="28">
+      <UniformGrid Columns="4">
+       <Border Classes="card" Padding="16" Margin="0,0,14,0"><StackPanel Spacing="14"><TextBlock Text="{l:T 'TOTAL TOKENS'}" Classes="label"/><TextBlock Text="{Binding Overview.TotalTokensLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><Border Background="#F26039" Height="3" Width="48" HorizontalAlignment="Left" CornerRadius="2"/></StackPanel></Border>
+       <Border Classes="card" Padding="16" Margin="0,0,14,0"><StackPanel Spacing="14"><TextBlock Text="{l:T 'EST. COST'}" Classes="label"/><TextBlock Text="{Binding Overview.EstimatedCostLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><Border Background="#2EC790" Height="3" Width="48" HorizontalAlignment="Left" CornerRadius="2"/></StackPanel></Border>
+       <Border Classes="card" Padding="16" Margin="0,0,14,0"><StackPanel Spacing="14"><TextBlock Text="{l:T 'CACHED'}" Classes="label"/><TextBlock Text="{Binding Overview.CachedLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><Border Background="#4089EF" Height="3" Width="48" HorizontalAlignment="Left" CornerRadius="2"/></StackPanel></Border>
+       <Border Classes="card" Padding="16"><StackPanel Spacing="14"><TextBlock Text="{l:T 'LAST SYNC'}" Classes="label"/><TextBlock Text="{Binding DisplayedCollector.LastSyncLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><Border Background="#E64C9D" Height="3" Width="48" HorizontalAlignment="Left" CornerRadius="2"/></StackPanel></Border>
+      </UniformGrid>
+      <Grid ColumnDefinitions="1.9*,24,*">
+       <Border Classes="card" MinHeight="430">
+        <StackPanel Spacing="24"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T 'RECENT SYNC ACTIVITY'}" Classes="label" VerticalAlignment="Center"/><Button Grid.Column="1" Content="{l:T 'View all'}" Command="{Binding ShowActivityCommand}" IsEnabled="{Binding !IsBusy}" Padding="10,6"/></Grid>
+         <ItemsControl ItemsSource="{Binding Overview.Activity}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:ActivityData">
+          <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,22"><Grid ColumnDefinitions="14,70,*,70,68">
+           <Ellipse Width="7" Height="7" Fill="{Binding Color}" HorizontalAlignment="Left"/><TextBlock Grid.Column="1" Text="{Binding TimeLabel, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="11"/><TextBlock Grid.Column="2" Text="{Binding Provider, Converter={x:Static l:Tr.Converter}}"/><TextBlock Grid.Column="3" Text="{Binding TokenLabel, Converter={x:Static l:Tr.Converter}}" TextAlignment="Right"/><TextBlock Grid.Column="4" Text="{Binding Result, Converter={x:Static l:Tr.Converter}}" TextAlignment="Right" Foreground="{StaticResource SuccessBrush}" FontSize="10"/>
+          </Grid></Border>
+         </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+         <TextBlock Text="{l:T 'No recent activity'}" Classes="muted" IsVisible="{Binding IsActivityEmpty}"/>
+        </StackPanel>
+       </Border>
+       <StackPanel Grid.Column="2" Spacing="24">
+        <Border Classes="card"><StackPanel Spacing="22"><TextBlock Text="{l:T 'SOURCES'}" Classes="label"/>
+         <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceData">
+          <StackPanel Spacing="10" Margin="0,0,0,16"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Name, Converter={x:Static l:Tr.Converter}}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding ShareLabel, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="11"/></Grid><ProgressBar Value="{Binding Share}" Foreground="{Binding Color}"/></StackPanel>
+         </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        </StackPanel></Border>
+        <Border Classes="card"><StackPanel Spacing="20"><TextBlock Text="{l:T 'PRIVACY &amp; HEALTH'}" Classes="label"/>
+         <ItemsControl ItemsSource="{Binding Overview.Health}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:HealthData"><Grid ColumnDefinitions="*,Auto" Margin="0,8"><TextBlock Text="{Binding Label, Converter={x:Static l:Tr.Converter}}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding Value, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding Color}" FontSize="11"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        </StackPanel></Border>
+       </StackPanel>
+      </Grid>
+     </StackPanel>
+     <views:LazyView ViewType="{x:Type views:SourceNotFoundView}" IsVisible="{Binding IsSourceNotFound}"/>
+     <views:LazyView ViewType="{x:Type views:SourceScanView}" IsVisible="{Binding IsScanningSources}"/>
+     <views:LazyView ViewType="{x:Type views:SourcePermissionView}" IsVisible="{Binding IsPermissionRequired}"/>
+     <!-- D05: Sources -->
+     <StackPanel IsVisible="{Binding IsSourcesNormal}" Spacing="24">
+      <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceData">
+       <Button Classes="source" Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).OpenSourceCommand}" CommandParameter="{Binding}" IsEnabled="{Binding !$parent[Window].((vm:MainViewModel)DataContext).IsBusy}" AutomationProperties.Name="{Binding Name}">
+        <StackPanel Spacing="16">
+         <Grid ColumnDefinitions="40,*,Auto"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><TextBlock Grid.Column="1" Text="{Binding Name, Converter={x:Static l:Tr.Converter}}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0"/><StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center"><Ellipse Classes="status-dot" Fill="{Binding StatusColor}"/><TextBlock Text="{Binding StatusLabel, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding StatusColor}" FontSize="10"/></StackPanel></Grid>
+         <Border Background="{StaticResource LineBrush}" Height="1"/>
+         <Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="8"><TextBlock Text="{l:T 'Tokens'}" Classes="muted" FontSize="10"/><TextBlock Text="{Binding TokenLabel, Converter={x:Static l:Tr.Converter}}" FontSize="24" FontWeight="SemiBold"/></StackPanel><StackPanel Grid.Column="1" Spacing="8"><TextBlock Text="{l:T 'Share'}" Classes="muted" FontSize="10" HorizontalAlignment="Right"/><TextBlock Text="{Binding ShareLabel, Converter={x:Static l:Tr.Converter}}" FontSize="17" FontWeight="SemiBold"/></StackPanel></Grid>
+         <TextBlock Text="{Binding LastEventCaption, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10"/>
+         <ProgressBar Value="{Binding Share}" Foreground="{Binding Color}"/>
+
+        </StackPanel>
+       </Button>
+      </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+      <TextBlock Text="{l:T 'No supported sources found. Install Codex or Claude Code, then rescan.'}" IsVisible="{Binding IsSourceListEmpty}" Classes="muted"/>
+      <Grid ColumnDefinitions="1.9*,24,*">
+       <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{l:T 'Collection coverage'}" Classes="heading"/><TextBlock Text="{l:T 'What the collector reads from each provider.'}" Classes="muted" FontSize="11"/>
+        <ItemsControl ItemsSource="{Binding SourceList.Coverage}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:CoverageData"><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,16"><Grid ColumnDefinitions="18,150,*,48"><Ellipse Classes="status-dot" Fill="{Binding Color}" HorizontalAlignment="Left"/><TextBlock Grid.Column="1" Text="{Binding Label, Converter={x:Static l:Tr.Converter}}" FontSize="11"/><TextBlock Grid.Column="2" Text="{Binding Description, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10" TextWrapping="Wrap"/><TextBlock Grid.Column="3" Text="{Binding Count, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding Color}" TextAlignment="Right" FontSize="11"/></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+       </StackPanel></Border>
+       <Border Grid.Column="2" Classes="card"><StackPanel Spacing="22"><TextBlock Text="{l:T 'Collector paths'}" Classes="heading"/>
+        <ItemsControl ItemsSource="{Binding SourceList.Sources}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:SourceData"><Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,15"><Grid ColumnDefinitions="40,*"><Image Source="{Binding Logo, Converter={x:Static views:SvgLogo.Instance}}" Width="32" Height="32"/><StackPanel Grid.Column="1" Margin="8,0" Spacing="8"><TextBlock Text="{Binding Name, Converter={x:Static l:Tr.Converter}}" FontSize="11"/><TextBlock Text="{Binding Path, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10" TextWrapping="Wrap" ToolTip.Tip="{Binding Path, Converter={x:Static l:Tr.Converter}}"/></StackPanel></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        <Button Content="{l:T 'Manage permissions'}" Command="{Binding ShowPermissionInstructionsCommand}" CommandParameter="guide" IsEnabled="{Binding !IsBusy}"/>
+        <TextBlock Text="{l:T 'Only token counts and metadata are read from these folders.'}" TextWrapping="Wrap" Classes="muted" FontSize="11"/>
+       </StackPanel></Border>
+      </Grid>
+     </StackPanel>
+     <!-- D06: Source Detail -->
+     <StackPanel IsVisible="{Binding IsDetail}" Spacing="20">
+
+      <UniformGrid Columns="4">
+       <Border Classes="card" Padding="16" Margin="0,0,14,0"><StackPanel Spacing="10"><TextBlock Text="{l:T 'TOKENS'}" Classes="label"/><TextBlock Text="{Binding SelectedSource.TokenLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><TextBlock Text="{Binding SelectedSource.ShareLabel, StringFormat='{}{0} of total'}" Foreground="{Binding SelectedSource.Color}" FontSize="10"/></StackPanel></Border>
+       <Border Classes="card" Padding="16" Margin="0,0,14,0"><StackPanel Spacing="10"><TextBlock Text="{l:T 'ESTIMATED COST'}" Classes="label"/><TextBlock Text="{Binding SelectedSource.EstimatedCostLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><TextBlock Text="{Binding SelectedSource.DailyCostLabel, Converter={x:Static l:Tr.Converter}}" Foreground="{StaticResource SuccessBrush}" FontSize="10"/></StackPanel></Border>
+       <Border Classes="card" Padding="16" Margin="0,0,14,0"><StackPanel Spacing="10"><TextBlock Text="{l:T 'CACHE RATE'}" Classes="label"/><TextBlock Text="{Binding SelectedSource.CacheRateLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><TextBlock Text="{Binding SelectedSource.CacheChangeLabel, Converter={x:Static l:Tr.Converter}}" Foreground="#4089EF" FontSize="10"/></StackPanel></Border>
+       <Border Classes="card" Padding="16"><StackPanel Spacing="10"><TextBlock Text="{l:T 'LAST EVENT'}" Classes="label"/><TextBlock Text="{Binding SelectedSource.LastEventLabel, Converter={x:Static l:Tr.Converter}}" Classes="value"/><TextBlock Text="{Binding SelectedSource.CollectorHealthLabel, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding SelectedSource.CollectorHealthColor}" FontSize="10"/></StackPanel></Border>
+      </UniformGrid>
+      <Grid ColumnDefinitions="1.8*,20,*">
+       <Border Classes="card"><StackPanel Spacing="12"><TextBlock Text="{l:T 'Usage trend'}" Classes="heading"/><TextBlock Text="{Binding SelectedSource.TrendCaption, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="11"/>
+        <ItemsControl ItemsSource="{Binding SelectedSource.ChartBars}" Height="160" VerticalAlignment="Bottom"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:TrendBar"><Grid Margin="2,0" Width="12" HorizontalAlignment="Center" VerticalAlignment="Bottom" ToolTip.Tip="{Binding Tooltip, Converter={x:Static l:Tr.Converter}}"><Border Height="{Binding Height}" Background="{Binding $parent[Window].((vm:MainViewModel)DataContext).SelectedSource.Color}" CornerRadius="4"/><Border Height="{Binding CachedHeight}" Background="{StaticResource SuccessBrush}" VerticalAlignment="Top" CornerRadius="4"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding SelectedSource.TrendStart, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10"/><TextBlock Grid.Column="1" Text="{Binding SelectedSource.TrendEnd, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="10"/></Grid>
+       </StackPanel></Border>
+       <Border Grid.Column="2" Classes="card"><StackPanel Spacing="24"><TextBlock Text="{l:T 'Model breakdown'}" Classes="heading"/>
+        <ItemsControl ItemsSource="{Binding SelectedSource.Models}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:ModelData"><StackPanel Spacing="12" Margin="0,12,0,16"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Name, Converter={x:Static l:Tr.Converter}}" FontSize="11"/><TextBlock Grid.Column="1" Text="{Binding TokenLabel, Converter={x:Static l:Tr.Converter}}" FontSize="11"/></Grid><Grid ColumnDefinitions="60,*"><TextBlock Text="{Binding Share, StringFormat='{}{0:0.0}%'}" Classes="muted" FontSize="10"/><ProgressBar Grid.Column="1" Value="{Binding Share}" Foreground="{Binding $parent[Window].((vm:MainViewModel)DataContext).SelectedSource.Color}" VerticalAlignment="Center"/></Grid></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+       </StackPanel></Border>
+      </Grid>
+      <Border Classes="card"><StackPanel Spacing="22"><TextBlock Text="{l:T 'Collection health'}" Classes="heading"/>
+       <ItemsControl ItemsSource="{Binding SelectedSource.HealthRows}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate x:DataType="m:HealthData"><StackPanel Spacing="10" Margin="0,0,16,14"><TextBlock Text="{Binding Label, Converter={x:Static l:Tr.Converter}}" Classes="muted" FontSize="11"/><TextBlock Text="{Binding Value, Converter={x:Static l:Tr.Converter}}" Foreground="{Binding Color}" FontSize="12"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+      </StackPanel></Border>
+     </StackPanel>
+     <views:LazyView ViewType="{x:Type views:ActivityView}" IsVisible="{Binding IsActivityPage}"/>
+     <views:LazyView ViewType="{x:Type views:PricingView}" IsVisible="{Binding IsPricingPage}"/>
+     <views:LazyView ViewType="{x:Type views:SectionStateView}" IsVisible="{Binding IsSectionStatePreview}"/>
+     <views:LazyView ViewType="{x:Type views:SyncStateView}" IsVisible="{Binding IsSyncDetailState}"/>
+     <views:LazyView ViewType="{x:Type views:SyncView}" IsVisible="{Binding IsSyncNormal}"/>
+     <views:LazyView ViewType="{x:Type views:FirstRunView}" IsVisible="{Binding IsFirstRunPage}"/>
+     <views:LazyView ViewType="{x:Type views:SettingsView}" IsVisible="{Binding IsSettingsPage}"/>
+     <views:LazyView ViewType="{x:Type views:PairingStateView}" IsVisible="{Binding IsPairingStateVisible}"/>
+     <views:LazyView ViewType="{x:Type views:PairingView}" IsVisible="{Binding IsPairingFormVisible}"/>
+    </StackPanel>
+   </ScrollViewer>
+  </Grid>
+ </Grid>
+ </Grid>
 </Window>

@@ -1,0 +1,66 @@
+{
+  "screen_id": "M01",
+  "state_type": "session_expired",
+  "screen_title": "Sign in",
+  "has_back_button": false,
+  "badge_text": "SESSION EXPIRED",
+  "specification_subtitle": "State specification · Session expired",
+  "card": {
+    "icon_type": "offline",
+    "title": "Sign in again",
+    "description": "Your session expired before μToken could load your account.",
+    "items": [
+      {
+        "id": "reauth_required",
+        "title": "Reauthentication required",
+        "subtitle": "Google confirms that it is still you",
+        "bullet_color": "#C27A20"
+      },
+      {
+        "id": "usage_in_cloud",
+        "title": "Usage remains in cloud",
+        "subtitle": "Nothing is deleted when a session expires",
+        "bullet_color": "#C27A20"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Return the user to their previous destination after sign-in."
+  },
+  "has_bottom_navigation": false,
+  "action": {
+    "button_label": "Continue with Google",
+    "cancel_label": "Continue with Google",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "figma_layout": {
+    "node": "93:382",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 736,
+    "illustration": "assets/figma/reviewed/58b40.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 25.1404,
+      "w": 89.856,
+      "h": 35.4825
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/a295a.svg",
+      "assets/figma/reviewed/a6d9e.svg"
+    ],
+    "nav": [
+      null,
+      null,
+      null,
+      null
+    ]
+  }
+}

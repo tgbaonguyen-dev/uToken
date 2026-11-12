@@ -1,0 +1,61 @@
+{
+  "screen_id": "M15",
+  "screen_title": "AI suggestions",
+  "has_back_button": false,
+  "state_type": "invalid_api_key",
+  "active_tab": "Settings",
+  "action": {
+    "button_label": "Edit API key",
+    "background_color": "#171717",
+    "text_color": "#9C9FAB"
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Keep old suggestions visible and show AI_PROVIDER_ERROR here after Test connection or a failed daily run."
+  },
+  "card": {
+    "title": "The provider rejected this key",
+    "description": "Check the key or quota, then test the connection again.",
+    "icon_type": "empty",
+    "items": [
+      {
+        "title": "Provider",
+        "subtitle": "OpenAI · gpt-5.5-mini"
+      },
+      {
+        "title": "Previous suggestions",
+        "subtitle": "Still shown on Insights"
+      }
+    ]
+  },
+  "badge_text": "KEY REJECTED",
+  "specification_subtitle": "State specification · Invalid API key",
+  "figma_layout": {
+    "node": "153:3383",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/b67b6.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 23.160216,
+      "w": 89.856,
+      "h": 38.086708
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/e7cbc.svg",
+      "assets/figma/reviewed/68341.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/19623.svg"
+    ]
+  }
+}

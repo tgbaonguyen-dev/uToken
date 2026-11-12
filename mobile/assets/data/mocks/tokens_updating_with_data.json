@@ -1,0 +1,65 @@
+{
+  "screen_id": "M04",
+  "state_type": "updating_with_data",
+  "screen_title": "Tokens",
+  "has_back_button": false,
+  "badge_text": "REFRESHING",
+  "specification_subtitle": "State specification · Refreshing",
+  "card": {
+    "icon_type": "signing_in",
+    "title": "Updating latest usage",
+    "description": "The current dashboard remains visible while new desktop data is processed.",
+    "items": [
+      {
+        "id": "existing_totals_readable",
+        "title": "Existing totals stay readable",
+        "subtitle": "Never replace valid data with a blank screen",
+        "bullet_color": "#6678E8"
+      },
+      {
+        "id": "last_sync_visible",
+        "title": "Last sync remains visible",
+        "subtitle": "Fresh values replace it when complete",
+        "bullet_color": "#6678E8"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "Show progress without blocking exploration."
+  },
+  "action": {
+    "button_label": "View current data",
+    "background_color": "#f4f4f5",
+    "text_color": "#111214"
+  },
+  "has_bottom_navigation": true,
+  "figma_layout": {
+    "node": "93:878",
+    "badge_color": "#747984",
+    "subtitle_color": "#747984",
+    "behavior_label_color": "#747984",
+    "behavior_color": "#9b9fa8",
+    "button_background": "#f4f4f5",
+    "button_color": "#111214",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/5a53e.svg",
+    "illustration_rect": {
+      "x": 141.552,
+      "y": 22.023916,
+      "w": 69.472,
+      "h": 42.881784
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/21f2c.svg",
+      "assets/figma/reviewed/f1f72.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/4100e.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/bf4e0.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "screen_id": "M07",
+  "state_type": "no_significant_issues",
+  "screen_title": "Insights",
+  "has_back_button": false,
+  "badge_text": "ALL CLEAR",
+  "specification_subtitle": "State specification · All clear",
+  "card": {
+    "icon_type": "success",
+    "title": "No significant issues found",
+    "description": "Recent usage is within its normal pattern and no reliable optimization stands out.",
+    "items": [
+      {
+        "id": "analysis_completed",
+        "title": "Analysis completed",
+        "subtitle": "Models and projects were compared",
+        "bullet_color": "#22A575"
+      },
+      {
+        "id": "keep_collecting_usage",
+        "title": "Keep collecting usage",
+        "subtitle": "New activity may reveal opportunities later",
+        "bullet_color": "#22A575"
+      }
+    ]
+  },
+  "behavior": {
+    "label": "BEHAVIOR",
+    "description": "A positive empty state should still show analysis freshness."
+  },
+  "action": {
+    "button_label": "Review analytics",
+    "background_color": "#171717",
+    "text_color": "#9C9FA8"
+  },
+  "has_bottom_navigation": true,
+  "active_tab": "Insights",
+  "figma_layout": {
+    "node": "94:2260",
+    "badge_color": "#92929a",
+    "subtitle_color": "#6e6e73",
+    "behavior_label_color": "#92929a",
+    "behavior_color": "#6e6e73",
+    "button_background": "#171717",
+    "button_color": "#9c9fa8",
+    "button_top": 700,
+    "illustration": "assets/figma/reviewed/74018.svg",
+    "illustration_rect": {
+      "x": 129.072,
+      "y": 19.4255595,
+      "w": 89.856,
+      "h": 51.883881
+    },
+    "divider": "assets/figma/reviewed/911db.svg",
+    "dots": [
+      "assets/figma/reviewed/3284e.svg",
+      "assets/figma/reviewed/003df.svg"
+    ],
+    "nav": [
+      "assets/figma/reviewed/e1c33.svg",
+      "assets/figma/reviewed/7945a.svg",
+      "assets/figma/reviewed/b20c3.svg",
+      "assets/figma/reviewed/1c76d.svg"
+    ]
+  }
+}

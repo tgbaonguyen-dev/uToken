@@ -3,7 +3,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() { return request.auth != null; }
-    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    // Tài khoản bị admin tạm khóa (suspended/{uid}) mất quyền với dữ liệu của chính mình.
+    function suspended(uid) { return exists(/databases/$(database)/documents/suspended/$(uid)); }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid && !suspended(uid); }
+    // Admin: có tài liệu admins/{uid}. Chỉ thêm được từ Firebase Console / Admin SDK.
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
 
     // Bảng giá dùng chung: ai cũng đọc được, không ai ghi từ client.
     match /pricing/{doc=**} {
@@ -11,28 +15,95 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Mọi dữ liệu người dùng: chỉ chủ tài khoản đọc/ghi.
+    match /admins/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow write: if false;
+    }
+
+    match /suspended/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if isAdmin()
+        && request.resource.data.by_uid == request.auth.uid
+        && request.resource.data.reason is string;
+      allow delete: if isAdmin();
+    }
+
+    // Thông báo admin gửi cho mọi người dùng. Người dùng chỉ đọc; admin tạo và tắt.
+    function validNotice(d) {
+      return d.title is string && d.title.size() > 0 && d.title.size() <= 80
+        && d.body is string && d.body.size() > 0 && d.body.size() <= 1000
+        && d.level in ['info', 'warning', 'critical']
+        && d.active is bool
+        && d.created_by == request.auth.uid;
+    }
+    match /announcements/{id} {
+      allow read: if signedIn();
+      allow create: if isAdmin() && validNotice(request.resource.data);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'deactivated_at']);
+      allow delete: if false;
+    }
+
+    // Nhật ký thao tác admin: chỉ thêm, không sửa/xóa.
+    match /admin_audit/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.actor_uid == request.auth.uid
+        && request.resource.data.action is string;
+      allow update, delete: if false;
+    }
+
+    // Truy vấn collection group cho trang admin (chỉ đọc).
+    match /{path=**}/crash_reports/{id} { allow read: if isAdmin(); }
+    match /{path=**}/sync_requests/{id} { allow read: if isAdmin(); }
+    match /{path=**}/daily/{date} { allow read: if isAdmin(); }
+    match /{path=**}/insights/{id} { allow read: if isAdmin(); }
+    match /{path=**}/inbox/{id} { allow read: if isAdmin(); }
+
+    // Mọi dữ liệu người dùng: chỉ chủ tài khoản đọc/ghi; admin chỉ đọc.
     match /users/{uid} {
-      allow read, write: if isOwner(uid);
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if isOwner(uid);
 
       match /daily/{date} {
-        allow read: if isOwner(uid);
+        allow read: if isOwner(uid) || isAdmin();
         allow write: if isOwner(uid)
           && date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
-          && request.resource.data.schema_version == 2
-          && request.resource.size() < 900 * 1024;
+          && request.resource.data.schema_version == 2;
       }
 
       match /sync_requests/{id} {
-        allow read, delete: if isOwner(uid);
+        allow read: if isOwner(uid) || isAdmin();
+        allow delete: if isOwner(uid);
         allow create: if isOwner(uid)
-          && request.resource.data.trigger in ['screen_open', 'manual_refresh']
+          && request.resource.data.trigger in ['screen_open', 'manual_refresh', 'ai_review']
           && request.resource.data.state == 'pending';
         allow update: if isOwner(uid);
       }
 
-      match /{rest=**} {
-        allow read, write: if isOwner(uid);
+      // Thông báo gửi riêng: admin tạo/tắt, chủ tài khoản chỉ đọc.
+      match /inbox/{id} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isAdmin() && validNotice(request.resource.data);
+        allow update: if isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'deactivated_at']);
+        allow delete: if false;
+      }
+
+      // Báo cáo crash: người dùng tạo; admin chỉ được đổi trạng thái xử lý.
+      match /crash_reports/{id} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, delete: if isOwner(uid);
+        allow update: if isOwner(uid)
+          || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['status', 'resolved_by', 'resolved_at', 'admin_note']));
+      }
+
+      // Các collection con còn lại (efficiency, budget…). Không áp cho daily, sync_requests, crash_reports, inbox:
+      // Firestore OR các luật cùng khớp, nên nếu luật này phủ chúng thì kiểm tra riêng ở trên bị vô hiệu.
+      match /{collection}/{rest=**} {
+        allow read: if (isOwner(uid) || isAdmin()) && !(collection in ['daily', 'sync_requests', 'crash_reports', 'inbox']);
+        allow write: if isOwner(uid) && !(collection in ['daily', 'sync_requests', 'crash_reports', 'inbox']);
       }
     }
   }

@@ -11,7 +11,8 @@
     "trigger": {
       "enum": [
         "screen_open",
-        "manual_refresh"
+        "manual_refresh",
+        "ai_review"
       ]
     },
     "state": {
@@ -36,6 +37,14 @@
         "string",
         "null"
       ]
+    },
+    "started_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "UTC lease start written by desktop when claiming a request. Optional for legacy running requests, which are recoverable immediately."
     }
   }
 }

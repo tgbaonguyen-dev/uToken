@@ -1,0 +1,1 @@
+{"root":["./src/main.tsx","./src/ui.tsx","./src/lib/data.ts","./src/lib/firebase.ts","./src/lib/stats.test.ts","./src/lib/stats.ts","./src/pages/Admins.tsx","./src/pages/Audit.tsx","./src/pages/Crashes.tsx","./src/pages/Overview.tsx","./src/pages/Reviews.tsx","./src/pages/Sync.tsx","./src/pages/UserDetail.tsx","./src/pages/Users.tsx"],"version":"5.6.3"}

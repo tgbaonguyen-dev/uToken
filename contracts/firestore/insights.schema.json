@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version","status","generated_at","period_start","period_end","provider","model","pricing_version","score","grade","headline","dimensions","insights","error_code"],
+  "properties": {
+    "source": {"type":"string","enum":["phone"]},
+    "review_mode": {"type":"string","enum":["sinceLastReview","last30Days"]},
+    "review_from": {"type":"string","format":"date-time"},
+    "review_through": {"type":"string","format":"date-time"},
+    "schema_version": {"const": 1},
+    "status": {"enum": ["ok","insufficient_data","failed"]},
+    "generated_at": {"type":"string","format":"date-time"}, "period_start":{"type":"string","format":"date"}, "period_end":{"type":"string","format":"date"},
+    "provider":{"enum":["google","anthropic","openai"]}, "model":{"type":"string"}, "pricing_version":{"type":"string"}, "score":{"type":["integer","null"],"minimum":0,"maximum":100}, "grade":{"type":["string","null"],"enum":["A","B","C","D",null]}, "headline":{"type":"string"},
+    "dimensions":{"type":"array","items":{"type":"object","required":["id","score","comment"],"properties":{"id":{"enum":["cache","context","reasoning","reliability","outcomes","hidden_cost"]},"score":{"type":["integer","null"],"minimum":0,"maximum":100},"comment":{"type":"string"}},"additionalProperties":false}},
+    "insights":{"type":"array","maxItems":5,"items":{"type":"object","required":["id","title","severity","category","provider","evidence","recommendation","estimated_impact","estimated_saving_micro_per_month","confidence"],"properties":{"id":{"type":"string"},"title":{"type":"string"},"severity":{"enum":["high","medium","low"]},"category":{"enum":["cache","context","reasoning","reliability","outcomes","hidden_cost"]},"provider":{"type":["string","null"],"enum":["codex","claude_code","antigravity",null]},"evidence":{"type":"array","items":{"type":"object","required":["metric","label","value"],"properties":{"metric":{"type":"string"},"label":{"type":"string"},"value":{"type":"string"}},"additionalProperties":false}},"recommendation":{"type":"string"},"estimated_impact":{"type":["string","null"]},"estimated_saving_micro_per_month":{"type":["integer","null"],"minimum":0},"confidence":{"enum":["high","medium","low"]},"why":{"type":"string"},"steps":{"type":"array","maxItems":4,"items":{"type":"string"}}},"additionalProperties":false}},
+    "error_code":{"type":["string","null"],"enum":["invalid_api_key","rate_limited","provider_error","refused","truncated",null]}
+  }, "additionalProperties": false
+}
