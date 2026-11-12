@@ -1,0 +1,24 @@
+[
+  {
+    "step": 1,
+    "result": {
+      "trace_id": "9738e542-e0bc-45be-a896-5fd49d923aa6",
+      "device_serial": "emulator-5554",
+      "step_number": 1,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\1838226287254756dcff9e0904967ad37098bc8af027d8bad81154f8cc1e9583.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\c5728d7d2e08233a3d09641cf52234981ac480074c7ea8938eb16587783a625e.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\9738e542-e0bc-45be-a896-5fd49d923aa6\\step_1_overlay.jpg"
+    }
+  },
+  {
+    "step": 2,
+    "result": {
+      "trace_id": "9738e542-e0bc-45be-a896-5fd49d923aa6",
+      "device_serial": "emulator-5554",
+      "step_number": 2,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\c5728d7d2e08233a3d09641cf52234981ac480074c7ea8938eb16587783a625e.jpg",
+      "after_screenshot": null,
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\9738e542-e0bc-45be-a896-5fd49d923aa6\\step_2_overlay.jpg"
+    }
+  }
+]

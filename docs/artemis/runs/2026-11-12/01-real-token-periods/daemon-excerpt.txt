@@ -1,0 +1,10 @@
+[QueueWorker] Starting task [023406ea-c8a4-4dfc-8610-4280d617dd10]: 'Recovery of real-app case TOK-PERIODS-01 after previous Pro model timeout (not an app error). Current app is on the Custom date-range picker. Tap its top-left Close/X button ONCE (label Close, not Apply; hierarchy bounds approximately [10,58][126,110]). Do not change dates or press Apply. Verify return to Tokens with Month highlighted, total 701,521,151 and estimated cost $144.44, and report observed values if they differ. Finish immediately after that verification. Stay within this picker and Tokens only; do not open any account/Settings/Google/private text screen, do not record identity, no refresh/sync/review/delete.' (profile: flash, device: emulator-5554, outputter: False)
+ℹ Session directory created at D:\IntelliJProjects\artemis\traces\023406ea-c8a4-4dfc-8610-4280d617dd10
+ℹ Session started: 023406ea-c8a4-4dfc-8610-4280d617dd10 (current step counter: 0)
+[IPC] Session started: 023406ea-c8a4-4dfc-8610-4280d617dd10 (profile: flash)
+ℹ Recorded step 1 for session 023406ea-c8a4-4dfc-8610-4280d617dd10
+ℹ Recorded step 2 for session 023406ea-c8a4-4dfc-8610-4280d617dd10
+ℹ LLM usage for session 023406ea-c8a4-4dfc-8610-4280d617dd10: 2 calls, 23790 prompt tokens, 0 cached (cached_ratio=0.000, cache-hit calls 0); openrouter:nvidia/nemotron-3.5-super-vl:free: 2 calls, cached_ratio=0.000
+ℹ Session ended: 023406ea-c8a4-4dfc-8610-4280d617dd10 with status: completed
+[QueueWorker] Task [023406ea-c8a4-4dfc-8610-4280d617dd10] exited with returncode 0
+[QueueWorker] Preserved authoritative session 023406ea-c8a4-4dfc-8610-4280d617dd10 status 'completed'

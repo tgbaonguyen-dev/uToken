@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/local_prefs.dart';
+import '../../core/data/replay_stream.dart';
+import '../../core/data/stream_status.dart';
 import '../../core/data/usage_aggregates.dart';
 import '../../core/i18n/tr.dart';
 import '../../core/models/usage_docs.dart';
@@ -24,15 +28,113 @@ IconData noticeIcon(String level) => switch (level) {
 /// Live notices with an empty list until the first snapshot, so screens never
 /// wait on them.
 Widget withNotices(LiveArgs args,
-        Widget Function(BuildContext context, List<Notice> notices) builder) =>
-    StreamBuilder<List<Notice>>(
-      stream: args.repository.watchNotices(uid: args.uid),
-      initialData: const [],
-      builder: (context, snap) => ListenableBuilder(
-        listenable: LocalPrefs.instance,
-        builder: (context, _) => builder(context, snap.data ?? const []),
-      ),
-    );
+        Widget Function(BuildContext context, List<Notice> notices) builder,
+        {bool compact = false}) =>
+    _NoticeFeed(args: args, builder: builder, compact: compact);
+
+class _NoticeFeed extends StatefulWidget {
+  const _NoticeFeed(
+      {required this.args, required this.builder, required this.compact});
+  final LiveArgs args;
+  final bool compact;
+  final Widget Function(BuildContext, List<Notice>) builder;
+  @override
+  State<_NoticeFeed> createState() => _NoticeFeedState();
+}
+
+class _NoticeFeedState extends State<_NoticeFeed> with WidgetsBindingObserver {
+  late Stream<List<Notice>> _stream;
+  Timer? _expiry;
+  final _prefs = LocalPrefs.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _connect();
+  }
+
+  void _connect() {
+    _expiry?.cancel();
+    _stream = widget.args.repository.watchNotices(uid: widget.args.uid);
+    _prefs.loadNoticeReads(widget.args.uid).then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void didUpdateWidget(_NoticeFeed oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.args.uid != widget.args.uid ||
+        oldWidget.args.repository != widget.args.repository) {
+      _connect();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _expiry?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<List<Notice>>(
+        key: ValueKey(widget.args.uid),
+        stream: _stream,
+        initialData: const [],
+        builder: (context, snap) {
+          _expiry?.cancel();
+          if (snap.hasError) {
+            void retry() {
+              final stream = _stream;
+              if (stream is ReplayStream<List<Notice>>) {
+                unawaited(stream.restart());
+              } else {
+                setState(_connect);
+              }
+            }
+
+            if (widget.compact) {
+              return UtIconButton(
+                  icon: Icons.error_outline_rounded,
+                  label: tr('Could not load notifications. Retry'),
+                  onPressed: retry);
+            }
+            return SyncBannerCard(
+                icon: Icons.cloud_off_outlined,
+                color: UtColors.orange,
+                title: tr('Could not load notifications'),
+                message: friendlyStreamError(snap.error!),
+                actions: [
+                  UtChipButtonSmall(label: tr('Retry'), onPressed: retry)
+                ]);
+          }
+          final now = widget.args.now();
+          final live = (snap.data ?? const <Notice>[])
+              .where((n) => n.isLive(now))
+              .toList();
+          final deadlines = live
+              .map((n) => n.expiresAt)
+              .whereType<DateTime>()
+              .toList()
+            ..sort();
+          if (deadlines.isNotEmpty) {
+            _expiry = Timer(deadlines.first.difference(now), () {
+              if (mounted) setState(() {});
+            });
+          }
+          return ListenableBuilder(
+              listenable: _prefs,
+              builder: (context, _) => widget.builder(context, live));
+        },
+      );
+}
 
 /// Newest unread notice on top of the Tokens tab; "Later" hides it.
 class NoticeBanner extends StatelessWidget {
@@ -42,7 +144,8 @@ class NoticeBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => withNotices(args, (context, notices) {
         final unread = notices
-            .where((n) => !LocalPrefs.instance.isNoticeRead(n.id))
+            .where(
+                (n) => !LocalPrefs.instance.isNoticeRead(n.id, uid: args.uid))
             .toList();
         if (unread.isEmpty) return const SizedBox.shrink();
         final n = unread.first;
@@ -60,7 +163,8 @@ class NoticeBanner extends StatelessWidget {
                 onPressed: () => context.push('/notifications')),
             UtChipButtonSmall(
                 label: tr('Dismiss'),
-                onPressed: () => LocalPrefs.instance.markNoticesRead([n.id])),
+                onPressed: () =>
+                    LocalPrefs.instance.markNoticesRead([n.id], uid: args.uid)),
           ],
         );
       });
@@ -74,7 +178,8 @@ class NoticeBell extends StatelessWidget {
   @override
   Widget build(BuildContext context) => withNotices(args, (context, notices) {
         final unread = notices
-            .where((n) => !LocalPrefs.instance.isNoticeRead(n.id))
+            .where(
+                (n) => !LocalPrefs.instance.isNoticeRead(n.id, uid: args.uid))
             .length;
         return UtIconButton(
           icon: unread > 0
@@ -84,7 +189,7 @@ class NoticeBell extends StatelessWidget {
           badge: unread,
           onPressed: () => context.push('/notifications'),
         );
-      });
+      }, compact: true);
 }
 
 /// Settings row with the unread count.
@@ -95,7 +200,8 @@ class NoticesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => withNotices(args, (context, notices) {
         final unread = notices
-            .where((n) => !LocalPrefs.instance.isNoticeRead(n.id))
+            .where(
+                (n) => !LocalPrefs.instance.isNoticeRead(n.id, uid: args.uid))
             .length;
         return UtRow(
           title: tr('Notifications'),
@@ -124,6 +230,12 @@ class _LiveNoticesScreenState extends State<LiveNoticesScreen> {
   Set<String>? _freshOnOpen;
 
   @override
+  void didUpdateWidget(LiveNoticesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.args.uid != widget.args.uid) _freshOnOpen = null;
+  }
+
+  @override
   Widget build(BuildContext context) => UtPage(
         title: tr('Notifications'),
         subtitle: tr('Messages from the μToken team.'),
@@ -131,15 +243,17 @@ class _LiveNoticesScreenState extends State<LiveNoticesScreen> {
         children: [
           withNotices(widget.args, (context, notices) {
             final prefs = LocalPrefs.instance;
+            final uid = widget.args.uid;
             final fresh = {
               ...?_freshOnOpen,
               for (final n in notices)
-                if (!prefs.isNoticeRead(n.id)) n.id
+                if (!prefs.isNoticeRead(n.id, uid: widget.args.uid)) n.id
             };
             _freshOnOpen = fresh;
-            if (fresh.any((id) => !prefs.isNoticeRead(id))) {
-              WidgetsBinding.instance
-                  .addPostFrameCallback((_) => prefs.markNoticesRead(fresh));
+            if (fresh
+                .any((id) => !prefs.isNoticeRead(id, uid: widget.args.uid))) {
+              WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => prefs.markNoticesRead(fresh, uid: uid));
             }
             if (notices.isEmpty) {
               return UtMessage(

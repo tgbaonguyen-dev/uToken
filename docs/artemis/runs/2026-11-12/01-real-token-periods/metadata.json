@@ -1,0 +1,29 @@
+{
+  "case": "TOK-PERIODS-01",
+  "status": "PASS_WITH_AUTOMATION_RECOVERY",
+  "trace_id": "9bfc5fc8-4238-44de-9230-4c07552306ee",
+  "entrypoint": "mobile/lib/main.dart",
+  "device": "emulator-5554",
+  "head": "094397e65e58127271e9d7e2dd6a5f5f1ba90ff4",
+  "uncommitted_files": [
+    "mobile/lib/core/data/local_prefs.dart",
+    "mobile/lib/core/data/replay_stream.dart",
+    "mobile/lib/core/i18n/vi.dart",
+    "mobile/lib/features/live/notices.dart",
+    "mobile/test/live/notices_test.dart",
+    "mobile/test/replay_stream_test.dart"
+  ],
+  "apk_sha256": "3ff989582a9606d4406b0a500123e0602281b9434072ed41a1dbd2729efa3adb",
+  "provider": "openrouter",
+  "model": "nvidia/nemotron-3.5-super-vl:free",
+  "scope": "Real app, existing Firebase session, aggregate Tokens UI only; no identity/account/private text pages.",
+  "limitations": [
+    "Not a fresh Google login test",
+    "No manual sync or AI review requested",
+    "No privacy-sensitive screens in task scope"
+  ],
+  "original_task_status": "failed",
+  "original_task_error": "LLM call timed out after 180 seconds",
+  "recovery_trace_id": "023406ea-c8a4-4dfc-8610-4280d617dd10",
+  "recovery_status": "completed"
+}

@@ -18,6 +18,8 @@ class ReplayStream<T> extends Stream<T> {
   int _listeners = 0;
   bool _hasValue = false;
   T? _value;
+  Object? _error;
+  StackTrace? _errorStack;
 
   /// True once the source has emitted at least one value.
   bool get hasValue => _hasValue;
@@ -25,11 +27,21 @@ class ReplayStream<T> extends Stream<T> {
   /// Latest value; only meaningful when [hasValue].
   T get value => _value as T;
 
+  /// Reopens a failed source even while other screens share this stream.
+  Future<void> restart() async {
+    final source = _source;
+    _source = null;
+    await source?.cancel();
+    if (_listeners > 0 && _source == null) _ensureOpen();
+  }
+
   void _ensureOpen() {
     _closer?.cancel();
     _closer = null;
     _source ??= _open().listen(
       (v) {
+        _error = null;
+        _errorStack = null;
         _hasValue = true;
         _value = v;
         _hub.add(v);
@@ -38,6 +50,8 @@ class ReplayStream<T> extends Stream<T> {
         // Don't replay a stale value next to a failure (e.g. after sign-out).
         _hasValue = false;
         _value = null;
+        _error = e;
+        _errorStack = s;
         _hub.addError(e, s);
       },
       onDone: () {
@@ -54,6 +68,8 @@ class ReplayStream<T> extends Stream<T> {
       _source = null;
       _hasValue = false;
       _value = null;
+      _error = null;
+      _errorStack = null;
     });
   }
 
@@ -66,6 +82,7 @@ class ReplayStream<T> extends Stream<T> {
       onListen: () {
         _listeners++;
         if (_hasValue) out.add(_value as T);
+        if (_error != null) out.addError(_error!, _errorStack);
         inner = _hub.stream.listen(out.add, onError: out.addError);
         _ensureOpen();
       },

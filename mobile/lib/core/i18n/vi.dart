@@ -1,5 +1,7 @@
 /// Vietnamese UI strings keyed by their English source text.
 const Map<String, String> vi = {
+  'Could not load notifications': 'Không tải được thông báo',
+  'Could not load notifications. Retry': 'Không tải được thông báo. Thử lại',
   '+{amount} this week': '+{amount} tuần này',
   '119 days': '119 ngày',
   'A review sends about 6,000 tokens of usage totals and costs a few cents with most models. No prompts or code are sent.':

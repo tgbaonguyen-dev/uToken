@@ -1,0 +1,10 @@
+[QueueWorker] Starting task [9738e542-e0bc-45be-a896-5fd49d923aa6]: 'REAL APP SESSION-RESTORE-04. Host just ran adb am force-stop com.utoken_mobile (no clear-data/uninstall). Launch locked app and observe whether the existing real Firebase session restores without user signing in. Stay on initial Tokens screen only. Wait for loading to settle, max 20 seconds of actual waiting. PASS only if Tokens appears directly with Month selected and existing usage (prior baseline 701,521,151 / $144.44; report actual if changed). If Welcome/sign-in screen appears, report session-not-restored and STOP; NEVER click Google or reveal/select any accounts. Do not open Settings/Account/notifications/Insights/projects, do not collect identity, no refresh, sync, AI calls or writes. Existing automatic desktop-sync error/pending banner is environmental and not a session failure. Finish on Tokens after reporting real observed state; no extra taps.' (profile: flash, device: emulator-5554, outputter: False)
+ℹ Session directory created at D:\IntelliJProjects\artemis\traces\9738e542-e0bc-45be-a896-5fd49d923aa6
+ℹ Session started: 9738e542-e0bc-45be-a896-5fd49d923aa6 (current step counter: 0)
+[IPC] Session started: 9738e542-e0bc-45be-a896-5fd49d923aa6 (profile: flash)
+ℹ Recorded step 1 for session 9738e542-e0bc-45be-a896-5fd49d923aa6
+ℹ Recorded step 2 for session 9738e542-e0bc-45be-a896-5fd49d923aa6
+ℹ LLM usage for session 9738e542-e0bc-45be-a896-5fd49d923aa6: 2 calls, 22254 prompt tokens, 8672 cached (cached_ratio=0.390, cache-hit calls 1); openrouter:nvidia/nemotron-3.5-super-vl:free: 2 calls, cached_ratio=0.390
+ℹ Session ended: 9738e542-e0bc-45be-a896-5fd49d923aa6 with status: completed
+[QueueWorker] Task [9738e542-e0bc-45be-a896-5fd49d923aa6] exited with returncode 0
+[QueueWorker] Preserved authoritative session 9738e542-e0bc-45be-a896-5fd49d923aa6 status 'completed'

@@ -1,5 +1,7 @@
 # Artemis: kết quả và bằng chứng kiểm thử
 
+**Lượt app thật mới nhất — 12/11/2026:** [Báo cáo và bằng chứng](runs/2026-11-12/README.md): 4 case đạt trong phạm vi quan sát, 1 case Budget BLOCKED bởi nhập liệu automation. Có ghi riêng timeout Pro, locator sai, lỗi chữ `1 days` và các phần chưa kiểm thử.
+
 Thư mục này lưu bằng chứng trong repository uToken, không phụ thuộc đường dẫn cài Artemis trên máy người chạy.
 
 ## Kết quả mới

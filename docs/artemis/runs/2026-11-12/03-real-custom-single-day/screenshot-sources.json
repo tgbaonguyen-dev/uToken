@@ -1,0 +1,79 @@
+[
+  {
+    "step": 1,
+    "result": {
+      "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+      "device_serial": "emulator-5554",
+      "step_number": 1,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\20faa69a25ed61a68c38cf8689f8c39b01ea7dc57e13667788e24f4c44d2d126.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\0778f732d564903d01feeffe5fa0d622f0609591b28ffaaad2e2870dcaeafe55.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\8e491bf3-53d5-4540-9b36-dfc444373f47\\step_1_overlay.jpg"
+    }
+  },
+  {
+    "step": 2,
+    "result": {
+      "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+      "device_serial": "emulator-5554",
+      "step_number": 2,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\0778f732d564903d01feeffe5fa0d622f0609591b28ffaaad2e2870dcaeafe55.jpg",
+      "after_screenshot": null,
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\8e491bf3-53d5-4540-9b36-dfc444373f47\\step_2_overlay.jpg"
+    }
+  },
+  {
+    "step": 3,
+    "result": {
+      "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+      "device_serial": "emulator-5554",
+      "step_number": 3,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\0778f732d564903d01feeffe5fa0d622f0609591b28ffaaad2e2870dcaeafe55.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\c3eb7619ab4ae9fb7cbf6b6ad0d4a12b7e7d57a4832ac0bafa3fe24ae61944a9.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\8e491bf3-53d5-4540-9b36-dfc444373f47\\step_3_overlay.jpg"
+    }
+  },
+  {
+    "step": 4,
+    "result": {
+      "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+      "device_serial": "emulator-5554",
+      "step_number": 4,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\c3eb7619ab4ae9fb7cbf6b6ad0d4a12b7e7d57a4832ac0bafa3fe24ae61944a9.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\44ca013875ecf575bdcc8c73be114968bf5b7e5f155eb2aa56d18a1f50d844db.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\8e491bf3-53d5-4540-9b36-dfc444373f47\\step_4_overlay.jpg"
+    }
+  },
+  {
+    "step": 5,
+    "result": {
+      "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+      "device_serial": "emulator-5554",
+      "step_number": 5,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\44ca013875ecf575bdcc8c73be114968bf5b7e5f155eb2aa56d18a1f50d844db.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\b13a30b2256fcba0cd138a729d0d7a9b53d1576b7a66cc3e7548a980dc411eb1.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\8e491bf3-53d5-4540-9b36-dfc444373f47\\step_5_overlay.jpg"
+    }
+  },
+  {
+    "step": 6,
+    "result": {
+      "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+      "device_serial": "emulator-5554",
+      "step_number": 6,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\b13a30b2256fcba0cd138a729d0d7a9b53d1576b7a66cc3e7548a980dc411eb1.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\90f82ffb2ddad348880cd1f7190d7f557d13fe6794eb76d95661222b4ff6c07b.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\8e491bf3-53d5-4540-9b36-dfc444373f47\\step_6_overlay.jpg"
+    }
+  },
+  {
+    "step": 7,
+    "result": {
+      "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+      "device_serial": "emulator-5554",
+      "step_number": 7,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\90f82ffb2ddad348880cd1f7190d7f557d13fe6794eb76d95661222b4ff6c07b.jpg",
+      "after_screenshot": null,
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\8e491bf3-53d5-4540-9b36-dfc444373f47\\step_7_overlay.jpg"
+    }
+  }
+]

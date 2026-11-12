@@ -69,22 +69,46 @@ class LocalPrefs extends ChangeNotifier {
 
   bool isReviewed(String insightId) => _reviewed.contains(insightId);
 
-  /// Admin notices already seen on this phone (local only, not synced).
-  final Set<String> _readNotices = {};
-  bool isNoticeRead(String id) => _readNotices.contains(id);
+  /// Read state stays local, isolated by account. Legacy shared state is ignored.
+  final Map<String, Set<String>> _readNotices = {};
+  final Map<String, Future<void>> _noticeLoads = {};
+  Future<void>? _noticeWrites;
+  bool isNoticeRead(String id, {required String uid}) =>
+      _readNotices[uid]?.contains(id) ?? false;
 
-  Future<void> markNoticesRead(Iterable<String> ids) async {
+  Future<void> loadNoticeReads(String uid) =>
+      _noticeLoads.putIfAbsent(uid, () async {
+        try {
+          final saved = await _store.read('read_notices_v2_$uid');
+          final values = saved == null ? const [] : jsonDecode(saved) as List;
+          _readNotices
+              .putIfAbsent(uid, () => {})
+              .addAll(values.whereType<String>());
+        } catch (error) {
+          debugPrint('Could not read notice preferences: $error');
+        }
+      });
+
+  Future<void> markNoticesRead(Iterable<String> ids,
+      {required String uid}) async {
+    final selected = ids.toList();
+    await loadNoticeReads(uid);
+    final read = _readNotices.putIfAbsent(uid, () => {});
     var changed = false;
-    for (final id in ids) {
-      changed |= _readNotices.add(id);
+    for (final id in selected) {
+      changed |= read.add(id);
     }
     if (!changed) return;
     notifyListeners();
-    try {
-      await _store.write('read_notices', jsonEncode(_readNotices.toList()));
-    } catch (error) {
-      debugPrint('Could not save read notices: $error');
-    }
+    final value = jsonEncode(read.toList());
+    _noticeWrites = (_noticeWrites ?? Future<void>.value()).then((_) async {
+      try {
+        await _store.write('read_notices_v2_$uid', value);
+      } catch (error) {
+        debugPrint('Could not save read notices: $error');
+      }
+    });
+    await _noticeWrites;
   }
 
   StreamSubscription<Map<String, dynamic>?>? _remote;
@@ -280,10 +304,6 @@ class LocalPrefs extends ChangeNotifier {
       _tokenFormat = (await _store.read('token_format')) == 'full'
           ? TokenFormat.full
           : TokenFormat.compact;
-      final notices = await _store.read('read_notices');
-      if (notices != null) {
-        _readNotices.addAll((jsonDecode(notices) as List).cast<String>());
-      }
       final reviewed = await _store.read('reviewed_insights');
       if (reviewed != null) {
         _reviewed.addAll((jsonDecode(reviewed) as List).cast<String>());

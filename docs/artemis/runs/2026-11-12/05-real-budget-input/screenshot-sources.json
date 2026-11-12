@@ -1,0 +1,134 @@
+[
+  {
+    "step": 1,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 1,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\198f406c0be8d1fa495e7531765f6e55450ac20c4d2689132b4e99bfaeaee064.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\731de58758948759d30ac3a0b1291e819a5a5773d9719be79768ea86ebd691a8.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_1_overlay.jpg"
+    }
+  },
+  {
+    "step": 2,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 2,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\731de58758948759d30ac3a0b1291e819a5a5773d9719be79768ea86ebd691a8.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\598d0e7a496fb2b0d8efb562eb9969980dc82d7ff13f495b7fb14bc5ef37eca3.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_2_overlay.jpg"
+    }
+  },
+  {
+    "step": 3,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 3,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\598d0e7a496fb2b0d8efb562eb9969980dc82d7ff13f495b7fb14bc5ef37eca3.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\01e2cb43a32247f27fdb465ab047bc518b7af5b54219e7025c48acc6bd39502d.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_3_overlay.jpg"
+    }
+  },
+  {
+    "step": 4,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 4,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\01e2cb43a32247f27fdb465ab047bc518b7af5b54219e7025c48acc6bd39502d.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\d55cb976bc9773240a6dde8cc99f9297e8b3bdb81353d8d6771b3ff8eadae632.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_4_overlay.jpg"
+    }
+  },
+  {
+    "step": 5,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 5,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\d55cb976bc9773240a6dde8cc99f9297e8b3bdb81353d8d6771b3ff8eadae632.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\01e2cb43a32247f27fdb465ab047bc518b7af5b54219e7025c48acc6bd39502d.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_5_overlay.jpg"
+    }
+  },
+  {
+    "step": 6,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 6,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\01e2cb43a32247f27fdb465ab047bc518b7af5b54219e7025c48acc6bd39502d.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\2432adb382ed5e41b000750715737735e15d55587c72ee566e2bc837a9386f9e.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_6_overlay.jpg"
+    }
+  },
+  {
+    "step": 7,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 7,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\2432adb382ed5e41b000750715737735e15d55587c72ee566e2bc837a9386f9e.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\d55cb976bc9773240a6dde8cc99f9297e8b3bdb81353d8d6771b3ff8eadae632.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_7_overlay.jpg"
+    }
+  },
+  {
+    "step": 8,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 8,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\d55cb976bc9773240a6dde8cc99f9297e8b3bdb81353d8d6771b3ff8eadae632.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\f29406e680e4f76dc57b5960fdb76c3d3d712878cdeb71426b4cdbe42d5e5b54.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_8_overlay.jpg"
+    }
+  },
+  {
+    "step": 9,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 9,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\f29406e680e4f76dc57b5960fdb76c3d3d712878cdeb71426b4cdbe42d5e5b54.jpg",
+      "after_screenshot": null,
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_9_overlay.jpg"
+    }
+  },
+  {
+    "step": 10,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 10,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\f29406e680e4f76dc57b5960fdb76c3d3d712878cdeb71426b4cdbe42d5e5b54.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\3b636bb214cd96162dc5f06cae2a4fe47abe8a7732336b3cc3d8563559ce1f78.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_10_overlay.jpg"
+    }
+  },
+  {
+    "step": 11,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 11,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\3b636bb214cd96162dc5f06cae2a4fe47abe8a7732336b3cc3d8563559ce1f78.jpg",
+      "after_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\c9cdd2f3a8ec51fb6ab57b2c337f16020e7a7ebfc90928fe92b26563c1ee287d.jpg",
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_11_overlay.jpg"
+    }
+  },
+  {
+    "step": 12,
+    "result": {
+      "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+      "device_serial": "emulator-5554",
+      "step_number": 12,
+      "before_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\images\\c9cdd2f3a8ec51fb6ab57b2c337f16020e7a7ebfc90928fe92b26563c1ee287d.jpg",
+      "after_screenshot": null,
+      "action_overlay_screenshot": "file://D:\\IntelliJProjects\\artemis\\traces\\e7a7486d-c876-47ee-8fea-b5e85176d0b1\\step_12_overlay.jpg"
+    }
+  }
+]

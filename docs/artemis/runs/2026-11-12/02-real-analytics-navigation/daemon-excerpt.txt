@@ -1,0 +1,16 @@
+[QueueWorker] Starting task [ff562168-9585-43c9-8228-7629b8f8c55e]: 'REAL APP NAV-ANALYTICS-02. Begin on Tokens Month. Test ONLY Tokens -> Analytics -> Efficiency -> Back to Analytics -> Tokens. No Settings, Account, Insights, notifications, projects, Google screens, private text, key setup or any personal-data collection. No refresh, sync, AI calls or writes. Tap Analytics bottom tab once; verify Analytics heading, Month selected and visible total approximately 701.52M/$144.44 (actual counts may change; record what you see). Find the Efficiency entry by scrolling only inside Analytics and open it; verify its actual heading/content, record empty/not-enough-data state if present instead of inventing metrics. Press its back control or Android Back once; verify return to Analytics. Then tap Tokens bottom tab; verify Tokens and Month selection. If a chart/card looks clipped, scroll to check before reporting overflow. If an unexpected route appears, stop; do not recover via Settings. Finish on Tokens. Report whether each route was visibly observed, not merely tapped.' (profile: flash, device: emulator-5554, outputter: False)
+ℹ Session directory created at D:\IntelliJProjects\artemis\traces\ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Session started: ff562168-9585-43c9-8228-7629b8f8c55e (current step counter: 0)
+[IPC] Session started: ff562168-9585-43c9-8228-7629b8f8c55e (profile: flash)
+ℹ Recorded step 1 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Recorded step 2 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Recorded step 3 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Recorded step 4 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Recorded step 5 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Recorded step 6 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Recorded step 7 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ Recorded step 8 for session ff562168-9585-43c9-8228-7629b8f8c55e
+ℹ LLM usage for session ff562168-9585-43c9-8228-7629b8f8c55e: 8 calls, 143468 prompt tokens, 47696 cached (cached_ratio=0.332, cache-hit calls 4); openrouter:nvidia/nemotron-3.5-super-vl:free: 8 calls, cached_ratio=0.332
+ℹ Session ended: ff562168-9585-43c9-8228-7629b8f8c55e with status: completed
+[QueueWorker] Task [ff562168-9585-43c9-8228-7629b8f8c55e] exited with returncode 0
+[QueueWorker] Preserved authoritative session ff562168-9585-43c9-8228-7629b8f8c55e status 'completed'

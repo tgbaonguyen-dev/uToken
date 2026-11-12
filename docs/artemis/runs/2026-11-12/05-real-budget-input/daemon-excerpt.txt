@@ -1,0 +1,20 @@
+[QueueWorker] Starting task [e7a7486d-c876-47ee-8fea-b5e85176d0b1]: 'REAL APP BUDGET-INPUT-05. Host has navigated locally to Budget; current saved state is 'no limit set' and Monthly limit input is EMPTY (hint e.g. 50.00). Stay STRICTLY on Budget and keyboard only; NEVER press Back/navigation because Settings may show identity. No private data collection, no AI calls, no sync. Test: (1) Focus Monthly limit, enter 0; OBSERVE exact field value is 0 before pressing Save. Press Save ONLY while field contains exactly 0; expect validation 'Enter a monthly limit above $0.' and saved summary still 'no limit set'. If field is empty or uncertain DO NOT press Save. (2) Replace field with 120.00 using numeric keyboard/text input. Verify the text field actually displays 120.00; keyboard may normalize it, report exact visible value. DO NOT SAVE any valid number. (3) Clear the field back to its original EMPTY state; DO NOT press Save. Hide keyboard if possible without leaving Budget; finish on Budget with summary still no limit set and input empty. Use current visible element indices or full coordinate pairs, never a lone coordinate. Stop after 3 unsuccessful input attempts, report what was/was not observed. This is input/validation only, NOT a persistence test. Do not claim 120 input succeeded unless visible in field.' (profile: flash, device: emulator-5554, outputter: False)
+ℹ Session directory created at D:\IntelliJProjects\artemis\traces\e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Session started: e7a7486d-c876-47ee-8fea-b5e85176d0b1 (current step counter: 0)
+[IPC] Session started: e7a7486d-c876-47ee-8fea-b5e85176d0b1 (profile: flash)
+ℹ Recorded step 1 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 2 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 3 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 4 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 5 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 6 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 7 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 8 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 9 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 10 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 11 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ Recorded step 12 for session e7a7486d-c876-47ee-8fea-b5e85176d0b1
+ℹ LLM usage for session e7a7486d-c876-47ee-8fea-b5e85176d0b1: 12 calls, 234818 prompt tokens, 34688 cached (cached_ratio=0.148, cache-hit calls 3); openrouter:nvidia/nemotron-3.5-super-vl:free: 12 calls, cached_ratio=0.148
+ℹ Session ended: e7a7486d-c876-47ee-8fea-b5e85176d0b1 with status: failed
+[QueueWorker] Task [e7a7486d-c876-47ee-8fea-b5e85176d0b1] exited with returncode 0
+[QueueWorker] Preserved authoritative session e7a7486d-c876-47ee-8fea-b5e85176d0b1 status 'failed'

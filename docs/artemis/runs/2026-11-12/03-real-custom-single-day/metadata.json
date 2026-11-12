@@ -1,0 +1,26 @@
+{
+  "case": "CUSTOM-RANGE-03",
+  "status": "FUNCTIONAL_PASS_WITH_MINOR_COPY_DEFECT",
+  "trace_id": "8e491bf3-53d5-4540-9b36-dfc444373f47",
+  "entrypoint": "mobile/lib/main.dart",
+  "device": "emulator-5554",
+  "head": "094397e65e58127271e9d7e2dd6a5f5f1ba90ff4",
+  "uncommitted_files": [
+    "mobile/lib/core/data/local_prefs.dart",
+    "mobile/lib/core/data/replay_stream.dart",
+    "mobile/lib/core/i18n/vi.dart",
+    "mobile/lib/features/live/notices.dart",
+    "mobile/test/live/notices_test.dart",
+    "mobile/test/replay_stream_test.dart"
+  ],
+  "apk_sha256": "3ff989582a9606d4406b0a500123e0602281b9434072ed41a1dbd2729efa3adb",
+  "provider": "openrouter",
+  "model": "nvidia/nemotron-3.5-super-vl:free",
+  "scope": "Tokens Custom one-day range -> Month, anonymous counters only.",
+  "limitations": [
+    "Not a fresh Google login test",
+    "No manual sync or AI review requested",
+    "No privacy-sensitive screens in task scope"
+  ],
+  "elapsed_seconds": 66.2
+}

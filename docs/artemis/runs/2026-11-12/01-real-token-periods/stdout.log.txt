@@ -1,0 +1,10 @@
+Starting task execution for Trace ID: 9bfc5fc8-4238-44de-9230-4c07552306ee
+Goal: REAL APP TEST TOK-PERIODS-01. Production main.dart APK installed, real Firebase session restored. Stay STRICTLY on Tokens screen and its period controls; anonymous aggregate counters only are in scope. Never open Account, Settings, Google sign-in, projects, notifications, Insights, or any screen containing identity, private text, API keys or personal data. Do not run AI reviews, delete data, sign out, change budget, or press manual refresh. On Tokens, record initial selected period, exact total tokens and estimated cost visible (do not invent abbreviated values). Select Day, Week, Month, Total, then return Month. After each action verify selected control and record the shown total/cost, including whether data is genuinely different or legitimately equal. Verify 0 <= Day <= Week <= Total and Day <= Month <= Total, but Week versus Month has no required ordering. Open Custom, verify date-range picker then CANCEL without changing range. Verify Month remains selected with same counter if no backend update occurred. Count any unexpected crash, overflow, dead tap, routing loop or incorrect selected period as failure, not a successful dispatch. If desktop-sync pending/error banner exists, record it separately as environmental; do not attempt to fix it. If identity/private data unexpectedly appears STOP immediately without navigating further. Finish on Tokens Month. Provide checkpoint assertions and concise before/action/after results.
+Model: Pro
+Conversation ID: 
+--------------------------------------------------
+✅ Using specified target device: 'emulator-5554'.
+Initializing Artemis Agent...
+📱 Bound to device serial: 'emulator-5554'
+Running task on agent...
+Cleaning up resources...

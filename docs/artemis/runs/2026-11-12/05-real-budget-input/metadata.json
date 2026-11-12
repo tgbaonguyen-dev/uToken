@@ -1,0 +1,27 @@
+{
+  "case": "BUDGET-INPUT-05",
+  "status": "BLOCKED_AUTOMATION_INPUT",
+  "trace_id": "e7a7486d-c876-47ee-8fea-b5e85176d0b1",
+  "entrypoint": "mobile/lib/main.dart",
+  "device": "emulator-5554",
+  "head": "094397e65e58127271e9d7e2dd6a5f5f1ba90ff4",
+  "uncommitted_files": [
+    "mobile/lib/core/data/local_prefs.dart",
+    "mobile/lib/core/data/replay_stream.dart",
+    "mobile/lib/core/i18n/vi.dart",
+    "mobile/lib/features/live/notices.dart",
+    "mobile/test/live/notices_test.dart",
+    "mobile/test/replay_stream_test.dart"
+  ],
+  "apk_sha256": "3ff989582a9606d4406b0a500123e0602281b9434072ed41a1dbd2729efa3adb",
+  "provider": "openrouter",
+  "model": "nvidia/nemotron-3.5-super-vl:free",
+  "scope": "Budget numeric entry only, no valid saves. Settings setup was performed locally without exporting account data.",
+  "limitations": [
+    "Not a fresh Google login test",
+    "No manual sync or AI review requested",
+    "No privacy-sensitive screens in task scope"
+  ],
+  "elapsed_seconds": 99.0,
+  "task_status": "failed"
+}

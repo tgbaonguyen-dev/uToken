@@ -1,0 +1,15 @@
+[QueueWorker] Starting task [8e491bf3-53d5-4540-9b36-dfc444373f47]: 'REAL APP CUSTOM-RANGE-03. Stay ONLY on Tokens and its date picker; no Settings/Account/Insights/projects/Google/private data. No refresh/sync, AI calls or writes. Current Tokens Month baseline 701,521,151 / $144.44. Open Custom. In the calendar choose November 12, 2026 as BOTH start and end (tap the day 12 twice if needed); verify picker header shows one-day Nov 12 range before tapping Apply. Do not choose adjacent months, future dates or default Nov 6–12. Apply, verify Custom highlighted and date chip Nov 12–Nov 12. Expected daily total from prior Day observation is 6,323,177 tokens / $0.93; report actual if it differs, do not force expected. Finally tap Month and verify return to baseline; finish on Tokens Month. Use only visible element indices, or a full [x,y] coordinate pair; never pass a single coordinate as an index. Stop after 3 failed attempts or any unexpected/private screen. Report selected date range, actual counters, and whether Month was restored.' (profile: flash, device: emulator-5554, outputter: False)
+ℹ Session directory created at D:\IntelliJProjects\artemis\traces\8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ Session started: 8e491bf3-53d5-4540-9b36-dfc444373f47 (current step counter: 0)
+[IPC] Session started: 8e491bf3-53d5-4540-9b36-dfc444373f47 (profile: flash)
+ℹ Recorded step 1 for session 8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ Recorded step 2 for session 8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ Recorded step 3 for session 8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ Recorded step 4 for session 8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ Recorded step 5 for session 8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ Recorded step 6 for session 8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ Recorded step 7 for session 8e491bf3-53d5-4540-9b36-dfc444373f47
+ℹ LLM usage for session 8e491bf3-53d5-4540-9b36-dfc444373f47: 7 calls, 125599 prompt tokens, 39024 cached (cached_ratio=0.311, cache-hit calls 3); openrouter:nvidia/nemotron-3.5-super-vl:free: 7 calls, cached_ratio=0.311
+ℹ Session ended: 8e491bf3-53d5-4540-9b36-dfc444373f47 with status: completed
+[QueueWorker] Task [8e491bf3-53d5-4540-9b36-dfc444373f47] exited with returncode 0
+[QueueWorker] Preserved authoritative session 8e491bf3-53d5-4540-9b36-dfc444373f47 status 'completed'

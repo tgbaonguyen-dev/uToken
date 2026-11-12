@@ -55,6 +55,16 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(errors, hasLength(1));
     expect(s.hasValue, isFalse);
+    final lateErrors = <Object>[];
+    final lateSub = s.listen((_) {}, onError: lateErrors.add);
+    await Future<void>.delayed(Duration.zero);
+    expect(lateErrors, hasLength(1),
+        reason: 'a new screen must see the failure, not an empty list');
+    source.add(2);
+    await Future<void>.delayed(Duration.zero);
+    expect(s.hasValue, isTrue);
+    await lateSub.cancel();
     await sub.cancel();
+    await source.close();
   });
 }
