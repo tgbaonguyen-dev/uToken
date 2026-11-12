@@ -66,3 +66,24 @@ test('nhật ký admin chỉ thêm, đúng người thực hiện', async () => 
   await assertFails(addDoc(collection(admin(), 'admin_audit'), { actor_uid: 'other', action: 'suspend' }));
   await assertFails(addDoc(collection(user('dave'), 'admin_audit'), { actor_uid: 'dave', action: 'x' }));
 });
+
+const notice = (by) => ({ title: 'Bảo trì', body: 'Tối nay 22h', level: 'warning', active: true, created_by: by });
+
+test('thông báo chung: admin tạo/tắt, user chỉ đọc', async () => {
+  await assertSucceeds(setDoc(doc(admin(), 'announcements/a1'), notice('root')));
+  await assertFails(setDoc(doc(admin(), 'announcements/a2'), { ...notice('root'), level: 'spam' }));
+  await assertFails(setDoc(doc(admin(), 'announcements/a3'), notice('someone-else')));
+  await assertFails(setDoc(doc(user('dave'), 'announcements/a4'), notice('dave')));
+  await assertSucceeds(getDoc(doc(user('dave'), 'announcements/a1')));
+  await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), 'announcements/a1')));
+  await assertSucceeds(updateDoc(doc(admin(), 'announcements/a1'), { active: false }));
+  await assertFails(updateDoc(doc(admin(), 'announcements/a1'), { body: 'sửa nội dung' }));
+  await assertFails(updateDoc(doc(user('dave'), 'announcements/a1'), { active: true }));
+});
+
+test('thông báo riêng: chỉ chủ tài khoản đọc, user không tự tạo được', async () => {
+  await assertSucceeds(setDoc(doc(admin(), 'users/carol/inbox/m1'), notice('root')));
+  await assertSucceeds(getDoc(doc(user('carol'), 'users/carol/inbox/m1')));
+  await assertFails(getDoc(doc(user('dave'), 'users/carol/inbox/m1')));
+  await assertFails(setDoc(doc(user('carol'), 'users/carol/inbox/m2'), notice('carol')));
+});

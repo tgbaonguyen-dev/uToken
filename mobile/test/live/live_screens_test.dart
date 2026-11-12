@@ -68,6 +68,10 @@ class FakeUsageRepository implements UsageRepository {
   @override
   Stream<String?> watchDesktopName({required String uid}) => desktopName.stream;
   Map<String, String> projectNames = const {};
+  List<Notice> noticeValues = const [];
+  @override
+  Stream<List<Notice>> watchNotices({required String uid}) =>
+      Stream.value(noticeValues);
   final List<String> touchedProfiles = [];
   @override
   Future<void> touchProfile(

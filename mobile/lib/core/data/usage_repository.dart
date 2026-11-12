@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' as developer;
 
@@ -29,6 +30,9 @@ abstract interface class UsageRepository {
   /// project_key → folder name the desktop shares (users/{uid}/meta/projects).
   /// Empty when the desktop keeps names private.
   Stream<Map<String, String>> watchProjectNames({required String uid});
+
+  /// Active admin notices for this account, newest first.
+  Stream<List<Notice>> watchNotices({required String uid});
 
   /// Records who this account is and that the phone app was opened, so the
   /// admin console can list users (merged into users/{uid}).
@@ -210,6 +214,61 @@ class FirestoreUsageRepository implements UsageRepository {
         'mobile_platform': platform,
         'last_seen_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+
+  @override
+  Stream<List<Notice>> watchNotices({required String uid}) {
+    // Two live queries (broadcast + personal inbox) merged into one list.
+    late final StreamController<List<Notice>> out;
+    var broadcast = const <Notice>[], personal = const <Notice>[];
+    var ready = 0;
+    final subs = <StreamSubscription<Object?>>[];
+    void emit() {
+      if (ready < 2) return;
+      final now = DateTime.now();
+      out.add([...broadcast, ...personal].where((n) => n.isLive(now)).toList()
+        ..sort((a, b) => (b.createdAt ?? DateTime(0))
+            .compareTo(a.createdAt ?? DateTime(0))));
+    }
+
+    List<Notice> parse(QuerySnapshot<Map<String, dynamic>> s, bool mine) => [
+          for (final d in s.docs) Notice.fromMap(d.id, d.data(), personal: mine)
+        ];
+    out = StreamController<List<Notice>>(
+      onListen: () {
+        var gotB = false, gotP = false;
+        subs.add(FirebaseFirestore.instance
+            .collection('announcements')
+            .where('active', isEqualTo: true)
+            .snapshots()
+            .listen((s) {
+          broadcast = parse(s, false);
+          if (!gotB) {
+            gotB = true;
+            ready++;
+          }
+          emit();
+        }, onError: out.addError));
+        subs.add(_user(uid)
+            .collection('inbox')
+            .where('active', isEqualTo: true)
+            .snapshots()
+            .listen((s) {
+          personal = parse(s, true);
+          if (!gotP) {
+            gotP = true;
+            ready++;
+          }
+          emit();
+        }, onError: out.addError));
+      },
+      onCancel: () async {
+        for (final s in subs) {
+          await s.cancel();
+        }
+      },
+    );
+    return out.stream;
+  }
 
   @override
   Stream<Map<String, String>> watchProjectNames({required String uid}) =>

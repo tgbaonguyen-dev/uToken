@@ -16,6 +16,7 @@ import '../ai_review/judge.dart';
 import '../ai_review/phone_judge.dart';
 import '../auth/domain/mobile_auth.dart';
 import 'insights_screens.dart';
+import 'notices.dart';
 import 'live_common.dart';
 
 const appVersion = '0.1.0';
@@ -78,6 +79,7 @@ class LiveSettingsScreen extends StatelessWidget {
     final user = MobileAuthScope.maybeOf(context)?.user;
     final prefs = LocalPrefs.instance;
     return UtTabPage(
+      trailing: NoticeBell(args: args),
       title: tr('Settings'),
       subtitle: tr('Account, display, and sync preferences'),
       tabIndex: 3,
@@ -91,6 +93,7 @@ class LiveSettingsScreen extends StatelessWidget {
               children: [
                 UtSectionLabel(tr('General')),
                 UtRowGroup(children: [
+                  NoticesRow(args: args),
                   StreamBuilder<DateTime?>(
                     stream: args.repository.watchLastSync(uid: args.uid),
                     builder: (context, s) => UtRow(

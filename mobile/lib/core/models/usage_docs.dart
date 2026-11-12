@@ -184,24 +184,24 @@ class Insight {
   final int? estimatedSavingMicroPerMonth;
   final List<Evidence> evidence;
   factory Insight.fromMap(JsonMap m) => Insight(
-      id: readString(m['id']) ?? '',
-      title: readString(m['title']) ?? '',
-      severity: readString(m['severity']) ?? 'low',
-      category: readString(m['category']) ?? '',
-      evidence: readList(m['evidence'])
-          .map((e) => Evidence.fromMap(readMap(e)))
-          .toList(),
-      recommendation: readString(m['recommendation']) ?? '',
-      confidence: readString(m['confidence']) ?? 'low',
-      provider: readString(m['provider']),
-      estimatedImpact: readString(m['estimated_impact']),
-      estimatedSavingMicroPerMonth:
-          readInt(m['estimated_saving_micro_per_month']),
-      why: readString(m['why']) ?? '',
-      steps: [
-        for (final s in readList(m['steps']))
-          if (s is String && s.trim().isNotEmpty) s.trim()
-      ]);
+          id: readString(m['id']) ?? '',
+          title: readString(m['title']) ?? '',
+          severity: readString(m['severity']) ?? 'low',
+          category: readString(m['category']) ?? '',
+          evidence: readList(m['evidence'])
+              .map((e) => Evidence.fromMap(readMap(e)))
+              .toList(),
+          recommendation: readString(m['recommendation']) ?? '',
+          confidence: readString(m['confidence']) ?? 'low',
+          provider: readString(m['provider']),
+          estimatedImpact: readString(m['estimated_impact']),
+          estimatedSavingMicroPerMonth:
+              readInt(m['estimated_saving_micro_per_month']),
+          why: readString(m['why']) ?? '',
+          steps: [
+            for (final s in readList(m['steps']))
+              if (s is String && s.trim().isNotEmpty) s.trim()
+          ]);
 }
 
 /// One of the six scored review dimensions (cache, context, ...).
@@ -260,4 +260,51 @@ class InsightsDoc {
       reviewMode: readString(m['review_mode']),
       reviewFrom: readString(m['review_from']),
       reviewThrough: readString(m['review_through']));
+}
+
+/// A message an admin sent from the web console: to everyone
+/// (`announcements/{id}`) or to one account (`users/{uid}/inbox/{id}`).
+class Notice {
+  const Notice(
+      {required this.id,
+      required this.title,
+      required this.body,
+      required this.level,
+      required this.personal,
+      this.createdAt,
+      this.expiresAt});
+  final String id, title, body;
+
+  /// info, warning or critical.
+  final String level;
+
+  /// Sent to this account only (not a broadcast).
+  final bool personal;
+  final DateTime? createdAt, expiresAt;
+
+  bool isLive(DateTime now) => expiresAt == null || expiresAt!.isAfter(now);
+
+  factory Notice.fromMap(String id, JsonMap m, {required bool personal}) =>
+      Notice(
+        id: personal ? 'inbox/$id' : id,
+        title: readString(m['title']) ?? '',
+        body: readString(m['body']) ?? '',
+        level: const ['info', 'warning', 'critical'].contains(m['level'])
+            ? m['level'] as String
+            : 'info',
+        personal: personal,
+        createdAt: _readTime(m['created_at']),
+        expiresAt: _readTime(m['expires_at']),
+      );
+}
+
+DateTime? _readTime(Object? v) {
+  if (v is DateTime) return v;
+  if (v is String) return DateTime.tryParse(v);
+  try {
+    // Firestore Timestamp without importing cloud_firestore here.
+    return (v as dynamic)?.toDate() as DateTime?;
+  } catch (_) {
+    return null;
+  }
 }

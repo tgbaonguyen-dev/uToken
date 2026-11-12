@@ -5,6 +5,7 @@ import '../../core/data/usage_aggregates.dart';
 import '../../core/models/daily_doc.dart';
 import '../../core/models/usage_docs.dart';
 import '../../core/ui/ut_kit.dart';
+import 'notices.dart';
 import 'live_common.dart';
 import '../../core/i18n/tr.dart';
 
@@ -38,6 +39,7 @@ class _LiveAnalyticsScreenState extends State<LiveAnalyticsScreen>
   @override
   Widget build(BuildContext context) {
     return UtTabPage(
+      trailing: NoticeBell(args: widget.args),
       title: tr('Analytics'),
       subtitle: tr('Token mix, models, and cost.'),
       tabIndex: 1,

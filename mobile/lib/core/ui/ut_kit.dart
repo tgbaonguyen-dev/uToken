@@ -371,7 +371,11 @@ class UtTabPage extends StatelessWidget {
     this.subtitle,
     this.onRefresh,
     this.largeTitle = true,
+    this.trailing,
   });
+
+  /// Extra header button, left of refresh (e.g. the notifications bell).
+  final Widget? trailing;
 
   final String title;
   final String? subtitle;
@@ -410,6 +414,10 @@ class UtTabPage extends StatelessWidget {
                                     height: 38 / 30,
                                     fontWeight: FontWeight.w700)
                                 : UtText.title)),
+                    if (trailing != null) ...[
+                      trailing!,
+                      if (onRefresh != null) const SizedBox(width: 8),
+                    ],
                     if (onRefresh != null)
                       UtRefreshButton(onRefresh: onRefresh!)
                     else
@@ -655,6 +663,73 @@ class _UtRefreshButtonState extends State<UtRefreshButton>
           ),
         ),
       ));
+}
+
+/// 44px square header button matching [UtRefreshButton], with an optional
+/// count badge (e.g. unread notifications).
+class UtIconButton extends StatelessWidget {
+  const UtIconButton(
+      {super.key,
+      required this.icon,
+      required this.label,
+      required this.onPressed,
+      this.badge = 0});
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+  final int badge;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: label,
+        child: Stack(clipBehavior: Clip.none, children: [
+          Material(
+            color: UtColors.background,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(11),
+                side: const BorderSide(color: UtColors.cardBorder)),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              key: utActionKey(label),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onPressed();
+              },
+              child: UtPressScale(
+                scale: 0.9,
+                child: SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Icon(icon, size: 19, color: UtColors.text)),
+              ),
+            ),
+          ),
+          if (badge > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: IgnorePointer(
+                child: Container(
+                  key: const ValueKey('icon-badge'),
+                  constraints: const BoxConstraints(minWidth: 18),
+                  height: 18,
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFEF6461),
+                      borderRadius: BorderRadius.circular(9),
+                      border: Border.all(color: UtColors.background, width: 2)),
+                  child: Text(badge > 9 ? '9+' : '$badge',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          height: 1)),
+                ),
+              ),
+            ),
+        ]),
+      );
 }
 
 /// Pill segmented control (Figma: 40px track #111418 r14, thumb #20252B r11).
@@ -934,7 +1009,8 @@ class UtStream<T> extends StatelessWidget {
         }
         final data = snapshot.data as T;
         return _FadeInOnce(
-            skip: cached, child: _withInvalidWarning(builder(context, data), data));
+            skip: cached,
+            child: _withInvalidWarning(builder(context, data), data));
       },
     );
   }
